@@ -146,9 +146,7 @@ const NSInteger KSegmentedTableHeader = 100;
   BOOL hasFTS = [self.pluginManager pluginKeyIsLoaded:FTS_DB_KEY];
   if (!hasFTS)
   {
-    Plugin *ftsPlugin = [self.pluginManager.downloadablePlugins objectForKey:FTS_DB_KEY];
-    [[NSNotificationCenter defaultCenter] postNotificationName:LWEShouldShowDownloadModal object:ftsPlugin userInfo:nil];
-    self.searchBar.placeholder = NSLocalizedString(@"Tap here to install search",@"SearchViewController.SearchBarPlaceholder_InstallPlugin"); 
+    self.searchBar.placeholder = NSLocalizedString(@"Search unavailable",@"SearchViewController.SearchBarPlaceholder_Unavailable");
   }
   else
   {
@@ -284,9 +282,6 @@ const NSInteger KSegmentedTableHeader = 100;
   }
   else
   {
-    // And show them the modal again for good measure
-    Plugin *ftsPlugin = [self.pluginManager.downloadablePlugins objectForKey:FTS_DB_KEY];
-    [[NSNotificationCenter defaultCenter] postNotificationName:LWEShouldShowDownloadModal object:ftsPlugin userInfo:nil];
     return NO;
   }
 }
@@ -407,6 +402,7 @@ const NSInteger KSegmentedTableHeader = 100;
 - (CGFloat)tableView:(UITableView *)lclTableView heightForRowAtIndexPath:(NSIndexPath*)indexPath
 {
   CGFloat bodySize = [UIFont preferredFontForTextStyle:UIFontTextStyleBody].pointSize;
+  CGFloat scale = bodySize / 17.0f;
   return floorf(64.0f * bodySize / 17.0f);
 }
 
