@@ -7,9 +7,6 @@
 [submodule "jFlash/Classes/Reusable/LWE"]
 	path = jFlash/Classes/Reusable/LWE
 	url = git@github.com:LongWeekend/Long-Weekend-Dev-Tools.git
-[submodule "jFlash/Classes/External/asi-http-request"]
-	path = jFlash/Classes/External/asi-http-request
-	url = https://github.com/pokeb/asi-http-request.git
 [submodule "jFlash/Classes/External/janrain"]
 	path = jFlash/Classes/External/janrain
 	url = git@github.com:LongWeekend/engage.iphone.git

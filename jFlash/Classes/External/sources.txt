@@ -1,2 +1,1 @@
-asi-http-request: http://github.com/pokeb/asi-http-request.git
 FMDatabase: http://code.google.com/p/flycode/source/browse/trunk/fmdb 
