@@ -1,0 +1,27 @@
+name: apply-pbxproj
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: remove-online-plugins
+          fetch-depth: 1
+      - name: Apply project patch and drop the patch parts
+        run: |
+          set -euo pipefail
+          cat .pbx-update/part-00 .pbx-update/part-01 .pbx-update/part-02 .pbx-update/part-03 > /tmp/pbx.diff
+          git apply --index /tmp/pbx.diff
+          got=$(git rev-parse :jFlash/xFlash.xcodeproj/project.pbxproj)
+          echo "blob $got"
+          test "$got" = "14d93f62dd756ddb8b0a1756eab9a338239085ae"
+          git rm -r .pbx-update
+          git rm -f .github/workflows/apply-pbxproj.yml
+          git config user.name "rsharrott"
+          git config user.email "rsharrott@users.noreply.github.com"
+          git commit -m "Stop compiling the plugin download stack and point Reachability at External/Reachability."
+          git push origin HEAD:remove-online-plugins
