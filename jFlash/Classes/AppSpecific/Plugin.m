@@ -181,14 +181,6 @@
   return [self.pluginType isEqualToString:@"database"];
 }
 
-- (LWEPackage *) downloadPackage
-{
-  LWEPackage *pluginPackage = [LWEPackage packageWithUrl:[NSURL URLWithString:self.targetURL]
-                                     destinationFilepath:[self fullTargetPath]];
-  pluginPackage.userInfo = [NSDictionary dictionaryWithObject:self forKey:@"plugin"];
-  return pluginPackage;
-}
-
 - (BOOL) isEqual:(id)object
 {
   BOOL returnVal = NO;
