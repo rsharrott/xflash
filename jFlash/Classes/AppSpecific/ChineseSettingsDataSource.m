@@ -24,7 +24,7 @@
 /** Returns all the arrays to configure the settings table */
 - (NSArray*) settingsArrayWithPluginManager:(PluginManager *)pluginManager
 {
-	NSInteger newAvailableUpdate = [pluginManager.downloadablePlugins count];
+	NSInteger newAvailableUpdate = 0; // plugin catalog is no longer fetched online
 	
 	//This is to set up the very top row and section in the settings table view.
 	NSArray *newUpdateNames = [NSArray arrayWithObjects:[NSString stringWithFormat:@"%d Update%@ Available", newAvailableUpdate, (newAvailableUpdate>1) ? @"s" : @""], nil];
