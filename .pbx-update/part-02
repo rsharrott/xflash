@@ -1,0 +1,366 @@
+ 		49EC5E8C10369BF300BC6D44 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = /System/Library/Frameworks/SystemConfiguration.framework; sourceTree = "<absolute>"; };
+ 		49EE8D68134EC0EA00EC6B0E /* jFlash-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "jFlash-Info.plist"; sourceTree = "<group>"; };
+-		49EE9792134EC34300EC6B0E /* ASIAuthenticationDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIAuthenticationDialog.h; path = "External/asi-http-request/Classes/ASIAuthenticationDialog.h"; sourceTree = "<group>"; };
+-		49EE9793134EC34300EC6B0E /* ASIAuthenticationDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIAuthenticationDialog.m; path = "External/asi-http-request/Classes/ASIAuthenticationDialog.m"; sourceTree = "<group>"; };
+-		49EE9794134EC34300EC6B0E /* ASICacheDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASICacheDelegate.h; path = "External/asi-http-request/Classes/ASICacheDelegate.h"; sourceTree = "<group>"; };
+-		49EE9795134EC34300EC6B0E /* ASIDataCompressor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIDataCompressor.h; path = "External/asi-http-request/Classes/ASIDataCompressor.h"; sourceTree = "<group>"; };
+-		49EE9796134EC34300EC6B0E /* ASIDataCompressor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIDataCompressor.m; path = "External/asi-http-request/Classes/ASIDataCompressor.m"; sourceTree = "<group>"; };
+-		49EE9797134EC34300EC6B0E /* ASIDataDecompressor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIDataDecompressor.h; path = "External/asi-http-request/Classes/ASIDataDecompressor.h"; sourceTree = "<group>"; };
+-		49EE9798134EC34300EC6B0E /* ASIDataDecompressor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIDataDecompressor.m; path = "External/asi-http-request/Classes/ASIDataDecompressor.m"; sourceTree = "<group>"; };
+-		49EE9799134EC34300EC6B0E /* ASIDownloadCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIDownloadCache.h; path = "External/asi-http-request/Classes/ASIDownloadCache.h"; sourceTree = "<group>"; };
+-		49EE979A134EC34300EC6B0E /* ASIDownloadCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIDownloadCache.m; path = "External/asi-http-request/Classes/ASIDownloadCache.m"; sourceTree = "<group>"; };
+-		49EE979B134EC34400EC6B0E /* ASIFormDataRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIFormDataRequest.h; path = "External/asi-http-request/Classes/ASIFormDataRequest.h"; sourceTree = "<group>"; };
+-		49EE979C134EC34400EC6B0E /* ASIFormDataRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIFormDataRequest.m; path = "External/asi-http-request/Classes/ASIFormDataRequest.m"; sourceTree = "<group>"; };
+-		49EE979D134EC34400EC6B0E /* ASIHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIHTTPRequest.h; path = "External/asi-http-request/Classes/ASIHTTPRequest.h"; sourceTree = "<group>"; };
+-		49EE979E134EC34400EC6B0E /* ASIHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIHTTPRequest.m; path = "External/asi-http-request/Classes/ASIHTTPRequest.m"; sourceTree = "<group>"; };
+-		49EE979F134EC34400EC6B0E /* ASIHTTPRequestConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIHTTPRequestConfig.h; path = "External/asi-http-request/Classes/ASIHTTPRequestConfig.h"; sourceTree = "<group>"; };
+-		49EE97A0134EC34400EC6B0E /* ASIHTTPRequestDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIHTTPRequestDelegate.h; path = "External/asi-http-request/Classes/ASIHTTPRequestDelegate.h"; sourceTree = "<group>"; };
+-		49EE97A1134EC34400EC6B0E /* ASIInputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIInputStream.h; path = "External/asi-http-request/Classes/ASIInputStream.h"; sourceTree = "<group>"; };
+-		49EE97A2134EC34400EC6B0E /* ASIInputStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASIInputStream.m; path = "External/asi-http-request/Classes/ASIInputStream.m"; sourceTree = "<group>"; };
+-		49EE97A3134EC34400EC6B0E /* ASINetworkQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASINetworkQueue.h; path = "External/asi-http-request/Classes/ASINetworkQueue.h"; sourceTree = "<group>"; };
+-		49EE97A4134EC34400EC6B0E /* ASINetworkQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASINetworkQueue.m; path = "External/asi-http-request/Classes/ASINetworkQueue.m"; sourceTree = "<group>"; };
+-		49EE97A5134EC34400EC6B0E /* ASIProgressDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASIProgressDelegate.h; path = "External/asi-http-request/Classes/ASIProgressDelegate.h"; sourceTree = "<group>"; };
+-		49F9686811AF604900DFC3C9 /* ModalTaskView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ModalTaskView.xib; path = XIBs/ModalTaskView.xib; sourceTree = "<group>"; };
+ 		49F968E111AF64D400DFC3C9 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+ 		49F9692511AF680700DFC3C9 /* jFlashAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jFlashAppDelegate.h; path = AppSpecific/jFlashAppDelegate.h; sourceTree = "<group>"; };
+ 		49F9692611AF680700DFC3C9 /* jFlashAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = jFlashAppDelegate.m; path = AppSpecific/jFlashAppDelegate.m; sourceTree = "<group>"; };
+@@ -2606,17 +2426,9 @@
+ 		490D434E153BAA670003EA47 /* Network */ = {
+ 			isa = PBXGroup;
+ 			children = (
+-				490D434F153BAA670003EA47 /* LWEDecompressor.h */,
+-				490D4350153BAA670003EA47 /* LWEDecompressor.m */,
+ 				490D4351153BAA670003EA47 /* LWELongRunningTaskProtocol.h */,
+ 				490D4352153BAA670003EA47 /* LWENetworkUtils.h */,
+ 				490D4353153BAA670003EA47 /* LWENetworkUtils.m */,
+-				490D4354153BAA670003EA47 /* LWEPackage.h */,
+-				490D4355153BAA670003EA47 /* LWEPackage.m */,
+-				490D4356153BAA670003EA47 /* LWEPackageDownloader.h */,
+-				490D4357153BAA670003EA47 /* LWEPackageDownloader.m */,
+-				490D4358153BAA670003EA47 /* LWES3Package.h */,
+-				490D4359153BAA670003EA47 /* LWES3Package.m */,
+ 			);
+ 			name = Network;
+ 			path = Reusable/LWE/Network;
+@@ -2659,25 +2471,6 @@
+ 			name = LWE;
+ 			sourceTree = "<group>";
+ 		};
+-		490D446D153BAB030003EA47 /* S3 */ = {
+-			isa = PBXGroup;
+-			children = (
+-				490D4449153BAAFF0003EA47 /* ASIS3Bucket.h */,
+-				490D444A153BAAFF0003EA47 /* ASIS3Bucket.m */,
+-				490D444B153BAAFF0003EA47 /* ASIS3BucketObject.h */,
+-				490D444C153BAAFF0003EA47 /* ASIS3BucketObject.m */,
+-				490D444D153BAAFF0003EA47 /* ASIS3BucketRequest.h */,
+-				490D444E153BAAFF0003EA47 /* ASIS3BucketRequest.m */,
+-				490D444F153BAAFF0003EA47 /* ASIS3ObjectRequest.h */,
+-				490D4450153BAAFF0003EA47 /* ASIS3ObjectRequest.m */,
+-				490D4451153BAAFF0003EA47 /* ASIS3Request.h */,
+-				490D4452153BAAFF0003EA47 /* ASIS3Request.m */,
+-				490D4453153BAAFF0003EA47 /* ASIS3ServiceRequest.h */,
+-				490D4454153BAAFF0003EA47 /* ASIS3ServiceRequest.m */,
+-			);
+-			name = S3;
+-			sourceTree = "<group>";
+-		};
+ 		490D446E153BAB3A0003EA47 /* External */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -2828,11 +2621,10 @@
+ 				490D4448153BAA6C0003EA47 /* LWE */,
+ 				49E797F514A8434C009B505A /* LWEGradientButton */,
+ 				917A5C5C11AB839300016BD2 /* Appirater */,
+-				49EE97B6134EC34A00EC6B0E /* asi-http-request */,
++				913D48051353A3E0008A4649 /* Reachability */,
+ 				913EEF6C130800F300EBCF87 /* IFUnicodeURL */,
+ 				9158C0020FB6C2320083223F /* FMDb */,
+ 				917A5BA611AB7B1C00016BD2 /* sqlite */,
+-				49AD17B2148476080017EFB4 /* ZipArchive */,
+ 				4922ED9615567FBC00645F61 /* MBProgressHUD.h */,
+ 				4922ED9715567FBC00645F61 /* MBProgressHUD.m */,
+ 				917B2DBA146CC756007C77B1 /* DSActivityView.h */,
+@@ -2877,41 +2669,6 @@
+ 			name = "Study Sets";
+ 			sourceTree = "<group>";
+ 		};
+-		49AD17B2148476080017EFB4 /* ZipArchive */ = {
+-			isa = PBXGroup;
+-			children = (
+-				49AD17DF148476340017EFB4 /* ZipArchive */,
+-			);
+-			name = ZipArchive;
+-			sourceTree = "<group>";
+-		};
+-		49AD17DF148476340017EFB4 /* ZipArchive */ = {
+-			isa = PBXGroup;
+-			children = (
+-				49AD17E0148476340017EFB4 /* minizip */,
+-				49AD17EC148476340017EFB4 /* ZipArchive.h */,
+-				49AD17ED148476340017EFB4 /* ZipArchive.mm */,
+-			);
+-			name = ZipArchive;
+-			path = External/ZipArchive;
+-			sourceTree = "<group>";
+-		};
+-		49AD17E0148476340017EFB4 /* minizip */ = {
+-			isa = PBXGroup;
+-			children = (
+-				49AD17E2148476340017EFB4 /* crypt.h */,
+-				49AD17E3148476340017EFB4 /* ioapi.c */,
+-				49AD17E4148476340017EFB4 /* ioapi.h */,
+-				49AD17E6148476340017EFB4 /* mztools.c */,
+-				49AD17E7148476340017EFB4 /* mztools.h */,
+-				49AD17E8148476340017EFB4 /* unzip.c */,
+-				49AD17E9148476340017EFB4 /* unzip.h */,
+-				49AD17EA148476340017EFB4 /* zip.c */,
+-				49AD17EB148476340017EFB4 /* zip.h */,
+-			);
+-			path = minizip;
+-			sourceTree = "<group>";
+-		};
+ 		49B527B7127680DB00EE64D3 /* Tab Bar Icons */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -3014,35 +2771,6 @@
+ 			path = External/LWEGradientButton;
+ 			sourceTree = "<group>";
+ 		};
+-		49EE97B6134EC34A00EC6B0E /* asi-http-request */ = {
+-			isa = PBXGroup;
+-			children = (
+-				490D446D153BAB030003EA47 /* S3 */,
+-				913D48051353A3E0008A4649 /* Reachability */,
+-				49EE9792134EC34300EC6B0E /* ASIAuthenticationDialog.h */,
+-				49EE9793134EC34300EC6B0E /* ASIAuthenticationDialog.m */,
+-				49EE9794134EC34300EC6B0E /* ASICacheDelegate.h */,
+-				49EE9795134EC34300EC6B0E /* ASIDataCompressor.h */,
+-				49EE9796134EC34300EC6B0E /* ASIDataCompressor.m */,
+-				49EE9797134EC34300EC6B0E /* ASIDataDecompressor.h */,
+-				49EE9798134EC34300EC6B0E /* ASIDataDecompressor.m */,
+-				49EE9799134EC34300EC6B0E /* ASIDownloadCache.h */,
+-				49EE979A134EC34300EC6B0E /* ASIDownloadCache.m */,
+-				49EE979B134EC34400EC6B0E /* ASIFormDataRequest.h */,
+-				49EE979C134EC34400EC6B0E /* ASIFormDataRequest.m */,
+-				49EE979D134EC34400EC6B0E /* ASIHTTPRequest.h */,
+-				49EE979E134EC34400EC6B0E /* ASIHTTPRequest.m */,
+-				49EE979F134EC34400EC6B0E /* ASIHTTPRequestConfig.h */,
+-				49EE97A0134EC34400EC6B0E /* ASIHTTPRequestDelegate.h */,
+-				49EE97A1134EC34400EC6B0E /* ASIInputStream.h */,
+-				49EE97A2134EC34400EC6B0E /* ASIInputStream.m */,
+-				49EE97A3134EC34400EC6B0E /* ASINetworkQueue.h */,
+-				49EE97A4134EC34400EC6B0E /* ASINetworkQueue.m */,
+-				49EE97A5134EC34400EC6B0E /* ASIProgressDelegate.h */,
+-			);
+-			name = "asi-http-request";
+-			sourceTree = "<group>";
+-		};
+ 		49FE8C6D14A9B80900579716 /* Japanese Flash */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -3068,7 +2796,7 @@
+ 				913D48071353A3E0008A4649 /* Reachability.m */,
+ 			);
+ 			name = Reachability;
+-			path = "External/asi-http-request/External/Reachability";
++			path = External/Reachability;
+ 			sourceTree = "<group>";
+ 		};
+ 		913EEF6C130800F300EBCF87 /* IFUnicodeURL */ = {
+@@ -3153,8 +2881,6 @@
+ 				242A17431462893E002977E6 /* AudioSessionManager.m */,
+ 				917A5C7D11AB84EE00016BD2 /* CurrentState.h */,
+ 				917A5C7E11AB84EE00016BD2 /* CurrentState.m */,
+-				4982294F1491D02A009EC2CD /* DownloadManager.h */,
+-				498229501491D02A009EC2CD /* DownloadManager.m */,
+ 				491E276C14F5DA7B00C5243A /* ExternalAppManager.h */,
+ 				491E276D14F5DA7B00C5243A /* ExternalAppManager.m */,
+ 				498EBDA51488B96800BA6DE7 /* Plugin.h */,
+@@ -3609,7 +3335,6 @@
+ 				497125231487300A00D4D150 /* MoodIcon.xib */,
+ 				917A5C6A11AB844300016BD2 /* AddStudySetView.xib */,
+ 				49377B1E1485259D00BD80C5 /* GroupDescriptionView.xib */,
+-				49F9686811AF604900DFC3C9 /* ModalTaskView.xib */,
+ 				490820A411B7959500150499 /* PluginSettingsView.xib */,
+ 				91E1B0E711AE11E1003CCDC2 /* ProgressBarViewController.xib */,
+ 				917A5C6B11AB844300016BD2 /* ProgressView.xib */,
+@@ -3638,8 +3363,6 @@
+ 				499F07EA15803012006B7A14 /* Junior */,
+ 				49F9692511AF680700DFC3C9 /* jFlashAppDelegate.h */,
+ 				49F9692611AF680700DFC3C9 /* jFlashAppDelegate.m */,
+-				4925735111C12619006FA4E1 /* ModalTaskViewController.h */,
+-				4925735211C12619006FA4E1 /* ModalTaskViewController.m */,
+ 			);
+ 			name = Controllers;
+ 			sourceTree = "<group>";
+@@ -3899,7 +3622,6 @@
+ 				A3D5C64518406CDE00679ABD /* logo_google_280x65.png in Resources */,
+ 				A3D5C69C18406CDE00679ABD /* button_google_135x40@2x.png in Resources */,
+ 				A3D5C5F118406CDE00679ABD /* icon_myspace_30x30.png in Resources */,
+-				49F9686911AF604900DFC3C9 /* ModalTaskView.xib in Resources */,
+ 				A3D5C69318406CDE00679ABD /* button_black_280x40@2x.png in Resources */,
+ 				A3D5C77718406CDE00679ABD /* logo_yahoo_280x65@2x.png in Resources */,
+ 				49FE152C11B2B168007607D9 /* tametheme-cookie-cutters in Resources */,
+@@ -4230,7 +3952,6 @@
+ 				496C7AE212632730004B6B90 /* AddStudySetView.xib in Resources */,
+ 				A3D5C5EF18406CDE00679ABD /* icon_myopenid_30x30.png in Resources */,
+ 				A34F45B6184B20EC00FA137C /* question.png in Resources */,
+-				496C7AE412632730004B6B90 /* ModalTaskView.xib in Resources */,
+ 				496C7AE512632730004B6B90 /* PluginSettingsView.xib in Resources */,
+ 				496C7AE612632730004B6B90 /* ProgressBarViewController.xib in Resources */,
+ 				A3D5C78418406CDE00679ABD /* music_note@2x.jpg in Resources */,
+@@ -4499,7 +4220,6 @@
+ 				A3D5C64718406CDE00679ABD /* logo_google_280x65.png in Resources */,
+ 				A3D5C69E18406CDE00679ABD /* button_google_135x40@2x.png in Resources */,
+ 				A3D5C5F318406CDE00679ABD /* icon_myspace_30x30.png in Resources */,
+-				91D3F93F1580294F00CB8F1E /* ModalTaskView.xib in Resources */,
+ 				A3D5C69518406CDE00679ABD /* button_black_280x40@2x.png in Resources */,
+ 				A3D5C77918406CDE00679ABD /* logo_yahoo_280x65@2x.png in Resources */,
+ 				91D3F9401580294F00CB8F1E /* tametheme-cookie-cutters in Resources */,
+@@ -4781,7 +4501,6 @@
+ 				A3D5C7A818406D2D00679ABD /* NSDictionary+JRQueryParams.m in Sources */,
+ 				A3D5C58218406CDE00679ABD /* JRSessionData.m in Sources */,
+ 				91170DB411BF896F00D4A680 /* AlgorithmSettingsViewController.m in Sources */,
+-				4925735311C12619006FA4E1 /* ModalTaskViewController.m in Sources */,
+ 				491D7B2911C4776C00BF8323 /* UserPeer.m in Sources */,
+ 				49C5BC2111C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m in Sources */,
+ 				9181901811D3392300746B09 /* SettingsViewController.m in Sources */,
+@@ -4796,15 +4515,7 @@
+ 				913EEF8E130800F300EBCF87 /* util.c in Sources */,
+ 				913EEF8F130800F300EBCF87 /* NSURL+IFUnicodeURL.m in Sources */,
+ 				A3D5C55B18406CDE00679ABD /* debug_log.m in Sources */,
+-				49EE97A6134EC34500EC6B0E /* ASIAuthenticationDialog.m in Sources */,
+ 				A3D5C56D18406CDE00679ABD /* JREngagePhonegapPlugin.m in Sources */,
+-				49EE97A8134EC34500EC6B0E /* ASIDataCompressor.m in Sources */,
+-				49EE97AA134EC34500EC6B0E /* ASIDataDecompressor.m in Sources */,
+-				49EE97AC134EC34500EC6B0E /* ASIDownloadCache.m in Sources */,
+-				49EE97AE134EC34500EC6B0E /* ASIFormDataRequest.m in Sources */,
+-				49EE97B0134EC34500EC6B0E /* ASIHTTPRequest.m in Sources */,
+-				49EE97B2134EC34500EC6B0E /* ASIInputStream.m in Sources */,
+-				49EE97B4134EC34500EC6B0E /* ASINetworkQueue.m in Sources */,
+ 				913D48081353A3E0008A4649 /* Reachability.m in Sources */,
+ 				91F80F7213865C8700A07663 /* nameprep.c in Sources */,
+ 				4927B8401400A93F0076EEED /* JapaneseCard.m in Sources */,
+@@ -4816,14 +4527,8 @@
+ 				917B2DBC146CC756007C77B1 /* DSActivityView.m in Sources */,
+ 				24BB428114685E67002C387B /* LWEAudioQueue.m in Sources */,
+ 				49AAB8BC147106BF0015D64B /* CardViewController.m in Sources */,
+-				49AD17F2148476340017EFB4 /* ioapi.c in Sources */,
+-				49AD17FA148476340017EFB4 /* mztools.c in Sources */,
+-				49AD17FE148476340017EFB4 /* unzip.c in Sources */,
+-				49AD1802148476340017EFB4 /* zip.c in Sources */,
+-				49AD1806148476340017EFB4 /* ZipArchive.mm in Sources */,
+ 				4971252A14873B0000D4D150 /* MoodIcon.m in Sources */,
+ 				498EBDA71488B96800BA6DE7 /* Plugin.m in Sources */,
+-				498229511491D02B009EC2CD /* DownloadManager.m in Sources */,
+ 				4944B1E21495D23700AE23BE /* CloseButtonView.m in Sources */,
+ 				499E56B614972A7200088BD3 /* TTTAttributedLabel.m in Sources */,
+ 				49E797F914A8434C009B505A /* GradientButton.m in Sources */,
+@@ -4853,23 +4558,13 @@
+ 				490D43D0153BAA670003EA47 /* LWERetinaUtils.m in Sources */,
+ 				490D43D4153BAA670003EA47 /* LWEUniversalAppHelpers.m in Sources */,
+ 				490D43DC153BAA670003EA47 /* LWEDatabase.m in Sources */,
+-				490D43E0153BAA670003EA47 /* LWEDecompressor.m in Sources */,
+ 				490D43E4153BAA670003EA47 /* LWENetworkUtils.m in Sources */,
+ 				A3D5C58B18406CDE00679ABD /* JRWebViewController.m in Sources */,
+-				490D43E8153BAA670003EA47 /* LWEPackage.m in Sources */,
+-				490D43EC153BAA670003EA47 /* LWEPackageDownloader.m in Sources */,
+-				490D43F0153BAA670003EA47 /* LWES3Package.m in Sources */,
+ 				490D4418153BAA670003EA47 /* LWEUIAlertView.m in Sources */,
+ 				490D441C153BAA670003EA47 /* LWEUITableUtils.m in Sources */,
+ 				490D4420153BAA670003EA47 /* LWEViewAnimationUtils.m in Sources */,
+ 				490D4424153BAA670003EA47 /* LWECloseButtonView.m in Sources */,
+-				490D4455153BAAFF0003EA47 /* ASIS3Bucket.m in Sources */,
+-				490D4459153BAAFF0003EA47 /* ASIS3BucketObject.m in Sources */,
+-				490D445D153BAAFF0003EA47 /* ASIS3BucketRequest.m in Sources */,
+-				490D4461153BAAFF0003EA47 /* ASIS3ObjectRequest.m in Sources */,
+-				490D4465153BAAFF0003EA47 /* ASIS3Request.m in Sources */,
+ 				A3D5C55E18406CDE00679ABD /* JRActivityObject.m in Sources */,
+-				490D4469153BAAFF0003EA47 /* ASIS3ServiceRequest.m in Sources */,
+ 				490D4536153BAB3B0003EA47 /* NSObject+SBJSON.m in Sources */,
+ 				490D453A153BAB3B0003EA47 /* NSString+SBJSON.m in Sources */,
+ 				A3D5C56A18406CDE00679ABD /* JREngageError.m in Sources */,
+@@ -4909,22 +4604,9 @@
+ 				496C66AF1472894C009F04D4 /* UpdateManager.m in Sources */,
+ 				496C66B114728951009F04D4 /* PluginManager.m in Sources */,
+ 				496C66C3147289A3009F04D4 /* Group.m in Sources */,
+-				496C66C7147289C2009F04D4 /* ASIHTTPRequest.m in Sources */,
+-				496C66C9147289C5009F04D4 /* ASINetworkQueue.m in Sources */,
+-				496C66CB147289C8009F04D4 /* ASIDataDecompressor.m in Sources */,
+-				496C66CD147289CB009F04D4 /* ASIDataCompressor.m in Sources */,
+-				496C66CE147289CE009F04D4 /* ASIAuthenticationDialog.m in Sources */,
+-				496C66D1147289D2009F04D4 /* ASIDownloadCache.m in Sources */,
+-				496C66D3147289D5009F04D4 /* ASIFormDataRequest.m in Sources */,
+-				496C66D5147289D9009F04D4 /* ASIInputStream.m in Sources */,
+ 				496C66D7147289E0009F04D4 /* Reachability.m in Sources */,
+ 				496C670114728BC9009F04D4 /* ThemeManager.m in Sources */,
+ 				49111A06147C9CDF0059D620 /* AudioSessionManager.m in Sources */,
+-				49AD17F4148476340017EFB4 /* ioapi.c in Sources */,
+-				49AD17FC148476340017EFB4 /* mztools.c in Sources */,
+-				49AD1800148476340017EFB4 /* unzip.c in Sources */,
+-				49AD1804148476340017EFB4 /* zip.c in Sources */,
+-				49AD1808148476340017EFB4 /* ZipArchive.mm in Sources */,
+ 				9191004A148052A1003E9A19 /* JFlashSearchTest.m in Sources */,
+ 				44F6A3257BC7490FB532B615 /* CardModelTest.m in Sources */,
+ 				21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */,
+@@ -4964,21 +4646,11 @@
+ 				490D43D2153BAA670003EA47 /* LWERetinaUtils.m in Sources */,
+ 				490D43D6153BAA670003EA47 /* LWEUniversalAppHelpers.m in Sources */,
+ 				490D43DE153BAA670003EA47 /* LWEDatabase.m in Sources */,
+-				490D43E2153BAA670003EA47 /* LWEDecompressor.m in Sources */,
+ 				490D43E6153BAA670003EA47 /* LWENetworkUtils.m in Sources */,
+-				490D43EA153BAA670003EA47 /* LWEPackage.m in Sources */,
+-				490D43EE153BAA670003EA47 /* LWEPackageDownloader.m in Sources */,
+-				490D43F2153BAA670003EA47 /* LWES3Package.m in Sources */,
+ 				490D441A153BAA670003EA47 /* LWEUIAlertView.m in Sources */,
+ 				490D441E153BAA670003EA47 /* LWEUITableUtils.m in Sources */,
+ 				490D4422153BAA670003EA47 /* LWEViewAnimationUtils.m in Sources */,
+ 				490D4426153BAA670003EA47 /* LWECloseButtonView.m in Sources */,
+-				490D4457153BAAFF0003EA47 /* ASIS3Bucket.m in Sources */,
+-				490D445B153BAAFF0003EA47 /* ASIS3BucketObject.m in Sources */,
+-				490D445F153BAAFF0003EA47 /* ASIS3BucketRequest.m in Sources */,
+-				490D4463153BAAFF0003EA47 /* ASIS3ObjectRequest.m in Sources */,
+-				490D4467153BAAFF0003EA47 /* ASIS3Request.m in Sources */,
+-				490D446B153BAAFF0003EA47 /* ASIS3ServiceRequest.m in Sources */,
+ 				490D4538153BAB3B0003EA47 /* NSObject+SBJSON.m in Sources */,
+ 				490D453C153BAB3B0003EA47 /* NSString+SBJSON.m in Sources */,
+ 				490D4540153BAB3B0003EA47 /* SBJsonBase.m in Sources */,
+@@ -5018,22 +4690,9 @@
+ 				496C66AE1472894C009F04D4 /* UpdateManager.m in Sources */,
+ 				496C66B014728951009F04D4 /* PluginManager.m in Sources */,
+ 				496C66C2147289A3009F04D4 /* Group.m in Sources */,
+-				496C66C6147289C1009F04D4 /* ASIHTTPRequest.m in Sources */,
+-				496C66C8147289C5009F04D4 /* ASINetworkQueue.m in Sources */,
+-				496C66CA147289C8009F04D4 /* ASIDataDecompressor.m in Sources */,
+-				496C66CC147289CA009F04D4 /* ASIDataCompressor.m in Sources */,
+-				496C66CF147289CF009F04D4 /* ASIAuthenticationDialog.m in Sources */,
+-				496C66D0147289D2009F04D4 /* ASIDownloadCache.m in Sources */,
+-				496C66D2147289D5009F04D4 /* ASIFormDataRequest.m in Sources */,
+-				496C66D4147289D8009F04D4 /* ASIInputStream.m in Sources */,
+ 				496C66D6147289E0009F04D4 /* Reachability.m in Sources */,
+ 				496C670014728BC8009F04D4 /* ThemeManager.m in Sources */,
+ 				49111A05147C9CDE0059D620 /* AudioSessionManager.m in Sources */,
+-				49AD17F5148476340017EFB4 /* ioapi.c in Sources */,
+-				49AD17FD148476340017EFB4 /* mztools.c in Sources */,
+-				49AD1801148476340017EFB4 /* unzip.c in Sources */,
+-				49AD1805148476340017EFB4 /* zip.c in Sources */,
+-				49AD1809148476340017EFB4 /* ZipArchive.mm in Sources */,
+ 				4971252D14873B0000D4D150 /* MoodIcon.m in Sources */,
+ 				498EBDA41488AEAA00BA6DE7 /* PluginManagerTest.m in Sources */,
+ 				498EBDAA1488B96800BA6DE7 /* Plugin.m in Sources */,
+@@ -5073,21 +4732,11 @@
+ 				490D43D3153BAA670003EA47 /* LWERetinaUtils.m in Sources */,
+ 				490D43D7153BAA670003EA47 /* LWEUniversalAppHelpers.m in Sources */,
+ 				490D43DF153BAA670003EA47 /* LWEDatabase.m in Sources */,
+-				490D43E3153BAA670003EA47 /* LWEDecompressor.m in Sources */,
+ 				490D43E7153BAA670003EA47 /* LWENetworkUtils.m in Sources */,
+-				490D43EB153BAA670003EA47 /* LWEPackage.m in Sources */,
+-				490D43EF153BAA670003EA47 /* LWEPackageDownloader.m in Sources */,
+-				490D43F3153BAA670003EA47 /* LWES3Package.m in Sources */,
+ 				490D441B153BAA670003EA47 /* LWEUIAlertView.m in Sources */,
+ 				490D441F153BAA670003EA47 /* LWEUITableUtils.m in Sources */,
+ 				490D4423153BAA670003EA47 /* LWEViewAnimationUtils.m in Sources */,
+ 				490D4427153BAA670003EA47 /* LWECloseButtonView.m in Sources */,
+-				490D4458153BAAFF0003EA47 /* ASIS3Bucket.m in Sources */,
+-				490D445C153BAAFF0003EA47 /* ASIS3BucketObject.m in Sources */,
