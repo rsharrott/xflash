@@ -7,8 +7,6 @@
 //
 
 #import "PluginManager.h"
-#import "Reachability.h"
-
 NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 
 @interface PluginManager ()
@@ -295,98 +293,6 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 {
   return [NSDictionary dictionaryWithDictionary:_loadedPlugins];
 }
-
-- (void) processPlistHash:(NSDictionary*)plistHash
-{
-  LWE_ASSERT_EXC(plistHash, @"You must pass a proper hash to this method!");
-  NSMutableDictionary *tmpDownloadableDict = [NSMutableDictionary dictionaryWithDictionary:self.downloadablePlugins];
-  for (NSDictionary *availPluginHash in [plistHash objectForKey:@"Plugins"])
-  {
-    // There are 3 cases we would want to incorporate a new value:
-    // 1) When there is an update to an installed plugin,
-    // 2) When there is an update to an uninstalled plugin,
-    // 3) When there is a brand new plugin we knew nothing about
-    
-    Plugin *availPlugin = [Plugin pluginWithDictionary:availPluginHash];
-    Plugin *waitingToDownloadPlugin = [tmpDownloadableDict objectForKey:availPlugin.pluginId];
-    Plugin *currPlugin = [_loadedPlugins objectForKey:availPlugin.pluginId];
-    
-    // Determine whether case 1) or 2) applies
-    BOOL installedPluginNeedsUpdate = (currPlugin && [availPlugin isNewVersionOfPlugin:currPlugin]);
-    BOOL waitingToInstallPluginNeedsUpdate = (waitingToDownloadPlugin && [availPlugin isNewVersionOfPlugin:waitingToDownloadPlugin]);
-    BOOL isNewPlugin = ((currPlugin == nil) && (waitingToDownloadPlugin == nil));
-    
-    if (installedPluginNeedsUpdate || waitingToInstallPluginNeedsUpdate || isNewPlugin)
-    {
-      [tmpDownloadableDict setValue:availPlugin forKey:availPlugin.pluginId];
-    }
-    
-    // Now save a copy of it so we have our changes for next time
-    [tmpDownloadableDict writeToFile:[LWEFile createDocumentPathWithFilename:LWE_AVAILABLE_PLUGIN_PLIST] atomically:YES];
-  }
-  self.downloadablePlugins = (NSDictionary *)tmpDownloadableDict;
-}
-
-#pragma mark - Check for New Plugins
-
-/**
- * Tells whether update check is necessary
- * \return YES if settings' PLUGIN_LAST_UPDATE is more than LWE_PLUGIN_UPDATE_PERIOD days ago
- */
-- (BOOL) isTimeForCheckingUpdate
-{
-	NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-	NSDate *date = [settings objectForKey:PLUGIN_LAST_UPDATE];
-	date = [date addDays:LWE_PLUGIN_UPDATE_PERIOD];
-	NSDate *now = [NSDate date];
-	
-	//date is earlier than now, means it is for update
-	return ([date compare:now] == NSOrderedAscending);
-}
-
-/**
- * Check the server for an updated available-plugins plist. The completion
- * handler runs on the main queue.
- */
-- (void)checkNewPluginsWithCompletion:(void (^)(BOOL))completion
-{
-  NSString *urlStr = [LWE_PLUGIN_SERVER stringByAppendingString:LWE_PLUGIN_LIST_REL_URL];
-  NSURL *url = [NSURL URLWithString:urlStr];
-  if (url == nil)
-  {
-    if (completion) dispatch_async(dispatch_get_main_queue(), ^{ completion(NO); });
-    return;
-  }
-
-  NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithURL:url
-                                                          completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-    NSDictionary *plist = nil;
-    if (data != nil && error == nil)
-    {
-      id parsed = [NSPropertyListSerialization propertyListWithData:data
-                                                            options:NSPropertyListImmutable
-                                                             format:NULL
-                                                              error:NULL];
-      if ([parsed isKindOfClass:[NSDictionary class]])
-      {
-        plist = parsed;
-      }
-    }
-
-    // processPlistHash: touches NSUserDefaults and self.downloadablePlugins,
-    // so jump back to the main queue for the apply step and the completion.
-    dispatch_async(dispatch_get_main_queue(), ^{
-      if (plist != nil)
-      {
-        [self processPlistHash:plist];
-        [[NSUserDefaults standardUserDefaults] setValue:[NSDate date] forKey:PLUGIN_LAST_UPDATE];
-      }
-      if (completion) completion(plist != nil);
-    });
-  }];
-  [task resume];
-}
-
 
 #pragma mark - Private methods
 
