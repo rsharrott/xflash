@@ -45,7 +45,6 @@ NSString * const APP_HIDE_BURIED_CARDS    = @"app_hide_buried_cards";
 
 NSString * const LWEShouldSwitchTab           = @"LWEShouldSwitchTab";
 NSString * const LWEShouldShowModal				    = @"LWEShouldShowModal";
-NSString * const LWEShouldShowDownloadModal	  = @"LWEShouldShowDownloadModal";
 
 
 //Rendy did add this - For the plugin manager feature
@@ -115,15 +114,6 @@ NSString * const LWE_SUPPORT_EMAIL        = @"support@longweekendmobile.com";
 
       // This is here for legacy migration only, as of JFLash 1.6.
       NSString * const LWE_DOWNLOADED_PLUGIN_PLIST  = @"downloadedPlugin.plist";
-// Don't use Cloudfront in development
-#if defined(LWE_DEBUG)
-      NSString * const LWE_PLUGIN_SERVER            = @"https://s3.amazonaws.com";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/japanese-flash/jFlash-available.plist";
-#else
-      NSString * const LWE_PLUGIN_SERVER            = @"https://d3580k8bnen6up.cloudfront.net";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/jFlash-available.plist";
-#endif
-
 #elif defined(LWE_CFLASH)
       NSString * const LWE_FLURRY_API_KEY           = @"CJB5CHQSQ4ZZMRS16ZJ5";
       NSString * const LWE_APP_SPLASH_IMAGE         = @"chinese-flash-splash.png";
@@ -163,13 +153,6 @@ NSString * const LWE_SUPPORT_EMAIL        = @"support@longweekendmobile.com";
       // This pertains to the plugin manager
       NSString * const LWE_AVAILABLE_PLUGIN_PLIST   = @"cFlash-available.plist";
       NSString * const LWE_PREINSTALLED_PLUGIN_PLIST   = @"cFlash-installed.plist";
-  #if defined(LWE_DEBUG)
-      NSString * const LWE_PLUGIN_SERVER            = @"https://s3.amazonaws.com";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/chinese-flash/cFlash-available.plist";
-  #else
-      NSString * const LWE_PLUGIN_SERVER            = @"https://d3jxezdeu5e50q.cloudfront.net";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/cFlash-available.plist";
-  #endif
 #endif
 
 

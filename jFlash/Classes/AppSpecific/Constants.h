@@ -11,8 +11,6 @@
 #define DEFAULT_DIFFICULTY 1
 #define DEFAULT_REMINDER_DAYS 4
 
-#define LWE_PLUGIN_UPDATE_PERIOD		14
-
 // algorithm controls
 #define MAX_MAX_STUDYING 50
 #define MIN_MAX_STUDYING 5
@@ -36,7 +34,6 @@ extern NSString * const LWETableBackgroundImage;
 // Notification names
 extern NSString * const LWEShouldSwitchTab;
 extern NSString * const LWEShouldShowModal;
-extern NSString * const LWEShouldShowDownloadModal;
 
 
 // Settings - do not change
@@ -146,9 +143,6 @@ extern NSString * const LWE_XFLASH_HOMEPAGE;
 // PLugins - global
 extern NSString * const LWE_PREINSTALLED_PLUGIN_PLIST;
 extern NSString * const LWE_AVAILABLE_PLUGIN_PLIST;
-extern NSString * const LWE_PLUGIN_SERVER;            
-extern NSString * const LWE_PLUGIN_LIST_REL_URL;
-
 extern NSString * const CARD_DB_KEY;        //! Dictionary key to refer to main card database
 extern NSString * const FTS_DB_KEY;         //! Dictionary key to refer to FTS database filename
 extern NSString * const EXAMPLE_DB_KEY;     //! Dictionary key to refer to example database filename
