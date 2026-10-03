@@ -7,8 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "LWEPackage.h"
-
 typedef enum
 {
   LWEPluginLocationBundle = 0,
@@ -25,8 +23,6 @@ typedef enum
 + (id) pluginWithLegacyDictionary:(NSDictionary *)dict;
 
 - (BOOL) isNewVersionOfPlugin:(Plugin *)plugin;
-
-- (LWEPackage *) downloadPackage;
 
 - (NSString *) fullPath;
 - (BOOL) isDirectoryPlugin;

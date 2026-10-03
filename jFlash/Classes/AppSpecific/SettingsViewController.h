@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DownloadManager.h"
 #import "PluginManager.h"
 
 extern NSString * const APP_ABOUT;
@@ -29,6 +28,5 @@ extern NSString * const APP_NEW_UPDATE;
 @property (retain) id<LWESettingsDataSource> dataSource;
 @property (retain, nonatomic) NSArray *sectionArray;
 
-@property (retain) IBOutlet DownloadManager *downloadManager;
 @property (retain) IBOutlet PluginManager *pluginManager;
 @end

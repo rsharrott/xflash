@@ -9,8 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "FMResultSet.h"
 #import "Plugin.h"
-#import "NSDate+LWEUtilities.h"
-
 extern NSString * const LWEPluginDidInstall;
 
 //! Handles downloaded plugins' installation and versioning
@@ -38,15 +36,6 @@ extern NSString * const LWEPluginDidInstall;
 
 //========= THESE GIVE STATE ========
 
-- (BOOL) isTimeForCheckingUpdate;
-
-//! Fetches the latest available-plugins plist from the server using NSURLSession.
-//! The completion block is invoked on the main queue with success=YES if the
-//! plist was downloaded and applied, NO otherwise. The completion block may be
-//! nil for fire-and-forget callers.
-- (void) checkNewPluginsWithCompletion:(void (^)(BOOL success))completion;
-
-
 //! Returns YES if the plugin is loaded.  Directory plugins always return YES.
 - (BOOL) pluginKeyIsLoaded:(NSString *)pluginKey;
 
@@ -57,8 +46,6 @@ extern NSString * const LWEPluginDidInstall;
 - (NSDictionary *) loadedPlugins;
 
 - (BOOL) loadPlugin:(Plugin *)plugin error:(NSError **)error;
-
-- (void) processPlistHash:(NSDictionary*)plistHash;
 
 // Used to fix the plugin paths after a restore/transfer to a different device
 //- (void) _updatePluginPaths:(BOOL) debug pluginList:(NSString*)plistFileName;

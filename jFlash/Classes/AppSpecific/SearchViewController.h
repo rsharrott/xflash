@@ -10,7 +10,6 @@
 #import "CardPeer.h"
 #import "ExampleSentencePeer.h"
 #import "AddTagViewController.h"
-#import "DownloadManager.h"
 #import "PluginManager.h"
 #import "ExternalAppManager.h"
 #import "GradientButton.h"
