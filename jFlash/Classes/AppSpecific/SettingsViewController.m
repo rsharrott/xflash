@@ -19,7 +19,7 @@
 
 @implementation SettingsViewController
 @synthesize sectionArray, dataSource;
-@synthesize downloadManager, pluginManager;
+@synthesize pluginManager;
 
 NSString * const APP_ABOUT = @"about";
 NSString * const APP_NEW_UPDATE = @"new_update";
@@ -81,15 +81,8 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 
 - (void) updateBadgeValue
 {
-  NSInteger pluginCount = [self.pluginManager.downloadablePlugins count];
-  if (pluginCount > 0)
-  {
-    self.navigationController.tabBarItem.badgeValue = [NSString stringWithFormat:@"%d",pluginCount];
-  }
-  else
-  {
-    self.navigationController.tabBarItem.badgeValue = nil;
-  }
+  // Online plugin downloads are gone; do not badge the tab for a server catalog.
+  self.navigationController.tabBarItem.badgeValue = nil;
 }
 
 
@@ -340,7 +333,6 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   [self.pluginManager removeObserver:self forKeyPath:@"downloadablePlugins"];
   [pluginManager release];
 
-  [downloadManager release];
   [dataSource release];
   [sectionArray release];
   [super dealloc];
