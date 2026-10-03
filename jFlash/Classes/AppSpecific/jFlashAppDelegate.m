@@ -86,7 +86,7 @@
 @synthesize observerArray;
 @synthesize window, tabBarController, splashView;
 @synthesize isFinishedLoading, loadSearchOnBoot;
-@synthesize downloadManager, pluginManager, externalAppManager;
+@synthesize pluginManager, externalAppManager;
 
 #pragma mark - URL Handling
 
@@ -158,13 +158,7 @@
   // 1. This call initializes app settings in NSUserDefaults if not already done.  Important!  Do this FIRST!
   [[CurrentState sharedCurrentState] initializeSettings];
   
-  // 2. Check for plugin updates if it's time for that
-	if ([self.pluginManager isTimeForCheckingUpdate])
-	{
-    [self.pluginManager checkNewPluginsWithCompletion:nil];
-	}
-  
-  // 3. Initialize audio session manager - start with audio session "playback" first
+  // Initialize audio session manager - start with audio session "playback" first
   AudioSessionManager *audioManager = [AudioSessionManager sharedAudioSessionManager];
   [audioManager setSessionCategory:AVAudioSessionCategoryPlayback];
   [audioManager setSessionActive:NO];
@@ -443,7 +437,6 @@
   [window release];
   
   [externalAppManager release];
-  [downloadManager release];
   [pluginManager release];
   
   [super dealloc];
