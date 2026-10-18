@@ -102,7 +102,19 @@
 //* setup the example sentences view with information from the datasource
 - (void) setupWithCard:(Card *)card
 {
+#if defined(LWE_JFLASH)
+  // 2026 design: big yellow headword, kana with muted romaji, and each sentence on its own
+  // translucent panel (Japanese, then English, then the Read / speak pills).
+  NSArray *readingParts = [card.reading componentsSeparatedByString:@" - "];
+  NSString *kanaPart = [readingParts count] > 0 ? [readingParts objectAtIndex:0] : @"";
+  NSString *romajiPart = [readingParts count] > 1 ? [readingParts objectAtIndex:1] : @"";
+  NSMutableString *sentencesHTML = [[NSMutableString alloc] initWithFormat:
+    @"<div class='exHeader'><h2 class='headwordLabel'>%@</h2><div class='readingLabel'>%@ <span class='romaji'>%@</span></div></div>"
+    @"<div class='exTitle'>%@</div><ol>",
+    card.headword, kanaPart, romajiPart, NSLocalizedString(@"Example sentences", @"ExampleSentences.Title")];
+#else
   NSMutableString *sentencesHTML = [[NSMutableString alloc] initWithFormat:@"<div class='readingLabel'>%@</div><h2 class='headwordLabel'>%@</h2><ol>",card.reading,card.headword];
+#endif
 
   [_sentenceTexts removeAllObjects];
 
@@ -117,6 +129,27 @@
     NSString *speakLink = [NSString stringWithFormat:@"<a href='http://xflash.com/%@?id=%d'><span class='button'>%@</span></a>",
       SPEAK_SENTENCE, sentence.sentenceId, speakSVG];
 
+#if defined(LWE_JFLASH)
+    // The studied word is highlighted inside the sentence (when it appears as written).
+    NSString *ja = sentence.sentenceJa ?: @"";
+    if ([card.headword length] > 0)
+    {
+      ja = [ja stringByReplacingOccurrencesOfString:card.headword
+                                         withString:[NSString stringWithFormat:@"<span class='hl'>%@</span>", card.headword]];
+    }
+    [sentencesHTML appendFormat:@"<li><div class='ja'>%@</div><div class='en'>%@</div>", ja, sentence.sentenceEn];
+    if (_useOldPluginMethods == NO)
+    {
+      [sentencesHTML appendFormat:@"<div class='showWordsDiv'><a id='anchor%d' href='http://xflash.com/%@?id=%d&open=0'><span class='button'>%@</span></a> %@</div>",
+        sentence.sentenceId, TOKENIZE_SAMPLE_SENTENCE, sentence.sentenceId, SHOW_BUTTON_TITLE, speakLink];
+      [sentencesHTML appendFormat:@"<div id='detailedCards%d'></div>", sentence.sentenceId];
+    }
+    else
+    {
+      [sentencesHTML appendFormat:@"<div class='showWordsDiv'>%@</div>", speakLink];
+    }
+    [sentencesHTML appendString:@"</li>"];
+#else
     [sentencesHTML appendFormat:@"<li>"];
     if (_useOldPluginMethods == NO)
     {
@@ -134,6 +167,7 @@
       [sentencesHTML appendFormat:@"<div id='detailedCards%d'></div>", sentence.sentenceId];
     }
     [sentencesHTML appendFormat:@"<div class='lowlight'>%@</div></li>", sentence.sentenceEn];
+#endif
   }
   [sentencesHTML appendFormat:@"</ol>"];
   
@@ -323,6 +357,31 @@ NSString * const LWESentencesHTML = @""
 "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
 "<style>"
+#if defined(LWE_JFLASH)
+// 2026 design (Japanese in a Flash).
+"body{ background-color:transparent; margin:0; padding:22px 20px 28px 20px; box-sizing:border-box; width:100%; text-align:left; font-size:17px; font-family:'Helvetica Neue','Hiragino Sans',Helvetica,sans-serif; color:#fff; -webkit-text-size-adjust:none; } "
+".exHeader{ margin:0 4px 22px 4px; } "
+".headwordLabel{ font-size:2.35em; font-weight:800; line-height:1.1; letter-spacing:-0.5px; color:#FFD60A; margin:0 0 6px 0; } "
+".readingLabel{ font-size:1.05em; font-weight:500; color:#fff; margin:0; } "
+".romaji{ color:rgba(255,255,255,0.66); margin-left:6px; } "
+".exTitle{ font-size:0.76em; font-weight:700; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,0.62); margin:0 4px 10px 4px; } "
+"ol{ list-style:none; margin:0; padding:0; } "
+"li{ background:rgba(255,255,255,0.12); border-radius:20px; padding:16px 18px 14px 18px; margin:0 0 12px 0; overflow:hidden; } "
+".ja{ font-size:1.06em; font-weight:600; line-height:1.5; color:#fff; } "
+".hl{ color:#FFD60A; } "
+".en{ font-size:0.92em; font-weight:400; line-height:1.4; color:rgba(255,255,255,0.80); margin-top:6px; } "
+".showWordsDiv{ margin-top:12px; } "
+".button{ display:inline-block; font-size:0.8em; font-weight:600; line-height:1; color:#fff; background:rgba(255,255,255,0.18); border-radius:14px; padding:7px 13px; margin-right:6px; vertical-align:middle; } "
+".button svg{ display:block; } "
+"dfn{ font-style:normal; font-weight:600; color:#3a2a00; font-size:0.72em; background-color:#FFD60A; border-radius:6px; padding:2px 6px; margin:0 4px 0 0; display:inline-block; } "
+"#container{ display:block; width:100%; text-align:left; } "
+".ExpandedSentencesTable{ width:100%; border-collapse:collapse; margin:12px 0 2px 0; } "
+".ExpandedSentencesTable td{ border-top:1px solid rgba(255,255,255,0.18); padding:9px 4px; vertical-align:middle; } "
+".HeadwordCell{ font-size:1em; font-weight:700; color:#FFD60A; width:30%; } "
+".ContentCell{ font-size:0.88em; color:rgba(255,255,255,0.85); } "
+".AddToSetAnchor{ float:right; } "
+" a{ text-decoration:none; -webkit-tap-highlight-color:transparent; } "
+#else
 "body{ background-color: transparent; margin:0; padding: 0 10px; box-sizing:border-box; width:100%; text-align:left; line-height:21px; font-size:16px; font-weight:bold; font-family:Helvetica,sanserif; color:#fff; } "
 "dfn{ text-shadow:none; font-weight:normal; color:#000; position:relative; top:-1px; font-family:verdana; font-size:10.5px; background-color:#C79810; line-height:10.5px; margin:4px 4px 0px 0px; height:14px; padding:2px 3px; -webkit-border-radius:4px; border:1px solid #F9F7ED; display:inline-block;} "
 ".button{ font-size:14px; margin:2px 0px 2px 0px; padding: 2px 4px 3px 4px; display: inline; background: #777; border: none; color: #fff; font-weight: bold; border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; background: rgba(0,0,0,0.3);} "
@@ -340,6 +399,7 @@ NSString * const LWESentencesHTML = @""
 ".HeadwordCell { vertical-align:middle; border-right:none; font-size:15px; width:100px; } "
 ".ContentCell { vertical-align:middle; border-left:none; font-size:14px; } "
 " a {text-decoration: none; } "
+#endif
 "##THEMECSS##</style></head>"
 "<body><div id='container'>"
 "##EXAMPLES##"
