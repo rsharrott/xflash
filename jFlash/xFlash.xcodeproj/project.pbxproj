@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA2D001419000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
+		AA2D001319000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
+		AA2D001219000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
+		AA2D001119000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
+		AA2D001019000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
 		AA2C001219000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
 		AA2C001119000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
 		AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
@@ -434,7 +439,6 @@
 		496C7B1E12632779004B6B90 /* StudySetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD411AB7C4600016BD2 /* StudySetViewController.m */; };
 		496C7B1F1263277A004B6B90 /* StudySetWordsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD611AB7C4600016BD2 /* StudySetWordsViewController.m */; };
 		496C7B2912632794004B6B90 /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C7C11AB84EE00016BD2 /* Constants.m */; };
-		496C7B37126327B0004B6B90 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C5E11AB839300016BD2 /* Appirater.m */; };
 		496C7B6F12632831004B6B90 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		496C7B831263286D004B6B90 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 917A5D0D11AB8A1400016BD2 /* SystemConfiguration.framework */; };
 		496C7B841263286D004B6B90 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 917A5D0811AB89FD00016BD2 /* MobileCoreServices.framework */; };
@@ -645,7 +649,6 @@
 		917A5C0011AB7CD700016BD2 /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF711AB7CD700016BD2 /* User.m */; };
 		917A5C0111AB7CD700016BD2 /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
 		917A5C4911AB829000016BD2 /* ProgressDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */; };
-		917A5C5F11AB839300016BD2 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C5E11AB839300016BD2 /* Appirater.m */; };
 		917A5C7011AB844300016BD2 /* AddTagView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6611AB844300016BD2 /* AddTagView.xib */; };
 		917A5C7211AB844300016BD2 /* HelpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6811AB844300016BD2 /* HelpView.xib */; };
 		917A5C7311AB844300016BD2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6911AB844300016BD2 /* MainWindow.xib */; };
@@ -769,7 +772,6 @@
 		91D3F9E11580294F00CB8F1E /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF711AB7CD700016BD2 /* User.m */; };
 		91D3F9E21580294F00CB8F1E /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
 		91D3F9E41580294F00CB8F1E /* ProgressDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */; };
-		91D3F9E51580294F00CB8F1E /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C5E11AB839300016BD2 /* Appirater.m */; };
 		91D3F9E61580294F00CB8F1E /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C7C11AB84EE00016BD2 /* Constants.m */; };
 		91D3F9E71580294F00CB8F1E /* CurrentState.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C7E11AB84EE00016BD2 /* CurrentState.m */; };
 		91D3F9E81580294F00CB8F1E /* ProgressBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91E1B0E611AE11E1003CCDC2 /* ProgressBarViewController.m */; };
@@ -978,6 +980,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA2D000119000040000000AA /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D6058910D05DD3D006BFB54 /* jFlash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jFlash.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1346,8 +1349,6 @@
 		917A5C3811AB826000016BD2 /* CustomCellBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CustomCellBackgroundView.m; path = Reusable/CustomCellBackgroundView/CustomCellBackgroundView.m; sourceTree = "<group>"; };
 		917A5C4111AB829000016BD2 /* ProgressDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressDetailsViewController.h; path = AppSpecific/ProgressDetailsViewController.h; sourceTree = "<group>"; };
 		917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProgressDetailsViewController.m; path = AppSpecific/ProgressDetailsViewController.m; sourceTree = "<group>"; };
-		917A5C5D11AB839300016BD2 /* Appirater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
-		917A5C5E11AB839300016BD2 /* Appirater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appirater.m; sourceTree = "<group>"; };
 		917A5C6611AB844300016BD2 /* AddTagView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = AddTagView.xib; path = XIBs/AddTagView.xib; sourceTree = "<group>"; };
 		917A5C6811AB844300016BD2 /* HelpView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = HelpView.xib; path = XIBs/HelpView.xib; sourceTree = "<group>"; };
 		917A5C6911AB844300016BD2 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainWindow.xib; path = XIBs/MainWindow.xib; sourceTree = "<group>"; };
@@ -1434,6 +1435,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2D001019000040000000AA /* StoreKit.framework in Frameworks */,
 				919FBDBB1622E9D2001FD77B /* Social.framework in Frameworks */,
 				499448D01472817000671849 /* libsqlite3.a in Frameworks */,
 				242A174914628B17002977E6 /* AudioToolbox.framework in Frameworks */,
@@ -1458,6 +1460,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2D001319000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000319000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EB14FD069400CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C814FD05C700CF5C44 /* CoreData.framework in Frameworks */,
@@ -1481,6 +1484,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2D001419000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000519000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EA14FD068D00CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C914FD05CF00CF5C44 /* CoreData.framework in Frameworks */,
@@ -1504,6 +1508,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2D001119000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000419000020000000AA /* WebKit.framework in Frameworks */,
 				499448D11472817800671849 /* libsqlite3.a in Frameworks */,
 				242A174814628AF4002977E6 /* AudioToolbox.framework in Frameworks */,
@@ -1527,6 +1532,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2D001219000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000219000020000000AA /* WebKit.framework in Frameworks */,
 				919FBDBD16230000001FD77B /* Social.framework in Frameworks */,
 				91D3FA5C1580294F00CB8F1E /* libsqlite3.a in Frameworks */,
@@ -1578,6 +1584,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1A600019000010000000AA /* WebKit.framework */,
+				AA2D000119000040000000AA /* StoreKit.framework */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -2018,7 +2025,6 @@
 			children = (
 				490D4448153BAA6C0003EA47 /* LWE */,
 				49E797F514A8434C009B505A /* LWEGradientButton */,
-				917A5C5C11AB839300016BD2 /* Appirater */,
 				49EE97B6134EC34A00EC6B0E /* asi-http-request */,
 				913EEF6C130800F300EBCF87 /* IFUnicodeURL */,
 				9158C0020FB6C2320083223F /* FMDb */,
@@ -2324,16 +2330,6 @@
 				494F7F95138B8E1D00094AE2 /* sqlite3.xcodeproj */,
 			);
 			name = sqlite;
-			sourceTree = "<group>";
-		};
-		917A5C5C11AB839300016BD2 /* Appirater */ = {
-			isa = PBXGroup;
-			children = (
-				917A5C5D11AB839300016BD2 /* Appirater.h */,
-				917A5C5E11AB839300016BD2 /* Appirater.m */,
-			);
-			name = Appirater;
-			path = External/Appirater;
 			sourceTree = "<group>";
 		};
 		917A5C8611AB851E00016BD2 /* Objects */ = {
@@ -3055,7 +3051,6 @@
 				917A5C0011AB7CD700016BD2 /* User.m in Sources */,
 				917A5C0111AB7CD700016BD2 /* UserHistoryPeer.m in Sources */,
 				917A5C4911AB829000016BD2 /* ProgressDetailsViewController.m in Sources */,
-				917A5C5F11AB839300016BD2 /* Appirater.m in Sources */,
 				917A5C7F11AB84EE00016BD2 /* Constants.m in Sources */,
 				917A5C8011AB84EE00016BD2 /* CurrentState.m in Sources */,
 				91E1B0E811AE11E1003CCDC2 /* ProgressBarViewController.m in Sources */,
@@ -3408,7 +3403,6 @@
 				496C7B1E12632779004B6B90 /* StudySetViewController.m in Sources */,
 				496C7B1F1263277A004B6B90 /* StudySetWordsViewController.m in Sources */,
 				496C7B2912632794004B6B90 /* Constants.m in Sources */,
-				496C7B37126327B0004B6B90 /* Appirater.m in Sources */,
 				496C7B6F12632831004B6B90 /* main.m in Sources */,
 				490B23411277BCE100CF3484 /* FMDatabase.m in Sources */,
 				490B23421277BCE100CF3484 /* FMDatabaseAdditions.m in Sources */,
@@ -3518,7 +3512,6 @@
 				91D3F9E11580294F00CB8F1E /* User.m in Sources */,
 				91D3F9E21580294F00CB8F1E /* UserHistoryPeer.m in Sources */,
 				91D3F9E41580294F00CB8F1E /* ProgressDetailsViewController.m in Sources */,
-				91D3F9E51580294F00CB8F1E /* Appirater.m in Sources */,
 				91D3F9E61580294F00CB8F1E /* Constants.m in Sources */,
 				91D3F9E71580294F00CB8F1E /* CurrentState.m in Sources */,
 				91D3F9E81580294F00CB8F1E /* ProgressBarViewController.m in Sources */,

@@ -216,7 +216,12 @@
 
   NSMutableArray *sharingItems = [NSMutableArray array];
   [sharingItems addObject:shareText];
-  [sharingItems addObject:@"https://itunes.apple.com/us/app/japanese-flash-vocabulary/id367216357?mt=8"];
+  // Only append the App Store link once the app has an ID (kAppStoreID in Constants.m)
+  NSString *appURL = LWEAppStoreURLString();
+  if (appURL)
+  {
+    [sharingItems addObject:[NSURL URLWithString:appURL]];
+  }
 
   UIActivityViewController *activityController = [[[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil] autorelease];
   [self presentViewController:activityController animated:YES completion:nil];

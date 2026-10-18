@@ -67,7 +67,6 @@
 
 #import "DSActivityView.h"
 #import "AudioSessionManager.h"
-#import "Appirater.h"
 
 #import "SettingsViewController.h"
 #import "SearchViewController.h"
@@ -273,7 +272,6 @@
 
   // Finish setting up & load tab bar
   [self _registerObservers];
-  [Appirater appLaunched];
   
   // Finally load search if we're supposed to do that.
   if (self.loadSearchOnBoot)
