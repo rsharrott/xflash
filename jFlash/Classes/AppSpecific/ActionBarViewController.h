@@ -37,6 +37,10 @@
 
 - (void)distributeButtonsEvenly;
 
+//! Height the study view should give the action bar (excluding any safe-area inset).
+//! Practice mode uses the two-row paper panel; browse mode keeps its NIB height.
+- (CGFloat)preferredBarHeight;
+
 @property (assign) IBOutlet id<ActionBarViewControllerDelegate> delegate;
 
 @property (nonatomic, retain) Card *currentCard;
@@ -49,5 +53,8 @@
 @property (nonatomic, retain) IBOutlet UIButton *wrongBtn;
 
 @property (nonatomic, retain) IBOutlet UIView *cardMeaningBtnHint;
+
+//! Practice mode only: full-width "Show answer" button shown until the card is revealed.
+@property (nonatomic, retain) UIButton *showAnswerBtn;
 
 @end

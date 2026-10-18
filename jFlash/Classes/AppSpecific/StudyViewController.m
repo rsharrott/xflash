@@ -13,6 +13,9 @@
 #import "AddTagViewController.h"
 #import "UpdateManager.h"
 #import "CardViewController.h"
+#import "ActionBarViewController.h"
+#import "FirstRunViewController.h"
+#import "LWEDesignTokens.h"
 
 @interface StudyViewController()
 //private methods
@@ -26,6 +29,11 @@
 - (void) _setupDelegateForStudyMode:(NSString*)studyMode;
 - (void) _setupSubviews;
 - (Card*) _getNextCardWithDirection:(NSString*)directionOrNil currentCard:(Card *)theCurrentCard;
+#if defined (LWE_JFLASH)
+- (void) _showWelcomeSheet;
+- (void) _showFirstCardHint;
+- (void) _coachHintSpotlight:(CGRect *)spot tapPoint:(CGPoint *)tap inView:(UIView *)host;
+#endif
 @end
 
 @implementation StudyViewController
@@ -91,8 +99,11 @@
   {
     _alreadyShowedAlertView = YES;
 #if defined (LWE_JFLASH)
-    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Welcome to Japanese in a Flash!",@"StudyViewController.WelcomeAlertViewTitle")
-                                       message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nTo study other sets, tap the 'Study Sets' tab below.",@"RootViewController.WelcomeAlertViewMessage")];
+    // First launch: the welcome sheet (starter set + reading mode) replaces the old UIAlert.
+    if ([FirstRunWelcomeViewController shouldShowWelcome])
+    {
+      [self _showWelcomeSheet];
+    }
 #elif (LWE_CFLASH)
     [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Welcome to Chinese Flash!",@"StudyViewController.WelcomeAlertViewTitle")
                                        message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nIf you want to study other sets, tap the 'Study Sets' tab below.",@"RootViewController.WelcomeAlertViewMessage")
@@ -107,7 +118,138 @@
     [UpdateManager showUpgradeAlertView:[NSUserDefaults standardUserDefaults] delegate:self];
     _alreadyShowedAlertView = YES;
   }
+
+#if defined (LWE_DEBUG)
+  // Screenshot hooks for Debug builds (the simulator can't be tapped from scripts):
+  //   simctl launch <udid> <bundle> -LWEDebugShowCardHint YES   -> show the coach hint
+  //   simctl launch <udid> <bundle> -LWEDebugAutoReveal YES     -> reveal the first card
+  static BOOL debugHooksRan = NO;
+  if (debugHooksRan == NO)
+  {
+    debugHooksRan = YES;
+    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+    //   simctl launch <udid> <bundle> -LWEDebugCardId 116148     -> show a specific card first
+    NSInteger debugCardId = [settings integerForKey:@"LWEDebugCardId"];
+    if (debugCardId > 0)
+    {
+      Card *debugCard = [CardPeer retrieveCardByPK:debugCardId];
+      if (debugCard) [self doChangeCard:debugCard direction:nil];
+    }
+#if defined (LWE_JFLASH)
+    // The coach hint only exists in Japanese in a Flash.
+    if ([settings boolForKey:@"LWEDebugShowCardHint"])
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self _showFirstCardHint]; });
+    }
+#endif
+    if ([settings boolForKey:@"LWEDebugAutoReveal"])
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self revealCard]; });
+    }
+    //   simctl launch --console <udid> <bundle> -LWEDebugCheckRevealTapGuard YES
+    //     -> reveal, then log what a tap on the Right button's spot would hit (UIKit hit-testing, which
+    //        honours userInteractionEnabled / hidden / alpha) during and after the Show answer fade.
+    if ([settings boolForKey:@"LWEDebugCheckRevealTapGuard"] &&
+        [self.actionBarController isKindOfClass:[ActionBarViewController class]])
+    {
+      ActionBarViewController *bar = (ActionBarViewController *)self.actionBarController;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self revealCard];
+        NSArray *delays = @[@0.02, @0.1, @0.2, @0.28, @0.4, @0.6];
+        for (NSNumber *delay in delays)
+        {
+          dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([delay doubleValue] * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            CGPoint p = CGPointMake(CGRectGetMidX(bar.rightBtn.frame), CGRectGetMidY(bar.rightBtn.frame));
+            UIView *hit = [bar.view hitTest:p withEvent:nil];
+            NSString *what = (hit == bar.rightBtn) ? @"RIGHT BUTTON (answer would be recorded)"
+                           : (hit == bar.showAnswerBtn) ? @"Show answer" : NSStringFromClass([hit class]);
+            NSLog(@"LWEDebugCheckRevealTapGuard t+%.2fs: tap at Right hits %@", [delay doubleValue], what);
+          });
+        }
+      });
+    }
+    //   simctl launch <udid> <bundle> -LWEDebugShowExamples YES  -> reveal, then open the example sentences page
+    if ([settings boolForKey:@"LWEDebugShowExamples"])
+    {
+#if defined (LWE_JFLASH)
+      [settings setBool:YES forKey:LWEFirstRunCardHintShownKey]; // never cover it with the coach hint
+#endif
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if ([settings boolForKey:@"LWEDebugAutoReveal"] == NO) [self revealCard];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+          if (self.pageControl.numberOfPages > 1)
+          {
+            self.pageControl.currentPage = 1;
+            [self changePage:self.pageControl animated:NO];
+            _isChangingPage = NO;
+          }
+        });
+      });
+    }
+  }
+#endif
 }
+
+#if defined (LWE_JFLASH)
+- (void) _showWelcomeSheet
+{
+  // Something else (an alert, the upgrade notice, a plugin prompt...) may already be up; a second
+  // present would be dropped, so try again shortly instead -- for up to ~30 seconds.
+  static NSInteger retries = 0;
+  UIViewController *presenter = self.tabBarController ?: self;
+  if (presenter.presentedViewController != nil || presenter.view.window == nil)
+  {
+    if (retries++ < 60)
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if ([FirstRunWelcomeViewController shouldShowWelcome]) [self _showWelcomeSheet];
+      });
+    }
+    return;
+  }
+
+  FirstRunWelcomeViewController *welcome = [[[FirstRunWelcomeViewController alloc] init] autorelease];
+  welcome.finishedHandler = ^{
+    // Then, once, point at the first card.
+    if ([FirstRunCoachHintView shouldShowHint])
+    {
+      [self _showFirstCardHint];
+    }
+  };
+  [presenter presentViewController:welcome animated:YES completion:nil];
+}
+
+- (void) _showFirstCardHint
+{
+  UIView *host = self.tabBarController.view ?: self.view;
+  [self.view layoutIfNeeded];
+  // MRC: __block keeps the block from retaining self (the hint goes away long before we do).
+  __block StudyViewController *blockSelf = self;
+  [FirstRunCoachHintView showInView:host spotlightProvider:^(CGRect *spot, CGPoint *tap) {
+    [blockSelf _coachHintSpotlight:spot tapPoint:tap inView:host];
+  }];
+}
+
+//! The card's current spotlight rect and tap point, in host's coordinates.
+- (void) _coachHintSpotlight:(CGRect *)spot tapPoint:(CGPoint *)tap inView:(UIView *)host
+{
+  // Spotlight the card: the red area between the progress strip and the answer bar.
+  CGFloat top = CGRectGetMinY(self.scrollView.frame) + 8.0;
+  CGFloat bottom = CGRectGetMinY(self.actionbarView.frame) - 8.0;
+  CGRect rect = CGRectMake(14.0, top, self.view.bounds.size.width - 28.0, MAX(120.0, bottom - top));
+  *spot = [self.view convertRect:rect toView:host];
+
+  // Tap target: just below the headword, where tapping reveals the answer.
+  CGFloat revealTop = CGRectGetMinY(self.revealCardBtn.frame);
+  if ([self.cardViewController isKindOfClass:[CardViewController class]])
+  {
+    revealTop = CGRectGetMinY(self.scrollView.frame) + [(CardViewController *)self.cardViewController revealAreaTop];
+  }
+  // Keep the ring inside the card even when large text pushes the reveal area down.
+  CGFloat tapY = MIN(revealTop + 44.0, bottom - 48.0);
+  *tap = [self.view convertPoint:CGPointMake(CGRectGetMidX(self.view.bounds), tapY) toView:host];
+}
+#endif
 
 - (void)viewSafeAreaInsetsDidChange
 {
@@ -125,6 +267,31 @@
   if (@available(iOS 11.0, *)) {
     CGFloat top = self.view.safeAreaInsets.top;
     CGFloat progressBottom = top + self.progressBarView.bounds.size.height;
+
+#if defined (LWE_JFLASH)
+    // Give the action bar the height it asks for (the practice answer bar is two rows and grows
+    // with Dynamic Type), pinned to the bottom of the safe area.
+    if ([self.actionBarController respondsToSelector:@selector(preferredBarHeight)]) {
+      CGFloat barH = [(ActionBarViewController *)self.actionBarController preferredBarHeight];
+      CGFloat bottomInset = self.view.safeAreaInsets.bottom;
+      CGFloat viewH = self.view.bounds.size.height;
+      if (barH > 0 && viewH > barH) {
+        self.actionbarView.frame = CGRectMake(0, viewH - bottomInset - barH, self.view.bounds.size.width, barH + bottomInset);
+        self.actionBarController.view.frame = self.actionbarView.bounds;
+      }
+    }
+    // The card colour runs behind the answer bar's rounded top corners.
+    self.practiceBgImage.frame = self.view.bounds;
+
+    // Keep the example-sentence page dot on the card's bottom line (between the set name and
+    // the count), not over the taller answer bar.
+    if (self.pageControl) {
+      CGPoint pc = self.pageControl.center;
+      pc.x = roundf(self.view.bounds.size.width / 2.0);
+      pc.y = CGRectGetMinY(self.actionbarView.frame) - 17.0;
+      self.pageControl.center = pc;
+    }
+#endif
 
     CGRect pf = self.progressBarView.frame;
     pf.origin.y = top;
@@ -199,6 +366,24 @@
       // Move the reveal button below the reading/headword area so the reading toggle
       // sits above it and can be tapped without triggering the definition reveal.
       if (self.revealCardBtn) {
+#if defined (LWE_JFLASH)
+        // Starts below the headword / reading toggle / "+N readings" (still tappable) and
+        // stops at the answer bar.
+        CGFloat revealTop = self.scrollView.frame.origin.y + [cvc revealAreaTop];
+        CGFloat revealBottom = CGRectGetMinY(self.actionbarView.frame);
+        CGRect rf = self.revealCardBtn.frame;
+        rf.origin.x = 0;
+        rf.size.width = self.view.bounds.size.width;
+        rf.origin.y = revealTop;
+        rf.size.height = MAX(100.0, revealBottom - revealTop);
+        self.revealCardBtn.frame = rf;
+        // The answer bar's "Show answer" button is the VoiceOver element for revealing; this
+        // invisible tap area would only be a second, duplicate "Show answer".
+        BOOL barHasShowAnswer = [self.actionBarController isKindOfClass:[ActionBarViewController class]] &&
+                                ((ActionBarViewController *)self.actionBarController).showAnswerBtn != nil;
+        self.revealCardBtn.isAccessibilityElement = (barHasShowAnswer == NO);
+        self.revealCardBtn.accessibilityLabel = NSLocalizedString(@"Show answer", @"StudyViewController.ShowAnswerAccessibility");
+#else
         // readingY (25% of containerH) + readingH (42) + gap (4) + headwordH (55) + buffer (10)
         CGFloat headwordsBottom = roundf(containerH * 0.25) + 42.0 + 4.0 + 55.0 + 10.0;
         CGFloat revealTop = self.scrollView.frame.origin.y + headwordsBottom;
@@ -206,10 +391,15 @@
         rf.origin.y = revealTop;
         rf.size.height = MAX(100.0, self.view.bounds.size.height - revealTop);
         self.revealCardBtn.frame = rf;
+#endif
       }
     }
   }
 
+#if defined (LWE_JFLASH)
+  // A coach hint on screen follows the card.
+  [FirstRunCoachHintView setNeedsLayoutInView:(self.tabBarController.view ?: self.view)];
+#endif
 }
 
 /**
@@ -423,6 +613,9 @@
   
   // Finally, update the progress bar
   [self.progressBarViewController drawProgressBar];
+
+  // The card's headword size varies per card, so the reveal area moves too.
+  [self.view setNeedsLayout];
 }
 
 - (IBAction)doCardBtn:(id)sender
@@ -824,7 +1017,20 @@
  */
 -(void)setBackgroundColor_
 {
+#if defined (LWE_JFLASH)
+  NSString *theme = [[NSUserDefaults standardUserDefaults] objectForKey:APP_THEME];
+  if (theme == nil || [theme isEqualToString:SET_THEME_FIRE])
+  {
+    // Solid #C01B00 (the old 90% tint over gray came out as a duller #C42F17)
+    self.practiceBgImage.backgroundColor = LWEDesignFire();
+  }
+  else
+  {
+    self.practiceBgImage.backgroundColor = [[ThemeManager sharedThemeManager] currentThemeTintColor:0.9];
+  }
+#else
   self.practiceBgImage.backgroundColor = [[ThemeManager sharedThemeManager] currentThemeTintColor:0.9];
+#endif
   self.view.backgroundColor = [UIColor colorWithWhite:0.902 alpha:1.0];
 }
 

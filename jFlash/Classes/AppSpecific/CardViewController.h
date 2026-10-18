@@ -60,6 +60,10 @@ extern NSString * const LWECardHTMLTemplate_EtoJ;
 //! Call from StudyViewController.viewDidLayoutSubviews (child VC containment is informal).
 - (void) layoutCardSubviews;
 
+//! Y (in this controller's view) below which a tap on the card should reveal the answer.
+//! Everything above it (headword, speaker, reading toggle, "+N readings") stays tappable.
+- (CGFloat) revealAreaTop;
+
 //! Implement this delegate to control how the card is displayed in a mode.
 @property (assign) IBOutlet id<CardViewControllerDelegate> delegate;
 

@@ -8,7 +8,18 @@
 
 #import "CardViewController.h"
 #import "UIScrollView+LWEUtilities.h"
+#import "LWEDesignTokens.h"
+#if defined(LWE_JFLASH)
+#import "JapaneseCard.h"
+#endif
 #import <AVFoundation/AVFoundation.h>
+
+// Study card (J->E) metrics from the 2026 design refresh
+static const CGFloat kLWEHeadwordMaxPointSize = 88.0;
+static const CGFloat kLWEHeadwordMinPointSize = 34.0;
+static const CGFloat kLWESpeakBtnSize         = 44.0;
+static const CGFloat kLWESpeakBtnGap          = 14.0;
+static const CGFloat kLWECompactCardHeight    = 420.0; // card areas shorter than this use the compact layout
 
 // Maps iOS system text size category to a CSS font-size string for WKWebView/UIWebView HTML.
 static NSString *LWEDynamicTypeCSSFontSize(void)
@@ -65,6 +76,9 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 #endif
 
 // Private Methods
+//! The "+N readings" pill is 30pt tall; its button extends this far above and below it (44pt hit area).
+static const CGFloat kLWEPillHitInset = 7.0;
+
 @interface CardViewController()
 - (void) _injectMeaningHTML:(NSString*)html;
 - (void) _prepareView:(Card*)card;
@@ -77,10 +91,26 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 - (AVSpeechSynthesisVoice *) _bestJapaneseVoice;
 - (void) _updateSpeakBtnPosition;
 @property (nonatomic, retain) AVSpeechSynthesizer *speechSynthesizer;
+
+// New-style card (J->E only): big headword, reading below it, "+N readings" pill
+- (void) _setupModernCard;
+- (void) _layoutModernCard;
+- (void) _applyReadingText;
+- (void) _updateMoreReadingsBtn;
+- (void) _toggleMoreReadings:(id)sender;
+@property (nonatomic, retain) NSArray *kanaReadings;
+@property (nonatomic, retain) NSArray *romajiReadings;
+@property (nonatomic, retain) UIButton *moreReadingsBtn;
 #endif
 @end
 
 @implementation CardViewController
+{
+  BOOL _modernCard;
+  BOOL _readingsExpanded;
+  CGFloat _lastLayoutWidth;
+  CGFloat _lastLayoutHeight;
+}
 
 @synthesize delegate;
 @synthesize meaningWebViewContainer, headwordMoreIcon, headwordLabel, readingMoreIcon, readingLabel, toggleReadingBtn;
@@ -89,6 +119,7 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 @synthesize moodIcon;
 #if defined(LWE_JFLASH)
 @synthesize speakBtn, speechSynthesizer;
+@synthesize kanaReadings, romajiReadings, moreReadingsBtn;
 #endif
 
 #pragma mark - Flow Methods
@@ -149,6 +180,9 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   self = [super initWithNibName:nibName bundle:nil];
   if (self)
   {
+#if defined(LWE_JFLASH)
+    _modernCard = displayMainHeadword;
+#endif
     // Replace out the CSS to match the current theme
     NSString *cssHeader = [[ThemeManager sharedThemeManager] currentThemeCSS];
     html = [html stringByReplacingOccurrencesOfString:@"##THEMECSS##" withString:cssHeader];
@@ -200,13 +234,346 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   [speak addTarget:self action:@selector(doSpeakHeadword) forControlEvents:UIControlEventTouchUpInside];
   [self.view addSubview:speak];
   self.speakBtn = speak;
+
+  if (_modernCard)
+  {
+    [self _setupModernCard];
+  }
 #endif
 }
+
+#if defined(LWE_JFLASH)
+- (void) _setupModernCard
+{
+  // Headword: heavy & yellow; the size is set per card in -_layoutModernCard.
+  self.headwordLabel.textColor = LWEDesignYellow();
+  self.headwordLabel.shadowOffset = CGSizeZero;
+  self.headwordLabel.shadowColor = nil;
+  self.headwordLabel.lineBreakMode = NSLineBreakByCharWrapping;
+  self.headwordLabel.numberOfLines = 0;
+  self.headwordLabel.autoresizingMask = UIViewAutoresizingNone;
+  self.headwordMoreIcon.hidden = YES;
+
+  // Reading: upright (the NIB font was Helvetica Bold Oblique), attributed per card.
+  self.readingLabel.numberOfLines = 0;
+  self.readingLabel.lineBreakMode = NSLineBreakByWordWrapping;
+  self.readingLabel.textAlignment = NSTextAlignmentCenter;
+  self.readingLabel.shadowColor = nil;
+  self.readingLabel.shadowOffset = CGSizeZero;
+  self.readingLabel.autoresizingMask = UIViewAutoresizingNone;
+  self.readingMoreIcon.hidden = YES;
+
+  self.toggleReadingBtn.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
+  [self.toggleReadingBtn setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.85] forState:UIControlStateNormal];
+  self.toggleReadingBtn.autoresizingMask = UIViewAutoresizingNone;
+
+  // Speaker: 44pt translucent circle next to the headword
+  UIImageSymbolConfiguration *cfg = [UIImageSymbolConfiguration configurationWithPointSize:19 weight:UIImageSymbolWeightMedium];
+  [self.speakBtn setImage:[UIImage systemImageNamed:@"speaker.wave.2" withConfiguration:cfg] forState:UIControlStateNormal];
+  self.speakBtn.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.16];
+  self.speakBtn.layer.cornerRadius = kLWESpeakBtnSize / 2.0;
+
+  // "+N readings" pill
+  UIButton *pill = nil;
+  if (@available(iOS 15.0, *))
+  {
+    // UIButtonConfiguration (replaces the deprecated image/content edge insets): chevron after the text
+    UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
+    // White text (5.1:1 on the pill); the visible pill is 30pt tall inside a 44pt-tall hit area.
+    config.baseForegroundColor = [UIColor whiteColor];
+    config.background.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
+    config.background.cornerRadius = 15.0;
+    config.background.backgroundInsets = NSDirectionalEdgeInsetsMake(kLWEPillHitInset, 0, kLWEPillHitInset, 0);
+    config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
+    config.imagePlacement = NSDirectionalRectEdgeTrailing;
+    config.imagePadding = 5.0;
+    config.contentInsets = NSDirectionalEdgeInsetsMake(0, 13, 0, 13);
+    config.titleTextAttributesTransformer = ^NSDictionary<NSAttributedStringKey, id> *(NSDictionary<NSAttributedStringKey, id> *incoming) {
+      NSMutableDictionary *attrs = [[incoming mutableCopy] autorelease];
+      attrs[NSFontAttributeName] = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
+      return attrs;
+    };
+    pill = [UIButton buttonWithConfiguration:config primaryAction:nil];
+  }
+  else
+  {
+    pill = [UIButton buttonWithType:UIButtonTypeCustom];
+    pill.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
+    pill.layer.cornerRadius = 15.0;
+    pill.titleLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
+    [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.88] forState:UIControlStateNormal];
+    [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.5] forState:UIControlStateHighlighted];
+    pill.tintColor = [UIColor colorWithWhite:1.0 alpha:0.88];
+    pill.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft; // chevron after the text
+  }
+  pill.hidden = YES;
+  [pill addTarget:self action:@selector(_toggleMoreReadings:) forControlEvents:UIControlEventTouchUpInside];
+  [self.view addSubview:pill];
+  self.moreReadingsBtn = pill;
+}
+
+//! Splits "うみ; み; わた" style readings into an array of trimmed, non-empty strings
+static NSArray *LWESplitReadings(NSString *readings)
+{
+  NSMutableArray *result = [NSMutableArray array];
+  for (NSString *part in [readings componentsSeparatedByString:@";"])
+  {
+    NSString *trimmed = [part stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if ([trimmed length] > 0) [result addObject:trimmed];
+  }
+  return result;
+}
+
+//! The readings with exact duplicates removed, first occurrence kept.
+static NSArray *LWEUniqueReadings(NSArray *readings)
+{
+  NSMutableArray *result = [NSMutableArray array];
+  for (NSString *reading in readings)
+  {
+    if ([result containsObject:reading] == NO) [result addObject:reading];
+  }
+  return result;
+}
+
+//! How many readings are hidden behind the "+N readings" pill for the current reading mode.
+static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
+{
+  NSString *mode = [[NSUserDefaults standardUserDefaults] objectForKey:APP_READING];
+  if ([mode isEqualToString:SET_READING_ROMAJI])
+  {
+    return (NSInteger)[LWEUniqueReadings(romaji) count] - 1;
+  }
+  if ([mode isEqualToString:SET_READING_KANA])
+  {
+    return (NSInteger)[kana count] - 1;
+  }
+  return (NSInteger)MAX([kana count], [romaji count]) - 1;
+}
+
+//! Builds the reading label: kana on one line, muted romaji on the next (per APP_READING).
+- (void) _applyReadingText
+{
+  NSString *mode = [[NSUserDefaults standardUserDefaults] objectForKey:APP_READING];
+  BOOL showKana = ([mode isEqualToString:SET_READING_ROMAJI] == NO);
+  BOOL showRomaji = ([mode isEqualToString:SET_READING_KANA] == NO);
+
+  NSArray *kana = self.kanaReadings;
+  NSArray *romaji = self.romajiReadings;
+  NSString *kanaText = nil;
+  NSString *romajiText = nil;
+  if (_readingsExpanded)
+  {
+    // Kana list with the Japanese middle dot; the romaji list with an ASCII comma (a "・" or
+    // a Latin "·" between romanised words reads as part of the word).  When only romaji is
+    // shown, repeated romanisations (e.g. ひらがな and カタカナ spellings) are listed once.
+    kanaText = [kana componentsJoinedByString:@"・"];
+    NSArray *romajiList = showKana ? romaji : LWEUniqueReadings(romaji);
+    romajiText = [romajiList componentsJoinedByString:@", "];
+  }
+  else
+  {
+    kanaText = [kana count] > 0 ? [kana objectAtIndex:0] : nil;
+    romajiText = [romaji count] > 0 ? [romaji objectAtIndex:0] : nil;
+  }
+
+  // A short card (small phone, or a tall answer bar at large text sizes) keeps the reading at
+  // its base size so the meaning still has room.
+  CGFloat dt = (self.view.bounds.size.height > 0 && self.view.bounds.size.height < kLWECompactCardHeight)
+             ? 1.0f : MIN(LWEDynamicTypeSizeMultiplier(), 1.35f);
+  NSMutableParagraphStyle *para = [[[NSMutableParagraphStyle alloc] init] autorelease];
+  para.alignment = NSTextAlignmentCenter;
+  para.paragraphSpacing = 2.0;
+  para.lineBreakMode = NSLineBreakByWordWrapping;
+
+  NSMutableAttributedString *text = [[[NSMutableAttributedString alloc] init] autorelease];
+  if (showKana && [kanaText length] > 0)
+  {
+    CGFloat kanaSize = (_readingsExpanded ? 24.0 : 30.0) * dt;
+    // Long readings shrink to stay on one line (down to 20pt), then wrap.
+    CGFloat availW = self.view.bounds.size.width - 48.0;
+    CGFloat kanaW = [kanaText sizeWithAttributes:@{NSFontAttributeName: [UIFont systemFontOfSize:kanaSize weight:UIFontWeightMedium]}].width;
+    if (availW > 0 && kanaW > availW)
+    {
+      kanaSize = MAX(20.0, floorf(kanaSize * availW / kanaW));
+    }
+    [text appendAttributedString:[[[NSAttributedString alloc] initWithString:kanaText attributes:@{
+      NSFontAttributeName: [UIFont systemFontOfSize:kanaSize weight:UIFontWeightMedium],
+      NSForegroundColorAttributeName: [UIColor whiteColor],
+      NSParagraphStyleAttributeName: para,
+    }] autorelease]];
+  }
+  if (showRomaji && [romajiText length] > 0)
+  {
+    BOOL romajiOnly = ([text length] == 0);
+    if (!romajiOnly)
+    {
+      [text appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n"] autorelease]];
+    }
+    CGFloat romajiSize = (romajiOnly ? 24.0 : 17.0) * dt;
+    [text appendAttributedString:[[[NSAttributedString alloc] initWithString:romajiText attributes:@{
+      NSFontAttributeName: [UIFont systemFontOfSize:romajiSize weight:UIFontWeightMedium],
+      NSForegroundColorAttributeName: [UIColor colorWithWhite:1.0 alpha:(romajiOnly ? 1.0 : 0.88)],
+      NSKernAttributeName: @(0.2),
+      NSParagraphStyleAttributeName: para,
+    }] autorelease]];
+  }
+  [text addAttribute:NSParagraphStyleAttributeName value:para range:NSMakeRange(0, [text length])];
+  self.readingLabel.attributedText = text;
+  [self _updateMoreReadingsBtn];
+}
+
+- (void) _updateMoreReadingsBtn
+{
+  NSInteger extra = LWEExtraReadingCount(self.kanaReadings, self.romajiReadings);
+  BOOL readingShowing = (self.readingScrollContainer.hidden == NO);
+  self.moreReadingsBtn.hidden = (extra <= 0 || readingShowing == NO);
+  if (extra <= 0) return;
+
+  NSString *title = nil;
+  NSString *symbol = nil;
+  if (_readingsExpanded)
+  {
+    title = NSLocalizedString(@"Fewer readings", @"CardViewController.FewerReadings");
+    symbol = @"chevron.up";
+  }
+  else if (extra == 1)
+  {
+    title = NSLocalizedString(@"+1 reading", @"CardViewController.OneMoreReading");
+    symbol = @"chevron.down";
+  }
+  else
+  {
+    title = [NSString stringWithFormat:NSLocalizedString(@"+%d readings", @"CardViewController.NMoreReadings"), (int)extra];
+    symbol = @"chevron.down";
+  }
+  UIImageSymbolConfiguration *cfg = [UIImageSymbolConfiguration configurationWithPointSize:10 weight:UIImageSymbolWeightBold];
+  UIImage *chevron = [UIImage systemImageNamed:symbol withConfiguration:cfg];
+  BOOL configured = NO;
+  if (@available(iOS 15.0, *))
+  {
+    UIButtonConfiguration *config = [[self.moreReadingsBtn.configuration copy] autorelease];
+    if (config)
+    {
+      config.title = title;
+      config.image = chevron;
+      self.moreReadingsBtn.configuration = config;
+      configured = YES;
+    }
+  }
+  if (configured == NO)
+  {
+    [self.moreReadingsBtn setImage:chevron forState:UIControlStateNormal];
+    [self.moreReadingsBtn setTitle:title forState:UIControlStateNormal];
+  }
+  self.moreReadingsBtn.accessibilityLabel = _readingsExpanded
+    ? NSLocalizedString(@"Show fewer readings", @"CardViewController.FewerReadingsAccessibility")
+    : [NSString stringWithFormat:NSLocalizedString(@"Show %d more readings", @"CardViewController.MoreReadingsAccessibility"), (int)extra];
+}
+
+- (void) _toggleMoreReadings:(id)sender
+{
+  _readingsExpanded = !_readingsExpanded;
+  [self _applyReadingText];
+  [self _layoutModernCard];
+}
+
+- (void) _layoutModernCard
+{
+  CGFloat w = self.view.bounds.size.width;
+  CGFloat h = self.view.bounds.size.height;
+  if (w <= 0 || h <= 0) return;
+
+  CGFloat hPad = 24.0;
+  CGFloat contentW = w - 2.0 * hPad;
+  CGFloat dt = MIN(LWEDynamicTypeSizeMultiplier(), 1.2f);
+  // Short card: scale the headword with the available height (not below 48pt) and tighten the
+  // spacing, so reading, pill and meaning still fit above the answer bar.
+  BOOL compact = (h < kLWECompactCardHeight);
+  CGFloat compactScale = compact ? MAX(0.55f, h / kLWECompactCardHeight) : 1.0f;
+
+  // Re-flow the reading for the final width (the first card is prepared before layout).
+  // Re-flow the reading when the width or height changed (the reading size depends on both).
+  if (fabs(w - _lastLayoutWidth) > 0.5 || fabs(h - _lastLayoutHeight) > 0.5)
+  {
+    _lastLayoutWidth = w;
+    _lastLayoutHeight = h;
+    [self _applyReadingText];
+  }
+
+  // ---- Headword: ~88pt, scaled down to fit one line beside the speaker; wraps only if
+  // it would otherwise be smaller than the minimum.
+  NSString *headword = self.headwordLabel.text ?: @"";
+  CGFloat textAvailW = contentW - 2.0 * (kLWESpeakBtnSize + kLWESpeakBtnGap);
+  CGFloat size = floorf(MAX(compact ? 48.0f : 0.0f, kLWEHeadwordMaxPointSize * dt * compactScale));
+  UIFont *font = [UIFont systemFontOfSize:size weight:UIFontWeightBold];
+  CGFloat oneLineW = [headword sizeWithAttributes:@{NSFontAttributeName: font}].width;
+  if (oneLineW > textAvailW && oneLineW > 0)
+  {
+    size = MAX(kLWEHeadwordMinPointSize, floorf(size * textAvailW / oneLineW));
+    font = [UIFont systemFontOfSize:size weight:UIFontWeightBold];
+  }
+  self.headwordLabel.font = font;
+  CGRect hwBounds = [headword boundingRectWithSize:CGSizeMake(textAvailW, CGFLOAT_MAX)
+                                           options:NSStringDrawingUsesLineFragmentOrigin
+                                        attributes:@{NSFontAttributeName: font}
+                                           context:nil];
+  CGFloat hwH = ceilf(MAX(hwBounds.size.height, font.lineHeight));
+  CGFloat maxHwH = roundf(h * 0.36);
+  CGFloat containerH = MIN(hwH, maxHwH);
+
+  CGFloat headwordY = compact ? MAX(8.0, roundf(h * 0.06)) : MAX(16.0, roundf(h * 0.16));
+  self.headwordScrollContainer.frame = CGRectMake(hPad, headwordY, contentW, containerH);
+  self.headwordLabel.frame = CGRectMake(roundf((contentW - textAvailW) / 2.0), 0, textAvailW, hwH);
+  self.headwordScrollContainer.contentSize = CGSizeMake(contentW, hwH);
+  self.headwordScrollContainer.contentOffset = CGPointZero;
+  self.headwordMoreIcon.hidden = YES;
+  [self _updateSpeakBtnPosition];
+
+  // ---- Reading under the headword
+  CGFloat readingY = headwordY + containerH + (compact ? 6.0 : 16.0);
+  CGSize readingFit = [self.readingLabel.attributedText boundingRectWithSize:CGSizeMake(contentW, CGFLOAT_MAX)
+                                                                     options:NSStringDrawingUsesLineFragmentOrigin
+                                                                     context:nil].size;
+  CGFloat readingH = MAX(44.0, ceilf(readingFit.height));
+  CGFloat readingContainerH = MIN(readingH, roundf(h * 0.3));
+  self.readingScrollContainer.frame = CGRectMake(hPad, readingY, contentW, readingContainerH);
+  self.readingLabel.frame = CGRectMake(0, 0, contentW, readingH);
+  self.readingScrollContainer.contentSize = CGSizeMake(contentW, readingH);
+  self.readingMoreIcon.hidden = YES;
+  // Toggle ("Show Reading") overlays the reading row
+  self.toggleReadingBtn.frame = CGRectMake(hPad, readingY, contentW, readingContainerH);
+
+  CGFloat bottom = readingY + readingContainerH;
+  NSInteger extra = LWEExtraReadingCount(self.kanaReadings, self.romajiReadings);
+  if (extra > 0)
+  {
+    CGSize pillSize = [self.moreReadingsBtn sizeThatFits:CGSizeMake(contentW, 30)];
+    CGFloat pillW = MIN(contentW, ceilf(pillSize.width));
+    // 44pt-tall button around the 30pt pill (iOS 15+ draws the pill inset); the layout uses the visible pill.
+    CGFloat inset = 0.0;
+    if (@available(iOS 15.0, *)) { if (self.moreReadingsBtn.configuration != nil) inset = kLWEPillHitInset; }
+    self.moreReadingsBtn.frame = CGRectMake(roundf((w - pillW) / 2.0), bottom + (compact ? 6.0 : 12.0) - inset, pillW, 30.0 + 2.0 * inset);
+    bottom = CGRectGetMaxY(self.moreReadingsBtn.frame) - inset;
+  }
+
+  // ---- Meaning: a short rule, then the meaning (both drawn by the HTML template)
+  CGFloat webY = bottom + (compact ? 10.0 : 20.0);
+  CGFloat webH = MAX(60.0, h - webY - 8.0);
+  self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
+}
+#endif
 
 #pragma mark - Layout
 
 - (void)layoutCardSubviews
 {
+#if defined(LWE_JFLASH)
+  if (_modernCard)
+  {
+    [self _layoutModernCard];
+    return;
+  }
+#endif
   CGFloat w = self.view.bounds.size.width;
   CGFloat h = self.view.bounds.size.height;
   if (w <= 0 || h <= 0) return;
@@ -238,6 +605,19 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
 }
 
+- (CGFloat) revealAreaTop
+{
+  CGFloat top = CGRectGetMaxY(self.headwordScrollContainer.frame);
+  top = MAX(top, CGRectGetMaxY(self.toggleReadingBtn.frame));
+#if defined(LWE_JFLASH)
+  if (self.moreReadingsBtn && self.moreReadingsBtn.hidden == NO)
+  {
+    top = MAX(top, CGRectGetMaxY(self.moreReadingsBtn.frame));
+  }
+#endif
+  return top + 4.0;
+}
+
 #pragma mark - IBAction Methods
 
 #if defined(LWE_JFLASH)
@@ -246,6 +626,21 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 {
   CGRect container = self.headwordScrollContainer.frame;
   if (container.size.width <= 0 || self.headwordLabel.text.length == 0) return;
+
+  if (_modernCard)
+  {
+    // 44pt circle, 14pt to the right of the (centred) headword's last line
+    CGRect labelFrame = self.headwordLabel.frame;
+    CGSize textSize = [self.headwordLabel.text sizeWithAttributes:@{NSFontAttributeName: self.headwordLabel.font}];
+    CGFloat textW = MIN(textSize.width, labelFrame.size.width);
+    CGFloat centerX = container.origin.x + CGRectGetMidX(labelFrame);
+    CGFloat maxX = self.view.bounds.size.width - 4.0;
+    CGFloat x = MIN(roundf(centerX + textW / 2.0 + kLWESpeakBtnGap), maxX - kLWESpeakBtnSize);
+    CGFloat lineH = MIN(container.size.height, self.headwordLabel.font.lineHeight);
+    CGFloat y = container.origin.y + roundf((lineH - kLWESpeakBtnSize) / 2.0);
+    self.speakBtn.frame = CGRectMake(x, y, kLWESpeakBtnSize, kLWESpeakBtnSize);
+    return;
+  }
 
   // Text is center-aligned in the label; compute the visual right edge from intrinsic text width.
   CGSize textSize = [self.headwordLabel.text sizeWithAttributes:
@@ -279,6 +674,11 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   // Reading label text is "kana - romaji"; speak only the kana part.
   NSString *reading = self.readingLabel.text;
   NSString *text = [[reading componentsSeparatedByString:@" - "] firstObject];
+  if (_modernCard)
+  {
+    // New card: the first kana reading (fall back to the headword itself)
+    text = ([self.kanaReadings count] > 0) ? [self.kanaReadings objectAtIndex:0] : self.headwordLabel.text;
+  }
   if (text.length == 0) return;
 
   [self.speechSynthesizer stopSpeakingAtBoundary:AVSpeechBoundaryImmediate];
@@ -319,6 +719,9 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   
   // This will handle the "more" icon after the state change
   [self _updateReadingContainer];
+#if defined(LWE_JFLASH)
+  if (_modernCard) [self _updateMoreReadingsBtn];
+#endif
 }
 
 - (void) turnReadingOff
@@ -331,6 +734,9 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 
   // This will handle the "more" icon after the state change
   [self _updateReadingContainer];
+#if defined(LWE_JFLASH)
+  if (_modernCard) [self _updateMoreReadingsBtn];
+#endif
 }
 
 //! shows or hides the reading label and toggleButton according to the readingVisible bool
@@ -366,6 +772,19 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   
   // Now do the hard part (for CFlash)
 #if defined(LWE_JFLASH)
+  if (_modernCard)
+  {
+    // First reading only (kana, and romaji muted underneath); the rest sit behind "+N readings".
+    self.kanaReadings = LWESplitReadings(card.hw_reading);
+    NSString *romaji = [card isKindOfClass:[JapaneseCard class]] ? [(JapaneseCard *)card romaji] : nil;
+    self.romajiReadings = LWESplitReadings(romaji);
+    _readingsExpanded = NO;
+    _lastLayoutWidth = self.view.bounds.size.width;
+    _lastLayoutHeight = self.view.bounds.size.height;
+    [self _applyReadingText];
+    [self _layoutModernCard];
+    return;
+  }
   self.readingLabel.text = card.reading;
 #elif defined(LWE_CFLASH)
   [(TTTAttributedLabel *)self.readingLabel setText:[card attributedReading]];
@@ -450,6 +869,7 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 #if defined(LWE_JFLASH)
   self.speakBtn = nil;
   self.speechSynthesizer = nil;
+  self.moreReadingsBtn = nil;
 #endif
 }
 
@@ -473,6 +893,9 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 #if defined(LWE_JFLASH)
   [speakBtn release];
   [speechSynthesizer release];
+  [kanaReadings release];
+  [romajiReadings release];
+  [moreReadingsBtn release];
 #endif
 
   _meaningWebView.navigationDelegate = nil;
@@ -487,12 +910,25 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 // HTML Header content that will be displayed in the meaning UIWebView before the actual meaning
 NSString * const LWECardHTMLTemplate = @""
 "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
+#if defined(LWE_JFLASH)
+// 2026 card: large, upright meaning; no maximum-scale, so pinch zoom stays available.
+"<meta name='viewport' content='width=device-width, initial-scale=1' />"
+"<style>"
+"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:calc(##TEXTSIZE## * 1.5); font-weight:600; font-style:normal; font-family:-apple-system,'Helvetica Neue',Helvetica,sans-serif; color:#fff; line-height:1.25; letter-spacing:-0.4px; -webkit-text-size-adjust:none; } "
+"dfn{ text-shadow:none; font-style:normal; font-weight:600; color:#3a2a00; position:relative; top:-3px; font-family:-apple-system,sans-serif; font-size:13px; letter-spacing:0.1px; background-color:#FFD60A; line-height:1; margin:0 0 0 8px; padding:5px 9px 6px; -webkit-border-radius:8px; border:0; display:inline-block; vertical-align:middle; } "
+"#container{ width:100%; text-align:center; padding-top:0; } "
+"#container:before{ content:''; display:block; width:40px; height:2px; border-radius:1px; background:rgba(255,255,255,0.3); margin:0 auto 22px auto; } "
+"ol{color:white; text-align:left; font-size:0.75em; line-height:1.35; width:auto; margin:0 12px; padding-left:22px;} "
+"li{color:white; margin:0px; margin-bottom:8px;} "
+#else
+// Chinese Flash keeps the original card styling.
 "<style>"
 "body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:##TEXTSIZE##; font-weight:bold; font-family:Helvetica,sanserif; color:#fff; line-height:1.4; } "
 "dfn{ text-shadow:none; font-weight:normal; color:#000; position:relative; top:-1px; font-family:verdana; font-size:10.5px; background-color:#C79810; line-height:1.4; margin:4px 4px 0px 0px; height:14px; padding:2px 3px; -webkit-border-radius:4px; border:1px solid #F9F7ED; display:inline-block;} "
 "#container{ width:100%; text-align:center; padding-top:12px; } "
 "ol{color:white; text-align:left; width:240px; margin:0px; margin-left:24px; padding-left:10px;} "
 "li{color:white; margin:0px; margin-bottom:7px;} "
+#endif
 "##THEMECSS##"
 "</style></head>"
 "<body><div id='container'>"
