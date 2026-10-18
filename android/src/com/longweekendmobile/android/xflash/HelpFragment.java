@@ -160,7 +160,7 @@ public class HelpFragment extends Fragment
             public void onClick(View v)
             {
                 Intent myIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://getsatisfaction.com/longweekend"));
+                    Uri.parse("https://japaneseinaflash.com/support"));
 
                 inContext.startActivity(myIntent);
 
@@ -177,7 +177,7 @@ public class HelpFragment extends Fragment
             public void onClick(View v)
             {
                 Intent myIntent  = new Intent(Intent.ACTION_SEND);
-                myIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{ "support@longweekendmobile.com" });
+                myIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{ "help@japaneseinaflash.com" });
                 myIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,"Please make this awesome.");
 
                 // I believe this is the current email MIME?
