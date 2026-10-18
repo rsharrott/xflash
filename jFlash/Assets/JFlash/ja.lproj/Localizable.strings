@@ -30,7 +30,7 @@
 "Bury" = "もう覚えた";
 
 /* ActionBar.BuryIt  (ActionBarViewController.m) */
-"Bury it" = "もう覚えた（今後は出題しない）";
+"Bury it" = "もう覚えた（「覚えた」に移動）";
 
 /* ActionBar.Wrong  (ActionBarViewController.m) */
 "Wrong" = "不正解";
@@ -51,7 +51,7 @@
 "Add to Starred" = "スターを付ける";
 
 /* ActionBarViewController.ActionSheetTitle  (ActionBarViewController.m) */
-"Card Actions" = "カードの操作";
+"Card Actions" = "アクション";
 
 /* AddTagViewController.AlertViewLastCardTitle  (ActionBarViewController.m, AddTagViewController.m, SearchViewController.m, StudySetWordsViewController.m) */
 "Last Card in Set" = "セットの最後のカードです";
@@ -68,7 +68,7 @@
 /* Action Sheet Button to post on FB  (ActionBarViewController.m) */
 "Share This Card" = "このカードをシェア";
 
-/* ActionBarViewController.ActionSheetCancel  (ActionBarViewController.m, StudySetWordsViewController.m) */
+/* ActionBarViewController.ActionSheetCancel  (ActionBarViewController.m, LWEUIAlertView.m, StudySetWordsViewController.m) */
 "Cancel" = "キャンセル";
 
 /* emailVM.notAvailable.title  (ActionBarViewController.m, HelpViewController.m) */
@@ -82,6 +82,12 @@
 
 /* AddStudySetInputViewController.NavBarTitle  (AddStudySetInputViewController.m) */
 "Update Study Set" = "学習セットを編集";
+
+/*   (AddStudySetInputViewController.m) */
+"Please Tap a Name" = "名前を入力してください";
+
+/*   (AddStudySetInputViewController.m) */
+"We need to call your new set something.  Please tap a name and press 'Save'." = "新しいセットに名前を付けてください。名前を入力して「保存」をタップします。";
 
 /* AddStudySetInputViewController.AlertViewTitle  (AddStudySetInputViewController.m) */
 "Enter Set Name" = "セット名を入力してください";
@@ -270,7 +276,7 @@
 "Sharing" = "シェア";
 
 /* HelpViewController.Table_Integration  (HelpViewController.m) */
-"Integration" = "他のアプリとの連携";
+"Integration" = "ほかのアプリとの連携";
 
 /* HelpViewController.Table_TagGlossary  (HelpViewController.m) */
 "Tag Glossary" = "タグの一覧";
@@ -279,52 +285,31 @@
 "Ask Us" = "お問い合わせ";
 
 /* HelpViewController.SupportAlertMsgTitle  (HelpViewController.m) */
-"GetSatisfaction.com" = "お問い合わせ";
+"Support" = "サポート";
 
 /* HelpViewController.SupportAlertMsgMsg  (HelpViewController.m) */
-"Do you have a question?\nA feature request?\n\nIt's best to make your voice heard on our support site, but we respond to e-mail too!" = "ご質問や機能のご要望はありますか？\n\nサポートサイトへの投稿がいちばん確実ですが、メールでもお返事します。";
-
-/* Cancel  (HelpViewController.m, JFlashUpdateManager.m) */
-"No Thanks" = "今はしない";
+"Do you have a question?\nA feature request?\n\nVisit our support site or send us an email!" = "ご質問や機能のご要望はありますか？\n\nサポートサイトをご覧いただくか、メールでお気軽にご連絡ください。";
 
 /* Visit Site  (HelpViewController.m) */
-"Visit Site" = "サイトを開く";
+"Visit Support Site" = "サポートサイトを開く";
 
 /* Mail Us  (HelpViewController.m) */
 "Send an Email" = "メールを送る";
 
 /* emailVM.notAvailable.body  (HelpViewController.m) */
-"Oh no!  It looks like your device isn't set up for Mail yet!" = "このデバイスではまだメールが設定されていないようです。";
+"It looks like your device isn't set up for Mail yet. You can write to us at %@." = "このデバイスではまだメールが設定されていないようです。%@ までご連絡ください。";
+
+/* HelpViewController.PrivacyPolicy  (HelpViewController.m) */
+"Privacy Policy" = "プライバシーポリシー";
+
+/* Cancel  (HelpViewController.m) */
+"No Thanks" = "今はしない";
 
 /* HelpViewController.Next  (HelpViewController.m) */
 "Next >" = "次へ";
 
-/* JFlash1.6 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.6" = "JFlash 1.6にアップデートしました";
-
-/* JFlash1.6 upgrade alert msg  (JFlashUpdateManager.m) */
-"Thanks for updating!  Special thanks to Ben, Murray, Riley & David for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words.  Want it?" = "アップデートありがとうございます！いくつかの項目の改善に協力してくれたBen、Murray、Riley、Davidに感謝します。ところで、Rikai Browserはもうお持ちですか？JFlashと連携して、日本語のウェブページを読みながら新しい単語を覚えられます。入手しますか？";
-
-/* StudyViewController.Later  (JFlashUpdateManager.m) */
-"Later" = "あとで";
-
-/* WebViewController.RikaiAppStore  (JFlashUpdateManager.m) */
-"Get Rikai" = "Rikaiを入手";
-
-/* JFlash1.6.1 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.6.1" = "JFlash 1.6.1にアップデートしました";
-
-/* JFlash1.6.1 upgrade alert msg  (JFlashUpdateManager.m) */
-"Thanks for updating!  We fixed a minor bug in the example sentences display.  Special thanks to Michael & Murray for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words." = "アップデートありがとうございます！例文の表示に関する小さな不具合を修正しました。いくつかの項目の改善に協力してくれたMichaelとMurrayに感謝します。ところで、Rikai Browserはもうお持ちですか？JFlashと連携して、日本語のウェブページを読みながら新しい単語を覚えられます。";
-
-/* JFlash1.6.2 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.6.2" = "JFlash 1.6.2にアップデートしました";
-
-/* JFlash1.6.2 upgrade alert msg  (JFlashUpdateManager.m) */
-"Another update!  We fixed a bug in the integration between Rikai Browser & Japanese Flash.  Did you know you can send words from Rikai Browser to Japanese Flash with one button?  Get it if you don't have it!  Also, thanks to Michael, who helped us update a few more entries." = "またアップデートです！Rikai BrowserとJapanese Flashの連携の不具合を修正しました。Rikai Browserからボタンひとつで単語をJapanese Flashに送れるのをご存じですか？まだの方はぜひどうぞ！さらにいくつかの項目の更新に協力してくれたMichaelに感謝します。";
-
 /* JFlash1.7 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.7" = "JFlash 1.7にアップデートしました";
+"Updated to Japanese in a Flash! 1.7" = "Japanese in a Flash! 1.7にアップデートしました";
 
 /* JFlash1.7 upgrade alert msg  (JFlashUpdateManager.m) */
 "Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries." = "アップデートありがとうございます！新機能として、検索からカードの例文を見られるようになりました。また、辞書の約8項目の更新に協力してくれたKobeとMurrayに感謝します。";
@@ -372,7 +357,7 @@
 "Common Kana Words" = "かな書きが多い語";
 
 /* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
-"Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese Flash Logo & Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese Flashは、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリはEDICT辞書とTanaka Corpus（田中コーパス）のデータも使用しています。EDICTファイルはElectronic Dictionary Research and Development Groupの所有物であり、同グループのライセンスに従って使用しています。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese Flashのロゴと製品名はオリジナルの創作物であり、他の商標との類似は意図したものではなく、まったくの偶然です。";
+"Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash!（旧Japanese Flash）は、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリはEDICT辞書とTanaka Corpus（田中コーパス）のデータも使用しています。EDICTファイルはElectronic Dictionary Research and Development Groupの所有物であり、同グループのライセンスに従って使用しています。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese in a Flash!のロゴと製品名はオリジナルの創作物であり、ほかの商標との類似は意図したものではなく、まったくの偶然です。";
 
 /* PleaseWait  (PluginSettingsViewController.m) */
 "Please Wait" = "お待ちください";
@@ -391,6 +376,9 @@
 
 /* LastUpdate  (PluginSettingsViewController.m) */
 "Last update : %@" = "最終アップデート：%@";
+
+/* PluginSettings.UpdatesUnavailable  (PluginSettingsViewController.m) */
+"Online updates are not available right now." = "現在、オンラインでのアップデートはご利用いただけません。";
 
 /* Study Set Learned  (PracticeModeCardViewDelegate.m) */
 "Study Set Learned" = "このセットは覚えました";
@@ -435,10 +423,7 @@
 "Remove From Set Error" = "セットから削除できません";
 
 /* SettingsViewController.RateUsButton  (SettingsViewController.m) */
-"Rate Us" = "評価する";
-
-/* SettingsViewController.Share  (SettingsViewController.m) */
-"Tell a Friend" = "友だちに教える";
+"Rate Us" = "App Storeで評価";
 
 /* SettingsViewController.Plugins_NumInstalled  (SettingsViewController.m) */
 "%d installed" = "%d件インストール済み";
@@ -488,7 +473,7 @@
 /* StudySetWordsViewController.EditSetDetails  (StudySetWordsViewController.m) */
 "Edit Set Details" = "セットの詳細を編集";
 
-/* StudyViewController.OK  (StudyViewController.m) */
+/* StudyViewController.OK  (LWEUIAlertView.m, StudyViewController.m) */
 "OK" = "OK";
 
 /* AddTagViewController.AlertViewLastCardMessage  (TagPeer.m) */
@@ -530,41 +515,41 @@
 /* StudyNotification.Action  (jFlashAppDelegate.m) */
 "Study" = "学習する";
 
-/* Long Weekend dev tools (LWE submodule) */
+/* Default DSActivtyView label text  (DSActivityView.m) */
 "Loading..." = "読み込み中…";
 
-/* Long Weekend dev tools (LWE submodule) */
-"Please check your network connection and try again." = "ネットワーク接続を確認して、もう一度お試しください。";
-
-/* Long Weekend dev tools (LWE submodule) */
-"No Network Access" = "ネットワークに接続できません";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Next" = "次へ";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Finished" = "完了";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Failed to decompress" = "展開できませんでした";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Downloading (%d KB)" = "ダウンロード中（%d KB）";
-
-/* Long Weekend dev tools (LWE submodule) */
+/* LWEDownloader.cancelled  (LWEDecompressor.m) */
 "Download cancelled" = "ダウンロードをキャンセルしました";
 
-/* Long Weekend dev tools (LWE submodule) */
-"Decompressing" = "展開中";
+/* LWEDownloader.decompressFail  (LWEDecompressor.m) */
+"Failed to decompress" = "展開できませんでした";
 
-/* Long Weekend dev tools (LWE submodule) */
-"Could not open the page you requested. The server is not responding." = "ページを開けませんでした。サーバが応答していません。";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Connecting to server" = "サーバに接続中";
-
-/* Long Weekend dev tools (LWE submodule) */
+/* LWENetworkUtils.No Internet  (LWENetworkUtils.m) */
 "Cannot open the page because it is not connected to the internet." = "インターネットに接続されていないため、ページを開けません。";
 
-/* Long Weekend dev tools (LWE submodule) */
+/* LWENetworkUtils.No Page  (LWENetworkUtils.m) */
+"Could not open the page you requested. The server is not responding." = "ページを開けませんでした。サーバーが応答していません。";
+
+/* LWENetworkUtils.AlertView Title  (LWENetworkUtils.m) */
 "Cannot Open Page" = "ページを開けません";
+
+/* LWEPackageDownloader.Status.ConnectingToServer  (LWEPackageDownloader.m) */
+"Connecting to server" = "サーバーに接続中";
+
+/* LWEPackageDownloader.status.DownloadingWithKB  (LWEPackageDownloader.m) */
+"Downloading (%d KB)" = "ダウンロード中（%d KB）";
+
+/* LWEPackageDownloader.Status.Decompressing  (LWEPackageDownloader.m) */
+"Decompressing" = "展開中";
+
+/* LWEPackageDownloader.Status.Finished  (LWEPackageDownloader.m) */
+"Finished" = "完了";
+
+/* Network.UnableToConnect_AlertViewTitle  (LWEUIAlertView.m) */
+"No Network Access" = "ネットワークに接続できません";
+
+/* Network.UnableToConnect_AlertViewMessage  (LWEUIAlertView.m) */
+"Please check your network connection and try again." = "ネットワーク接続を確認して、もう一度お試しください。";
+
+/* Next  (LWEFormView.m) */
+"Next" = "次へ";

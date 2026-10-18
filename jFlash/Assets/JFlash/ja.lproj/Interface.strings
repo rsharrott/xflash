@@ -39,13 +39,13 @@
 "Learned" = "覚えた";
 
 /* Progress popup motivation line */
-"You're doing great, keep going!" = "その調子！この調子で続けましょう";
+"You're doing great, keep going!" = "いい調子です！このまま続けましょう";
 
 /* Progress popup: right count this session */
-"Times Right" = "正解";
+"Times Right" = "正解数";
 
 /* Progress popup: wrong count this session */
-"Times Wrong" = "不正解";
+"Times Wrong" = "不正解数";
 
 /* Progress popup level: not seen yet */
 "Untested" = "未出題";
@@ -57,19 +57,19 @@
 "Streak!" = "連続";
 
 /* Progress popup sentence, part 1: [You are studying] 50 [cards] */
-"You are studying" = "学習中のカード";
+"You are studying" = "学習中：";
 
 /* Progress popup sentence, part 2 (counter after the study-pool number) */
 "cards" = "枚";
 
 /* Progress popup sentence, line 2: [out of] 120 [in this set.] */
-"out of" = "全";
+"out of" = "（全";
 
 /* Progress popup sentence, line 2 end */
-"in this set." = "枚中";
+"in this set." = "枚中）";
 
 /* Progress popup footnote, followed by the Settings button */
-"*You can change this in" = "※枚数の変更は";
+"*You can change this in" = "※枚数の変更：";
 
 /* Placeholder for a new study set name */
 "e.g. New Words I Heard on TV" = "例：テレビで聞いた新しい単語";

@@ -68,7 +68,7 @@
 /* Action Sheet Button to post on FB  (ActionBarViewController.m) */
 "Share This Card" = "Share This Card";
 
-/* ActionBarViewController.ActionSheetCancel  (ActionBarViewController.m, StudySetWordsViewController.m) */
+/* ActionBarViewController.ActionSheetCancel  (ActionBarViewController.m, LWEUIAlertView.m, StudySetWordsViewController.m) */
 "Cancel" = "Cancel";
 
 /* emailVM.notAvailable.title  (ActionBarViewController.m, HelpViewController.m) */
@@ -82,6 +82,12 @@
 
 /* AddStudySetInputViewController.NavBarTitle  (AddStudySetInputViewController.m) */
 "Update Study Set" = "Update Study Set";
+
+/*   (AddStudySetInputViewController.m) */
+"Please Tap a Name" = "Please Tap a Name";
+
+/*   (AddStudySetInputViewController.m) */
+"We need to call your new set something.  Please tap a name and press 'Save'." = "We need to call your new set something.  Please tap a name and press 'Save'.";
 
 /* AddStudySetInputViewController.AlertViewTitle  (AddStudySetInputViewController.m) */
 "Enter Set Name" = "Enter Set Name";
@@ -279,52 +285,31 @@
 "Ask Us" = "Ask Us";
 
 /* HelpViewController.SupportAlertMsgTitle  (HelpViewController.m) */
-"GetSatisfaction.com" = "GetSatisfaction.com";
+"Support" = "Support";
 
 /* HelpViewController.SupportAlertMsgMsg  (HelpViewController.m) */
-"Do you have a question?\nA feature request?\n\nIt's best to make your voice heard on our support site, but we respond to e-mail too!" = "Do you have a question?\nA feature request?\n\nIt's best to make your voice heard on our support site, but we respond to e-mail too!";
-
-/* Cancel  (HelpViewController.m, JFlashUpdateManager.m) */
-"No Thanks" = "No Thanks";
+"Do you have a question?\nA feature request?\n\nVisit our support site or send us an email!" = "Do you have a question?\nA feature request?\n\nVisit our support site or send us an email!";
 
 /* Visit Site  (HelpViewController.m) */
-"Visit Site" = "Visit Site";
+"Visit Support Site" = "Visit Support Site";
 
 /* Mail Us  (HelpViewController.m) */
 "Send an Email" = "Send an Email";
 
 /* emailVM.notAvailable.body  (HelpViewController.m) */
-"Oh no!  It looks like your device isn't set up for Mail yet!" = "Oh no!  It looks like your device isn't set up for Mail yet!";
+"It looks like your device isn't set up for Mail yet. You can write to us at %@." = "It looks like your device isn't set up for Mail yet. You can write to us at %@.";
+
+/* HelpViewController.PrivacyPolicy  (HelpViewController.m) */
+"Privacy Policy" = "Privacy Policy";
+
+/* Cancel  (HelpViewController.m) */
+"No Thanks" = "No Thanks";
 
 /* HelpViewController.Next  (HelpViewController.m) */
 "Next >" = "Next >";
 
-/* JFlash1.6 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.6" = "Updated to JFlash 1.6";
-
-/* JFlash1.6 upgrade alert msg  (JFlashUpdateManager.m) */
-"Thanks for updating!  Special thanks to Ben, Murray, Riley & David for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words.  Want it?" = "Thanks for updating!  Special thanks to Ben, Murray, Riley & David for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words.  Want it?";
-
-/* StudyViewController.Later  (JFlashUpdateManager.m) */
-"Later" = "Later";
-
-/* WebViewController.RikaiAppStore  (JFlashUpdateManager.m) */
-"Get Rikai" = "Get Rikai";
-
-/* JFlash1.6.1 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.6.1" = "Updated to JFlash 1.6.1";
-
-/* JFlash1.6.1 upgrade alert msg  (JFlashUpdateManager.m) */
-"Thanks for updating!  We fixed a minor bug in the example sentences display.  Special thanks to Michael & Murray for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words." = "Thanks for updating!  We fixed a minor bug in the example sentences display.  Special thanks to Michael & Murray for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words.";
-
-/* JFlash1.6.2 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.6.2" = "Updated to JFlash 1.6.2";
-
-/* JFlash1.6.2 upgrade alert msg  (JFlashUpdateManager.m) */
-"Another update!  We fixed a bug in the integration between Rikai Browser & Japanese Flash.  Did you know you can send words from Rikai Browser to Japanese Flash with one button?  Get it if you don't have it!  Also, thanks to Michael, who helped us update a few more entries." = "Another update!  We fixed a bug in the integration between Rikai Browser & Japanese Flash.  Did you know you can send words from Rikai Browser to Japanese Flash with one button?  Get it if you don't have it!  Also, thanks to Michael, who helped us update a few more entries.";
-
 /* JFlash1.7 upgrade alert title  (JFlashUpdateManager.m) */
-"Updated to JFlash 1.7" = "Updated to JFlash 1.7";
+"Updated to Japanese in a Flash! 1.7" = "Updated to Japanese in a Flash! 1.7";
 
 /* JFlash1.7 upgrade alert msg  (JFlashUpdateManager.m) */
 "Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries." = "Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries.";
@@ -372,7 +357,7 @@
 "Common Kana Words" = "Common Kana Words";
 
 /* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
-"Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese Flash Logo & Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese Flash Logo & Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental.";
+"Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental.";
 
 /* PleaseWait  (PluginSettingsViewController.m) */
 "Please Wait" = "Please Wait";
@@ -391,6 +376,9 @@
 
 /* LastUpdate  (PluginSettingsViewController.m) */
 "Last update : %@" = "Last update : %@";
+
+/* PluginSettings.UpdatesUnavailable  (PluginSettingsViewController.m) */
+"Online updates are not available right now." = "Online updates are not available right now.";
 
 /* Study Set Learned  (PracticeModeCardViewDelegate.m) */
 "Study Set Learned" = "Study Set Learned";
@@ -436,9 +424,6 @@
 
 /* SettingsViewController.RateUsButton  (SettingsViewController.m) */
 "Rate Us" = "Rate Us";
-
-/* SettingsViewController.Share  (SettingsViewController.m) */
-"Tell a Friend" = "Tell a Friend";
 
 /* SettingsViewController.Plugins_NumInstalled  (SettingsViewController.m) */
 "%d installed" = "%d installed";
@@ -488,7 +473,7 @@
 /* StudySetWordsViewController.EditSetDetails  (StudySetWordsViewController.m) */
 "Edit Set Details" = "Edit Set Details";
 
-/* StudyViewController.OK  (StudyViewController.m) */
+/* StudyViewController.OK  (LWEUIAlertView.m, StudyViewController.m) */
 "OK" = "OK";
 
 /* AddTagViewController.AlertViewLastCardMessage  (TagPeer.m) */
@@ -530,41 +515,41 @@
 /* StudyNotification.Action  (jFlashAppDelegate.m) */
 "Study" = "Study";
 
-/* Long Weekend dev tools (LWE submodule) */
+/* Default DSActivtyView label text  (DSActivityView.m) */
 "Loading..." = "Loading...";
 
-/* Long Weekend dev tools (LWE submodule) */
-"Please check your network connection and try again." = "Please check your network connection and try again.";
-
-/* Long Weekend dev tools (LWE submodule) */
-"No Network Access" = "No Network Access";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Next" = "Next";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Finished" = "Finished";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Failed to decompress" = "Failed to decompress";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Downloading (%d KB)" = "Downloading (%d KB)";
-
-/* Long Weekend dev tools (LWE submodule) */
+/* LWEDownloader.cancelled  (LWEDecompressor.m) */
 "Download cancelled" = "Download cancelled";
 
-/* Long Weekend dev tools (LWE submodule) */
-"Decompressing" = "Decompressing";
+/* LWEDownloader.decompressFail  (LWEDecompressor.m) */
+"Failed to decompress" = "Failed to decompress";
 
-/* Long Weekend dev tools (LWE submodule) */
-"Could not open the page you requested. The server is not responding." = "Could not open the page you requested. The server is not responding.";
-
-/* Long Weekend dev tools (LWE submodule) */
-"Connecting to server" = "Connecting to server";
-
-/* Long Weekend dev tools (LWE submodule) */
+/* LWENetworkUtils.No Internet  (LWENetworkUtils.m) */
 "Cannot open the page because it is not connected to the internet." = "Cannot open the page because it is not connected to the internet.";
 
-/* Long Weekend dev tools (LWE submodule) */
+/* LWENetworkUtils.No Page  (LWENetworkUtils.m) */
+"Could not open the page you requested. The server is not responding." = "Could not open the page you requested. The server is not responding.";
+
+/* LWENetworkUtils.AlertView Title  (LWENetworkUtils.m) */
 "Cannot Open Page" = "Cannot Open Page";
+
+/* LWEPackageDownloader.Status.ConnectingToServer  (LWEPackageDownloader.m) */
+"Connecting to server" = "Connecting to server";
+
+/* LWEPackageDownloader.status.DownloadingWithKB  (LWEPackageDownloader.m) */
+"Downloading (%d KB)" = "Downloading (%d KB)";
+
+/* LWEPackageDownloader.Status.Decompressing  (LWEPackageDownloader.m) */
+"Decompressing" = "Decompressing";
+
+/* LWEPackageDownloader.Status.Finished  (LWEPackageDownloader.m) */
+"Finished" = "Finished";
+
+/* Network.UnableToConnect_AlertViewTitle  (LWEUIAlertView.m) */
+"No Network Access" = "No Network Access";
+
+/* Network.UnableToConnect_AlertViewMessage  (LWEUIAlertView.m) */
+"Please check your network connection and try again." = "Please check your network connection and try again.";
+
+/* Next  (LWEFormView.m) */
+"Next" = "Next";
