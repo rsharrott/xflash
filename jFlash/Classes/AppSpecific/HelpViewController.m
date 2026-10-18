@@ -108,25 +108,18 @@
 - (void) _supportBtnPressed:(id)sender
 {
   UIAlertController *alert = [UIAlertController
-    alertControllerWithTitle:NSLocalizedString(@"GetSatisfaction.com", @"HelpViewController.SupportAlertMsgTitle")
-                     message:NSLocalizedString(@"Do you have a question?\nA feature request?\n\nIt's best to make your voice heard on our support site, but we respond to e-mail too!", @"HelpViewController.SupportAlertMsgMsg")
+    alertControllerWithTitle:NSLocalizedString(@"Support", @"HelpViewController.SupportAlertMsgTitle")
+                     message:NSLocalizedString(@"Do you have a question?\nA feature request?\n\nVisit our support site or send us an email!", @"HelpViewController.SupportAlertMsgMsg")
               preferredStyle:UIAlertControllerStyleAlert];
 
-  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No Thanks", @"Cancel")
-                                           style:UIAlertActionStyleCancel handler:nil]];
-
-  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Visit Site", @"Visit Site")
+#if defined (LWE_JFLASH)
+  // Only Japanese in a Flash! has a live support site & privacy policy
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Visit Support Site", @"Visit Site")
                                            style:UIAlertActionStyleDefault
                                          handler:^(UIAlertAction *a) {
-#if defined (LWE_JFLASH)
-    NSURL *url = [NSURL URLWithString:@"http://getsatisfaction.com/longweekend/products/longweekend_japanese_flash"];
-#elif defined (LWE_CFLASH)
-    NSURL *url = [NSURL URLWithString:@"http://getsatisfaction.com/longweekend/products/longweekend_chinese_flash"];
-#else
-    NSURL *url = [NSURL URLWithString:@"http://getsatisfaction.com/longweekend/"];
-#endif
-    [[UIApplication sharedApplication] openURL:url];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:LWE_SUPPORT_URL] options:@{} completionHandler:nil];
   }]];
+#endif
 
   [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Send an Email", @"Mail Us")
                                            style:UIAlertActionStyleDefault
@@ -140,9 +133,20 @@
       [picker release];
     } else {
       [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Email Not Available", @"emailVM.notAvailable.title")
-                                         message:NSLocalizedString(@"Oh no!  It looks like your device isn't set up for Mail yet!", @"emailVM.notAvailable.body")];
+                                         message:[NSString stringWithFormat:NSLocalizedString(@"It looks like your device isn't set up for Mail yet. You can write to us at %@.", @"emailVM.notAvailable.body"), LWE_SUPPORT_EMAIL]];
     }
   }]];
+
+#if defined (LWE_JFLASH)
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Privacy Policy", @"HelpViewController.PrivacyPolicy")
+                                           style:UIAlertActionStyleDefault
+                                         handler:^(UIAlertAction *a) {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:LWE_PRIVACY_URL] options:@{} completionHandler:nil];
+  }]];
+#endif
+
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"No Thanks", @"Cancel")
+                                           style:UIAlertActionStyleCancel handler:nil]];
 
   [self presentViewController:alert animated:YES completion:nil];
 }
