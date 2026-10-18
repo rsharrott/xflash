@@ -135,18 +135,45 @@
       Card *debugCard = [CardPeer retrieveCardByPK:debugCardId];
       if (debugCard) [self doChangeCard:debugCard direction:nil];
     }
+#if defined (LWE_JFLASH)
+    // The coach hint only exists in Japanese in a Flash.
     if ([settings boolForKey:@"LWEDebugShowCardHint"])
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self _showFirstCardHint]; });
     }
+#endif
     if ([settings boolForKey:@"LWEDebugAutoReveal"])
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self revealCard]; });
     }
+    //   simctl launch --console <udid> <bundle> -LWEDebugCheckRevealTapGuard YES
+    //     -> reveal, then log what a tap on the Right button's spot would hit (UIKit hit-testing, which
+    //        honours userInteractionEnabled / hidden / alpha) during and after the Show answer fade.
+    if ([settings boolForKey:@"LWEDebugCheckRevealTapGuard"] &&
+        [self.actionBarController isKindOfClass:[ActionBarViewController class]])
+    {
+      ActionBarViewController *bar = (ActionBarViewController *)self.actionBarController;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self revealCard];
+        NSArray *delays = @[@0.02, @0.1, @0.2, @0.28, @0.4, @0.6];
+        for (NSNumber *delay in delays)
+        {
+          dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)([delay doubleValue] * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            CGPoint p = CGPointMake(CGRectGetMidX(bar.rightBtn.frame), CGRectGetMidY(bar.rightBtn.frame));
+            UIView *hit = [bar.view hitTest:p withEvent:nil];
+            NSString *what = (hit == bar.rightBtn) ? @"RIGHT BUTTON (answer would be recorded)"
+                           : (hit == bar.showAnswerBtn) ? @"Show answer" : NSStringFromClass([hit class]);
+            NSLog(@"LWEDebugCheckRevealTapGuard t+%.2fs: tap at Right hits %@", [delay doubleValue], what);
+          });
+        }
+      });
+    }
     //   simctl launch <udid> <bundle> -LWEDebugShowExamples YES  -> reveal, then open the example sentences page
     if ([settings boolForKey:@"LWEDebugShowExamples"])
     {
+#if defined (LWE_JFLASH)
       [settings setBool:YES forKey:LWEFirstRunCardHintShownKey]; // never cover it with the coach hint
+#endif
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         if ([settings boolForKey:@"LWEDebugAutoReveal"] == NO) [self revealCard];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{

@@ -189,6 +189,25 @@
 {
 }
 
+//! The answer buttons of the practice bar that exist (NIB outlets can be nil), for array literals.
+static NSArray *LWEAnswerGridButtons(ActionBarViewController *avc)
+{
+  NSMutableArray *buttons = [NSMutableArray arrayWithCapacity:4];
+  if (avc.rightBtn)    [buttons addObject:avc.rightBtn];
+  if (avc.wrongBtn)    [buttons addObject:avc.wrongBtn];
+  if (avc.buryCardBtn) [buttons addObject:avc.buryCardBtn];
+  if (avc.addBtn)      [buttons addObject:avc.addBtn];
+  return buttons;
+}
+
+//! How long after "Show answer" the grid under it stays untappable: a quick second tap on
+//! Show answer must not land on Wrong / Right / Bury / Actions (the fade itself is 0.18s).
+static const NSTimeInterval kLWERevealTapGuard = 0.3;
+
+//! Bumped on every card setup and reveal.  A pending "enable the grid" from an earlier reveal
+//! only runs if nothing happened since, so a card change mid-fade can't leave stale state.
+static NSUInteger LWERevealGeneration = 0;
+
 -(void) actionBarWillSetup:(ActionBarViewController*)avc
 {
   avc.rightBtn.hidden = YES;
@@ -198,10 +217,16 @@
     // New answer bar, before reveal: one "Show answer" button covering the area of the
     // Actions / Bury / Wrong / Right grid it is replaced by, so nothing moves on reveal.
     // Hidden buttons are also hidden from VoiceOver.
-    for (UIView *v in @[avc.showAnswerBtn, avc.rightBtn, avc.wrongBtn, avc.buryCardBtn, avc.addBtn])
+    // Cancels any reveal fade / tap guard still pending from the previous card, and puts every
+    // button back to fully visible + tappable (the grid is hidden below, so it can't be hit).
+    LWERevealGeneration++;
+    NSMutableArray *all = [NSMutableArray arrayWithArray:LWEAnswerGridButtons(avc)];
+    [all addObject:avc.showAnswerBtn];
+    for (UIView *v in all)
     {
       [v.layer removeAllAnimations];
       v.alpha = 1.0;
+      v.userInteractionEnabled = YES;
     }
     avc.showAnswerBtn.hidden = NO;
     avc.showAnswerBtn.userInteractionEnabled = YES;
@@ -223,26 +248,38 @@
   if (avc.showAnswerBtn && avc.showAnswerBtn.hidden == NO)
   {
     // Short cross-fade from "Show answer" to the 2x2 grid (same frame, so nothing moves).
+    // The grid stays untappable until the fade is over and the tap guard has passed, so a
+    // double tap on Show answer can't record an answer.  Either the guard below re-enables it
+    // (same generation) or the next actionBarWillSetup does: it is never left disabled.
     UIButton *show = avc.showAnswerBtn;
-    NSArray *grid = @[avc.rightBtn, avc.wrongBtn, avc.buryCardBtn, avc.addBtn];
+    NSArray *grid = LWEAnswerGridButtons(avc);
+    NSUInteger generation = ++LWERevealGeneration;
     show.userInteractionEnabled = NO;
     show.accessibilityElementsHidden = YES;
-    for (UIView *v in grid) { v.alpha = 0.0; v.hidden = NO; }
+    for (UIView *v in grid) { v.userInteractionEnabled = NO; v.alpha = 0.0; v.hidden = NO; }
     avc.cardMeaningBtnHint.hidden = YES;
     [UIView animateWithDuration:0.18 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
       for (UIView *v in grid) v.alpha = 1.0;
       show.alpha = 0.0;
     } completion:^(BOOL finished) {
       // Only finish the hand-over if the next card hasn't set up "Show answer" again meanwhile.
-      if (show.accessibilityElementsHidden)
+      if (generation == LWERevealGeneration)
       {
         show.hidden = YES;
         show.alpha = 1.0;
       }
     }];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kLWERevealTapGuard * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+      if (generation == LWERevealGeneration)
+      {
+        for (UIView *v in grid) v.userInteractionEnabled = YES;
+      }
+    });
     UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, avc.wrongBtn);
     return;
   }
+  LWERevealGeneration++;
+  for (UIView *v in LWEAnswerGridButtons(avc)) v.userInteractionEnabled = YES;
   avc.rightBtn.hidden = NO;
   avc.wrongBtn.hidden = NO;
   avc.buryCardBtn.hidden = NO;
