@@ -6,7 +6,7 @@
 //  mode card-level math, so it can be unit tested. PracticeCardSelector reads
 //  the settings and the Tag's level counts and calls these.
 //
-//  Header-only (static inline) so it needs no project/target changes.
+//  Header-only (static inline): it's in the project as a header reference only, not a compile source.
 //
 
 #ifndef LWE_PRACTICE_CARD_SELECTOR_MATH_H
@@ -97,7 +97,7 @@ static inline double LWEProbabilityOfUnseenCard(long cardsSeenTotal, long totalC
 static inline long LWEPickCardLevel(const long *levelCounts, long numLevels, double p_unseen, double randomNum)
 {
   if (numLevels > LWE_SRS_MAX_LEVELS) numLevels = LWE_SRS_MAX_LEVELS;
-  if (p_unseen < 0.0 || p_unseen != p_unseen) p_unseen = 0.0;   // also catches NaN
+  if (isnan(p_unseen) || p_unseen < 0.0) p_unseen = 0.0;
   if (p_unseen > 1.0) p_unseen = 1.0;
 
   long denominatorTotal = 0;

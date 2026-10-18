@@ -11,7 +11,7 @@
 #import "PracticeModeCardViewDelegate.h"
 #import "TagPeer.h"
 #import "PracticeCardSelector.h"
-#import "../Classes/AppSpecific/PracticeCardSelectorMath.h"   // header-only, not in the project file
+#import "PracticeCardSelectorMath.h"
 #import "CardPeer.h"
 #import "UserHistoryPeer.h"
 
@@ -33,8 +33,8 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
 - (void)testProbabilityOfUnseenWhenMoreSeenThanPoolSize
 {
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-  NSInteger oldMax = [settings integerForKey:APP_MAX_STUDYING];
-  NSInteger oldFreq = [settings integerForKey:APP_FREQUENCY_MULTIPLIER];
+  id oldMax = [[settings objectForKey:APP_MAX_STUDYING] retain];
+  id oldFreq = [[settings objectForKey:APP_FREQUENCY_MULTIPLIER] retain];
   [settings setInteger:30 forKey:APP_MAX_STUDYING];
   [settings setInteger:2 forKey:APP_FREQUENCY_MULTIPLIER];
 
@@ -44,8 +44,11 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   XCTAssertEqualWithAccuracy(p, 0.140625, 1e-6, @"Over the pool size only the 'how well known' term should remain: ((2.5-1)/4)^2");
   [cardSelector release];
 
-  [settings setInteger:oldMax forKey:APP_MAX_STUDYING];
-  [settings setInteger:oldFreq forKey:APP_FREQUENCY_MULTIPLIER];
+  // Put the settings back exactly as they were (absent stays absent)
+  if (oldMax) { [settings setObject:oldMax forKey:APP_MAX_STUDYING]; } else { [settings removeObjectForKey:APP_MAX_STUDYING]; }
+  if (oldFreq) { [settings setObject:oldFreq forKey:APP_FREQUENCY_MULTIPLIER]; } else { [settings removeObjectForKey:APP_FREQUENCY_MULTIPLIER]; }
+  [oldMax release];
+  [oldFreq release];
 }
 
 - (void)testProbabilityOfUnseenStaysInRange
@@ -80,8 +83,13 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   XCTAssertTrue(picks[0] > 100 && picks[0] < 200, @"~14%% should be new cards, got %ld/1000", (long)picks[0]);
   XCTAssertTrue(picks[1] > picks[4], @"Studying cards should come up more than Right 3x cards");
 
+  // Inputs where the roulette loop can't return, so the old code fell through to the (empty) unseen level:
+  // (a) randomNum == 1.0 (the old rand()/RAND_MAX could produce it): the only slice sums to exactly 1.0, never > 1.0
+  long onlyStudying[6] = {0, 1, 0, 0, 0, 0};
+  XCTAssertEqual(LWEPickCardLevel(onlyStudying, 5, 0.0, 1.0), 1L, @"Fall-through with no unseen cards must pick a seen level");
+  // (b) a non-zero p_unseen with no unseen cards: seen slices only cover [0, 0.5), so 0.9 falls through
   long noUnseen[6] = {0, 3, 0, 2, 0, 0};
-  XCTAssertEqual(LWEPickCardLevel(noUnseen, 5, 0.0, 0.9999999999), 3L, @"Rounding near 1.0 must not fall through to an empty unseen level");
+  XCTAssertEqual(LWEPickCardLevel(noUnseen, 5, 0.5, 0.9), 3L, @"Fall-through must pick the highest non-empty seen level, not empty unseen");
 }
 
 - (void)testFrequencySliderMoreOftenMeansMoreNewCards
