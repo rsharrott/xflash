@@ -45,7 +45,6 @@
 @synthesize practiceBgImage, currentRightStreak, currentWrongStreak, cardViewController, cardView;
 @synthesize scrollView, pageControl, exampleSentencesViewController, showProgressModalBtn;
 @synthesize actionBarController, actionbarView, revealCardBtn, tapForAnswerImage;
-@synthesize progressDetailsViewController;
 @synthesize pronounceBtn = pronounceBtn;
 
 #define LWE_EX_SENTENCE_INSTALLER_VIEW_TAG 69
@@ -197,6 +196,20 @@
             self.progressDetailsViewController.sheetPresentationController.selectedDetentIdentifier = UISheetPresentationControllerDetentIdentifierLarge;
           }];
         }
+      });
+    }
+    //   simctl launch --console <udid> <bundle> -LWEDebugProgressCycles 10  -> open and close the progress sheet
+    //     N times (2s apart), logging when each sheet is presented and when it has gone (leak check)
+    NSInteger cycles = [settings integerForKey:@"LWEDebugProgressCycles"];
+    for (NSInteger i = 0; i < cycles; i++)
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((2.0 + 2.0 * i) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self doShowProgressModalBtn];
+        NSLog(@"LWEDebugProgressCycles open %ld: %@", (long)(i + 1), self.progressDetailsViewController);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+          [self.progressDetailsViewController dismiss];
+          if (i == cycles - 1) NSLog(@"LWEDebugProgressCycles done");
+        });
       });
     }
     //   simctl launch <udid> <bundle> -LWEDebugShowExamples YES  -> reveal, then open the example sentences page
@@ -517,8 +530,17 @@
     [self.currentCardSet removeObserver:self forKeyPath:@"tagName"];
   }
   
-  // Tell the progress bars about this new tag
-  self.progressDetailsViewController.tag = newTag;
+  // Tell the progress bars (and an open progress sheet) about this new tag
+  ProgressDetailsViewController *openSheet = self.progressDetailsViewController;
+  if (openSheet)
+  {
+    openSheet.tag = newTag;
+    openSheet.rightCount = 0;
+    openSheet.wrongCount = 0;
+    openSheet.rightStreak = 0;
+    openSheet.wrongStreak = 0;
+    [openSheet updateView];
+  }
   self.progressBarViewController.tag = newTag;
 
   // Get active set/tag & add an observer
@@ -709,18 +731,26 @@
   // Pass everything in up front; the sheet builds its views from these in -viewDidLoad.
   // (The old XIB overlay set label text before its view was loaded, so the first open showed
   // the XIB's placeholder numbers.)
-  ProgressDetailsViewController *progressVC = [[ProgressDetailsViewController alloc] initWithTag:self.currentCardSet
+  ProgressDetailsViewController *progressVC = [[[ProgressDetailsViewController alloc] initWithTag:self.currentCardSet
                                                                                      rightCount:self.numRight
                                                                                      wrongCount:self.numWrong
                                                                                     rightStreak:self.currentRightStreak
-                                                                                    wrongStreak:self.currentWrongStreak];
-  self.progressDetailsViewController = progressVC;
-  [progressVC release];
-
-  // A page sheet with medium/large detents (see ProgressDetailsViewController -init).
-  [self presentViewController:self.progressDetailsViewController animated:YES completion:nil];
+                                                                                    wrongStreak:self.currentWrongStreak] autorelease];
+  // A page sheet: content-sized + large detents (see ProgressDetailsViewController -init). The
+  // presentation retains it, so it's released as soon as it's dismissed.
+  [self presentViewController:progressVC animated:YES completion:nil];
 }
 
+
+- (ProgressDetailsViewController *) progressDetailsViewController
+{
+  UIViewController *presented = self.presentedViewController;
+  if ([presented isKindOfClass:[ProgressDetailsViewController class]] && presented.isBeingDismissed == NO)
+  {
+    return (ProgressDetailsViewController *)presented;
+  }
+  return nil;
+}
 
 /**
  * Target for UIPageControl - allows us to flip between
@@ -1089,7 +1119,6 @@
 
 - (void) viewDidUnload
 {
-  self.progressDetailsViewController = nil;
 	self.progressBarViewController = nil;
 	self.exampleSentencesViewController = nil;
 	self.cardViewController = nil;
@@ -1137,7 +1166,6 @@
   [cardSetLabel release];
   
   //progress stuff
-  [progressDetailsViewController release];
   [progressBarViewController release];
   [progressBarView release];
   
