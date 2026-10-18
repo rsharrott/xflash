@@ -5,6 +5,7 @@
 //  Copyright LONG WEEKEND INC 2009. All rights reserved.
 
 #import "jFlashAppDelegate.h"
+#import "LWELocalization.h"
 #import <objc/runtime.h>
 
 // Centers UITabBarButton subviews vertically in the full tab bar frame,
@@ -302,6 +303,26 @@
   object_setClass(self.tabBarController.tabBar, [LWECenteredTabBar class]);
 
   self.window.rootViewController = self.tabBarController;
+
+  // The tab & navigation bar titles come from MainWindow.xib in English; translate them (Interface.strings).
+  // The Search tab is a system item, so UIKit already localizes it.
+  for (UIViewController *tabVC in self.tabBarController.viewControllers)
+  {
+    if (tabVC.tabBarItem.title) tabVC.tabBarItem.title = LWEInterfaceString(tabVC.tabBarItem.title);
+    if ([tabVC isKindOfClass:[UINavigationController class]])
+    {
+      UIViewController *rootVC = [[(UINavigationController *)tabVC viewControllers] firstObject];
+      if (rootVC.navigationItem.title) rootVC.navigationItem.title = LWEInterfaceString(rootVC.navigationItem.title);
+    }
+  }
+#if defined (LWE_DEBUG)
+  // Screenshot hook (Debug builds only): `simctl launch <udid> <bundle> -LWEDebugSelectTab 3` opens Settings
+  NSInteger debugTab = [[NSUserDefaults standardUserDefaults] integerForKey:@"LWEDebugSelectTab"];
+  if (debugTab > 0 && debugTab < (NSInteger)[self.tabBarController.viewControllers count])
+  {
+    self.tabBarController.selectedIndex = debugTab;
+  }
+#endif
 
   // Finish setting up & load tab bar
   [self _registerObservers];

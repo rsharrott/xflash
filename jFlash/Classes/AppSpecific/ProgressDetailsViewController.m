@@ -7,6 +7,7 @@
 //
 
 #import "ProgressDetailsViewController.h"
+#import "LWELocalization.h"
 #import "UserPeer.h"
 
 @implementation ProgressDetailsViewController
@@ -23,6 +24,8 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
   
   // Set the background view to be semi-transparent to shadow over the study view 
   self.view.backgroundColor = [UIColor colorWithHue:0.0 saturation:0.0 brightness:0.0 alpha:0.7];

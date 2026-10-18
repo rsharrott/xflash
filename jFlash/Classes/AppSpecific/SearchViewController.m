@@ -7,6 +7,7 @@
 //
 
 #import "SearchViewController.h"
+#import "LWELocalization.h"
 #import "ChineseCard.h"
 #import "SettingsViewController.h"
 #import "LWEChineseSearchBar.h"
@@ -75,6 +76,8 @@ const NSInteger KSegmentedTableHeader = 100;
 - (void) viewDidLoad
 {
   [super viewDidLoad];
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
   
   // Is a little bit ghetto for now.  We could consider updating this class.
   self.externalAppBtn.layer.borderWidth = 2.0f;
@@ -105,6 +108,7 @@ const NSInteger KSegmentedTableHeader = 100;
 
   
   [[NSBundle mainBundle] loadNibNamed:@"SearchingTableCell" owner:self options:nil];
+  LWELocalizeInterface(self.searchingCell);
   
   // Programmatically make UISearchBar
   // TODO: iPad customization!

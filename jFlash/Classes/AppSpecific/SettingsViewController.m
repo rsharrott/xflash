@@ -339,7 +339,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   if ([[keys objectAtIndex:0] isEqualToString:APP_ABOUT])
   {
     NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-    return [NSString stringWithFormat:@"Settings: %@, Data: %@, Build: %@",[settings objectForKey:APP_SETTINGS_VERSION],[settings objectForKey:APP_DATA_VERSION],[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]];
+    return [NSString stringWithFormat:NSLocalizedString(@"Settings: %@, Data: %@, Build: %@", @"SettingsViewController.VersionFooter"),[settings objectForKey:APP_SETTINGS_VERSION],[settings objectForKey:APP_DATA_VERSION],[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]];
   }
   else
   {

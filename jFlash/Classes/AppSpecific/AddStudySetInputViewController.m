@@ -7,6 +7,7 @@
 //
 
 #import "AddStudySetInputViewController.h"
+#import "LWELocalization.h"
 #import "TagPeer.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -51,6 +52,8 @@ NSString * const kSetWasAddedOrUpdated = @"setAddedToView";
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
   self.title = NSLocalizedString(@"Create Study Set",@"AddStudySetInputViewController.NavBarTitle");
   
   UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(save)];

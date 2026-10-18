@@ -7,6 +7,7 @@
 //
 
 #import "CardViewController.h"
+#import "LWELocalization.h"
 #import "UIScrollView+LWEUtilities.h"
 #import "LWEDesignTokens.h"
 #if defined(LWE_JFLASH)
@@ -197,6 +198,8 @@ static const CGFloat kLWEPillHitInset = 7.0;
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
 
   // Create the WKWebView programmatically inside the XIB-instantiated container.
   // (UIWebView is removed in modern iOS so we no longer instantiate it from the XIB.)
@@ -730,7 +733,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [self _updateReadingContainer];
   
   self.readingScrollContainer.hidden = YES;
-  [self.toggleReadingBtn setTitle:@"Show Reading" forState:UIControlStateNormal];
+  [self.toggleReadingBtn setTitle:NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading") forState:UIControlStateNormal];
 
   // This will handle the "more" icon after the state change
   [self _updateReadingContainer];

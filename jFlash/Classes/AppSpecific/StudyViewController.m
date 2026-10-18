@@ -168,6 +168,12 @@
         }
       });
     }
+    //   simctl launch <udid> <bundle> -LWEDebugShowProgress YES  -> open the progress details popup
+    if ([settings boolForKey:@"LWEDebugShowProgress"])
+    {
+      [settings setBool:YES forKey:LWEFirstRunCardHintShownKey]; // never cover it with the coach hint
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self doShowProgressModalBtn]; });
+    }
     //   simctl launch <udid> <bundle> -LWEDebugShowExamples YES  -> reveal, then open the example sentences page
     if ([settings boolForKey:@"LWEDebugShowExamples"])
     {

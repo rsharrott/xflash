@@ -7,6 +7,7 @@
 //
 
 #import "PluginSettingsViewController.h"
+#import "LWELocalization.h"
 #import "Constants.h"
 #import "DSActivityView.h"
 
@@ -84,6 +85,8 @@
 {
   [super viewDidLoad];
   self.navigationItem.title = NSLocalizedString(@"Get Updates",@"PluginSettingsViewController.NavBarTitle");
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
 	
 	_dateFormatter = [[NSDateFormatter alloc] init];
 	[_dateFormatter setDateStyle:NSDateFormatterLongStyle];

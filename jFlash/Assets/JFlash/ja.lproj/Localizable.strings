@@ -1,0 +1,570 @@
+/*
+  Localizable.strings (Japanese)
+  Japanese in a Flash! (jFlash target)
+  Keys are the English text passed to NSLocalizedString in code, so a target without
+  this file (cFlash, jFlashJr) falls back to the same English.
+*/
+
+/* ActionBar.Caption.Actions  (ActionBarViewController.m) */
+"actions" = "アクション";
+
+/* ActionBar.Caption.Right  (ActionBarViewController.m) */
+"right" = "正解";
+
+/* ActionBar.Caption.Wrong  (ActionBarViewController.m) */
+"wrong" = "不正解";
+
+/* ActionBar.Caption.BuryIt  (ActionBarViewController.m) */
+"bury it" = "もう覚えた";
+
+/* ActionBar.Caption.Previous  (ActionBarViewController.m) */
+"prev" = "前へ";
+
+/* ActionBar.Caption.Next  (ActionBarViewController.m) */
+"next" = "次へ";
+
+/* ActionBar.Actions  (ActionBarViewController.m) */
+"Actions" = "アクション";
+
+/* ActionBar.Bury  (ActionBarViewController.m) */
+"Bury" = "もう覚えた";
+
+/* ActionBar.BuryIt  (ActionBarViewController.m) */
+"Bury it" = "もう覚えた（今後は出題しない）";
+
+/* ActionBar.Wrong  (ActionBarViewController.m) */
+"Wrong" = "不正解";
+
+/* ActionBar.Right  (ActionBarViewController.m) */
+"Right" = "正解";
+
+/* ActionBar.ShowAnswer  (ActionBarViewController.m, StudyViewController.m) */
+"Show answer" = "答えを見る";
+
+/* ActionBar.ShowAnswerSubline  (ActionBarViewController.m) */
+"Then mark it Wrong or Right" = "そのあと「正解」か「不正解」を選びます";
+
+/* ActionBarViewController.ActionSheetRemoveFromFavorites  (ActionBarViewController.m) */
+"Remove from Starred" = "スターを外す";
+
+/* ActionBarViewController.ActionSheetAddToFavorites  (ActionBarViewController.m) */
+"Add to Starred" = "スターを付ける";
+
+/* ActionBarViewController.ActionSheetTitle  (ActionBarViewController.m) */
+"Card Actions" = "カードの操作";
+
+/* AddTagViewController.AlertViewLastCardTitle  (ActionBarViewController.m, AddTagViewController.m, SearchViewController.m, StudySetWordsViewController.m) */
+"Last Card in Set" = "セットの最後のカードです";
+
+/* ActionBarViewController.ActionSheetAddToSet  (ActionBarViewController.m) */
+"Add to Study Set" = "学習セットに追加";
+
+/* AddTagViewController.NavDoneButtonTitle  (ActionBarViewController.m, ExampleSentencesViewController.m) */
+"Done" = "完了";
+
+/* ActionBarViewController.ActionSheetReportBadData  (ActionBarViewController.m) */
+"Fix Card" = "誤りを報告";
+
+/* Action Sheet Button to post on FB  (ActionBarViewController.m) */
+"Share This Card" = "このカードをシェア";
+
+/* ActionBarViewController.ActionSheetCancel  (ActionBarViewController.m, StudySetWordsViewController.m) */
+"Cancel" = "キャンセル";
+
+/* emailVM.notAvailable.title  (ActionBarViewController.m, HelpViewController.m) */
+"Email Not Available" = "メールを送信できません";
+
+/* emailVM.notAvailable.body  (ActionBarViewController.m) */
+"Oh no!! We can't send mail right now." = "現在メールを送信できません。";
+
+/* AddStudySetInputViewController.NavBarTitle  (AddStudySetInputViewController.m) */
+"Create Study Set" = "学習セットを作成";
+
+/* AddStudySetInputViewController.NavBarTitle  (AddStudySetInputViewController.m) */
+"Update Study Set" = "学習セットを編集";
+
+/* AddStudySetInputViewController.AlertViewTitle  (AddStudySetInputViewController.m) */
+"Enter Set Name" = "セット名を入力してください";
+
+/* AddStudySetInputViewController.AlertViewMessage  (AddStudySetInputViewController.m) */
+"Please enter a new set name or click 'Cancel'." = "新しいセット名を入力するか、「キャンセル」をタップしてください。";
+
+/* AddTagViewController.NavBarTitle  (AddTagViewController.m) */
+"Add Card To Set" = "カードをセットに追加";
+
+/* AddTagViewController.NavBarTitle  (AddTagViewController.m) */
+"Dictionary Entry" = "辞書の項目";
+
+/* Cell that displays example sentences  (AddTagViewController.m) */
+"Example Sentences" = "例文";
+
+/* AddTagViewController.TableHeader_MySets  (AddTagViewController.m) */
+"My Sets" = "マイセット";
+
+/* AddTagViewController.TableHeader_AllSets  (AddTagViewController.m) */
+"Other Sets with this Card" = "このカードを含むほかのセット";
+
+/* AlgorithmSettingsViewController.NavBarTitle  (AlgorithmSettingsViewController.m) */
+"Change Difficulty" = "難易度の変更";
+
+/* AlgorithmVC.Difficulty  (AlgorithmSettingsViewController.m, ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Difficulty" = "難易度";
+
+/* AlgorithmVC.NewCardFrequency_MoreOften  (AlgorithmSettingsViewController.m) */
+"More Often" = "多めに";
+
+/* AlgorithmVC.HideLearnedCards  (AlgorithmSettingsViewController.m) */
+"Hide Learned Cards" = "覚えたカードを隠す";
+
+/* AlgorithmVC.NumberCards  (AlgorithmSettingsViewController.m) */
+"Number of Cards in Study Pool" = "同時に学習するカードの枚数";
+
+/* AlgorithmVC.NewCardFrequency  (AlgorithmSettingsViewController.m) */
+"Frequency of New Cards" = "新しいカードの出題頻度";
+
+/* CardViewController.SpeakWordAccessibility  (CardViewController.m) */
+"Speak word" = "発音を聞く";
+
+/* CardViewController.FewerReadings  (CardViewController.m) */
+"Fewer readings" = "読みを閉じる";
+
+/* CardViewController.OneMoreReading  (CardViewController.m) */
+"+1 reading" = "ほかの読み +1";
+
+/* CardViewController.NMoreReadings  (CardViewController.m) */
+"+%d readings" = "ほかの読み +%d";
+
+/* CardViewController.FewerReadingsAccessibility  (CardViewController.m) */
+"Show fewer readings" = "ほかの読みを閉じる";
+
+/* CardViewController.MoreReadingsAccessibility  (CardViewController.m) */
+"Show %d more readings" = "ほかの読みをあと%d件表示";
+
+/* CardViewController.ShowReading  (CardViewController.m) */
+"Show Reading" = "読みを表示";
+
+/* SettingsViewController.Practice  (ChineseSettingsDataSource.m, HelpViewController.m, JapaneseSettingsDataSource.m) */
+"Practice" = "練習";
+
+/* SettingsViewController.Browse  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Browse" = "閲覧";
+
+/* SettingsViewController.HeadwordLanguage_English  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"English" = "英語";
+
+/* SettingsViewController.On  (ChineseSettingsDataSource.m, SettingsViewController.m) */
+"On" = "オン";
+
+/* SettingsViewController.Off  (ChineseSettingsDataSource.m, SettingsViewController.m) */
+"Off" = "オフ";
+
+/* SettingsViewController.SettingNames_StudyMode  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Study Mode" = "学習モード";
+
+/* SettingsViewController.SettingNames_StudyLanguage  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Study Language" = "出題言語";
+
+/* SettingsViewController.TableHeader_Studying  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Studying" = "学習";
+
+/* SettingsViewController.SettingNames_Theme  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Theme" = "テーマ";
+
+/* SettingsViewController.SettingNames_StudyReminders  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m, ReminderSettingsViewController.m) */
+"Study Reminders" = "学習リマインダー";
+
+/* SettingsViewController.SettingNames_ActiveUser  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Active User" = "使用中のユーザー";
+
+/* SettingsViewController.SettingNames_DownloadExtras  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Updates" = "アップデート";
+
+/* SettingsViewController.TableHeader_Application  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Application" = "アプリ";
+
+/* SettingsViewController.TableHeader_Acknowledgements  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Acknowledgements" = "謝辞";
+
+/* DisplaySearchedSentenceViewController.NavBarTitle  (DisplaySearchedSentenceViewController.m) */
+"Examples" = "例文";
+
+/* PluginError.AlertMsgTitle  (DownloadManager.m) */
+"Problem Installing Update" = "アップデートをインストールできませんでした";
+
+/* ModalTaskViewController_Update.NavBarTitle  (DownloadManager.m) */
+"Get Update" = "アップデートを入手";
+
+/* ReadButton  (ExampleSentencesViewController.m) */
+"Read" = "単語を見る";
+
+/* CloseButton  (ExampleSentencesViewController.m) */
+"Close" = "閉じる";
+
+/* AddButton  (ExampleSentencesViewController.m) */
+"Add" = "追加";
+
+/* ExampleSentences.Title  (ExampleSentencesViewController.m) */
+"Example sentences" = "例文";
+
+/* Rikai Browser  (ExternalAppManager.m) */
+"Rikai Browser" = "Rikai Browser";
+
+/* FirstRun.OneWord  (FirstRunViewController.m) */
+"1 word" = "1語";
+
+/* FirstRun.NWords  (FirstRunViewController.m) */
+"%d words" = "%d語";
+
+/* FirstRun.StartStudying  (FirstRunViewController.m) */
+"Start studying" = "学習をはじめる";
+
+/* FirstRun.SwitchSetsNote  (FirstRunViewController.m) */
+"You can switch sets anytime in the Study Sets tab." = "セットは「学習セット」タブでいつでも変更できます。";
+
+/* FirstRun.Lede  (FirstRunViewController.m) */
+"Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed." = "日本語と英語の単語を覚えるフラッシュカード。単語帳はこのiPhoneの中だけに保存され、アカウント登録も不要です。";
+
+/* FirstRun.PickStarterSet  (FirstRunViewController.m) */
+"Pick a starter set" = "最初に学習するセットを選んでください";
+
+/* FirstRun.ShowReadingsAs  (FirstRunViewController.m) */
+"Show readings as" = "読みの表示";
+
+/* FirstRun.ReadingKana  (FirstRunViewController.m, JapaneseSettingsDataSource.m) */
+"Kana" = "かな";
+
+/* FirstRun.ReadingKanaRomaji  (FirstRunViewController.m) */
+"Kana + romaji" = "かな＋ローマ字";
+
+/* StudyViewController.WelcomeAlertViewTitle  (FirstRunViewController.m) */
+"Welcome to Japanese in a Flash!" = "Japanese in a Flash! へようこそ";
+
+/* FirstRun.CardHint  (FirstRunViewController.m) */
+"Tap the card to see the answer, then mark it right or wrong." = "カードをタップして答えを確認し、「正解」か「不正解」を選びましょう。";
+
+/* FirstRun.OneTimeTip  (FirstRunViewController.m) */
+"One-time tip" = "最初だけのヒント";
+
+/* FirstRun.GotIt  (FirstRunViewController.m) */
+"Got it" = "わかりました";
+
+/* HelpViewController.Table_Welcome  (HelpViewController.m) */
+"Welcome" = "ようこそ";
+
+/* HelpViewController.Table_StudySets  (HelpViewController.m) */
+"Study Sets" = "学習セット";
+
+/* HelpViewController.Table_BrowseMode  (HelpViewController.m) */
+"Browse Mode" = "閲覧モード";
+
+/* HelpViewController.Table_WordSearch  (HelpViewController.m) */
+"Search" = "検索";
+
+/* HelpViewController.Table_Corrections  (HelpViewController.m) */
+"Corrections" = "誤りの報告";
+
+/* HelpViewController.Table_LearningAlgorithm  (HelpViewController.m) */
+"Learning Algorithm" = "学習アルゴリズム";
+
+/* HelpViewController.Table_Sharing  (HelpViewController.m) */
+"Sharing" = "シェア";
+
+/* HelpViewController.Table_Integration  (HelpViewController.m) */
+"Integration" = "他のアプリとの連携";
+
+/* HelpViewController.Table_TagGlossary  (HelpViewController.m) */
+"Tag Glossary" = "タグの一覧";
+
+/* HelpViewController.GetSatsifactionLink  (HelpViewController.m) */
+"Ask Us" = "お問い合わせ";
+
+/* HelpViewController.SupportAlertMsgTitle  (HelpViewController.m) */
+"GetSatisfaction.com" = "お問い合わせ";
+
+/* HelpViewController.SupportAlertMsgMsg  (HelpViewController.m) */
+"Do you have a question?\nA feature request?\n\nIt's best to make your voice heard on our support site, but we respond to e-mail too!" = "ご質問や機能のご要望はありますか？\n\nサポートサイトへの投稿がいちばん確実ですが、メールでもお返事します。";
+
+/* Cancel  (HelpViewController.m, JFlashUpdateManager.m) */
+"No Thanks" = "今はしない";
+
+/* Visit Site  (HelpViewController.m) */
+"Visit Site" = "サイトを開く";
+
+/* Mail Us  (HelpViewController.m) */
+"Send an Email" = "メールを送る";
+
+/* emailVM.notAvailable.body  (HelpViewController.m) */
+"Oh no!  It looks like your device isn't set up for Mail yet!" = "このデバイスではまだメールが設定されていないようです。";
+
+/* HelpViewController.Next  (HelpViewController.m) */
+"Next >" = "次へ";
+
+/* JFlash1.6 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated to JFlash 1.6" = "JFlash 1.6にアップデートしました";
+
+/* JFlash1.6 upgrade alert msg  (JFlashUpdateManager.m) */
+"Thanks for updating!  Special thanks to Ben, Murray, Riley & David for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words.  Want it?" = "アップデートありがとうございます！いくつかの項目の改善に協力してくれたBen、Murray、Riley、Davidに感謝します。ところで、Rikai Browserはもうお持ちですか？JFlashと連携して、日本語のウェブページを読みながら新しい単語を覚えられます。入手しますか？";
+
+/* StudyViewController.Later  (JFlashUpdateManager.m) */
+"Later" = "あとで";
+
+/* WebViewController.RikaiAppStore  (JFlashUpdateManager.m) */
+"Get Rikai" = "Rikaiを入手";
+
+/* JFlash1.6.1 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated to JFlash 1.6.1" = "JFlash 1.6.1にアップデートしました";
+
+/* JFlash1.6.1 upgrade alert msg  (JFlashUpdateManager.m) */
+"Thanks for updating!  We fixed a minor bug in the example sentences display.  Special thanks to Michael & Murray for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words." = "アップデートありがとうございます！例文の表示に関する小さな不具合を修正しました。いくつかの項目の改善に協力してくれたMichaelとMurrayに感謝します。ところで、Rikai Browserはもうお持ちですか？JFlashと連携して、日本語のウェブページを読みながら新しい単語を覚えられます。";
+
+/* JFlash1.6.2 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated to JFlash 1.6.2" = "JFlash 1.6.2にアップデートしました";
+
+/* JFlash1.6.2 upgrade alert msg  (JFlashUpdateManager.m) */
+"Another update!  We fixed a bug in the integration between Rikai Browser & Japanese Flash.  Did you know you can send words from Rikai Browser to Japanese Flash with one button?  Get it if you don't have it!  Also, thanks to Michael, who helped us update a few more entries." = "またアップデートです！Rikai BrowserとJapanese Flashの連携の不具合を修正しました。Rikai Browserからボタンひとつで単語をJapanese Flashに送れるのをご存じですか？まだの方はぜひどうぞ！さらにいくつかの項目の更新に協力してくれたMichaelに感謝します。";
+
+/* JFlash1.7 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated to JFlash 1.7" = "JFlash 1.7にアップデートしました";
+
+/* JFlash1.7 upgrade alert msg  (JFlashUpdateManager.m) */
+"Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries." = "アップデートありがとうございます！新機能として、検索からカードの例文を見られるようになりました。また、辞書の約8項目の更新に協力してくれたKobeとMurrayに感謝します。";
+
+/* SettingsViewController.OneUpdateAvailable  (JapaneseSettingsDataSource.m) */
+"1 Update Available" = "1件のアップデートがあります";
+
+/* SettingsViewController.NUpdatesAvailable  (JapaneseSettingsDataSource.m) */
+"%d Updates Available" = "%d件のアップデートがあります";
+
+/* SettingsViewController.TableHeader_AvailableUpdate  (JapaneseSettingsDataSource.m) */
+"Available Update" = "入手可能なアップデート";
+
+/* SettingsViewController.TableHeader_AvailableUpdates  (JapaneseSettingsDataSource.m) */
+"Available Updates" = "入手可能なアップデート";
+
+/* SettingsViewController.HeadwordLanguage_Japanese  (JapaneseSettingsDataSource.m) */
+"Japanese" = "日本語";
+
+/* Theme name  (JapaneseSettingsDataSource.m) */
+"Fire" = "ファイア";
+
+/* Theme name  (JapaneseSettingsDataSource.m) */
+"Water" = "ウォーター";
+
+/* Theme name  (JapaneseSettingsDataSource.m) */
+"Tame" = "シック";
+
+/* SettingsViewController.DisplayReading_Romaji  (JapaneseSettingsDataSource.m) */
+"Romaji" = "ローマ字";
+
+/* SettingsViewController.DisplayReading_Both  (JapaneseSettingsDataSource.m) */
+"Both" = "両方";
+
+/* SettingsViewController.On  (JapaneseSettingsDataSource.m) */
+"Prefer Kana" = "かなを優先";
+
+/* SettingsViewController.Off  (JapaneseSettingsDataSource.m) */
+"Prefer Kanji" = "漢字を優先";
+
+/* SettingsViewController.SettingNames_DisplayFuriganaReading  (JapaneseSettingsDataSource.m) */
+"Furigana / Reading" = "ふりがな・読み";
+
+/* SettingsViewController.SettingNames_KanaOnlyWords  (JapaneseSettingsDataSource.m) */
+"Common Kana Words" = "かな書きが多い語";
+
+/* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
+"Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese Flash Logo & Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese Flashは、ある連休（Long Weekend）にステーキと何本かのコロナビールを片手に生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリはEDICT辞書と田中コーパスのデータを使用しています。EDICTファイルはElectronic Dictionary Research and Development Groupの所有物であり、同グループのライセンスに従って使用しています。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese Flashのロゴと製品名はオリジナルの創作物であり、他の商標との類似は意図したものではなく、まったくの偶然です。";
+
+/* PleaseWait  (PluginSettingsViewController.m) */
+"Please Wait" = "お待ちください";
+
+/* PluginSettingsViewController.NavBarTitle  (PluginSettingsViewController.m) */
+"Get Updates" = "アップデートを入手";
+
+/* PluginSettingsViewController.TableHeader_Installed  (PluginSettingsViewController.m) */
+"Installed" = "インストール済み";
+
+/* PluginSettingsViewController.TableHeader_Available  (PluginSettingsViewController.m) */
+"Available (Tap to Download)" = "入手可能（タップしてダウンロード）";
+
+/* NeverUpdated  (PluginSettingsViewController.m) */
+"Never" = "なし";
+
+/* LastUpdate  (PluginSettingsViewController.m) */
+"Last update : %@" = "最終アップデート：%@";
+
+/* Study Set Learned  (PracticeModeCardViewDelegate.m) */
+"Study Set Learned" = "このセットは覚えました";
+
+/* Congratulations! You've already learned this set. We will show cards that would usually be hidden.  (PracticeModeCardViewDelegate.m) */
+"Congratulations! You've already learned this set. We will show cards that would usually be hidden." = "おめでとうございます！このセットはすべて覚えました。ふだんは表示されないカードも出題します。";
+
+/* ProgressDetailsViewController.NumWrongStreak  (ProgressDetailsViewController.m) */
+"%i wrong" = "× %i回";
+
+/* ProgressDetailsViewController.NumRightStreak  (ProgressDetailsViewController.m) */
+"%i right" = "○ %i回";
+
+/* ReminderVC.pickerFormatPlural  (ReminderSettingsViewController.m) */
+"%@ days" = "%@日";
+
+/* ReminderVC.pickerFormatSingle  (ReminderSettingsViewController.m) */
+"%@ day" = "%@日";
+
+/* ReminderVC.SettingsSectionHeader  (ReminderSettingsViewController.m) */
+"Reminder Settings" = "リマインダーの設定";
+
+/* ReminderVC.SettingsSectionFooter  (ReminderSettingsViewController.m) */
+"Reminders are reset each time the app is opened.  If you're diligent about studying, you may never see one!" = "リマインダーはアプリを開くたびにリセットされます。こまめに学習していれば、一度も届かないかもしれません！";
+
+/* RemindersVC.DaysAfterLastSesssionLabel  (ReminderSettingsViewController.m) */
+"Days After Last Session" = "前回の学習からの日数";
+
+/* SearchViewController.SearchBarPlaceholder_InstallPlugin  (SearchViewController.m) */
+"Tap here to install search" = "タップして検索をインストール";
+
+/* SearchViewController.SearchBarPlaceholder_douzo  (SearchViewController.m) */
+"Enter search keyword" = "キーワードを入力";
+
+/* SearchViewController.NoResults  (SearchViewController.m, StudySetViewController.m) */
+"No Results Found" = "見つかりませんでした";
+
+/* ExternalAppReturnButtonFormat  (SearchViewController.m) */
+"Return to %@" = "%@に戻る";
+
+/* Remove from Set Error  (SearchViewController.m) */
+"Remove From Set Error" = "セットから削除できません";
+
+/* SettingsViewController.RateUsButton  (SettingsViewController.m) */
+"Rate Us" = "評価する";
+
+/* SettingsViewController.Share  (SettingsViewController.m) */
+"Tell a Friend" = "友だちに教える";
+
+/* SettingsViewController.Plugins_NumInstalled  (SettingsViewController.m) */
+"%d installed" = "%d件インストール済み";
+
+/* Global.None  (SettingsViewController.m) */
+"None" = "なし";
+
+/* SettingsViewController.VersionFooter  (SettingsViewController.m) */
+"Settings: %@, Data: %@, Build: %@" = "設定: %@、データ: %@、ビルド: %@";
+
+/* StudySetViewController.SearchPlaceholder  (StudySetViewController.m) */
+"Search Sets By Name" = "セット名で検索";
+
+/* StudySetViewController.WordCount  (StudySetViewController.m) */
+"%d Words" = "%d語";
+
+/* StudySetViewController.LoadingCards  (StudySetViewController.m) */
+"Loading cards..." = "カードを読み込み中…";
+
+/* StudySetViewController.premiumSets  (StudySetViewController.m) */
+"Get More Sets" = "ほかのセットを入手";
+
+/* StudySetViewController.details  (StudySetViewController.m) */
+"Tap For Details" = "タップして詳細を表示";
+
+/* StudySetViewController.GroupCount  (StudySetViewController.m) */
+"%d Groups" = "%dグループ";
+
+/* StudySetViewController.TagCount  (StudySetViewController.m) */
+"%d Sets" = "%dセット";
+
+/* StudySetViewController.StartStudy_AlertViewMessage  (StudySetViewController.m) */
+"Do you want to start this set?  Progress on your last set will be saved." = "このセットの学習をはじめますか？今のセットの進み具合は保存されます。";
+
+/* StudySetViewController.NoWords_AlertViewTitle  (StudySetViewController.m, StudySetWordsViewController.m) */
+"No Words In Set" = "セットに単語がありません";
+
+/* StudySetViewController.NoWords_AlertViewMessage  (StudySetViewController.m, StudySetWordsViewController.m) */
+"To add words to this set, you can use Search." = "このセットに単語を追加するには「検索」を使ってください。";
+
+/* StudySetWordsViewController.LoadingWords  (StudySetWordsViewController.m) */
+"Loading words..." = "単語を読み込み中…";
+
+/* StudySetWordsViewController.BeginStudyingThese  (StudySetWordsViewController.m) */
+"Begin Studying These" = "このセットを学習する";
+
+/* StudySetWordsViewController.EditSetDetails  (StudySetWordsViewController.m) */
+"Edit Set Details" = "セットの詳細を編集";
+
+/* StudyViewController.OK  (StudyViewController.m) */
+"OK" = "OK";
+
+/* AddTagViewController.AlertViewLastCardMessage  (TagPeer.m) */
+"This set only contains the card you are currently studying.  To delete a set entirely, please change to a different set first." = "このセットには今学習中のカードしかありません。セットごと削除するには、先に別のセットに切り替えてください。";
+
+/* UserDetailsViewController.NavBarTitle  (UserDetailsViewController.m) */
+"Add User" = "ユーザーを追加";
+
+/* UserDetailsViewController.EnterNameAlertTitle  (UserDetailsViewController.m) */
+"Enter a Name" = "名前を入力してください";
+
+/* UserDetailsViewController.EnterNameAlertMsg  (UserDetailsViewController.m) */
+"Please enter a user name or tap back to cancel." = "ユーザー名を入力するか、「戻る」でキャンセルしてください。";
+
+/* UserViewController.NavBarTitle  (UserViewController.m) */
+"Choose User" = "ユーザーを選択";
+
+/* UserViewController.SwitchingUserDialog  (UserViewController.m) */
+"Switching User..." = "ユーザーを切り替え中…";
+
+/* UserViewController.ChangeUser_AlertViewMessage  (UserViewController.m) */
+"Set the active user to %@?" = "使用するユーザーを「%@」に切り替えますか？";
+
+/* UserViewController.ChangeUser_AlertViewTitle  (UserViewController.m) */
+"Activate User" = "ユーザーの切り替え";
+
+/* UserViewController.CannotDelete_AlertViewTitle  (UserViewController.m) */
+"Cannot Delete User" = "ユーザーを削除できません";
+
+/* UserViewController.CannotDelete_AlertViewMessage  (UserViewController.m) */
+"The default user can be edited, but not deleted." = "デフォルトのユーザーは編集できますが、削除はできません。";
+
+/* FirstLoadModalText  (jFlashAppDelegate.m) */
+"Setting up...\nThis will take a moment." = "準備しています…\nしばらくお待ちください。";
+
+/* StudyNotification.Body  (jFlashAppDelegate.m) */
+"You're Awesome!  It's time to learn some more words!" = "その調子です！そろそろ新しい単語を覚えましょう！";
+
+/* StudyNotification.Action  (jFlashAppDelegate.m) */
+"Study" = "学習する";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Loading..." = "読み込み中…";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Please check your network connection and try again." = "ネットワーク接続を確認して、もう一度お試しください。";
+
+/* Long Weekend dev tools (LWE submodule) */
+"No Network Access" = "ネットワークに接続できません";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Next" = "次へ";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Finished" = "完了";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Failed to decompress" = "展開できませんでした";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Downloading (%d KB)" = "ダウンロード中（%d KB）";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Download cancelled" = "ダウンロードをキャンセルしました";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Decompressing" = "展開中";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Could not open the page you requested. The server is not responding." = "ページを開けませんでした。サーバが応答していません。";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Connecting to server" = "サーバに接続中";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Cannot open the page because it is not connected to the internet." = "インターネットに接続されていないため、ページを開けません。";
+
+/* Long Weekend dev tools (LWE submodule) */
+"Cannot Open Page" = "ページを開けません";

@@ -1,0 +1,10 @@
+/*
+  InfoPlist.strings (Japanese)
+  Home-screen name stays "Japanese Flash" (the name Ross chose; it fits under the icon).
+*/
+
+/* Home-screen name under the app icon */
+"CFBundleDisplayName" = "Japanese Flash";
+
+/* Bundle name */
+"CFBundleName" = "Japanese Flash";

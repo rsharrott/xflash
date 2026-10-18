@@ -6,6 +6,7 @@
 //
 
 #import "ModalTaskViewController.h"
+#import "LWELocalization.h"
 
 NSString * const LWEModalTaskDidCancel = @"LWEModalTaskDidCancel";
 NSString * const LWEModalTaskDidFail = @"LWEModalTaskDidFail";
@@ -26,6 +27,8 @@ NSString * const LWEModalTaskDidFail = @"LWEModalTaskDidFail";
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
 
   // Create the WKWebView programmatically inside the XIB-instantiated container.
   WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
