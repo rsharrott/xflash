@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA2C001219000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
+		AA2C001119000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
+		AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
 		AA2B001119000020000000AA /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
 		AA2B001019000020000000AA /* DisplaySearchedSentenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */; };
 		AA2B000519000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
@@ -975,6 +978,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D6058910D05DD3D006BFB54 /* jFlash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jFlash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -1898,6 +1902,7 @@
 				915FEC4F15807B9100BEDF5F /* jFlashJr.db */,
 				4919507A144F1BFE00DB81F7 /* jFlash-available.plist */,
 				498EBDBC148909CF00BA6DE7 /* jFlash-installed.plist */,
+				AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */,
 				49EE8D68134EC0EA00EC6B0E /* jFlash-Info.plist */,
 				91D3FA721580295000CB8F1E /* jFlashJr-Info.plist */,
 				49AF3CF51265E2B900CEAA52 /* jflash_12_to_13.sql */,
@@ -2668,6 +2673,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
 				912405DA109C263D00ECA1C2 /* Entitlements.plist in Resources */,
 				D35B077B1116456D00DB5E02 /* overlay-btn-close.png in Resources */,
 				D35B077D1116456D00DB5E02 /* practice-btn-goaway.png in Resources */,
@@ -2818,6 +2824,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2C001119000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
 				496C7AB01263270B004B6B90 /* plugin-resources in Resources */,
 				496C7AB21263270B004B6B90 /* tametheme-cookie-cutters in Resources */,
 				496C7AB81263270B004B6B90 /* practice-btn-actions.png in Resources */,
@@ -2920,6 +2927,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2C001219000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
 				91D3F9251580294F00CB8F1E /* Entitlements.plist in Resources */,
 				91D3F92A1580294F00CB8F1E /* overlay-btn-close.png in Resources */,
 				91D3F92B1580294F00CB8F1E /* practice-btn-goaway.png in Resources */,
