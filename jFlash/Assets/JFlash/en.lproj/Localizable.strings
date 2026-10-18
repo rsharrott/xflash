@@ -571,7 +571,7 @@
 /* Progress sheet pill: cards in this set answered at least once (all time); the value is "4 of 14" */
 "Seen" = "Seen";
 
-/* Progress sheet Seen pill value: [cards seen] of [cards in the set] */
+/* Progress sheet Seen pill value: [cards seen] of [cards in the set] (ja puts the total first, like the lead line: 全14枚中) */
 "%1$@ of %2$@" = "%1$@ of %2$@";
 
 /* Progress sheet level: cards never answered yet (was Untested) */
