@@ -19,6 +19,12 @@
 - (IBAction)appStoreBtnPressed:(id)sender
 {
   // The old store links (Rikai Browser / legacy jFlash) are no longer on the App Store.
+  // Open the new app's page once it has an App Store ID (kAppStoreID in Constants.m).
+  NSString *appURL = LWEAppStoreURLString();
+  if (appURL)
+  {
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appURL] options:@{} completionHandler:nil];
+  }
   [self dismissModalViewControllerAnimated:YES];
 }
 
