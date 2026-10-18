@@ -117,7 +117,8 @@
 // handles URL openings from other apps
 - (BOOL) handleIncomingURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication
 {
-  if (url == nil)
+  // Nothing to search for (nil URL, bare jflash://, undecodable term): just open the app normally
+  if (url == nil || [self.externalAppManager searchTermForURL:url] == nil)
   {
     return NO;
   }

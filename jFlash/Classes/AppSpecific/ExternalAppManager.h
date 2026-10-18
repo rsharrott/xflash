@@ -14,6 +14,9 @@
 //! This method configures the instance based on the incoming URL and bundle ID
 - (void) configureManagerForURL:(NSURL *)incomingURL sourceBundleId:(NSString *)sourceBundleId;
 
+//! The search term carried by a jflash://TERM URL, or nil if there isn't one (e.g. a bare jflash://)
+- (NSString *) searchTermForURL:(NSURL *)url;
+
 //! This method translates between a bundleID and the URL handler for that bundle -- e.g. com.lwe.jflash ==> jflash (as in jflash://)
 - (NSString *) handlerForBundleId:(NSString *)bundleId;
 
