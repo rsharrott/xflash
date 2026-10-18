@@ -99,7 +99,7 @@ NSString * LWEAppStoreURLString(void)
       NSString * const LWE_CURRENT_VERSION       = @"1.9";
       NSString * const LWE_CURRENT_USER_DATABASE = @"jFlash.db";
 #endif
-      NSString * const LWE_CURRENT_CARD_DATABASE = @"jFlash-CARD-1.1.db";
+      NSString * const LWE_CURRENT_CARD_DATABASE = @"jFlash-CARD-2.0.db";
 
       // These constants are JF specific
       NSString * const LWE_JF_10_USER_DATABASE       = @"jFlash.db";

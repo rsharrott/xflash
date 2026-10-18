@@ -24,7 +24,9 @@
   // MMA TODO: 12/11/2011 -- this is a total hack, but it's no better than the [CurrentState..] static code
   // that was here before.  Point is, we need a way to just stop all this plugin versioning ridiculousness altogether.
   jFlashAppDelegate *appDelegate = (jFlashAppDelegate*)[[UIApplication sharedApplication] delegate];
-  if ([[appDelegate.pluginManager versionForLoadedPlugin:EXAMPLE_DB_KEY] isEqualToString:@"1.2"])
+  // EX 1.2 introduced card_sentence_link.should_show; every later version (2.0 = Tatoeba refresh) keeps it.
+  NSString *exVersion = [appDelegate.pluginManager versionForLoadedPlugin:EXAMPLE_DB_KEY];
+  if (exVersion && [exVersion doubleValue] >= 1.2)
   {
     isNewVersion = YES;
   }

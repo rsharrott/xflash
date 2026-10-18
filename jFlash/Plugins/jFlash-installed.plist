@@ -7,7 +7,7 @@
 		<key>pluginId</key>
 		<string>CARD_DB</string>
 		<key>version</key>
-		<string>1.1</string>
+		<string>2.0</string>
 		<key>name</key>
 		<string>Japanese Flash Cards</string>
 		<key>details</key>
@@ -15,7 +15,7 @@
 		<key>pluginType</key>
 		<string>database</string>
 		<key>filePath</key>
-		<string>jFlash-CARD-1.1.db</string>
+		<string>jFlash-CARD-2.0.db</string>
 		<key>fileLocation</key>
 		<integer>0</integer>
 	</dict>
@@ -24,15 +24,15 @@
 		<key>pluginId</key>
 		<string>FTS_DB</string>
 		<key>version</key>
-		<string>1.1</string>
+		<string>2.0</string>
 		<key>name</key>
-		<string>Awesomely Fast Search v1.1</string>
+		<string>Awesomely Fast Search v2.0</string>
 		<key>details</key>
 		<string>Adds sub-second full dictionary search</string>
 		<key>pluginType</key>
 		<string>database</string>
 		<key>filePath</key>
-		<string>jFlash-FTS-1.1.db</string>
+		<string>jFlash-FTS-2.0.db</string>
 		<key>fileLocation</key>
 		<integer>0</integer>
 	</dict>
@@ -41,15 +41,15 @@
 		<key>pluginId</key>
 		<string>EX_DB</string>
 		<key>version</key>
-		<string>1.2</string>
+		<string>2.0</string>
 		<key>name</key>
-		<string>Fifty Thousand Examples v1.2</string>
+		<string>Tatoeba Example Sentences v2.0</string>
 		<key>details</key>
 		<string>Adds sentences to practice screen</string>
 		<key>pluginType</key>
 		<string>database</string>
 		<key>filePath</key>
-		<string>jFlash-EX-1.2.db</string>
+		<string>jFlash-EX-2.0.db</string>
 		<key>fileLocation</key>
 		<integer>0</integer>
 	</dict>
