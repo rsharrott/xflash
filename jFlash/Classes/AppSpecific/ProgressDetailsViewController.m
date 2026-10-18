@@ -13,12 +13,16 @@
 //! Mascot next to the encouragement line (same image the old XIB used; folder reference in jFlash and cFlash).
 static NSString * const kLWEProgressMascotImage = @"redtheme-cookie-cutters/mood-icons/positive/hh-happy.png";
 
+//! Custom detent sized to the content (iOS 16+)
+static NSString * const kLWEProgressFitDetent = @"com.longweekend.progress.fit";
+
 @interface ProgressDetailsViewController ()
 {
   UIScrollView *_scroll;
   UIStackView *_stack;
 }
 - (void) _buildContent;
+- (CGFloat) _fittingContentHeight;
 @end
 
 @implementation ProgressDetailsViewController
@@ -119,7 +123,22 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 
     self.modalPresentationStyle = UIModalPresentationPageSheet;
     UISheetPresentationController *sheet = self.sheetPresentationController;
-    sheet.detents = @[[UISheetPresentationControllerDetent mediumDetent], [UISheetPresentationControllerDetent largeDetent]];
+    if (@available(iOS 16.0, *))
+    {
+      // First detent: exactly as tall as the content (the medium detent cut off the lower levels and
+      // the mascot line at the default text size), capped at the large detent; large stays available.
+      __block ProgressDetailsViewController *blockSelf = self; // MRC: don't retain self from its own sheet
+      UISheetPresentationControllerDetent *fit =
+        [UISheetPresentationControllerDetent customDetentWithIdentifier:kLWEProgressFitDetent
+                                                               resolver:^CGFloat(id<UISheetPresentationControllerDetentResolutionContext> context) {
+          return MIN([blockSelf _fittingContentHeight], context.maximumDetentValue);
+        }];
+      sheet.detents = @[fit, [UISheetPresentationControllerDetent largeDetent]];
+    }
+    else
+    {
+      sheet.detents = @[[UISheetPresentationControllerDetent largeDetent]];
+    }
     sheet.prefersGrabberVisible = YES;
     sheet.preferredCornerRadius = 28; // radius-3xl
     sheet.prefersScrollingExpandsWhenScrolledToEdge = YES;
@@ -190,6 +209,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   {
     // Rows switch between side-by-side and stacked layouts, and the attributed text re-resolves its fonts.
     [self _buildContent];
+    [self _invalidateFitDetent];
   }
 }
 
@@ -198,10 +218,39 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   if ([self isViewLoaded])
   {
     [self _buildContent];
+    [self _invalidateFitDetent];
+  }
+}
+
+- (void) _invalidateFitDetent
+{
+  if (@available(iOS 16.0, *))
+  {
+    [self.sheetPresentationController animateChanges:^{
+      [self.sheetPresentationController invalidateDetents];
+    }];
   }
 }
 
 #pragma mark - Content
+
+//! Height the scrolling content needs at the sheet's current width (what the fit detent resolves to).
+- (CGFloat) _fittingContentHeight
+{
+  if ([self isViewLoaded] == NO || _stack == nil)
+  {
+    return CGFLOAT_MAX; // resolves to the large detent
+  }
+  CGFloat width = self.view.bounds.size.width;
+  if (width <= 0)
+  {
+    width = self.presentingViewController.view.bounds.size.width;
+  }
+  CGSize size = [_stack systemLayoutSizeFittingSize:CGSizeMake(width, UILayoutFittingCompressedSize.height)
+                      withHorizontalFittingPriority:UILayoutPriorityRequired
+                            verticalFittingPriority:UILayoutPriorityFittingSizeLevel];
+  return ceil(size.height);
+}
 
 - (BOOL) _isAccessibilitySize
 {
@@ -216,7 +265,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   title.lineBreakMode = NSLineBreakByTruncatingTail;
   title.accessibilityTraits = UIAccessibilityTraitHeader;
 
-  // Close: a 32pt paper-button circle inside a 44pt tap target.
+  // Close: a 36pt paper-button circle centred in a 44 x 44pt tap target.
   UIButton *close = [UIButton buttonWithType:UIButtonTypeCustom];
   close.translatesAutoresizingMaskIntoConstraints = NO;
   close.accessibilityLabel = NSLocalizedString(@"Close", @"ProgressDetailsViewController.Close");
@@ -225,9 +274,9 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   circle.translatesAutoresizingMaskIntoConstraints = NO;
   circle.userInteractionEnabled = NO;
   circle.backgroundColor = LWEDesignPaperButton();
-  circle.layer.cornerRadius = 16;
+  circle.layer.cornerRadius = 18;
   [close addSubview:circle];
-  UIImageSymbolConfiguration *symbolConfig = [UIImageSymbolConfiguration configurationWithPointSize:13 weight:UIImageSymbolWeightBold];
+  UIImageSymbolConfiguration *symbolConfig = [UIImageSymbolConfiguration configurationWithPointSize:14 weight:UIImageSymbolWeightBold];
   UIImageView *xmark = [[[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"xmark" withConfiguration:symbolConfig]] autorelease];
   xmark.translatesAutoresizingMaskIntoConstraints = NO;
   xmark.tintColor = LWEDesignInk2();
@@ -235,8 +284,8 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   [NSLayoutConstraint activateConstraints:@[
     [close.widthAnchor constraintEqualToConstant:44],
     [close.heightAnchor constraintEqualToConstant:44],
-    [circle.widthAnchor constraintEqualToConstant:32],
-    [circle.heightAnchor constraintEqualToConstant:32],
+    [circle.widthAnchor constraintEqualToConstant:36],
+    [circle.heightAnchor constraintEqualToConstant:36],
     [circle.centerXAnchor constraintEqualToAnchor:close.centerXAnchor],
     [circle.centerYAnchor constraintEqualToAnchor:close.centerYAnchor],
     [xmark.centerXAnchor constraintEqualToAnchor:circle.centerXAnchor],
