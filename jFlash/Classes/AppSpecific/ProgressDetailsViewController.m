@@ -195,12 +195,27 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 - (void) viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
-  // At accessibility text sizes the medium detent shows only the header, so open full height.
+  // At accessibility text sizes the content is taller than the screen anyway, so open at large.
   if (UIContentSizeCategoryIsAccessibilityCategory(self.traitCollection.preferredContentSizeCategory))
   {
     self.sheetPresentationController.selectedDetentIdentifier = UISheetPresentationControllerDetentIdentifierLarge;
   }
 }
+
+#if defined (LWE_DEBUG)
+- (void) viewDidAppear:(BOOL)animated
+{
+  [super viewDidAppear:animated];
+  // Fit-detent check: where the content ends vs. the visible scroll area (both in sheet points).
+  UIView *last = [_stack.arrangedSubviews lastObject];
+  CGRect lastInView = [last convertRect:last.bounds toView:self.view];
+  CGFloat visibleBottom = self.view.bounds.size.height - _scroll.adjustedContentInset.bottom;
+  NSLog(@"LWEDebugProgressFit sheet=%.0fx%.0f fit=%.0f content=%.0f mascotBottom=%.0f visibleBottom=%.0f gap=%.0f detent=%@",
+        self.view.bounds.size.width, self.view.bounds.size.height, [self _fittingContentHeight], _scroll.contentSize.height,
+        CGRectGetMaxY(lastInView), visibleBottom, visibleBottom - CGRectGetMaxY(lastInView),
+        self.sheetPresentationController.selectedDetentIdentifier);
+}
+#endif
 
 - (void) traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
 {
@@ -234,7 +249,9 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 
 #pragma mark - Content
 
-//! Height the scrolling content needs at the sheet's current width (what the fit detent resolves to).
+//! Height the scrolling content needs at the sheet's width (what the fit detent resolves to).
+//! The stack is pinned to the scroll view's content guide (not its frame), so its height is free;
+//! it's measured at a required width with the lowest vertical priority, i.e. its compressed fitting height.
 - (CGFloat) _fittingContentHeight
 {
   if ([self isViewLoaded] == NO || _stack == nil)
@@ -249,6 +266,12 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   CGSize size = [_stack systemLayoutSizeFittingSize:CGSizeMake(width, UILayoutFittingCompressedSize.height)
                       withHorizontalFittingPriority:UILayoutPriorityRequired
                             verticalFittingPriority:UILayoutPriorityFittingSizeLevel];
+  // Cross-check against the laid-out content when the sheet already has that width.
+  if (self.view.bounds.size.width == width)
+  {
+    [self.view layoutIfNeeded];
+    size.height = MAX(size.height, _scroll.contentSize.height);
+  }
   return ceil(size.height);
 }
 
@@ -313,19 +336,28 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
                                NSForegroundColorAttributeName: LWEDesignInk2() };
   NSDictionary *numberAttrs = @{ NSFontAttributeName: LWEDesignScaledFont(UIFontTextStyleTitle1, 28, UIFontWeightBold, 0),
                                  NSForegroundColorAttributeName: LWEDesignInk() };
-  NSMutableAttributedString *current = [[[NSMutableAttributedString alloc] initWithString:LWEProgressNumber(studying) attributes:numberAttrs] autorelease];
-  if (capped)
-  {
-    // The asterisk points at the footnote under the sentence.
-    NSMutableDictionary *starAttrs = [[numberAttrs mutableCopy] autorelease];
-    starAttrs[NSForegroundColorAttributeName] = LWEDesignFire();
-    [current appendAttributedString:[[[NSAttributedString alloc] initWithString:@"*" attributes:starAttrs] autorelease]];
-  }
+  NSAttributedString *current = [[[NSAttributedString alloc] initWithString:LWEProgressNumber(studying) attributes:numberAttrs] autorelease];
   NSAttributedString *total = [[[NSAttributedString alloc] initWithString:LWEProgressNumber(totalWords) attributes:numberAttrs] autorelease];
 
-  NSString *format = NSLocalizedString(@"You are studying %1$@ cards out of %2$@ in this set.", @"ProgressDetailsViewController.StudyingSentence");
   UILabel *lead = LWEProgressLabel(textAttrs[NSFontAttributeName], LWEDesignInk2());
-  lead.attributedText = LWEProgressAttributedFormat(format, textAttrs, @[current, total]);
+  if (capped)
+  {
+    // The capped sentence carries the footnote marker (%3$@) where each language wants it:
+    // en "1,234* cards", ja "1,234枚※" (the footnote itself starts with the same marker).
+    NSString *format = NSLocalizedString(@"You are studying %1$@%3$@ cards out of %2$@ in this set.", @"ProgressDetailsViewController.StudyingSentenceCapped");
+    NSString *markerText = NSLocalizedString(@"StudyPoolCapMarker", @"ProgressDetailsViewController.CapMarker");
+    NSMutableDictionary *markerAttrs = [[numberAttrs mutableCopy] autorelease];
+    markerAttrs[NSForegroundColorAttributeName] = LWEDesignFire();
+    NSAttributedString *marker = [[[NSAttributedString alloc] initWithString:markerText attributes:markerAttrs] autorelease];
+    lead.attributedText = LWEProgressAttributedFormat(format, textAttrs, @[current, total, marker]);
+    // VoiceOver reads the sentence without the marker ("asterisk").
+    lead.accessibilityLabel = [NSString stringWithFormat:format, LWEProgressNumber(studying), LWEProgressNumber(totalWords), @""];
+  }
+  else
+  {
+    NSString *format = NSLocalizedString(@"You are studying %1$@ cards out of %2$@ in this set.", @"ProgressDetailsViewController.StudyingSentence");
+    lead.attributedText = LWEProgressAttributedFormat(format, textAttrs, @[current, total]);
+  }
   return lead;
 }
 
@@ -586,9 +618,18 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   UIView *lead = [self _leadView];
   [_stack addArrangedSubview:lead];
   [_stack setCustomSpacing:4 afterView:lead];
-  UIView *link = [self _settingsLinkView];
-  [_stack addArrangedSubview:link];
-  [_stack setCustomSpacing:8 afterView:link];
+  NSInteger maxStudying = [[NSUserDefaults standardUserDefaults] integerForKey:APP_MAX_STUDYING];
+  if (maxStudying > 0 && self.tag.cardCount > maxStudying)
+  {
+    // The footnote explains the capped number, so it only shows when the study pool is capped.
+    UIView *link = [self _settingsLinkView];
+    [_stack addArrangedSubview:link];
+    [_stack setCustomSpacing:8 afterView:link];
+  }
+  else
+  {
+    [_stack setCustomSpacing:16 afterView:lead];
+  }
 
   // ---- This session: Wrong / Right chips (answer-button colours), then the Streak pill
   UILabel *session = LWEProgressLabel(LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightSemibold, 0), LWEDesignInk());
@@ -608,21 +649,26 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   chips.spacing = 12;
   [_stack addArrangedSubview:chips];
 
-  NSString *streakValue = nil;
-  if (self.wrongStreak > 0)
+  // Streak only means something once a card has been answered this session.
+  UIView *streak = nil;
+  if (self.rightCount + self.wrongCount > 0)
   {
-    streakValue = [NSString stringWithFormat:NSLocalizedString(@"%@ wrong", @"ProgressDetailsViewController.NumWrongStreak"), LWEProgressNumber(self.wrongStreak)];
+    NSString *streakValue = nil;
+    if (self.wrongStreak > 0)
+    {
+      streakValue = [NSString stringWithFormat:NSLocalizedString(@"%@ wrong", @"ProgressDetailsViewController.NumWrongStreak"), LWEProgressNumber(self.wrongStreak)];
+    }
+    else
+    {
+      streakValue = [NSString stringWithFormat:NSLocalizedString(@"%@ right", @"ProgressDetailsViewController.NumRightStreak"), LWEProgressNumber(self.rightStreak)];
+    }
+    streak = [self _pillWithTitle:NSLocalizedString(@"Streak", @"ProgressDetailsViewController.Streak") value:streakValue];
   }
-  else
-  {
-    streakValue = [NSString stringWithFormat:NSLocalizedString(@"%@ right", @"ProgressDetailsViewController.NumRightStreak"), LWEProgressNumber(self.rightStreak)];
-  }
-  UIView *streak = [self _pillWithTitle:NSLocalizedString(@"Streak", @"ProgressDetailsViewController.Streak") value:streakValue];
   // Seen: cards in this set answered at least once, ever (total minus Unseen; the same counts the bars use).
-  NSString *seenValue = [NSString stringWithFormat:NSLocalizedString(@"%1$@ of %2$@", @"ProgressDetailsViewController.SeenOfTotal"),
+  NSString *seenValue = [NSString stringWithFormat:NSLocalizedString(@"Seen pill: %1$@ of %2$@", @"ProgressDetailsViewController.SeenOfTotal"),
                          LWEProgressNumber(self.tag.seenCardCount), LWEProgressNumber(self.tag.cardCount)];
   UIView *seen = [self _pillWithTitle:NSLocalizedString(@"Seen", @"ProgressDetailsViewController.SeenInSet") value:seenValue];
-  UIStackView *pills = [[[UIStackView alloc] initWithArrangedSubviews:@[streak, seen]] autorelease];
+  UIStackView *pills = [[[UIStackView alloc] initWithArrangedSubviews:(streak ? @[streak, seen] : @[seen])] autorelease];
   pills.axis = stacked ? UILayoutConstraintAxisVertical : UILayoutConstraintAxisHorizontal;
   pills.alignment = stacked ? UIStackViewAlignmentLeading : UIStackViewAlignmentTop;
   pills.spacing = 8;
@@ -661,6 +707,9 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 
 - (void) dealloc
 {
+#if defined (LWE_DEBUG)
+  NSLog(@"LWEDebugProgressCycles dealloc %p", self);
+#endif
   [tag release];
   [_stack release];
   [_scroll release];

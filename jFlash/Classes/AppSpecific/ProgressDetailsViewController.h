@@ -6,8 +6,9 @@
 //  Copyright 2009 LONG WEEKEND LLC. All rights reserved.
 //
 //  The study progress sheet (2026 "paper bottom sheet", design option A).
-//  Built in code and presented as a UISheetPresentationController page sheet with
-//  medium/large detents; it replaced the fixed 320x480 ProgressView.xib overlay.
+//  Built in code and presented as a UISheetPresentationController page sheet whose first
+//  detent is sized to the content (iOS 16+; large only on iOS 15), plus large. It replaced
+//  the fixed 320x480 ProgressView.xib overlay.
 //
 
 #import <UIKit/UIKit.h>
