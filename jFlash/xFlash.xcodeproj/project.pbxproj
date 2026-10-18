@@ -3661,7 +3661,7 @@
 					"$(SRCROOT)/Classes/External/LWEGradientButton",
 				);
 				INFOPLIST_FILE = "jFlash-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Japanese Flash";
+				INFOPLIST_KEY_CFBundleDisplayName = "Japanese in a Flash!";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LIBRARY_SEARCH_PATHS = (
@@ -3700,7 +3700,7 @@
 					"$(SRCROOT)/Classes/External/LWEGradientButton",
 				);
 				INFOPLIST_FILE = "jFlash-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Japanese Flash";
+				INFOPLIST_KEY_CFBundleDisplayName = "Japanese in a Flash!";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LIBRARY_SEARCH_PATHS = (
@@ -4098,7 +4098,7 @@
 					"$(SRCROOT)/Classes/External/LWEGradientButton",
 				);
 				INFOPLIST_FILE = "jFlash-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Japanese Flash";
+				INFOPLIST_KEY_CFBundleDisplayName = "Japanese in a Flash!";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LIBRARY_SEARCH_PATHS = (
