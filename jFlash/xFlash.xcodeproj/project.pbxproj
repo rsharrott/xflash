@@ -397,7 +397,6 @@
 		496C7AE412632730004B6B90 /* ModalTaskView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49F9686811AF604900DFC3C9 /* ModalTaskView.xib */; };
 		496C7AE512632730004B6B90 /* PluginSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 490820A411B7959500150499 /* PluginSettingsView.xib */; };
 		496C7AE612632730004B6B90 /* ProgressBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91E1B0E711AE11E1003CCDC2 /* ProgressBarViewController.xib */; };
-		496C7AE712632730004B6B90 /* ProgressView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6B11AB844300016BD2 /* ProgressView.xib */; };
 		496C7AE912632730004B6B90 /* SentenceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 491D7D0611C4EFFE00BF8323 /* SentenceView.xib */; };
 		496C7AEA12632730004B6B90 /* StudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6D11AB844300016BD2 /* StudySetView.xib */; };
 		496C7AEB12632730004B6B90 /* StudyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6E11AB844300016BD2 /* StudyView.xib */; };
@@ -653,7 +652,6 @@
 		917A5C7211AB844300016BD2 /* HelpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6811AB844300016BD2 /* HelpView.xib */; };
 		917A5C7311AB844300016BD2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6911AB844300016BD2 /* MainWindow.xib */; };
 		917A5C7411AB844300016BD2 /* AddStudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6A11AB844300016BD2 /* AddStudySetView.xib */; };
-		917A5C7511AB844300016BD2 /* ProgressView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6B11AB844300016BD2 /* ProgressView.xib */; };
 		917A5C7711AB844300016BD2 /* StudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6D11AB844300016BD2 /* StudySetView.xib */; };
 		917A5C7811AB844300016BD2 /* StudyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6E11AB844300016BD2 /* StudyView.xib */; };
 		917A5C7911AB844300016BD2 /* UserDetailsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6F11AB844300016BD2 /* UserDetailsView.xib */; };
@@ -691,7 +689,6 @@
 		91D3F9371580294F00CB8F1E /* HelpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6811AB844300016BD2 /* HelpView.xib */; };
 		91D3F9381580294F00CB8F1E /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6911AB844300016BD2 /* MainWindow.xib */; };
 		91D3F9391580294F00CB8F1E /* AddStudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6A11AB844300016BD2 /* AddStudySetView.xib */; };
-		91D3F93A1580294F00CB8F1E /* ProgressView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6B11AB844300016BD2 /* ProgressView.xib */; };
 		91D3F93B1580294F00CB8F1E /* StudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6D11AB844300016BD2 /* StudySetView.xib */; };
 		91D3F93C1580294F00CB8F1E /* StudyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6E11AB844300016BD2 /* StudyView.xib */; };
 		91D3F93D1580294F00CB8F1E /* UserDetailsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6F11AB844300016BD2 /* UserDetailsView.xib */; };
@@ -1350,7 +1347,6 @@
 		917A5C6811AB844300016BD2 /* HelpView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = HelpView.xib; path = XIBs/HelpView.xib; sourceTree = "<group>"; };
 		917A5C6911AB844300016BD2 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainWindow.xib; path = XIBs/MainWindow.xib; sourceTree = "<group>"; };
 		917A5C6A11AB844300016BD2 /* AddStudySetView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = AddStudySetView.xib; path = XIBs/AddStudySetView.xib; sourceTree = "<group>"; };
-		917A5C6B11AB844300016BD2 /* ProgressView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ProgressView.xib; path = XIBs/ProgressView.xib; sourceTree = "<group>"; };
 		917A5C6D11AB844300016BD2 /* StudySetView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = StudySetView.xib; path = XIBs/StudySetView.xib; sourceTree = "<group>"; };
 		917A5C6E11AB844300016BD2 /* StudyView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = StudyView.xib; path = XIBs/StudyView.xib; sourceTree = "<group>"; };
 		917A5C6F11AB844300016BD2 /* UserDetailsView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = UserDetailsView.xib; path = XIBs/UserDetailsView.xib; sourceTree = "<group>"; };
@@ -2425,7 +2421,6 @@
 				49F9686811AF604900DFC3C9 /* ModalTaskView.xib */,
 				490820A411B7959500150499 /* PluginSettingsView.xib */,
 				91E1B0E711AE11E1003CCDC2 /* ProgressBarViewController.xib */,
-				917A5C6B11AB844300016BD2 /* ProgressView.xib */,
 				49716141144EC74D006BBEB4 /* ReminderSettingsViewController.xib */,
 				496BE55111EC5320003AB713 /* SearchView.xib */,
 				4982292C1490A0BD009EC2CD /* SearchingTableCell.xib */,
@@ -2661,7 +2656,6 @@
 				917A5C7211AB844300016BD2 /* HelpView.xib in Resources */,
 				917A5C7311AB844300016BD2 /* MainWindow.xib in Resources */,
 				917A5C7411AB844300016BD2 /* AddStudySetView.xib in Resources */,
-				917A5C7511AB844300016BD2 /* ProgressView.xib in Resources */,
 				917A5C7711AB844300016BD2 /* StudySetView.xib in Resources */,
 				917A5C7811AB844300016BD2 /* StudyView.xib in Resources */,
 				917A5C7911AB844300016BD2 /* UserDetailsView.xib in Resources */,
@@ -2831,7 +2825,6 @@
 				496C7AE412632730004B6B90 /* ModalTaskView.xib in Resources */,
 				496C7AE512632730004B6B90 /* PluginSettingsView.xib in Resources */,
 				496C7AE612632730004B6B90 /* ProgressBarViewController.xib in Resources */,
-				496C7AE712632730004B6B90 /* ProgressView.xib in Resources */,
 				496C7AE912632730004B6B90 /* SentenceView.xib in Resources */,
 				496C7AEA12632730004B6B90 /* StudySetView.xib in Resources */,
 				496C7AEB12632730004B6B90 /* StudyView.xib in Resources */,
@@ -2918,7 +2911,6 @@
 				91D3F9371580294F00CB8F1E /* HelpView.xib in Resources */,
 				91D3F9381580294F00CB8F1E /* MainWindow.xib in Resources */,
 				91D3F9391580294F00CB8F1E /* AddStudySetView.xib in Resources */,
-				91D3F93A1580294F00CB8F1E /* ProgressView.xib in Resources */,
 				91D3F93B1580294F00CB8F1E /* StudySetView.xib in Resources */,
 				91D3F93C1580294F00CB8F1E /* StudyView.xib in Resources */,
 				91D3F93D1580294F00CB8F1E /* UserDetailsView.xib in Resources */,

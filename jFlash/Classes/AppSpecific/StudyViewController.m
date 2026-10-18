@@ -168,11 +168,36 @@
         }
       });
     }
-    //   simctl launch <udid> <bundle> -LWEDebugShowProgress YES  -> open the progress details popup
+    //   simctl launch <udid> <bundle> -LWEDebugAnswerCards RRWRW  -> answer cards Right (R) / Wrong (W) / Bury (B)
+    //     through the normal button path (records history, updates counts), one every 0.3s
+    NSString *debugAnswers = [settings stringForKey:@"LWEDebugAnswerCards"];
+    NSTimeInterval answerTime = 0.3 * [debugAnswers length];
+    for (NSUInteger i = 0; i < [debugAnswers length]; i++)
+    {
+      unichar answer = [debugAnswers characterAtIndex:i];
+      NSInteger buttonTag = (answer == 'W') ? WRONG_BTN : (answer == 'B') ? BURY_BTN : RIGHT_BTN;
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((1.2 + 0.3 * i) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        UIButton *fake = [UIButton buttonWithType:UIButtonTypeCustom];
+        fake.tag = buttonTag;
+        [self doCardBtn:fake];
+      });
+    }
+    //   simctl launch <udid> <bundle> -LWEDebugShowProgress YES  -> open the progress sheet (after any debug answers)
     if ([settings boolForKey:@"LWEDebugShowProgress"])
     {
+#if defined (LWE_JFLASH)
       [settings setBool:YES forKey:LWEFirstRunCardHintShownKey]; // never cover it with the coach hint
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self doShowProgressModalBtn]; });
+#endif
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((1.5 + answerTime) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self doShowProgressModalBtn];
+        //   -LWEDebugProgressDetent large  -> open the sheet at the large detent
+        if ([[settings stringForKey:@"LWEDebugProgressDetent"] isEqualToString:@"large"])
+        {
+          [self.progressDetailsViewController.sheetPresentationController animateChanges:^{
+            self.progressDetailsViewController.sheetPresentationController.selectedDetentIdentifier = UISheetPresentationControllerDetentIdentifierLarge;
+          }];
+        }
+      });
     }
     //   simctl launch <udid> <bundle> -LWEDebugShowExamples YES  -> reveal, then open the example sentences page
     if ([settings boolForKey:@"LWEDebugShowExamples"])
@@ -676,28 +701,24 @@
  */
 - (IBAction)doShowProgressModalBtn
 {
-  // Bring up the modal dialog for progress view
-  // TODO: iPad customization!
-  if (self.progressDetailsViewController == nil)
+  // Already showing it (or something else) -- don't stack sheets.
+  if (self.presentedViewController != nil || self.currentCardSet == nil)
   {
-    self.progressDetailsViewController = [[[ProgressDetailsViewController alloc] initWithNibName:@"ProgressView" bundle:nil] autorelease];
+    return;
   }
-  self.progressDetailsViewController.tag = self.currentCardSet;
-  self.progressDetailsViewController.rightStreak = self.currentRightStreak;
-  self.progressDetailsViewController.wrongStreak = self.currentWrongStreak;
-  self.progressDetailsViewController.cardsRightNow.text = [NSString stringWithFormat:@"%i", self.numRight];
-  self.progressDetailsViewController.cardsWrongNow.text = [NSString stringWithFormat:@"%i", self.numWrong];
-  self.progressDetailsViewController.cardsViewedNow.text = [NSString stringWithFormat:@"%i", self.numViewed];
+  // Pass everything in up front; the sheet builds its views from these in -viewDidLoad.
+  // (The old XIB overlay set label text before its view was loaded, so the first open showed
+  // the XIB's placeholder numbers.)
+  ProgressDetailsViewController *progressVC = [[ProgressDetailsViewController alloc] initWithTag:self.currentCardSet
+                                                                                     rightCount:self.numRight
+                                                                                     wrongCount:self.numWrong
+                                                                                    rightStreak:self.currentRightStreak
+                                                                                    wrongStreak:self.currentWrongStreak];
+  self.progressDetailsViewController = progressVC;
+  [progressVC release];
 
-  self.progressDetailsViewController.view.frame = self.parentViewController.view.frame;
-  
-  // Tell the modal to update its details
-  [self.progressDetailsViewController updateView];
-  
-  // The parent is a nav bar controller, (tab bar in this case), so it will cover the whole view
-  // We could use presentModalViewController, but then we lose the "see-through" ability with the views underneath.
-  // There is a call to -removeFromSuperview inside the progress VC on dismiss.
-  [self.view addSubview:self.progressDetailsViewController.view];
+  // A page sheet with medium/large detents (see ProgressDetailsViewController -init).
+  [self presentViewController:self.progressDetailsViewController animated:YES completion:nil];
 }
 
 
