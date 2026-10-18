@@ -60,6 +60,25 @@
     appDelegate.window = window;
     self.window = window;
     [window makeKeyAndVisible];
+
+    // Cold launch via jflash://WORD -- with a scene manifest, iOS delivers the URL
+    // here instead of application:openURL:options:.
+    UIOpenURLContext *urlContext = connectionOptions.URLContexts.anyObject;
+    if (urlContext)
+    {
+      [appDelegate handleIncomingURL:urlContext.URL sourceApplication:urlContext.options.sourceApplication];
+    }
+  }
+}
+
+// Warm launch: the app is already running (foreground or background) and receives jflash://WORD
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
+{
+  UIOpenURLContext *urlContext = URLContexts.anyObject;
+  if (urlContext)
+  {
+    jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+    [appDelegate handleIncomingURL:urlContext.URL sourceApplication:urlContext.options.sourceApplication];
   }
 }
 
@@ -89,15 +108,19 @@
 
 #pragma mark - URL Handling
 
-//! For compatibility with iOS2.0 through iOS4.2, when it was deprecated in favor of the below.
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
+// Non-scene entry point (only used if the scene manifest is ever removed); scenes go through LWESceneDelegate.
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-  return [self application:application openURL:url sourceApplication:nil annotation:nil];
+  return [self handleIncomingURL:url sourceApplication:[options objectForKey:UIApplicationOpenURLOptionsSourceApplicationKey]];
 }
 
 // handles URL openings from other apps
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+- (BOOL) handleIncomingURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication
 {
+  if (url == nil)
+  {
+    return NO;
+  }
   [self.externalAppManager configureManagerForURL:url sourceBundleId:sourceApplication];
   if (self.isFinishedLoading)
   {

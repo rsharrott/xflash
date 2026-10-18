@@ -131,7 +131,7 @@
   NSString *term = [url unicodeAbsoluteString];
   if ([term isEqualToString:@""] || [term isEqualToString:schemeUri])
   {
-    term = [[url absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    term = [[url absoluteString] stringByRemovingPercentEncoding];
   }
   
   // Replace out the schema name
