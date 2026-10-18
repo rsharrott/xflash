@@ -292,10 +292,6 @@
 		4965FD84126F7002000AC280 /* redtheme-cookie-cutters in Resources */ = {isa = PBXBuildFile; fileRef = 4965FD83126F7002000AC280 /* redtheme-cookie-cutters */; };
 		4965FD85126F7002000AC280 /* redtheme-cookie-cutters in Resources */ = {isa = PBXBuildFile; fileRef = 4965FD83126F7002000AC280 /* redtheme-cookie-cutters */; };
 		4966C30112686DCE00F34E24 /* jflash_12_to_13.sql in Resources */ = {isa = PBXBuildFile; fileRef = 49AF3CF51265E2B900CEAA52 /* jflash_12_to_13.sql */; };
-		49695844150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
-		49695845150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
-		49695846150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
-		49695847150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
 		496BE55211EC5320003AB713 /* ActionBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE54F11EC5320003AB713 /* ActionBarViewController.xib */; };
 		496BE55311EC5320003AB713 /* AlgorithmSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */; };
 		496BE55411EC5320003AB713 /* SearchView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55111EC5320003AB713 /* SearchView.xib */; };
@@ -748,7 +744,6 @@
 		91D3F9C61580294F00CB8F1E /* CardViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49FE8C7614A9B83200579716 /* CardViewController.xib */; };
 		91D3F9CB1580294F00CB8F1E /* jflash_16_to_161.sql in Resources */ = {isa = PBXBuildFile; fileRef = 4937876014DB8D9700361203 /* jflash_16_to_161.sql */; };
 		91D3F9CC1580294F00CB8F1E /* jflash_161_to_162.sql in Resources */ = {isa = PBXBuildFile; fileRef = 49BA6DB414F4887500A48A21 /* jflash_161_to_162.sql */; };
-		91D3F9CD1580294F00CB8F1E /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
 		91D3F9CE1580294F00CB8F1E /* jflash_162_to_17.sql in Resources */ = {isa = PBXBuildFile; fileRef = 493ABDC015562B41007F8B5E /* jflash_162_to_17.sql */; };
 		91D3F9D01580294F00CB8F1E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		91D3F9D11580294F00CB8F1E /* AddStudySetInputViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BC411AB7C4600016BD2 /* AddStudySetInputViewController.m */; };
@@ -1140,7 +1135,6 @@
 		4965FD30126F6417000AC280 /* practice-btn-wrong@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-wrong@2x.png"; path = "Assets/practice-btn-wrong@2x.png"; sourceTree = "<group>"; };
 		4965FD80126F6FCF000AC280 /* bluetheme-cookie-cutters */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "bluetheme-cookie-cutters"; path = "Assets/bluetheme-cookie-cutters"; sourceTree = "<group>"; };
 		4965FD83126F7002000AC280 /* redtheme-cookie-cutters */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "redtheme-cookie-cutters"; path = "Assets/redtheme-cookie-cutters"; sourceTree = "<group>"; };
-		49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = "MainWindow-iPad.xib"; path = "XIBs/MainWindow-iPad.xib"; sourceTree = "<group>"; };
 		496BE54B11EC5303003AB713 /* ActionBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ActionBarViewController.h; path = AppSpecific/ActionBarViewController.h; sourceTree = "<group>"; };
 		496BE54C11EC5303003AB713 /* ActionBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ActionBarViewController.m; path = AppSpecific/ActionBarViewController.m; sourceTree = "<group>"; };
 		496BE54F11EC5320003AB713 /* ActionBarViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ActionBarViewController.xib; path = XIBs/ActionBarViewController.xib; sourceTree = "<group>"; };
@@ -2394,7 +2388,6 @@
 				49B4ABC311C1D03600CFC308 /* ExamplesUnavailable.xib */,
 				917A5C6811AB844300016BD2 /* HelpView.xib */,
 				917A5C6911AB844300016BD2 /* MainWindow.xib */,
-				49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */,
 				497125231487300A00D4D150 /* MoodIcon.xib */,
 				917A5C6A11AB844300016BD2 /* AddStudySetView.xib */,
 				49377B1E1485259D00BD80C5 /* GroupDescriptionView.xib */,
@@ -2718,7 +2711,6 @@
 				49FE8C7914A9B83200579716 /* CardViewController.xib in Resources */,
 				4937876114DB8D9700361203 /* jflash_16_to_161.sql in Resources */,
 				49BA6DB514F4887500A48A21 /* jflash_161_to_162.sql in Resources */,
-				49695844150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 				493ABDC115562B41007F8B5E /* jflash_162_to_17.sql in Resources */,
 				49C0C97C1629151900F8966C /* Default-568h@2x.png in Resources */,
 				49C0C97E16291B8400F8966C /* HelpWebViewController.xib in Resources */,
@@ -2744,7 +2736,6 @@
 				49FE8C7814A9B83200579716 /* CardViewController-EtoJ.xib in Resources */,
 				49FE8C7A14A9B83200579716 /* CardViewController.xib in Resources */,
 				4937876214DB8D9700361203 /* jflash_16_to_161.sql in Resources */,
-				49695846150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2762,7 +2753,6 @@
 				498229301490A0BE009EC2CD /* SearchingTableCell.xib in Resources */,
 				49FE8C7214A9B82300579716 /* CardViewController-EtoJ.xib in Resources */,
 				49FE8C7414A9B82300579716 /* CardViewController.xib in Resources */,
-				49695847150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2863,7 +2853,6 @@
 				A34F45C6184B22AA00FA137C /* starred-folder.png in Resources */,
 				49FE8C7114A9B82300579716 /* CardViewController-EtoJ.xib in Resources */,
 				49FE8C7314A9B82300579716 /* CardViewController.xib in Resources */,
-				49695845150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 				4922ED95155678E000645F61 /* cflash_11_to_12.sql in Resources */,
 				49C0C97F16291B8400F8966C /* HelpWebViewController.xib in Resources */,
 			);
@@ -2950,7 +2939,6 @@
 				91D3F9C61580294F00CB8F1E /* CardViewController.xib in Resources */,
 				91D3F9CB1580294F00CB8F1E /* jflash_16_to_161.sql in Resources */,
 				91D3F9CC1580294F00CB8F1E /* jflash_161_to_162.sql in Resources */,
-				91D3F9CD1580294F00CB8F1E /* MainWindow-iPad.xib in Resources */,
 				91D3F9CE1580294F00CB8F1E /* jflash_162_to_17.sql in Resources */,
 				499F07E915802FC1006B7A14 /* UpgradeAdViewController.xib in Resources */,
 				915FEC5115807BF300BEDF5F /* jFlashJr.db in Resources */,
