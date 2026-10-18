@@ -48,8 +48,7 @@
   }
   else
   {
-    // If it is unknown, log it so we can find out about it, and maybe even implement it
-    [LWEAnalytics logError:@"Unhandled bundle ID" message:bundleId];
+    // Unknown caller: ignore it (no analytics/error reporting -- the app collects no data)
     return nil;
   }
 }

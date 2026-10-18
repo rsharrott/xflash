@@ -10,9 +10,6 @@
 [submodule "jFlash/Classes/External/asi-http-request"]
 	path = jFlash/Classes/External/asi-http-request
 	url = https://github.com/pokeb/asi-http-request.git
-[submodule "jFlash/Classes/External/janrain"]
-	path = jFlash/Classes/External/janrain
-	url = git@github.com:LongWeekend/engage.iphone.git
 [submodule "jFlash/Classes/External/DSActivityView"]
 	path = jFlash/Classes/External/DSActivityView
 	url = https://github.com/dominik-hadl/DSActivityView.git
@@ -25,6 +22,3 @@
 [submodule "jFlash/Classes/External/MBProgressHUD"]
 	path = jFlash/Classes/External/MBProgressHUD
 	url = https://github.com/jdg/MBProgressHUD.git
-[submodule "jFlash/Classes/External/jump.ios"]
-	path = jFlash/Classes/External/jump.ios
-	url = https://github.com/janrain/jump.ios.git

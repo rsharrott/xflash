@@ -7,7 +7,6 @@
 //
 
 #import "UpgradeAdViewController.h"
-#import "LWENetworkUtils.h"
 
 @interface UpgradeAdViewController ()
 @end
@@ -19,15 +18,8 @@
 // Default action for when the "Go to the App Store" or equivalent button is pressed
 - (IBAction)appStoreBtnPressed:(id)sender
 {
-  LWENetworkUtils *tmpNet = [[LWENetworkUtils alloc] init];
-#if defined (LWE_JFLASH)
-  // TODO: Replace this with a JFlash link
-  [tmpNet followLinkshareURL:@"http://click.linksynergy.com/fs-bin/stat?id=qGx1VSppku4&offerid=146261&type=3&subid=0&tmpid=1826&RD_PARM1=http%253A%252F%252Fitunes.apple.com%252Fus%252Fapp%252Fid380853144%253Fmt%253D8%2526uo%253D4%2526partnerId%253D30&u1=JFLASH_APP_WELCOME_MESSAGE"];
-#elif defined (LWE_CFLASH)
-  // TODO: Replace this with a CFlash link
-  [tmpNet followLinkshareURL:@"http://click.linksynergy.com/fs-bin/stat?id=qGx1VSppku4&offerid=146261&type=3&subid=0&tmpid=1826&RD_PARM1=http%253A%252F%252Fitunes.apple.com%252Fus%252Fapp%252Fid380853144%253Fmt%253D8%2526uo%253D4%2526partnerId%253D30&u1=JFLASH_APP_WELCOME_MESSAGE"];
-#endif
-  [tmpNet release];
+  // The old store links (Rikai Browser / legacy jFlash) are no longer on the App Store.
+  [self dismissModalViewControllerAnimated:YES];
 }
 
 // When we want this VC to disappear

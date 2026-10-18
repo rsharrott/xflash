@@ -83,13 +83,6 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(CurrentState);
     self.starredTag = [Tag starredWordsTag];
   }
 
-  // This code is so we can figure out what our users are studying (only system sets)
-  if (tag.tagEditable == 0 && firstRun == NO)
-  {
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:tag.tagId] forKey:@"id"];
-    [LWEAnalytics logEvent:LWEActiveTagDidChange parameters:userInfo];
-  }
-  
   // Tell everyone to reload their data (only if we're not just starting up)
   if (firstRun == NO)
   {

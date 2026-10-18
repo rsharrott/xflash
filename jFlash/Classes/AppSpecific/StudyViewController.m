@@ -10,7 +10,6 @@
 #import "CurrentState.h"
 #import "SettingsViewController.h"
 #import "StudyViewController.h"
-#import "LWENetworkUtils.h"
 #import "AddTagViewController.h"
 #import "UpdateManager.h"
 #import "CardViewController.h"
@@ -92,11 +91,8 @@
   {
     _alreadyShowedAlertView = YES;
 #if defined (LWE_JFLASH)
-    [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Welcome to Japanese Flash!",@"StudyViewController.WelcomeAlertViewTitle")
-                                       message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nTo study other sets, tap the 'Study Sets' tab below.\n\nLike Japanese Flash? Checkout Rikai Browser: Reading Japanese on your iPhone just got easier!",@"RootViewController.WelcomeAlertViewMessage")
-                                            ok:NSLocalizedString(@"Later", @"StudyViewController.Later")
-                                        cancel:NSLocalizedString(@"Get Rikai", @"WebViewController.RikaiAppStore")
-                                      delegate:self];
+    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Welcome to Japanese in a Flash!",@"StudyViewController.WelcomeAlertViewTitle")
+                                       message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nTo study other sets, tap the 'Study Sets' tab below.",@"RootViewController.WelcomeAlertViewMessage")];
 #elif (LWE_CFLASH)
     [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Welcome to Chinese Flash!",@"StudyViewController.WelcomeAlertViewTitle")
                                        message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nIf you want to study other sets, tap the 'Study Sets' tab below.",@"RootViewController.WelcomeAlertViewMessage")
@@ -266,18 +262,14 @@
 #pragma mark - UIAlertView delegate method
 
 /**
- * We prompt users to get Rikai if it is JFlash.
- * This is the delegate method to handle the response of what the user taps.
+ * Handles the button tap on the legacy (pre-1.7) upgrade alerts shown by
+ * UpdateManager showUpgradeAlertView:delegate:. The first-launch welcome alert
+ * no longer uses this delegate.
  */
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-  // not really a cancel button, just button two
-  if (buttonIndex == LWE_ALERT_CANCEL_BTN)
-  {
-    LWENetworkUtils *tmpNet = [[LWENetworkUtils alloc] init];
-    [tmpNet followLinkshareURL:@"http://click.linksynergy.com/fs-bin/stat?id=qGx1VSppku4&offerid=146261&type=3&subid=0&tmpid=1826&RD_PARM1=http%253A%252F%252Fitunes.apple.com%252Fus%252Fapp%252Fid380853144%253Fmt%253D8%2526uo%253D4%2526partnerId%253D30&u1=JFLASH_APP_WELCOME_MESSAGE"];
-    [tmpNet release];
-  }
+  // The legacy alerts' second button linked to Rikai Browser, which is no longer
+  // on the App Store, so both buttons now just dismiss.
 }
 
 #pragma mark - Public methods
