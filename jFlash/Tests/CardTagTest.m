@@ -11,6 +11,7 @@
 #import "PracticeModeCardViewDelegate.h"
 #import "TagPeer.h"
 #import "PracticeCardSelector.h"
+#import "PracticeCardSelectorMath.h"
 #import "CardPeer.h"
 #import "UserHistoryPeer.h"
 
@@ -25,6 +26,82 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
 @implementation CardTagTest
 
 @synthesize tag = tag_;
+
+// Regression: once more cards were seen than the study pool size, (maxCardsToStudy - cardsSeenTotal)
+// was computed unsigned, wrapped to ~2^64, and p_unseen came out in the tens of thousands -- so seen
+// cards were never picked again. Pure math only, no database needed.
+- (void)testProbabilityOfUnseenWhenMoreSeenThanPoolSize
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  id oldMax = [[settings objectForKey:APP_MAX_STUDYING] retain];
+  id oldFreq = [[settings objectForKey:APP_FREQUENCY_MULTIPLIER] retain];
+  [settings setInteger:30 forKey:APP_MAX_STUDYING];
+  [settings setInteger:2 forKey:APP_FREQUENCY_MULTIPLIER];
+
+  // Medium: 40 seen (10 Studying, 10 each at Right 1x/2x/3x -> mean level 2.5), 100 cards in the set
+  PracticeCardSelector *cardSelector = [[PracticeCardSelector alloc] init];
+  CGFloat p = [cardSelector calculateProbabilityOfUnseenWithCardsSeen:40 totalCards:100 numerator:100 levelOneCards:10];
+  XCTAssertEqualWithAccuracy(p, 0.140625, 1e-6, @"Over the pool size only the 'how well known' term should remain: ((2.5-1)/4)^2");
+  [cardSelector release];
+
+  // Put the settings back exactly as they were (absent stays absent)
+  if (oldMax) { [settings setObject:oldMax forKey:APP_MAX_STUDYING]; } else { [settings removeObjectForKey:APP_MAX_STUDYING]; }
+  if (oldFreq) { [settings setObject:oldFreq forKey:APP_FREQUENCY_MULTIPLIER]; } else { [settings removeObjectForKey:APP_FREQUENCY_MULTIPLIER]; }
+  [oldMax release];
+  [oldFreq release];
+}
+
+- (void)testProbabilityOfUnseenStaysInRange
+{
+  for (long maxCards = MIN_MAX_STUDYING; maxCards <= MAX_MAX_STUDYING; maxCards++)
+  {
+    for (long freq = MIN_FREQUENCY_MULTIPLIER; freq <= MAX_FREQUENCY_MULTIPLIER; freq++)
+    {
+      for (long seen = 0; seen <= 120; seen++)
+      {
+        long levelOne = seen / 3;
+        long numerator = levelOne + (seen - levelOne) * 3;
+        double p = LWEProbabilityOfUnseenCard(seen, 150, numerator, levelOne, maxCards, freq);
+        XCTAssertTrue(p >= 0.0 && p <= 1.0, @"p_unseen %f out of range (seen %ld, pool %ld, freq %ld)", p, seen, maxCards, freq);
+      }
+    }
+  }
+  XCTAssertEqual(LWEProbabilityOfUnseenCard(0, 10, 0, 0, 30, 2), 1.0, @"Nothing seen yet -> new card, and no 0/0");
+  XCTAssertEqual(LWEProbabilityOfUnseenCard(10, 10, 30, 0, 30, 2), 0.0, @"Everything seen -> no new card");
+}
+
+- (void)testPickCardLevelPicksSeenCardsAndNeverAnEmptyLevel
+{
+  long counts[6] = {60, 10, 10, 10, 10, 0};
+  NSInteger picks[6] = {0};
+  for (NSInteger i = 0; i < 1000; i++)
+  {
+    long level = LWEPickCardLevel(counts, 5, 0.140625, (i + 0.5) / 1000.0);
+    XCTAssertTrue(level >= 0 && level <= 4, @"Picked empty level %ld", level);
+    picks[level]++;
+  }
+  XCTAssertTrue(picks[0] > 100 && picks[0] < 200, @"~14%% should be new cards, got %ld/1000", (long)picks[0]);
+  XCTAssertTrue(picks[1] > picks[4], @"Studying cards should come up more than Right 3x cards");
+
+  // Inputs where the roulette loop can't return, so the old code fell through to the (empty) unseen level:
+  // (a) randomNum == 1.0 (the old rand()/RAND_MAX could produce it): the only slice sums to exactly 1.0, never > 1.0
+  long onlyStudying[6] = {0, 1, 0, 0, 0, 0};
+  XCTAssertEqual(LWEPickCardLevel(onlyStudying, 5, 0.0, 1.0), 1L, @"Fall-through with no unseen cards must pick a seen level");
+  // (b) a non-zero p_unseen with no unseen cards: seen slices only cover [0, 0.5), so 0.9 falls through
+  long noUnseen[6] = {0, 3, 0, 2, 0, 0};
+  XCTAssertEqual(LWEPickCardLevel(noUnseen, 5, 0.5, 0.9), 3L, @"Fall-through must pick the highest non-empty seen level, not empty unseen");
+}
+
+- (void)testFrequencySliderMoreOftenMeansMoreNewCards
+{
+  double previous = -1.0;
+  for (long freq = MIN_FREQUENCY_MULTIPLIER; freq <= MAX_FREQUENCY_MULTIPLIER; freq++)
+  {
+    double p = LWEProbabilityOfUnseenCard(40, 100, 100, 10, 30, freq);
+    XCTAssertTrue(p > previous, @"Frequency %ld should give more new cards than %ld", freq, freq - 1);
+    previous = p;
+  }
+}
 
 - (void)testCalculateNextCardLevelWithError
 {

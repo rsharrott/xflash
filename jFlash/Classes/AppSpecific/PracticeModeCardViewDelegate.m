@@ -205,6 +205,23 @@
 #pragma mark - Get Random Card
 
 /**
+ * First level that has cards (seen levels, then unseen, then Learned), or -1 if the tag is empty.
+ * Only used if the selector ever names an empty level.
+ */
+- (NSInteger) _nonEmptyLevelInTag:(Tag *)tag
+{
+  NSInteger order[6] = {1, 2, 3, 4, kLWEUnseenCardLevel, kLWELearnedCardLevel};
+  for (NSInteger i = 0; i < 6; i++)
+  {
+    if ([[tag.cardsByLevel objectAtIndex:order[i]] count] > 0)
+    {
+      return order[i];
+    }
+  }
+  return -1;
+}
+
+/**
  * Returns a Card object from the database randomly
  * Accepts current cardId in an attempt to not return the last card again
  */
@@ -231,7 +248,18 @@
   NSMutableArray *cardArray = [tag.cardsByLevel objectAtIndex:nextLevelId];
   NSInteger numCardsAtLevel = [cardArray count];
   LWE_ASSERT_EXC((numCardsAtLevel > 0),@"We've been asked for cards at level %d but there aren't any.",nextLevelId);
-  NSInteger randomOffset = arc4random() % numCardsAtLevel;
+  if (numCardsAtLevel == 0)
+  {
+    // Release builds don't assert; never index into (or mod by) an empty level
+    nextLevelId = [self _nonEmptyLevelInTag:tag];
+    if (nextLevelId < 0)
+    {
+      return nil;
+    }
+    cardArray = [tag.cardsByLevel objectAtIndex:nextLevelId];
+    numCardsAtLevel = [cardArray count];
+  }
+  NSInteger randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel);
   randomCard = [cardArray objectAtIndex:randomOffset];
   
   // this is a simple queue of the last five cards
@@ -272,7 +300,12 @@
     cardArray = [tag.cardsByLevel objectAtIndex:nextLevelId];
     NSInteger numCardsAtLevel2 = [cardArray count];
     LWE_ASSERT_EXC((numCardsAtLevel2 > 0),@"We've been asked for cards at level %d but there aren't any.",nextLevelId);
-    randomOffset = arc4random() % numCardsAtLevel2;
+    if (numCardsAtLevel2 == 0)
+    {
+      // Keep the card we already have rather than index into an empty level
+      break;
+    }
+    randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel2);
     randomCard = [cardArray objectAtIndex:randomOffset];      
     
     i++;

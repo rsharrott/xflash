@@ -1134,6 +1134,7 @@
 		496461CA1580929A00C3AB80 /* JFlashUpdateManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = JFlashUpdateManager.m; path = AppSpecific/JFlashUpdateManager.m; sourceTree = "<group>"; };
 		4964E53C14A959EB00683A58 /* PracticeCardSelector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PracticeCardSelector.h; path = AppSpecific/PracticeCardSelector.h; sourceTree = "<group>"; };
 		4964E53D14A959EB00683A58 /* PracticeCardSelector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PracticeCardSelector.m; path = AppSpecific/PracticeCardSelector.m; sourceTree = "<group>"; };
+		4964E54214A959EB00683A58 /* PracticeCardSelectorMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PracticeCardSelectorMath.h; path = AppSpecific/PracticeCardSelectorMath.h; sourceTree = "<group>"; };
 		4965FD2D126F6417000AC280 /* practice-btn-actions@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-actions@2x.png"; path = "Assets/practice-btn-actions@2x.png"; sourceTree = "<group>"; };
 		4965FD2E126F6417000AC280 /* practice-btn-goaway@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-goaway@2x.png"; path = "Assets/practice-btn-goaway@2x.png"; sourceTree = "<group>"; };
 		4965FD2F126F6417000AC280 /* practice-btn-right@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-right@2x.png"; path = "Assets/practice-btn-right@2x.png"; sourceTree = "<group>"; };
@@ -2360,6 +2361,7 @@
 				91214D0811B4B9E80091AFEF /* BrowseModeCardViewDelegate.m */,
 				4964E53C14A959EB00683A58 /* PracticeCardSelector.h */,
 				4964E53D14A959EB00683A58 /* PracticeCardSelector.m */,
+				4964E54214A959EB00683A58 /* PracticeCardSelectorMath.h */,
 				91214D6811B4D77C0091AFEF /* PracticeModeCardViewDelegate.h */,
 				91214D6911B4D77C0091AFEF /* PracticeModeCardViewDelegate.m */,
 				91CBA67911BB4986004BD0D0 /* ExampleSentencesViewController.h */,
