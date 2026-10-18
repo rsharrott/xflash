@@ -7,7 +7,6 @@
 //
 
 #import "UpgradeAdViewController.h"
-#import "LWENetworkUtils.h"
 
 @interface UpgradeAdViewController ()
 @end
@@ -19,13 +18,8 @@
 // Default action for when the "Go to the App Store" or equivalent button is pressed
 - (IBAction)appStoreBtnPressed:(id)sender
 {
-#if defined (LWE_JFLASH)
-  // TODO: Replace this with a JFlash link
-  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://apps.apple.com/us/app/id380853144"] options:@{} completionHandler:nil];
-#elif defined (LWE_CFLASH)
-  // TODO: Replace this with a CFlash link
-  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://apps.apple.com/us/app/id380853144"] options:@{} completionHandler:nil];
-#endif
+  // The old store links (Rikai Browser / legacy jFlash) are no longer on the App Store.
+  [self dismissModalViewControllerAnimated:YES];
 }
 
 // When we want this VC to disappear

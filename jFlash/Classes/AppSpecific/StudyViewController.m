@@ -10,7 +10,6 @@
 #import "CurrentState.h"
 #import "SettingsViewController.h"
 #import "StudyViewController.h"
-#import "LWENetworkUtils.h"
 #import "AddTagViewController.h"
 #import "UpdateManager.h"
 #import "CardViewController.h"
@@ -269,11 +268,8 @@
  */
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-  // not really a cancel button, just button two
-  if (buttonIndex == LWE_ALERT_CANCEL_BTN)
-  {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://apps.apple.com/us/app/id380853144"] options:@{} completionHandler:nil];
-  }
+  // The legacy alerts' second button linked to Rikai Browser, which is no longer
+  // on the App Store, so both buttons now just dismiss.
 }
 
 #pragma mark - Public methods
