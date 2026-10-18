@@ -76,6 +76,9 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 #endif
 
 // Private Methods
+//! The "+N readings" pill is 30pt tall; its button extends this far above and below it (44pt hit area).
+static const CGFloat kLWEPillHitInset = 7.0;
+
 @interface CardViewController()
 - (void) _injectMeaningHTML:(NSString*)html;
 - (void) _prepareView:(Card*)card;
@@ -276,9 +279,11 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   {
     // UIButtonConfiguration (replaces the deprecated image/content edge insets): chevron after the text
     UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
-    config.baseForegroundColor = [UIColor colorWithWhite:1.0 alpha:0.88];
+    // White text (5.1:1 on the pill); the visible pill is 30pt tall inside a 44pt-tall hit area.
+    config.baseForegroundColor = [UIColor whiteColor];
     config.background.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
     config.background.cornerRadius = 15.0;
+    config.background.backgroundInsets = NSDirectionalEdgeInsetsMake(kLWEPillHitInset, 0, kLWEPillHitInset, 0);
     config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
     config.imagePlacement = NSDirectionalRectEdgeTrailing;
     config.imagePadding = 5.0;
@@ -407,7 +412,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     CGFloat romajiSize = (romajiOnly ? 24.0 : 17.0) * dt;
     [text appendAttributedString:[[[NSAttributedString alloc] initWithString:romajiText attributes:@{
       NSFontAttributeName: [UIFont systemFontOfSize:romajiSize weight:UIFontWeightMedium],
-      NSForegroundColorAttributeName: [UIColor colorWithWhite:1.0 alpha:(romajiOnly ? 1.0 : 0.66)],
+      NSForegroundColorAttributeName: [UIColor colorWithWhite:1.0 alpha:(romajiOnly ? 1.0 : 0.88)],
       NSKernAttributeName: @(0.2),
       NSParagraphStyleAttributeName: para,
     }] autorelease]];
@@ -544,8 +549,11 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   {
     CGSize pillSize = [self.moreReadingsBtn sizeThatFits:CGSizeMake(contentW, 30)];
     CGFloat pillW = MIN(contentW, ceilf(pillSize.width));
-    self.moreReadingsBtn.frame = CGRectMake(roundf((w - pillW) / 2.0), bottom + (compact ? 6.0 : 12.0), pillW, 30.0);
-    bottom = CGRectGetMaxY(self.moreReadingsBtn.frame);
+    // 44pt-tall button around the 30pt pill (iOS 15+ draws the pill inset); the layout uses the visible pill.
+    CGFloat inset = 0.0;
+    if (@available(iOS 15.0, *)) { if (self.moreReadingsBtn.configuration != nil) inset = kLWEPillHitInset; }
+    self.moreReadingsBtn.frame = CGRectMake(roundf((w - pillW) / 2.0), bottom + (compact ? 6.0 : 12.0) - inset, pillW, 30.0 + 2.0 * inset);
+    bottom = CGRectGetMaxY(self.moreReadingsBtn.frame) - inset;
   }
 
   // ---- Meaning: a short rule, then the meaning (both drawn by the HTML template)
