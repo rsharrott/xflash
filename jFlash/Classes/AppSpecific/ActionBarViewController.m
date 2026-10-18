@@ -122,9 +122,9 @@
     AddTagViewController *tmpVC = [[AddTagViewController alloc] initWithCard:card];
     tmpVC.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc]
       initWithTitle:NSLocalizedString(@"Done", @"AddTagViewController.NavDoneButtonTitle")
-              style:UIBarButtonItemStyleBordered
+              style:UIBarButtonItemStylePlain
              target:tmpVC
-             action:@selector(dismissModalViewControllerAnimated:)] autorelease];
+             action:@selector(dismissModal:)] autorelease];
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:tmpVC, @"controller",
                           [NSNumber numberWithBool:YES], @"useNavController", nil];
     [tmpVC release];
@@ -171,16 +171,16 @@
   {
     MFMailComposeViewController *picker = [[MFMailComposeViewController alloc] init];
     picker.mailComposeDelegate = self;
-    [picker setSubject:@"Bad Data"];
+    [picker setSubject:@"Card Correction"];
     [picker setToRecipients:[NSArray arrayWithObjects:LWE_BAD_DATA_EMAIL, nil]];
     
     Tag *tmpTag = [[CurrentState sharedCurrentState] activeTag];
-    NSString *messageBody = [NSString stringWithFormat:@"How can we make this awesome?\n\n\n\nInfo For Long Weekend:\n\nCard Id: %i\nCard Headword: %@\nCard Meaning: %@\nActive Tag Id: %i\nActive Tag Name: %@", self.currentCard.cardId, self.currentCard.headword, self.currentCard.meaningWithoutMarkup, tmpTag.tagId, tmpTag.tagName];
+    NSString *messageBody = [NSString stringWithFormat:@"How can we make this awesome?\n\n\n\nCard details (please leave these in):\n\nCard Id: %i\nCard Headword: %@\nCard Meaning: %@\nActive Tag Id: %i\nActive Tag Name: %@", self.currentCard.cardId, self.currentCard.headword, self.currentCard.meaningWithoutMarkup, tmpTag.tagId, tmpTag.tagName];
     
     [picker setMessageBody:messageBody isHTML:NO];
     
     jFlashAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
-    [appDelegate.tabBarController presentModalViewController:picker animated:YES];
+    [appDelegate.tabBarController presentViewController:picker animated:YES completion:nil];
     [picker release];
   }
   else 
@@ -194,7 +194,7 @@
 //! Called when dismissing email composer
 - (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
 {
-  [controller dismissModalViewControllerAnimated:YES];
+  [controller dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - UIAlertView delegate methods
@@ -216,7 +216,12 @@
 
   NSMutableArray *sharingItems = [NSMutableArray array];
   [sharingItems addObject:shareText];
-  [sharingItems addObject:@"https://itunes.apple.com/us/app/japanese-flash-vocabulary/id367216357?mt=8"];
+  // Only append the App Store link once the app has an ID (kAppStoreID in Constants.m)
+  NSString *appURL = LWEAppStoreURLString();
+  if (appURL)
+  {
+    [sharingItems addObject:[NSURL URLWithString:appURL]];
+  }
 
   UIActivityViewController *activityController = [[[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil] autorelease];
   [self presentViewController:activityController animated:YES completion:nil];

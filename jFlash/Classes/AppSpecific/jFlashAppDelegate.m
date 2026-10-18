@@ -35,6 +35,13 @@
 
 @implementation LWESceneDelegate
 
+// MRC: the "strong" window property is retained, so release it with the delegate
+- (void)dealloc
+{
+  [_window release];
+  [super dealloc];
+}
+
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
   if (@available(iOS 13.0, *)) {
     if (![scene isKindOfClass:[UIWindowScene class]]) return;
@@ -54,12 +61,33 @@
     UIViewController *placeholder = [[UIViewController alloc] init];
     placeholder.view.backgroundColor = [UIColor whiteColor];
     window.rootViewController = placeholder;
+    [placeholder release];
     if (appDelegate.splashView) {
       [window addSubview:appDelegate.splashView];
     }
     appDelegate.window = window;
     self.window = window;
     [window makeKeyAndVisible];
+    [window release]; // retained by self.window and appDelegate.window
+
+    // Cold launch via jflash://WORD -- with a scene manifest, iOS delivers the URL
+    // here instead of application:openURL:options:.
+    UIOpenURLContext *urlContext = connectionOptions.URLContexts.anyObject;
+    if (urlContext)
+    {
+      [appDelegate handleIncomingURL:urlContext.URL sourceApplication:urlContext.options.sourceApplication];
+    }
+  }
+}
+
+// Warm launch: the app is already running (foreground or background) and receives jflash://WORD
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
+{
+  UIOpenURLContext *urlContext = URLContexts.anyObject;
+  if (urlContext)
+  {
+    jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+    [appDelegate handleIncomingURL:urlContext.URL sourceApplication:urlContext.options.sourceApplication];
   }
 }
 
@@ -67,7 +95,6 @@
 
 #import "DSActivityView.h"
 #import "AudioSessionManager.h"
-#import "Appirater.h"
 
 #import "SettingsViewController.h"
 #import "SearchViewController.h"
@@ -90,15 +117,20 @@
 
 #pragma mark - URL Handling
 
-//! For compatibility with iOS2.0 through iOS4.2, when it was deprecated in favor of the below.
-- (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
+// Non-scene entry point (only used if the scene manifest is ever removed); scenes go through LWESceneDelegate.
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
-  return [self application:application openURL:url sourceApplication:nil annotation:nil];
+  return [self handleIncomingURL:url sourceApplication:[options objectForKey:UIApplicationOpenURLOptionsSourceApplicationKey]];
 }
 
 // handles URL openings from other apps
-- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+- (BOOL) handleIncomingURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication
 {
+  // Nothing to search for (nil URL, bare jflash://, undecodable term): just open the app normally
+  if (url == nil || [self.externalAppManager searchTermForURL:url] == nil)
+  {
+    return NO;
+  }
   [self.externalAppManager configureManagerForURL:url sourceBundleId:sourceApplication];
   if (self.isFinishedLoading)
   {
@@ -273,7 +305,6 @@
 
   // Finish setting up & load tab bar
   [self _registerObservers];
-  [Appirater appLaunched];
   
   // Finally load search if we're supposed to do that.
   if (self.loadSearchOnBoot)
@@ -323,12 +354,12 @@
   if (useNavController)
   {
     UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:vc];
-    [self.tabBarController presentModalViewController:controller animated:YES];
+    [self.tabBarController presentViewController:controller animated:YES completion:nil];
     [controller release];
   }
   else
   {
-    [self.tabBarController presentModalViewController:vc animated:YES];    
+    [self.tabBarController presentViewController:vc animated:YES completion:nil];    
   }
 }
 

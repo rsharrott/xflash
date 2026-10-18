@@ -4,7 +4,7 @@
 #import "ExampleSentencePeer.h"
 
 @interface CardPeer ()
-+ (NSString *) _FTSSQLForKeyword:(NSString*)keyword column:(NSString *)columnName queryLimit:(NSInteger)limit;
++ (FMResultSet *) _FTSResultSetForKeyword:(NSString*)keyword column:(NSString *)columnName queryLimit:(NSInteger)limit;
 + (Card*) _retrieveCardWithResultSet:(FMResultSet *)rs;
 + (NSMutableArray*) _addCardsToList:(NSMutableArray*)cardList fromResultSet:(FMResultSet*)rs hydrate:(BOOL)shouldHydrate;
 + (NSString *) _tagLinkTableName:(Tag *)tag;
@@ -104,7 +104,6 @@
  */
 + (NSArray*) searchCardsForKeyword:(NSString*)keyword
 {
-  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
   NSMutableArray *cardList = [NSMutableArray array];
   NSInteger queryLimit = 100;
   
@@ -118,15 +117,13 @@
   {
     column = @"reading";
   }
-  NSString *sql = [CardPeer _FTSSQLForKeyword:keyword column:column queryLimit:queryLimit];
-  cardList = [CardPeer _addCardsToList:cardList fromResultSet:[db executeQuery:sql] hydrate:NO];
+  cardList = [CardPeer _addCardsToList:cardList fromResultSet:[CardPeer _FTSResultSetForKeyword:keyword column:column queryLimit:queryLimit] hydrate:NO];
   
   // Now, did we get enough cards, query "content" column as well (if it was a no-column search, don't re-run)
   if (column != nil && [cardList count] < queryLimit)
   {
     NSInteger newLimit = queryLimit - [cardList count];
-    NSString *sql = [CardPeer _FTSSQLForKeyword:keyword column:@"content" queryLimit:newLimit];
-    cardList = [CardPeer _addCardsToList:cardList fromResultSet:[db executeQuery:sql] hydrate:NO];
+    cardList = [CardPeer _addCardsToList:cardList fromResultSet:[CardPeer _FTSResultSetForKeyword:keyword column:@"content" queryLimit:newLimit] hydrate:NO];
   }
   
   return (NSArray*)cardList;
@@ -135,20 +132,23 @@
 #pragma mark - Private Methods
 
 /**
- * This will return a SQL query that will return card ids from the FTS table based on the settings passed
+ * Runs the FTS query for the keyword and returns the card_id result set.
+ * The keyword is passed to SQLite as a bound parameter (MATCH ?), never
+ * interpolated into the SQL -- it can come from a jflash:// URL.
  */
-+ (NSString *) _FTSSQLForKeyword:(NSString*)keyword column:(NSString *)columnName queryLimit:(NSInteger)limit
++ (FMResultSet *) _FTSResultSetForKeyword:(NSString*)keyword column:(NSString *)columnName queryLimit:(NSInteger)limit
 {
   // Users understand "?" better than "*".  Well, maybe not geeks.
   NSString *keywordWildcard = [keyword stringByReplacingOccurrencesOfString:@"?" withString:@"*"];
   NSString *column = nil;
-  NSString *returnSql = nil;
   NSString *searchString = nil;
 
   if (columnName)
   {
     // If we are searching a specific column, and not the whole table, wrap it in quotes for exact match.
-    searchString = [NSString stringWithFormat:@"\"%@\"",keywordWildcard];
+    // FTS3 phrases can't contain a double quote, so drop any from the keyword.
+    NSString *phrase = [keywordWildcard stringByReplacingOccurrencesOfString:@"\"" withString:@" "];
+    searchString = [NSString stringWithFormat:@"\"%@\"",phrase];
     column = columnName;
   }
   else
@@ -156,11 +156,11 @@
     searchString = keywordWildcard;
     column = @"cards_search_content";
   }
-  
-  // Do the search using SQLite FTS (PTAG results)
-  returnSql = [NSString stringWithFormat:@"SELECT card_id FROM cards_search_content WHERE "
-               "%@ MATCH '%@' ORDER BY LENGTH(%@) ASC, ptag DESC LIMIT %d", column, searchString, column, limit];
-  return returnSql;
+
+  // Only the column name (one of our own constants) and the integer limit are formatted into the SQL.
+  NSString *sql = [NSString stringWithFormat:@"SELECT card_id FROM cards_search_content WHERE "
+                   "%@ MATCH ? ORDER BY LENGTH(%@) ASC, ptag DESC LIMIT %ld", column, column, (long)limit];
+  return [[LWEDatabase sharedLWEDatabase].dao executeQuery:sql withArgumentsInArray:[NSArray arrayWithObject:searchString]];
 }
 
 /**

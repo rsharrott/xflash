@@ -93,7 +93,7 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
   self.navigationItem.rightBarButtonItem = _addButton;
   
   self.tagArray = [[self.group.childTags mutableCopy] autorelease];
-  self.activityIndicator = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
+  self.activityIndicator = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium] autorelease];
 
   self.tableView.rowHeight = UITableViewAutomaticDimension;
   self.tableView.estimatedRowHeight = 60;
@@ -217,7 +217,7 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
   AddStudySetInputViewController *tmpVC = [[AddStudySetInputViewController alloc] initWithDefaultCard:nil inGroup:self.group];
 #endif
   UINavigationController *modalNavController = [[UINavigationController alloc] initWithRootViewController:tmpVC];
-  [self.navigationController presentModalViewController:modalNavController animated:YES];
+  [self.navigationController presentViewController:modalNavController animated:YES completion:nil];
   [modalNavController release];
 	[tmpVC release];
 }
@@ -458,7 +458,7 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
   groupDescription.font = [UIFont systemFontOfSize:14.0f];
   groupDescription.backgroundColor = [UIColor colorWithRed:0.95f green:0.95f blue:0.95f alpha:1.0f];
   groupDescription.numberOfLines = 0;
-  groupDescription.lineBreakMode = UILineBreakModeWordWrap;
+  groupDescription.lineBreakMode = NSLineBreakByWordWrapping;
   groupDescription.layer.borderWidth = 1.0f;
   groupDescription.layer.cornerRadius = 7.0f;
   groupDescription.layer.borderColor = [[UIColor lightGrayColor] CGColor];
@@ -517,7 +517,7 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
       // For JFlash & CFlash Junior, we don't let them add a new study set, so show the Coffee modal instead.
       UpgradeAdViewController *tmpVC = [[UpgradeAdViewController alloc] initWithNibName:@"UpgradeAdViewController" bundle:nil];
       UINavigationController *modalNavController = [[UINavigationController alloc] initWithRootViewController:tmpVC];
-      [self.navigationController presentModalViewController:modalNavController animated:YES];
+      [self.navigationController presentViewController:modalNavController animated:YES completion:nil];
       [modalNavController release];
       [tmpVC release];
     #endif

@@ -199,14 +199,32 @@
 		// check if it contains directory
 		NSString* strPath = [NSString stringWithCString:filename encoding:NSUTF8StringEncoding];
 		BOOL isDirectory = NO;
-		if( filename[fileInfo.size_filename-1]=='/' || filename[fileInfo.size_filename-1]=='\\')
+		if( fileInfo.size_filename > 0 && (filename[fileInfo.size_filename-1]=='/' || filename[fileInfo.size_filename-1]=='\\'))
 			isDirectory = YES;
 		free( filename );
 		if( [strPath rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"/\\"]].location!=NSNotFound )
 		{// contains a path
 			strPath = [strPath stringByReplacingOccurrencesOfString:@"\\" withString:@"/"];
 		}
-		NSString* fullPath = [path stringByAppendingPathComponent:strPath];
+		// Zip-slip guard: refuse entries whose name is absolute, contains "..", isn't valid
+		// UTF-8, or otherwise resolves outside the destination folder. A bad entry aborts
+		// the whole unzip so a crafted package can't write anywhere else in the container.
+		NSString* fullPath = nil;
+		if( strPath != nil && [strPath length] > 0 && ![strPath hasPrefix:@"/"]
+		    && ![[strPath pathComponents] containsObject:@".."] )
+		{
+			NSString* destRoot = [[path stringByStandardizingPath] stringByAppendingString:@"/"];
+			NSString* candidate = [[path stringByAppendingPathComponent:strPath] stringByStandardizingPath];
+			if( [candidate hasPrefix:destRoot] || (isDirectory && [candidate isEqualToString:[path stringByStandardizingPath]]) )
+				fullPath = candidate;
+		}
+		if( fullPath == nil )
+		{
+			[self OutputErrorMessage:[NSString stringWithFormat:@"Refusing zip entry outside the destination: %@", strPath]];
+			success = NO;
+			unzCloseCurrentFile( _unzFile );
+			break;
+		}
 		
 		if( isDirectory )
 			[fman createDirectoryAtPath:fullPath withIntermediateDirectories:YES attributes:nil error:nil];

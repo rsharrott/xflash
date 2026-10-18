@@ -10,7 +10,6 @@
 #import "NSURL+IFUnicodeURL.h"
 
 @interface ExternalAppManager ()
-- (NSString*) _getDecodedSearchTerm:(NSURL *)url;
 - (void) _removeReturnHeaderFromSearch;
 @end
 
@@ -27,7 +26,7 @@
  */
 - (void) configureManagerForURL:(NSURL *)incomingURL sourceBundleId:(NSString *)sourceBundleId
 {
-  self.searchTerm = [self _getDecodedSearchTerm:incomingURL];
+  self.searchTerm = [self searchTermForURL:incomingURL];
   self.externalBundleId = sourceBundleId;
   self.appLaunchedFromURL = YES;
 }
@@ -115,28 +114,54 @@
   LWE_ASSERT_EXC(handler, @"You must have a URL handler set for bundle ID");
   
   NSString *urlString = [NSString stringWithFormat:@"%@://foobar",handler];
-  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString] options:@{} completionHandler:nil];
 }
 
 #pragma mark - Private Methods
 
-- (NSString*) _getDecodedSearchTerm:(NSURL *)url  
+- (NSString *) searchTermForURL:(NSURL *)url
 {
-  // Get the PLIST data about our scheme - use this because we could be JFlash://, cFlash://, etc.
-  NSArray *urlSchemes = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleURLTypes"];
-  NSDictionary *schemeInfo = [urlSchemes objectAtIndex:0];
-  NSString *scheme = [(NSArray*)[schemeInfo objectForKey:@"CFBundleURLSchemes"] objectAtIndex:0];
-  NSString *schemeUri = [NSString stringWithFormat:@"%@://",scheme];
-  
-  NSString *term = [url unicodeAbsoluteString];
-  if ([term isEqualToString:@""] || [term isEqualToString:schemeUri])
+  if (url == nil)
   {
-    term = [[url absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return nil;
   }
-  
-  // Replace out the schema name
-  term = [term stringByReplacingOccurrencesOfString:schemeUri withString:@""];
-  return term;
+
+  // IFUnicodeURL turns a punycode host (jflash://xn--...) back into the Japanese/Chinese term
+  NSString *term = [url unicodeAbsoluteString];
+  NSString *bareScheme = [url.scheme length] ? [NSString stringWithFormat:@"%@://",url.scheme] : nil;
+  if ([term length] == 0 || (bareScheme && [term caseInsensitiveCompare:bareScheme] == NSOrderedSame))
+  {
+    // stringByRemovingPercentEncoding returns nil for malformed escapes; keep the raw string then
+    NSString *raw = [url absoluteString];
+    term = [raw stringByRemovingPercentEncoding] ?: raw;
+  }
+  if (term == nil)
+  {
+    return nil;
+  }
+
+  // Strip "<scheme>://" (or "<scheme>:") whatever its case -- jflash://, JFlash://, cflash://, ...
+  if ([url.scheme length])
+  {
+    NSString *prefixes[] = { [NSString stringWithFormat:@"%@://",url.scheme], [NSString stringWithFormat:@"%@:",url.scheme] };
+    for (NSUInteger i = 0; i < 2; i++)
+    {
+      NSRange r = [term rangeOfString:prefixes[i] options:(NSAnchoredSearch | NSCaseInsensitiveSearch)];
+      if (r.location != NSNotFound)
+      {
+        term = [term substringFromIndex:NSMaxRange(r)];
+        break;
+      }
+    }
+  }
+
+  // Path/query parts can still carry %-escapes (e.g. %20); decode them if they're well-formed
+  term = [term stringByRemovingPercentEncoding] ?: term;
+
+  // A trailing slash (jflash://word/) isn't part of the term
+  term = [term stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/"]];
+  term = [term stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  return ([term length] > 0) ? term : nil;
 }
 
 - (void) _removeReturnHeaderFromSearch

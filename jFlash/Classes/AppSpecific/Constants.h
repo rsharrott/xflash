@@ -76,9 +76,13 @@ extern NSString * const LWE_CURRENT_USER_DATABASE;
 
 extern NSString * const LWE_BAD_DATA_EMAIL;
 extern NSString * const LWE_SUPPORT_EMAIL;
+extern NSString * const LWE_SUPPORT_URL;
+extern NSString * const LWE_PRIVACY_URL;
 
-// Tapjoy ID - should be updated for each app!
-extern NSString * const LWE_TAPJOY_APP_ID;
+//! App Store ID of this app. Empty until the new app has one -- see Constants.m (TODO).
+extern NSString * const kAppStoreID;
+//! https://apps.apple.com/app/id<kAppStoreID>, or nil while kAppStoreID is empty.
+extern NSString * LWEAppStoreURLString(void);
 
 extern NSString * const LWE_XFLASH_HOMEPAGE;
 

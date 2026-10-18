@@ -54,9 +54,27 @@ NSString * const PLUGIN_LAST_UPDATE		  = @"last_update";
 // Tag for "favorites" - zero, because it wasn't taken!
 const NSInteger STARRED_TAG_ID = 0;
 
-// The email address of our bad data reports
-NSString * const LWE_BAD_DATA_EMAIL       = @"fix-card@longweekendmobile.com";
-NSString * const LWE_SUPPORT_EMAIL        = @"support@longweekendmobile.com";
+// Support contact for card corrections and general support.
+// (The old longweekendmobile.com addresses no longer exist.)
+NSString * const LWE_BAD_DATA_EMAIL       = @"help@japaneseinaflash.com";
+NSString * const LWE_SUPPORT_EMAIL        = @"help@japaneseinaflash.com";
+NSString * const LWE_SUPPORT_URL          = @"https://japaneseinaflash.com/support";
+NSString * const LWE_PRIVACY_URL          = @"https://japaneseinaflash.com/privacy";
+
+// App Store ID of the current app, used to build the share link.
+// TODO(Ross): set this once App Store Connect assigns the new app an ID.
+// While it is empty, the "Tell a Friend" / share-app UI stays hidden so users
+// never get a dead link. (The old Japanese Flash ID, 367216357, now 404s.)
+NSString * const kAppStoreID              = @"";
+
+NSString * LWEAppStoreURLString(void)
+{
+  if ([kAppStoreID length] == 0)
+  {
+    return nil;
+  }
+  return [NSString stringWithFormat:@"https://apps.apple.com/app/id%@", kAppStoreID];
+}
 
 #if defined(LWE_JFLASH)
       NSString * const LWE_APP_SPLASH_IMAGE = @"Default.png";
@@ -71,10 +89,7 @@ NSString * const LWE_SUPPORT_EMAIL        = @"support@longweekendmobile.com";
       NSString * const SET_KANA_ONLY_ON    = @"ON";
       NSString * const SET_KANA_ONLY_OFF   = @"OFF";
 
-      NSString * const LWE_XFLASH_HOMEPAGE       = @"http://www.japaneseflash.com";
-
-      // Tapjoy
-      NSString * const LWE_TAPJOY_APP_ID         = @"6f0f78d1-f4bf-437b-befc-977b317f7b04";
+      NSString * const LWE_XFLASH_HOMEPAGE       = @"https://japaneseinaflash.com";
 
 #if defined(LWE_JUNIOR)
       NSString * const LWE_CURRENT_VERSION       = @"1.0";
@@ -114,20 +129,20 @@ NSString * const LWE_SUPPORT_EMAIL        = @"support@longweekendmobile.com";
 
       // This is here for legacy migration only, as of JFLash 1.6.
       NSString * const LWE_DOWNLOADED_PLUGIN_PLIST  = @"downloadedPlugin.plist";
-// Don't use Cloudfront in development
-#if defined(LWE_DEBUG)
-      NSString * const LWE_PLUGIN_SERVER            = @"https://s3.amazonaws.com";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/japanese-flash/jFlash-available.plist";
-#else
-      NSString * const LWE_PLUGIN_SERVER            = @"https://d3580k8bnen6up.cloudfront.net";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/jFlash-available.plist";
-#endif
+// Remote plugin updates are switched off in every build: the old S3 buckets
+// (japanese-flash / chinese-flash) and CloudFront distributions are gone, so
+// the check and any download would only fail. Bundled plugins still load.
+// TODO: re-host the available-plugins plist and plugin packages, then set
+// LWE_PLUGIN_SERVER / LWE_PLUGIN_LIST_REL_URL here (and the targetURLs in
+// Plugins/*-available.plist) to turn updates back on.
+      NSString * const LWE_PLUGIN_SERVER            = @"";
+      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"";
 
 #elif defined(LWE_CFLASH)
       NSString * const LWE_APP_SPLASH_IMAGE         = @"chinese-flash-splash.png";
+      // cFlash never shipped a 4-inch splash; reuse the standard one
+      NSString * const LWE_APP_SPLASH_IMAGE_568h    = @"chinese-flash-splash.png";
 
-      // Tapjoy
-      NSString * const LWE_TAPJOY_APP_ID            = @"d05949e8-ab10-4039-b6f6-51ff3504084a";
 
       // These settings are CFlash only - pinyin coloring & tone changes
       NSString * const APP_PINYIN_COLOR             = @"pinyin_color";
@@ -161,13 +176,14 @@ NSString * const LWE_SUPPORT_EMAIL        = @"support@longweekendmobile.com";
       // This pertains to the plugin manager
       NSString * const LWE_AVAILABLE_PLUGIN_PLIST   = @"cFlash-available.plist";
       NSString * const LWE_PREINSTALLED_PLUGIN_PLIST   = @"cFlash-installed.plist";
-  #if defined(LWE_DEBUG)
-      NSString * const LWE_PLUGIN_SERVER            = @"https://s3.amazonaws.com";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/chinese-flash/cFlash-available.plist";
-  #else
-      NSString * const LWE_PLUGIN_SERVER            = @"https://d3jxezdeu5e50q.cloudfront.net";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/cFlash-available.plist";
-  #endif
+      // Remote plugin updates are switched off in every build: the old S3 buckets
+      // (japanese-flash / chinese-flash) and CloudFront distributions are gone, so
+      // the check and any download would only fail. Bundled plugins still load.
+      // TODO: re-host the available-plugins plist and plugin packages, then set
+      // LWE_PLUGIN_SERVER / LWE_PLUGIN_LIST_REL_URL here (and the targetURLs in
+      // Plugins/*-available.plist) to turn updates back on.
+      NSString * const LWE_PLUGIN_SERVER            = @"";
+      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"";
 #endif
 
 

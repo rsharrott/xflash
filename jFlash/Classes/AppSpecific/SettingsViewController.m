@@ -8,7 +8,6 @@
 
 #import "SettingsViewController.h"
 #import "PluginSettingsViewController.h"
-#import "Appirater.h"
 #import "AlgorithmSettingsViewController.h"
 #import "ReminderSettingsViewController.h"
 #import "UserViewController.h"
@@ -52,15 +51,18 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   [super viewDidLoad];
   self.sectionArray = [self.dataSource settingsArrayWithPluginManager:self.pluginManager];
 
-  UIBarButtonItem *rateUsBtn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Rate Us",@"SettingsViewController.RateUsButton") style:UIBarButtonItemStyleBordered target:self action:@selector(_launchAppirater)];
-  self.navigationItem.leftBarButtonItem = rateUsBtn;
-  [rateUsBtn release];
-    
-  // UIBarButtonItem *shareBtn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Tell a Friend",@"SettingsViewController.Share") style:UIBarButtonItemStyleBordered target:self action:@selector(_shareJFlash)];
-  UIBarButtonItem *shareBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(_shareJFlash)];
+  // Rate & share only make sense once the app is on the App Store. Until kAppStoreID
+  // is set (see Constants.m) both buttons stay hidden so nobody hits a dead link.
+  if (LWEAppStoreURLString())
+  {
+    UIBarButtonItem *rateUsBtn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Rate Us",@"SettingsViewController.RateUsButton") style:UIBarButtonItemStylePlain target:self action:@selector(_requestReview)];
+    self.navigationItem.leftBarButtonItem = rateUsBtn;
+    [rateUsBtn release];
 
-  self.navigationItem.rightBarButtonItem = shareBtn;
-  [shareBtn release];
+    UIBarButtonItem *shareBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(_shareJFlash)];
+    self.navigationItem.rightBarButtonItem = shareBtn;
+    [shareBtn release];
+  }
 
   self.tableView.rowHeight = UITableViewAutomaticDimension;
   self.tableView.estimatedRowHeight = 60;
@@ -111,19 +113,31 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 
 #pragma mark - Private Methods
 
-//! launchAppirater - convenience method for appirater
-- (void) _launchAppirater
+//! "Rate Us" is a user-initiated action, so open the App Store's write-a-review page directly
+//! (Apple's recommendation for buttons; SKStoreReviewController is rate-limited, may show
+//! nothing, and its ObjC API is deprecated in iOS 18).
+- (void) _requestReview
 {
-  Appirater *appirater = [[Appirater alloc] init]; // appirater releases itself, do not autorelease here.
-  [appirater showPromptManually];
+  NSString *appURL = LWEAppStoreURLString();
+  if (appURL == nil)
+  {
+    return;
+  }
+  NSURL *reviewURL = [NSURL URLWithString:[appURL stringByAppendingString:@"?action=write-review"]];
+  [[UIApplication sharedApplication] openURL:reviewURL options:@{} completionHandler:nil];
 }
 
 - (void) _shareJFlash
 {
-    NSArray *sharingItems = @[@"https://itunes.apple.com/us/app/japanese-flash-vocabulary/id367216357?mt=8"];
-        
-    UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
-    [self presentViewController:activityController animated:YES completion:nil];
+  NSString *appURL = LWEAppStoreURLString();
+  if (appURL == nil)
+  {
+    return;
+  }
+  NSArray *sharingItems = @[[NSURL URLWithString:appURL]];
+  UIActivityViewController *activityController = [[[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil] autorelease];
+  activityController.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItem;
+  [self presentViewController:activityController animated:YES completion:nil];
 }
 
 
@@ -244,7 +258,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     cell.detailTextLabel.text = [[self.dataSource.settingsHash objectForKey:key] objectForKey:[settings objectForKey:key]];        
   }
   
-  cell.textLabel.lineBreakMode = UILineBreakModeWordWrap;
+  cell.textLabel.lineBreakMode = NSLineBreakByWordWrapping;
   cell.textLabel.numberOfLines = 0;
   cell.textLabel.text = displayName;
   return cell;  
@@ -305,7 +319,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     // One special case, theme: reload the nav bar for this page
     if ([key isEqualToString:APP_THEME])
     {
-      UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+      UIWindow *window = self.view.window;
       window.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
       self.navigationController.navigationBar.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
     }

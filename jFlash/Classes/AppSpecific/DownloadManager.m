@@ -57,9 +57,9 @@
 - (void) packageDownloaderFinished:(LWEPackageDownloader *)packageDownloader
 {
   [self stopTabAnimation];
-  if (self.baseViewController.modalViewController && (self.baseViewController.modalViewController == self.modalTaskViewController))
+  if (self.baseViewController.presentedViewController && (self.baseViewController.presentedViewController == self.modalTaskViewController))
   {
-    [self.modalTaskViewController dismissModalViewControllerAnimated:YES];
+    [self.modalTaskViewController dismissViewControllerAnimated:YES completion:nil];
   }
   self.modalTaskViewController = nil;
 }
@@ -125,8 +125,14 @@
  */
 - (void) _showDownloaderModal:(NSNotification*)aNotification
 {
+  // Remote plugins are switched off (no server), so there is nothing to download
+  if ([PluginManager remotePluginsEnabled] == NO || aNotification.object == nil)
+  {
+    return;
+  }
+
   // Already showing!  Don't do it again.
-  if (self.baseViewController.modalViewController != nil)
+  if (self.baseViewController.presentedViewController != nil)
   {
     return;
   }
@@ -134,7 +140,7 @@
   // If the user tries to re-lauch while we are downloading, just re-launch that modal.
   if ([self pluginIsDownloading])
   {
-    [self.baseViewController presentModalViewController:self.modalTaskViewController animated:YES];
+    [self.baseViewController presentViewController:self.modalTaskViewController animated:YES completion:nil];
     return;
   }
   
@@ -156,7 +162,7 @@
   UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:dlViewController];
   [dlViewController release];
   
-  [self.baseViewController presentModalViewController:navController animated:YES];
+  [self.baseViewController presentViewController:navController animated:YES completion:nil];
   self.modalTaskViewController = navController;
   [navController release];
 }

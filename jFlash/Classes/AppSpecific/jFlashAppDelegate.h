@@ -26,4 +26,7 @@ void uncaughtExceptionHandler(NSException *exception);
 @property (retain) IBOutlet DownloadManager *downloadManager;
 @property (retain) IBOutlet ExternalAppManager *externalAppManager;
 
+//! Handles an incoming jflash:// (or cflash://) URL: runs a search now, or after the DB finishes loading.
+- (BOOL) handleIncomingURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication;
+
 @end

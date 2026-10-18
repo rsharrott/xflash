@@ -7,7 +7,6 @@
 //
 
 #import "PluginManager.h"
-#import "Reachability.h"
 
 NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 
@@ -58,6 +57,13 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 
 - (void) _initDownloadablePluginsDict
 {
+  // Nothing can be downloaded while remote plugins are off, so offer nothing
+  if ([PluginManager remotePluginsEnabled] == NO)
+  {
+    self.downloadablePlugins = [NSDictionary dictionary];
+    return;
+  }
+
 	NSString *docPath = [LWEFile createDocumentPathWithFilename:LWE_AVAILABLE_PLUGIN_PLIST];
   NSString *bundlePath = [LWEFile createBundlePathWithFilename:LWE_AVAILABLE_PLUGIN_PLIST];
   
@@ -123,7 +129,21 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
   {
     // Re-instantiate the plugins here
     NSData *data = [plugins objectForKey:pluginKey];
-    Plugin *plugin = (Plugin*)[NSKeyedUnarchiver unarchiveObjectWithData:data];
+    // Plugin only adopts NSCoding (not NSSecureCoding), so decode with secure coding off,
+    // which is what the deprecated +unarchiveObjectWithData: did.
+    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:NULL];
+    unarchiver.requiresSecureCoding = NO;
+    Plugin *plugin = (Plugin*)[unarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
+    [unarchiver finishDecoding];
+    [unarchiver release];
+
+    // Corrupt or unreadable settings data decodes to nil (or not a Plugin). Skip that
+    // entry rather than handing nil to loadPlugin: (the other plugins still load)
+    if ([plugin isKindOfClass:[Plugin class]] == NO)
+    {
+      LWE_LOG(@"Skipping plugin settings entry %@: could not decode it", pluginKey);
+      continue;
+    }
     
     // Now try to load it
     NSError *error = nil;
@@ -329,12 +349,22 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 
 #pragma mark - Check for New Plugins
 
+//! YES only when a plugin server is configured in Constants.m (currently it isn't)
++ (BOOL) remotePluginsEnabled
+{
+  return ([LWE_PLUGIN_SERVER length] > 0 && [LWE_PLUGIN_LIST_REL_URL length] > 0);
+}
+
 /**
  * Tells whether update check is necessary
  * \return YES if settings' PLUGIN_LAST_UPDATE is more than LWE_PLUGIN_UPDATE_PERIOD days ago
  */
 - (BOOL) isTimeForCheckingUpdate
 {
+  if ([PluginManager remotePluginsEnabled] == NO)
+  {
+    return NO;
+  }
 	NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
 	NSDate *date = [settings objectForKey:PLUGIN_LAST_UPDATE];
 	date = [date addDays:LWE_PLUGIN_UPDATE_PERIOD];
@@ -350,6 +380,12 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
  */
 - (void)checkNewPluginsWithCompletion:(void (^)(BOOL))completion
 {
+  if ([PluginManager remotePluginsEnabled] == NO)
+  {
+    if (completion) dispatch_async(dispatch_get_main_queue(), ^{ completion(NO); });
+    return;
+  }
+
   NSString *urlStr = [LWE_PLUGIN_SERVER stringByAppendingString:LWE_PLUGIN_LIST_REL_URL];
   NSURL *url = [NSURL URLWithString:urlStr];
   if (url == nil)
@@ -406,7 +442,7 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
   
   // We have to change one key, so create a mutable dict.  Kind of a waste, but.  Serialize the plugin
   NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:pluginSettings];
-  [tmpDict setObject:[NSKeyedArchiver archivedDataWithRootObject:plugin] forKey:plugin.pluginId];
+  [tmpDict setObject:[NSKeyedArchiver archivedDataWithRootObject:plugin requiringSecureCoding:NO error:NULL] forKey:plugin.pluginId];
   [settings setValue:tmpDict forKey:APP_PLUGIN];
   [settings synchronize];
 }

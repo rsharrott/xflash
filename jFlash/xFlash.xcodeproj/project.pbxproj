@@ -7,6 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA2E001419000050000000AA /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2E000119000050000000AA /* libsqlite3.tbd */; };
+		AA2E001319000050000000AA /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2E000119000050000000AA /* libsqlite3.tbd */; };
+		AA2E001219000050000000AA /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2E000119000050000000AA /* libsqlite3.tbd */; };
+		AA2E001119000050000000AA /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2E000119000050000000AA /* libsqlite3.tbd */; };
+		AA2E001019000050000000AA /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2E000119000050000000AA /* libsqlite3.tbd */; };
+		AA2C001219000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
+		AA2C001119000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
+		AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
+		AA2B001119000020000000AA /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
+		AA2B001019000020000000AA /* DisplaySearchedSentenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */; };
+		AA2B000519000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000419000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000319000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000219000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000119000020000000AA /* JFlashUpdateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 496461CA1580929A00C3AB80 /* JFlashUpdateManager.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -424,7 +439,6 @@
 		496C7B1E12632779004B6B90 /* StudySetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD411AB7C4600016BD2 /* StudySetViewController.m */; };
 		496C7B1F1263277A004B6B90 /* StudySetWordsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD611AB7C4600016BD2 /* StudySetWordsViewController.m */; };
 		496C7B2912632794004B6B90 /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C7C11AB84EE00016BD2 /* Constants.m */; };
-		496C7B37126327B0004B6B90 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C5E11AB839300016BD2 /* Appirater.m */; };
 		496C7B6F12632831004B6B90 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		496C7B831263286D004B6B90 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 917A5D0D11AB8A1400016BD2 /* SystemConfiguration.framework */; };
 		496C7B841263286D004B6B90 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 917A5D0811AB89FD00016BD2 /* MobileCoreServices.framework */; };
@@ -481,8 +495,6 @@
 		499006D2120FC44600601CD2 /* speech_bubble.png in Resources */ = {isa = PBXBuildFile; fileRef = 499006D1120FC44600601CD2 /* speech_bubble.png */; };
 		4993AF8C1278024800872875 /* twitter-bird@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4993AF851278024800872875 /* twitter-bird@2x.png */; };
 		4993AF931278024800872875 /* twitter-bird@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4993AF851278024800872875 /* twitter-bird@2x.png */; };
-		499448D01472817000671849 /* libsqlite3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941833C13EFB237006A5616 /* libsqlite3.a */; };
-		499448D11472817800671849 /* libsqlite3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941833C13EFB237006A5616 /* libsqlite3.a */; };
 		4999672A11B3E45F00898A0C /* ThemeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4999672911B3E45F00898A0C /* ThemeManager.m */; };
 		499E56B614972A7200088BD3 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 499E56B514972A7200088BD3 /* TTTAttributedLabel.m */; };
 		499E56B714972A7200088BD3 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 499E56B514972A7200088BD3 /* TTTAttributedLabel.m */; };
@@ -635,7 +647,6 @@
 		917A5C0011AB7CD700016BD2 /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF711AB7CD700016BD2 /* User.m */; };
 		917A5C0111AB7CD700016BD2 /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
 		917A5C4911AB829000016BD2 /* ProgressDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */; };
-		917A5C5F11AB839300016BD2 /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C5E11AB839300016BD2 /* Appirater.m */; };
 		917A5C7011AB844300016BD2 /* AddTagView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6611AB844300016BD2 /* AddTagView.xib */; };
 		917A5C7211AB844300016BD2 /* HelpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6811AB844300016BD2 /* HelpView.xib */; };
 		917A5C7311AB844300016BD2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6911AB844300016BD2 /* MainWindow.xib */; };
@@ -759,7 +770,6 @@
 		91D3F9E11580294F00CB8F1E /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF711AB7CD700016BD2 /* User.m */; };
 		91D3F9E21580294F00CB8F1E /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
 		91D3F9E41580294F00CB8F1E /* ProgressDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */; };
-		91D3F9E51580294F00CB8F1E /* Appirater.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C5E11AB839300016BD2 /* Appirater.m */; };
 		91D3F9E61580294F00CB8F1E /* Constants.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C7C11AB84EE00016BD2 /* Constants.m */; };
 		91D3F9E71580294F00CB8F1E /* CurrentState.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C7E11AB84EE00016BD2 /* CurrentState.m */; };
 		91D3F9E81580294F00CB8F1E /* ProgressBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91E1B0E611AE11E1003CCDC2 /* ProgressBarViewController.m */; };
@@ -857,7 +867,6 @@
 		91D3FA571580294F00CB8F1E /* SBJsonWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D447E153BAB3B0003EA47 /* SBJsonWriter.m */; };
 		91D3FA581580294F00CB8F1E /* UserHistory.m in Sources */ = {isa = PBXBuildFile; fileRef = 4922ED8A1556490200645F61 /* UserHistory.m */; };
 		91D3FA591580294F00CB8F1E /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 4922ED9715567FBC00645F61 /* MBProgressHUD.m */; };
-		91D3FA5C1580294F00CB8F1E /* libsqlite3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4941833C13EFB237006A5616 /* libsqlite3.a */; };
 		91D3FA5D1580294F00CB8F1E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242A174714628AF4002977E6 /* AudioToolbox.framework */; };
 		91D3FA5E1580294F00CB8F1E /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242A173F1461AB60002977E6 /* AVFoundation.framework */; };
 		91D3FA5F1580294F00CB8F1E /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 91B3E2F0144FD8ED003F8986 /* libz.tbd */; };
@@ -958,16 +967,11 @@
 			remoteGlobalIDString = 496C7A6B126325FD004B6B90;
 			remoteInfo = cFlash;
 		};
-		4941833B13EFB237006A5616 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 494F7F95138B8E1D00094AE2 /* sqlite3.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 494F7F81138B8DA000094AE2;
-			remoteInfo = sqlite3;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AA2E000119000050000000AA /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D6058910D05DD3D006BFB54 /* jFlash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jFlash.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -1111,7 +1115,6 @@
 		49377B1E1485259D00BD80C5 /* GroupDescriptionView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = GroupDescriptionView.xib; path = XIBs/GroupDescriptionView.xib; sourceTree = "<group>"; };
 		4937876014DB8D9700361203 /* jflash_16_to_161.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = jflash_16_to_161.sql; path = Migrations/jflash_16_to_161.sql; sourceTree = "<group>"; };
 		4938F8C214027818001EB473 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
-		4938F8C414027841001EB473 /* libsqlite3.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libsqlite3.a; sourceTree = SOURCE_ROOT; };
 		4938F8C614027853001EB473 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		493A478D146A829900F1E718 /* ActionBarViewController-Browse.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = "ActionBarViewController-Browse.xib"; path = "XIBs/ActionBarViewController-Browse.xib"; sourceTree = "<group>"; };
 		493A4791146A89BB00F1E718 /* SettingsView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SettingsView.xib; path = XIBs/SettingsView.xib; sourceTree = "<group>"; };
@@ -1123,8 +1126,6 @@
 		4947836612757EE4000F9328 /* practice-btn-unrevealed@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-unrevealed@2x.png"; path = "Assets/practice-btn-unrevealed@2x.png"; sourceTree = "<group>"; };
 		494783741275901E000F9328 /* practice-btn-last@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-last@2x.png"; path = "Assets/practice-btn-last@2x.png"; sourceTree = "<group>"; };
 		494783751275901E000F9328 /* practice-btn-next@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-next@2x.png"; path = "Assets/practice-btn-next@2x.png"; sourceTree = "<group>"; };
-		494F7F95138B8E1D00094AE2 /* sqlite3.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = sqlite3.xcodeproj; path = External/sqlite/sqlite3/sqlite3.xcodeproj; sourceTree = "<group>"; };
-		494F7FA4138B8E6400094AE2 /* libsqlite3.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libsqlite3.a; sourceTree = SOURCE_ROOT; };
 		4950C25111B764B200B70EE9 /* PluginManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PluginManager.h; path = AppSpecific/PluginManager.h; sourceTree = "<group>"; };
 		4950C25211B764B200B70EE9 /* PluginManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PluginManager.m; path = AppSpecific/PluginManager.m; sourceTree = "<group>"; };
 		496461C71580929A00C3AB80 /* CFlashUpdateManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CFlashUpdateManager.h; path = AppSpecific/CFlashUpdateManager.h; sourceTree = "<group>"; };
@@ -1220,7 +1221,7 @@
 		49C521DE144D2461002011BD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		49C5BC1F11C51B0D00A595D6 /* DisplaySearchedSentenceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisplaySearchedSentenceViewController.h; path = AppSpecific/DisplaySearchedSentenceViewController.h; sourceTree = "<group>"; };
 		49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DisplaySearchedSentenceViewController.m; path = AppSpecific/DisplaySearchedSentenceViewController.m; sourceTree = "<group>"; };
-		49D996C012705C8300D176D0 /* Icon@2x.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = "Icon@2x.png"; path = "Assets/Icon@2x.png"; sourceTree = "<group>"; };
+		49D996C012705C8300D176D0 /* Icon@2x.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = "Icon@2x.png"; path = "Assets/icon@2x.png"; sourceTree = "<group>"; };
 		49DADB7E1277F36F00B8FD72 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = Assets/Default.png; sourceTree = "<group>"; };
 		49DADB7F1277F36F00B8FD72 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "Assets/Default@2x.png"; sourceTree = "<group>"; };
 		49E3D17614727FAE00F79308 /* jFlashTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "jFlashTest-Info.plist"; path = "Tests/jFlashTests/jFlashTest-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -1335,8 +1336,6 @@
 		917A5C3811AB826000016BD2 /* CustomCellBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CustomCellBackgroundView.m; path = Reusable/CustomCellBackgroundView/CustomCellBackgroundView.m; sourceTree = "<group>"; };
 		917A5C4111AB829000016BD2 /* ProgressDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProgressDetailsViewController.h; path = AppSpecific/ProgressDetailsViewController.h; sourceTree = "<group>"; };
 		917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProgressDetailsViewController.m; path = AppSpecific/ProgressDetailsViewController.m; sourceTree = "<group>"; };
-		917A5C5D11AB839300016BD2 /* Appirater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Appirater.h; sourceTree = "<group>"; };
-		917A5C5E11AB839300016BD2 /* Appirater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Appirater.m; sourceTree = "<group>"; };
 		917A5C6611AB844300016BD2 /* AddTagView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = AddTagView.xib; path = XIBs/AddTagView.xib; sourceTree = "<group>"; };
 		917A5C6811AB844300016BD2 /* HelpView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = HelpView.xib; path = XIBs/HelpView.xib; sourceTree = "<group>"; };
 		917A5C6911AB844300016BD2 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainWindow.xib; path = XIBs/MainWindow.xib; sourceTree = "<group>"; };
@@ -1423,8 +1422,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2E001019000050000000AA /* libsqlite3.tbd in Frameworks */,
 				919FBDBB1622E9D2001FD77B /* Social.framework in Frameworks */,
-				499448D01472817000671849 /* libsqlite3.a in Frameworks */,
 				242A174914628B17002977E6 /* AudioToolbox.framework in Frameworks */,
 				242A17411461AB68002977E6 /* AVFoundation.framework in Frameworks */,
 				91B3E2F1144FD8ED003F8986 /* libz.tbd in Frameworks */,
@@ -1447,6 +1446,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2E001319000050000000AA /* libsqlite3.tbd in Frameworks */,
+				AA2B000319000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EB14FD069400CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C814FD05C700CF5C44 /* CoreData.framework in Frameworks */,
 				49A3EC1514DB99C800621183 /* CoreText.framework in Frameworks */,
@@ -1469,6 +1470,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2E001419000050000000AA /* libsqlite3.tbd in Frameworks */,
+				AA2B000519000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EA14FD068D00CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C914FD05CF00CF5C44 /* CoreData.framework in Frameworks */,
 				496C670214728BDC009F04D4 /* Security.framework in Frameworks */,
@@ -1491,7 +1494,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				499448D11472817800671849 /* libsqlite3.a in Frameworks */,
+				AA2E001119000050000000AA /* libsqlite3.tbd in Frameworks */,
+				AA2B000419000020000000AA /* WebKit.framework in Frameworks */,
 				242A174814628AF4002977E6 /* AudioToolbox.framework in Frameworks */,
 				242A17401461AB60002977E6 /* AVFoundation.framework in Frameworks */,
 				24A9F5681461334800C9D46F /* libz.tbd in Frameworks */,
@@ -1513,8 +1517,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2E001219000050000000AA /* libsqlite3.tbd in Frameworks */,
+				AA2B000219000020000000AA /* WebKit.framework in Frameworks */,
 				919FBDBD16230000001FD77B /* Social.framework in Frameworks */,
-				91D3FA5C1580294F00CB8F1E /* libsqlite3.a in Frameworks */,
 				91D3FA5D1580294F00CB8F1E /* AudioToolbox.framework in Frameworks */,
 				91D3FA5E1580294F00CB8F1E /* AVFoundation.framework in Frameworks */,
 				91D3FA5F1580294F00CB8F1E /* libz.tbd in Frameworks */,
@@ -1563,6 +1568,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1A600019000010000000AA /* WebKit.framework */,
+				AA2E000119000050000000AA /* libsqlite3.tbd */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -1643,7 +1649,6 @@
 				49C521DE144D2461002011BD /* CoreText.framework */,
 				4938F8C814027860001EB473 /* CFlash */,
 				4938F8C214027818001EB473 /* CoreText.framework */,
-				494F7FA4138B8E6400094AE2 /* libsqlite3.a */,
 				493D5378138B5F7A00DDC242 /* MessageUI.framework */,
 				917A5D0D11AB8A1400016BD2 /* SystemConfiguration.framework */,
 				917A5D0811AB89FD00016BD2 /* MobileCoreServices.framework */,
@@ -1887,6 +1892,7 @@
 				915FEC4F15807B9100BEDF5F /* jFlashJr.db */,
 				4919507A144F1BFE00DB81F7 /* jFlash-available.plist */,
 				498EBDBC148909CF00BA6DE7 /* jFlash-installed.plist */,
+				AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */,
 				49EE8D68134EC0EA00EC6B0E /* jFlash-Info.plist */,
 				91D3FA721580295000CB8F1E /* jFlashJr-Info.plist */,
 				49AF3CF51265E2B900CEAA52 /* jflash_12_to_13.sql */,
@@ -1921,17 +1927,8 @@
 			isa = PBXGroup;
 			children = (
 				4938F8C614027853001EB473 /* CoreText.framework */,
-				4938F8C414027841001EB473 /* libsqlite3.a */,
 			);
 			name = CFlash;
-			sourceTree = "<group>";
-		};
-		494F7F96138B8E1D00094AE2 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				4941833C13EFB237006A5616 /* libsqlite3.a */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		496461B6158085B600C3AB80 /* Updates */ = {
@@ -2002,11 +1999,9 @@
 			children = (
 				490D4448153BAA6C0003EA47 /* LWE */,
 				49E797F514A8434C009B505A /* LWEGradientButton */,
-				917A5C5C11AB839300016BD2 /* Appirater */,
 				49EE97B6134EC34A00EC6B0E /* asi-http-request */,
 				913EEF6C130800F300EBCF87 /* IFUnicodeURL */,
 				9158C0020FB6C2320083223F /* FMDb */,
-				917A5BA611AB7B1C00016BD2 /* sqlite */,
 				49AD17B2148476080017EFB4 /* ZipArchive */,
 				4922ED9615567FBC00645F61 /* MBProgressHUD.h */,
 				4922ED9715567FBC00645F61 /* MBProgressHUD.m */,
@@ -2302,24 +2297,6 @@
 			name = Assets;
 			sourceTree = "<group>";
 		};
-		917A5BA611AB7B1C00016BD2 /* sqlite */ = {
-			isa = PBXGroup;
-			children = (
-				494F7F95138B8E1D00094AE2 /* sqlite3.xcodeproj */,
-			);
-			name = sqlite;
-			sourceTree = "<group>";
-		};
-		917A5C5C11AB839300016BD2 /* Appirater */ = {
-			isa = PBXGroup;
-			children = (
-				917A5C5D11AB839300016BD2 /* Appirater.h */,
-				917A5C5E11AB839300016BD2 /* Appirater.m */,
-			);
-			name = Appirater;
-			path = External/Appirater;
-			sourceTree = "<group>";
-		};
 		917A5C8611AB851E00016BD2 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
@@ -2536,7 +2513,6 @@
 				4904662114727835004C44E2 /* Sources */,
 				4904662E14727835004C44E2 /* Frameworks */,
 				4904663614727835004C44E2 /* Resources */,
-				4904664014727835004C44E2 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -2626,12 +2602,6 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* jFlash */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 494F7F96138B8E1D00094AE2 /* Products */;
-					ProjectRef = 494F7F95138B8E1D00094AE2 /* sqlite3.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				1D6058900D05DD3D006BFB54 /* jFlash */,
@@ -2643,21 +2613,13 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXReferenceProxy section */
-		4941833C13EFB237006A5616 /* libsqlite3.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libsqlite3.a;
-			remoteRef = 4941833B13EFB237006A5616 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1D60588D0D05DD3D006BFB54 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
 				912405DA109C263D00ECA1C2 /* Entitlements.plist in Resources */,
 				D35B077B1116456D00DB5E02 /* overlay-btn-close.png in Resources */,
 				D35B077D1116456D00DB5E02 /* practice-btn-goaway.png in Resources */,
@@ -2808,6 +2770,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2C001119000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
 				496C7AB01263270B004B6B90 /* plugin-resources in Resources */,
 				496C7AB21263270B004B6B90 /* tametheme-cookie-cutters in Resources */,
 				496C7AB81263270B004B6B90 /* practice-btn-actions.png in Resources */,
@@ -2910,6 +2873,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2C001219000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
 				91D3F9251580294F00CB8F1E /* Entitlements.plist in Resources */,
 				91D3F92A1580294F00CB8F1E /* overlay-btn-close.png in Resources */,
 				91D3F92B1580294F00CB8F1E /* practice-btn-goaway.png in Resources */,
@@ -3010,19 +2974,6 @@
 			shellPath = /bin/sh;
 			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
 		};
-		4904664014727835004C44E2 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -3050,7 +3001,6 @@
 				917A5C0011AB7CD700016BD2 /* User.m in Sources */,
 				917A5C0111AB7CD700016BD2 /* UserHistoryPeer.m in Sources */,
 				917A5C4911AB829000016BD2 /* ProgressDetailsViewController.m in Sources */,
-				917A5C5F11AB839300016BD2 /* Appirater.m in Sources */,
 				917A5C7F11AB84EE00016BD2 /* Constants.m in Sources */,
 				917A5C8011AB84EE00016BD2 /* CurrentState.m in Sources */,
 				91E1B0E811AE11E1003CCDC2 /* ProgressBarViewController.m in Sources */,
@@ -3261,6 +3211,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B001119000020000000AA /* UserHistoryPeer.m in Sources */,
+				AA2B001019000020000000AA /* DisplaySearchedSentenceViewController.m in Sources */,
 				49E3D17E1472803900F79308 /* CardTagTest.m in Sources */,
 				49E3D1801472803900F79308 /* SetupDatabaseHelper.m in Sources */,
 				49E3D1831472804400F79308 /* CFlashSearchTest.m in Sources */,
@@ -3401,7 +3353,6 @@
 				496C7B1E12632779004B6B90 /* StudySetViewController.m in Sources */,
 				496C7B1F1263277A004B6B90 /* StudySetWordsViewController.m in Sources */,
 				496C7B2912632794004B6B90 /* Constants.m in Sources */,
-				496C7B37126327B0004B6B90 /* Appirater.m in Sources */,
 				496C7B6F12632831004B6B90 /* main.m in Sources */,
 				490B23411277BCE100CF3484 /* FMDatabase.m in Sources */,
 				490B23421277BCE100CF3484 /* FMDatabaseAdditions.m in Sources */,
@@ -3490,6 +3441,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B000119000020000000AA /* JFlashUpdateManager.m in Sources */,
 				91D3F9D01580294F00CB8F1E /* main.m in Sources */,
 				91D3F9D11580294F00CB8F1E /* AddStudySetInputViewController.m in Sources */,
 				91D3F9D21580294F00CB8F1E /* AddTagViewController.m in Sources */,
@@ -3510,7 +3462,6 @@
 				91D3F9E11580294F00CB8F1E /* User.m in Sources */,
 				91D3F9E21580294F00CB8F1E /* UserHistoryPeer.m in Sources */,
 				91D3F9E41580294F00CB8F1E /* ProgressDetailsViewController.m in Sources */,
-				91D3F9E51580294F00CB8F1E /* Appirater.m in Sources */,
 				91D3F9E61580294F00CB8F1E /* Constants.m in Sources */,
 				91D3F9E71580294F00CB8F1E /* CurrentState.m in Sources */,
 				91D3F9E81580294F00CB8F1E /* ProgressBarViewController.m in Sources */,
@@ -3724,7 +3675,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/jFlashTests/jFlashTest-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3753,7 +3704,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/jFlashTests/jFlashTest-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3783,7 +3734,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/jFlashTests/jFlashTest-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3812,7 +3763,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/cFlashTests/cFlashTest-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3841,7 +3792,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/cFlashTests/cFlashTest-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3871,7 +3822,7 @@
 				GCC_THUMB_SUPPORT = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/cFlashTests/cFlashTest-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3893,7 +3844,7 @@
 				);
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "cFlash-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 				);
@@ -3914,7 +3865,7 @@
 				);
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "cFlash-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 				);
@@ -3935,7 +3886,7 @@
 				);
 				GCC_THUMB_SUPPORT = NO;
 				INFOPLIST_FILE = "cFlash-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 				);
@@ -3967,7 +3918,7 @@
 					"$(SRCROOT)/Classes/External/LWEGradientButton",
 				);
 				INFOPLIST_FILE = "jFlashJr-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
@@ -4000,7 +3951,7 @@
 					"$(SRCROOT)/Classes/External/LWEGradientButton",
 				);
 				INFOPLIST_FILE = "jFlashJr-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
@@ -4033,7 +3984,7 @@
 					"$(SRCROOT)/Classes/External/LWEGradientButton",
 				);
 				INFOPLIST_FILE = "jFlashJr-Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",

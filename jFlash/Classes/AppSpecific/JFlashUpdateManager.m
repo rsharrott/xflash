@@ -233,7 +233,7 @@
     {
       NSDictionary *oldPluginHash = [installedPluginHash objectForKey:key];
       Plugin *newPlugin = [Plugin pluginWithLegacyDictionary:oldPluginHash];
-      [pluginsDict setObject:[NSKeyedArchiver archivedDataWithRootObject:newPlugin] forKey:newPlugin.pluginId];
+      [pluginsDict setObject:[NSKeyedArchiver archivedDataWithRootObject:newPlugin requiringSecureCoding:NO error:NULL] forKey:newPlugin.pluginId];
     }
   }
   [settings setValue:pluginsDict forKey:APP_PLUGIN];
@@ -393,35 +393,10 @@
 + (void) showUpgradeAlertView:(NSUserDefaults *)settings delegate:(id<UIAlertViewDelegate>)alertDelegate
 {
   NSString *version = [settings objectForKey:APP_SETTINGS_VERSION];
-  if ([version isEqualToString:LWE_JF_VERSION_1_6])
+  // The 1.6.x alerts promoted Rikai Browser, which is no longer on the App Store; removed.
+  if ([version isEqualToString:LWE_JF_VERSION_1_7])
   {
-    // Show shout-out UI Alert view
-    [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Updated to JFlash 1.6",@"JFlash1.6 upgrade alert title")
-                                       message:NSLocalizedString(@"Thanks for updating!  Special thanks to Ben, Murray, Riley & David for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words.  Want it?",@"JFlash1.6 upgrade alert msg")
-                                            ok:NSLocalizedString(@"Later", @"StudyViewController.Later")
-                                        cancel:NSLocalizedString(@"Get Rikai", @"WebViewController.RikaiAppStore")
-                                      delegate:alertDelegate];
-    
-  }
-  else if ([version isEqualToString:LWE_JF_VERSION_1_6_1])
-  {
-    [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Updated to JFlash 1.6.1",@"JFlash1.6.1 upgrade alert title")
-                                       message:NSLocalizedString(@"Thanks for updating!  We fixed a minor bug in the example sentences display.  Special thanks to Michael & Murray for helping us improve a few entries.  Also, do you have Rikai Browser yet?  It tightly integrates with JFlash and helps you read Japanese webpages and learn new words.",@"JFlash1.6.1 upgrade alert msg")
-                                            ok:NSLocalizedString(@"Later", @"StudyViewController.Later")
-                                        cancel:NSLocalizedString(@"Get Rikai", @"WebViewController.RikaiAppStore")
-                                      delegate:alertDelegate];
-  }
-  else if ([version isEqualToString:LWE_JF_VERSION_1_6_2])
-  {
-    [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Updated to JFlash 1.6.2",@"JFlash1.6.2 upgrade alert title")
-                                       message:NSLocalizedString(@"Another update!  We fixed a bug in the integration between Rikai Browser & Japanese Flash.  Did you know you can send words from Rikai Browser to Japanese Flash with one button?  Get it if you don't have it!  Also, thanks to Michael, who helped us update a few more entries.",@"JFlash1.6.2 upgrade alert msg")
-                                            ok:NSLocalizedString(@"No Thanks", @"StudyViewController.Later")
-                                        cancel:NSLocalizedString(@"Get Rikai", @"WebViewController.RikaiAppStore")
-                                      delegate:alertDelegate];
-  }
-  else if ([version isEqualToString:LWE_JF_VERSION_1_7])
-  {
-    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Updated to JFlash 1.7",@"JFlash1.7 upgrade alert title")
+    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Updated to Japanese in a Flash! 1.7",@"JFlash1.7 upgrade alert title")
                                        message:NSLocalizedString(@"Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries.",@"JFlash1.7 upgrade alert msg")];
   }
 }

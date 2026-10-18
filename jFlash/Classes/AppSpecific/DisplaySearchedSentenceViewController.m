@@ -109,7 +109,7 @@
     {
       label = [[UILabel alloc] initWithFrame:CGRectZero];
       label.tag = 101;
-      [label setLineBreakMode:UILineBreakModeWordWrap];
+      [label setLineBreakMode:NSLineBreakByWordWrapping];
       [label setMinimumFontSize:LWE_UITABLE_CELL_FONT_SIZE];
       [label setNumberOfLines:0];
       label.backgroundColor = [UIColor clearColor];
@@ -132,7 +132,7 @@
     // Is a search result record
     cell.textLabel.text = [card headwordIgnoringMode:YES];
     cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
-    cell.detailTextLabel.lineBreakMode = UILineBreakModeTailTruncation;
+    cell.detailTextLabel.lineBreakMode = NSLineBreakByTruncatingTail;
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
     

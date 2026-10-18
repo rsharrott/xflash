@@ -457,7 +457,7 @@ public class PracticeFragment extends Fragment
         Intent myIntent  = new Intent(Intent.ACTION_SEND);
 
         // set the email target
-        myIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{ "fix-card@longweekendmobile.com" });
+        myIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{ "help@japaneseinaflash.com" });
         
         // set the email subject 
         String emailSubject = res.getString(R.string.fixcard_subject);
