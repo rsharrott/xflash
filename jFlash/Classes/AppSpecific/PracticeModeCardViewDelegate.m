@@ -191,10 +191,12 @@
   avc.wrongBtn.hidden = YES;
   if (avc.showAnswerBtn)
   {
-    // New answer bar: Actions / Bury stay put in both states; "Show answer" holds the
-    // spot Wrong / Right will take, so nothing jumps on reveal.
+    // New answer bar: Actions is always shown; Bury only appears once the answer is
+    // revealed, in its own fixed slot (right half of the top row) so nothing moves.
+    // "Show answer" holds the spot Wrong / Right will take, so nothing jumps on reveal.
+    // Hidden buttons are also hidden from VoiceOver.
     avc.showAnswerBtn.hidden = NO;
-    avc.buryCardBtn.hidden = NO;
+    avc.buryCardBtn.hidden = YES;
     avc.addBtn.hidden = NO;
     avc.cardMeaningBtnHint.hidden = YES;
   }
@@ -214,6 +216,11 @@
   avc.addBtn.hidden = NO;
   avc.showAnswerBtn.hidden = YES;
   avc.cardMeaningBtnHint.hidden = YES;
+  if (avc.showAnswerBtn)
+  {
+    // Show answer was replaced by Wrong / Right (and Bury appeared): move VoiceOver to Wrong.
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, avc.wrongBtn);
+  }
 }
 
 #pragma mark - Get Random Card

@@ -214,6 +214,15 @@
     // The card colour runs behind the answer bar's rounded top corners.
     self.practiceBgImage.frame = self.view.bounds;
 
+    // Keep the example-sentence page dot on the card's bottom line (between the set name and
+    // the count), not over the taller answer bar.
+    if (self.pageControl) {
+      CGPoint pc = self.pageControl.center;
+      pc.x = roundf(self.view.bounds.size.width / 2.0);
+      pc.y = CGRectGetMinY(self.actionbarView.frame) - 17.0;
+      self.pageControl.center = pc;
+    }
+
     CGRect pf = self.progressBarView.frame;
     pf.origin.y = top;
     self.progressBarView.frame = pf;
