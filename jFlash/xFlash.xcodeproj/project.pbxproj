@@ -2644,9 +2644,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
-				D8E55F12EB5869DC90AD4663 /* Localizable.strings in Resources */,
-				00CF337ED4F7AF6798912C9A /* Interface.strings in Resources */,
-				1EE5CCAE823A9C2A6333A9C5 /* InfoPlist.strings in Resources */,
 				912405DA109C263D00ECA1C2 /* Entitlements.plist in Resources */,
 				D35B077B1116456D00DB5E02 /* overlay-btn-close.png in Resources */,
 				D35B077D1116456D00DB5E02 /* practice-btn-goaway.png in Resources */,
@@ -2749,6 +2746,9 @@
 				493ABDC115562B41007F8B5E /* jflash_162_to_17.sql in Resources */,
 				49C0C97C1629151900F8966C /* Default-568h@2x.png in Resources */,
 				49C0C97E16291B8400F8966C /* HelpWebViewController.xib in Resources */,
+				D8E55F12EB5869DC90AD4663 /* Localizable.strings in Resources */,
+				00CF337ED4F7AF6798912C9A /* Interface.strings in Resources */,
+				1EE5CCAE823A9C2A6333A9C5 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
