@@ -47,7 +47,7 @@
   self.tableView.estimatedRowHeight = 52;
 
   UIBarButtonItem *supportBtn = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Ask Us", @"HelpViewController.GetSatsifactionLink")
-                                                                  style:UIBarButtonItemStyleBordered
+                                                                  style:UIBarButtonItemStylePlain
                                                                  target:self action:@selector(_supportBtnPressed:)] autorelease];
   self.navigationItem.rightBarButtonItem = supportBtn;
 
@@ -155,7 +155,7 @@
 
 - (void) mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
 {
-  [self dismissModalViewControllerAnimated:YES];
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - UITableViewDataSource Methods
@@ -200,7 +200,7 @@
   // If there is a next, show the next button - note the array indices are different so we need a -1
   if (currentIndex < ([self.sectionTitles count]-1))
   {
-    UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Next >",@"HelpViewController.Next") style:UIBarButtonItemStyleBordered target:self action:@selector(navigateToNextHelpPage)];
+    UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Next >",@"HelpViewController.Next") style:UIBarButtonItemStylePlain target:self action:@selector(navigateToNextHelpPage)];
     webViewController.navigationItem.rightBarButtonItem = btn;
     [btn release];
   }

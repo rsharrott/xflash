@@ -307,7 +307,7 @@
     {
       AddStudySetInputViewController *tmpVC = [[AddStudySetInputViewController alloc] initWithTag:self.tag];
       self.navigationItem.backBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Cancel",@"Global.Cancel")
-                                                                                style:UIBarButtonItemStyleBordered
+                                                                                style:UIBarButtonItemStylePlain
                                                                                target:nil
                                                                                action:nil] autorelease];
       [self.navigationController pushViewController:tmpVC animated:YES];

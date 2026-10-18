@@ -15,6 +15,8 @@
 - (id) initWithCard:(Card*) card;
 - (id) initForExampleSentencesWithCard:(Card *)card;
 - (IBAction) addStudySet;
+//! Dismisses this controller when it is shown modally (target of the "Done" button)
+- (IBAction) dismissModal:(id)sender;
 
 @property (retain) NSArray *myTagArray;
 @property (retain) NSArray *sysTagArray;

@@ -7,7 +7,6 @@
 //
 
 #import "PluginManager.h"
-#import "Reachability.h"
 
 NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 
@@ -123,7 +122,13 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
   {
     // Re-instantiate the plugins here
     NSData *data = [plugins objectForKey:pluginKey];
-    Plugin *plugin = (Plugin*)[NSKeyedUnarchiver unarchiveObjectWithData:data];
+    // Plugin only adopts NSCoding (not NSSecureCoding), so decode with secure coding off,
+    // which is what the deprecated +unarchiveObjectWithData: did.
+    NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:NULL];
+    unarchiver.requiresSecureCoding = NO;
+    Plugin *plugin = (Plugin*)[unarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
+    [unarchiver finishDecoding];
+    [unarchiver release];
     
     // Now try to load it
     NSError *error = nil;
@@ -406,7 +411,7 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
   
   // We have to change one key, so create a mutable dict.  Kind of a waste, but.  Serialize the plugin
   NSMutableDictionary *tmpDict = [NSMutableDictionary dictionaryWithDictionary:pluginSettings];
-  [tmpDict setObject:[NSKeyedArchiver archivedDataWithRootObject:plugin] forKey:plugin.pluginId];
+  [tmpDict setObject:[NSKeyedArchiver archivedDataWithRootObject:plugin requiringSecureCoding:NO error:NULL] forKey:plugin.pluginId];
   [settings setValue:tmpDict forKey:APP_PLUGIN];
   [settings synchronize];
 }

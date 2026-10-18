@@ -122,9 +122,9 @@
     AddTagViewController *tmpVC = [[AddTagViewController alloc] initWithCard:card];
     tmpVC.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc]
       initWithTitle:NSLocalizedString(@"Done", @"AddTagViewController.NavDoneButtonTitle")
-              style:UIBarButtonItemStyleBordered
+              style:UIBarButtonItemStylePlain
              target:tmpVC
-             action:@selector(dismissModalViewControllerAnimated:)] autorelease];
+             action:@selector(dismissModal:)] autorelease];
     NSDictionary *info = [NSDictionary dictionaryWithObjectsAndKeys:tmpVC, @"controller",
                           [NSNumber numberWithBool:YES], @"useNavController", nil];
     [tmpVC release];
@@ -180,7 +180,7 @@
     [picker setMessageBody:messageBody isHTML:NO];
     
     jFlashAppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
-    [appDelegate.tabBarController presentModalViewController:picker animated:YES];
+    [appDelegate.tabBarController presentViewController:picker animated:YES completion:nil];
     [picker release];
   }
   else 
@@ -194,7 +194,7 @@
 //! Called when dismissing email composer
 - (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error
 {
-  [controller dismissModalViewControllerAnimated:YES];
+  [controller dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - UIAlertView delegate methods

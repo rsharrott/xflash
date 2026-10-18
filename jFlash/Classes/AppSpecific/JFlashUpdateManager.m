@@ -233,7 +233,7 @@
     {
       NSDictionary *oldPluginHash = [installedPluginHash objectForKey:key];
       Plugin *newPlugin = [Plugin pluginWithLegacyDictionary:oldPluginHash];
-      [pluginsDict setObject:[NSKeyedArchiver archivedDataWithRootObject:newPlugin] forKey:newPlugin.pluginId];
+      [pluginsDict setObject:[NSKeyedArchiver archivedDataWithRootObject:newPlugin requiringSecureCoding:NO error:NULL] forKey:newPlugin.pluginId];
     }
   }
   [settings setValue:pluginsDict forKey:APP_PLUGIN];

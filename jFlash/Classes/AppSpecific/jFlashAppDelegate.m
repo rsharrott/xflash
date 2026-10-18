@@ -344,12 +344,12 @@
   if (useNavController)
   {
     UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:vc];
-    [self.tabBarController presentModalViewController:controller animated:YES];
+    [self.tabBarController presentViewController:controller animated:YES completion:nil];
     [controller release];
   }
   else
   {
-    [self.tabBarController presentModalViewController:vc animated:YES];    
+    [self.tabBarController presentViewController:vc animated:YES completion:nil];    
   }
 }
 

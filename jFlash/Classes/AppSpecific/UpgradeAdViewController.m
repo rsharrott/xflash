@@ -25,13 +25,13 @@
   {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appURL] options:@{} completionHandler:nil];
   }
-  [self dismissModalViewControllerAnimated:YES];
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 // When we want this VC to disappear
 - (IBAction)dismissBtnPressed:(id)sender
 {
-  [self dismissModalViewControllerAnimated:YES];
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - UIViewController Methods
@@ -39,11 +39,6 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
-{
-    return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 @end

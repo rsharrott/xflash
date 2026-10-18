@@ -204,9 +204,9 @@
 
 	// Set up DONE button
 	UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", @"AddTagViewController.NavDoneButtonTitle") 
-																style:UIBarButtonItemStyleBordered 
+																style:UIBarButtonItemStylePlain 
 															   target:tmpVC
-															   action:@selector(dismissModalViewControllerAnimated:)];
+															   action:@selector(dismissModal:)];
 
 	tmpVC.navigationItem.leftBarButtonItem = doneBtn;
 	NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:tmpVC, @"controller", nil];

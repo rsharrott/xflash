@@ -255,7 +255,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     cell.detailTextLabel.text = [[self.dataSource.settingsHash objectForKey:key] objectForKey:[settings objectForKey:key]];        
   }
   
-  cell.textLabel.lineBreakMode = UILineBreakModeWordWrap;
+  cell.textLabel.lineBreakMode = NSLineBreakByWordWrapping;
   cell.textLabel.numberOfLines = 0;
   cell.textLabel.text = displayName;
   return cell;  

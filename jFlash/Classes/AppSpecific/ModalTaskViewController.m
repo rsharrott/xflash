@@ -110,7 +110,7 @@ NSString * const LWEModalTaskDidFail = @"LWEModalTaskDidFail";
   }
   
   // Go away
-  [self dismissModalViewControllerAnimated:YES];
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 /**
@@ -184,7 +184,7 @@ NSString * const LWEModalTaskDidFail = @"LWEModalTaskDidFail";
 
 - (IBAction) dismiss
 {
-  [self dismissModalViewControllerAnimated:YES];
+  [self dismissViewControllerAnimated:YES completion:nil];
 }
 
 /**

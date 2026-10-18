@@ -95,7 +95,7 @@ NSString * const kSetWasAddedOrUpdated = @"setAddedToView";
 
 - (void)dismiss
 {
-  [self dismissModalViewControllerAnimated:YES];
+  [self dismissViewControllerAnimated:YES completion:nil];
   [self.navigationController popViewControllerAnimated:YES];
 }
 

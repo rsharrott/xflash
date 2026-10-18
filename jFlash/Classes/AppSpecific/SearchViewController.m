@@ -558,7 +558,7 @@ const NSInteger KSegmentedTableHeader = 100;
   {
     searchResult = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
     searchResult.tag = SEARCH_CELL_HEADWORD;
-    searchResult.lineBreakMode = UILineBreakModeTailTruncation;
+    searchResult.lineBreakMode = NSLineBreakByTruncatingTail;
     [cell.contentView addSubview:searchResult];
   }
   searchResult.frame = CGRectMake(43, floorf(3 * scale), 240, floorf(25 * scale));

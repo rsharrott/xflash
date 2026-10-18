@@ -158,7 +158,7 @@ enum EntrySectionRows
 #endif
   UINavigationController *modalNavController = [[UINavigationController alloc] initWithRootViewController:tmpVC];
 	[tmpVC release];
-  [self.navigationController presentModalViewController:modalNavController animated:YES];
+  [self.navigationController presentViewController:modalNavController animated:YES completion:nil];
   [modalNavController release];
 }
 
@@ -322,7 +322,7 @@ enum EntrySectionRows
     {
       label = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
       label.tag = 101;
-      label.lineBreakMode = UILineBreakModeWordWrap;
+      label.lineBreakMode = NSLineBreakByWordWrapping;
       label.font = [UIFont systemFontOfSize:FONT_SIZE_ADD_TAG_VC];
       label.numberOfLines = 0;
       label.backgroundColor = [UIColor clearColor];
@@ -507,5 +507,12 @@ enum EntrySectionRows
   [super dealloc];
 }
 
+
+#pragma mark - Modal dismissal
+
+- (IBAction) dismissModal:(id)sender
+{
+  [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 @end
