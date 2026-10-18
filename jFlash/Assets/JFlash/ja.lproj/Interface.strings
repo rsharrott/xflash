@@ -20,6 +20,9 @@
 /* Tab bar & nav bar: help */
 "Help" = "ヘルプ";
 
+/* Tab bar only (short; 学習セット is truncated in the tab bar) */
+"Tab.Study Sets" = "セット";
+
 /* Progress bar / popup level: cards being studied */
 "Studying" = "学習中";
 

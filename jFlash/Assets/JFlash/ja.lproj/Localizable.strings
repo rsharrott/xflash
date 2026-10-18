@@ -219,10 +219,10 @@
 "Start studying" = "学習をはじめる";
 
 /* FirstRun.SwitchSetsNote  (FirstRunViewController.m) */
-"You can switch sets anytime in the Study Sets tab." = "セットは「学習セット」タブでいつでも変更できます。";
+"You can switch sets anytime in the Study Sets tab." = "セットは下の「セット」タブからいつでも変更できます。";
 
 /* FirstRun.Lede  (FirstRunViewController.m) */
-"Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed." = "日本語と英語の単語を覚えるフラッシュカード。単語帳はこのiPhoneの中だけに保存され、アカウント登録も不要です。";
+"Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed." = "英単語と日本語のフラッシュカード。\n単語帳はiPhoneの中だけに保存。アカウント登録も不要です。";
 
 /* FirstRun.PickStarterSet  (FirstRunViewController.m) */
 "Pick a starter set" = "最初に学習するセットを選んでください";
@@ -237,7 +237,7 @@
 "Kana + romaji" = "かな＋ローマ字";
 
 /* StudyViewController.WelcomeAlertViewTitle  (FirstRunViewController.m) */
-"Welcome to Japanese in a Flash!" = "Japanese in a Flash! へようこそ";
+"Welcome to Japanese in a Flash!" = "Japanese in a Flash!\nへようこそ";
 
 /* FirstRun.CardHint  (FirstRunViewController.m) */
 "Tap the card to see the answer, then mark it right or wrong." = "カードをタップして答えを確認し、「正解」か「不正解」を選びましょう。";

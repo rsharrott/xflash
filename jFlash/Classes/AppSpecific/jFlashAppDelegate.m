@@ -308,7 +308,14 @@
   // The Search tab is a system item, so UIKit already localizes it.
   for (UIViewController *tabVC in self.tabBarController.viewControllers)
   {
-    if (tabVC.tabBarItem.title) tabVC.tabBarItem.title = LWEInterfaceString(tabVC.tabBarItem.title);
+    NSString *tabTitle = tabVC.tabBarItem.title;
+    if (tabTitle)
+    {
+      // A "Tab.<English>" entry wins, for languages where the full title doesn't fit in the tab bar.
+      NSString *tabKey = [@"Tab." stringByAppendingString:tabTitle];
+      NSString *shortTitle = LWEInterfaceString(tabKey);
+      tabVC.tabBarItem.title = [shortTitle isEqualToString:tabKey] ? LWEInterfaceString(tabTitle) : shortTitle;
+    }
     if ([tabVC isKindOfClass:[UINavigationController class]])
     {
       UIViewController *rootVC = [[(UINavigationController *)tabVC viewControllers] firstObject];
