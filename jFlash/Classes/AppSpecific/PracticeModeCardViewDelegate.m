@@ -60,7 +60,7 @@
 - (void)cardViewWillSetup:(CardViewController*)cardViewController
 {
   // always start with the meaning hidden, reset the reading to whatever state it should be
-  cardViewController.meaningWebView.hidden = YES;
+  cardViewController.meaningWebViewContainer.hidden = YES;
   [cardViewController resetReadingVisibility];
 
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
@@ -90,7 +90,7 @@
 
 - (void)cardViewDidReveal:(CardViewController*)cardViewController
 {
-  cardViewController.meaningWebView.hidden = NO;
+  cardViewController.meaningWebViewContainer.hidden = NO;
   [cardViewController turnReadingOn];
 }
 
