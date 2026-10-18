@@ -156,11 +156,7 @@
 - (void) studyViewWillReveal:(StudyViewController *)svc
 {
   svc.revealCardBtn.hidden = YES;
-#if defined(LWE_JFLASH)
   svc.tapForAnswerImage.hidden = YES;
-#else
-  svc.tapForAnswerImage.hidden = NO;
-#endif
   
   // Now update scrollability (page control doesn't change)
   BOOL hasExampleSentences = [svc hasExampleSentences];
