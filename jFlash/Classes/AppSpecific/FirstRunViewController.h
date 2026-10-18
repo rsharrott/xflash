@@ -31,14 +31,21 @@ extern NSString * const LWEFirstRunCardHintShownKey;
 @end
 
 
+typedef void (^LWECoachHintSpotlightProvider)(CGRect *spotlightRect, CGPoint *tapPoint);
+
 @interface FirstRunCoachHintView : UIView
 
 //! YES until the user has tapped "Got it" once.
 + (BOOL) shouldShowHint;
 
-//! Dims hostView, outlines spotlightRect (the card) and points a tip bubble at tapPoint.
-//! Both rects/points are in hostView's coordinate space.
-+ (FirstRunCoachHintView *) showInView:(UIView *)hostView spotlightRect:(CGRect)spotlightRect tapPoint:(CGPoint)tapPoint;
+//! Dims hostView, outlines the spotlight rect (the card) and points a tip bubble at the tap
+//! point.  The provider is asked for both (in hostView's coordinate space) on every layout pass,
+//! so the hint follows the card when it moves; the bubble stays inside the safe area, flipping
+//! above the tap point when there's no room below.  "Got it", or a tap outside the bubble, dismisses.
++ (FirstRunCoachHintView *) showInView:(UIView *)hostView spotlightProvider:(LWECoachHintSpotlightProvider)provider;
+
+//! Asks any coach hint in hostView to re-run its layout (call when the card's layout changes).
++ (void) setNeedsLayoutInView:(UIView *)hostView;
 
 @end
 

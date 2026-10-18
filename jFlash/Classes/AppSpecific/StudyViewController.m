@@ -32,6 +32,7 @@
 #if defined (LWE_JFLASH)
 - (void) _showWelcomeSheet;
 - (void) _showFirstCardHint;
+- (void) _coachHintSpotlight:(CGRect *)spot tapPoint:(CGPoint *)tap inView:(UIView *)host;
 #endif
 @end
 
@@ -149,6 +150,21 @@
 #if defined (LWE_JFLASH)
 - (void) _showWelcomeSheet
 {
+  // Something else (an alert, the upgrade notice, a plugin prompt...) may already be up; a second
+  // present would be dropped, so try again shortly instead -- for up to ~30 seconds.
+  static NSInteger retries = 0;
+  UIViewController *presenter = self.tabBarController ?: self;
+  if (presenter.presentedViewController != nil || presenter.view.window == nil)
+  {
+    if (retries++ < 60)
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if ([FirstRunWelcomeViewController shouldShowWelcome]) [self _showWelcomeSheet];
+      });
+    }
+    return;
+  }
+
   FirstRunWelcomeViewController *welcome = [[[FirstRunWelcomeViewController alloc] init] autorelease];
   welcome.finishedHandler = ^{
     // Then, once, point at the first card.
@@ -157,7 +173,6 @@
       [self _showFirstCardHint];
     }
   };
-  UIViewController *presenter = self.tabBarController ?: self;
   [presenter presentViewController:welcome animated:YES completion:nil];
 }
 
@@ -165,12 +180,21 @@
 {
   UIView *host = self.tabBarController.view ?: self.view;
   [self.view layoutIfNeeded];
+  // MRC: __block keeps the block from retaining self (the hint goes away long before we do).
+  __block StudyViewController *blockSelf = self;
+  [FirstRunCoachHintView showInView:host spotlightProvider:^(CGRect *spot, CGPoint *tap) {
+    [blockSelf _coachHintSpotlight:spot tapPoint:tap inView:host];
+  }];
+}
 
+//! The card's current spotlight rect and tap point, in host's coordinates.
+- (void) _coachHintSpotlight:(CGRect *)spot tapPoint:(CGPoint *)tap inView:(UIView *)host
+{
   // Spotlight the card: the red area between the progress strip and the answer bar.
   CGFloat top = CGRectGetMinY(self.scrollView.frame) + 8.0;
   CGFloat bottom = CGRectGetMinY(self.actionbarView.frame) - 8.0;
-  CGRect spot = CGRectMake(14.0, top, self.view.bounds.size.width - 28.0, MAX(120.0, bottom - top));
-  spot = [self.view convertRect:spot toView:host];
+  CGRect rect = CGRectMake(14.0, top, self.view.bounds.size.width - 28.0, MAX(120.0, bottom - top));
+  *spot = [self.view convertRect:rect toView:host];
 
   // Tap target: just below the headword, where tapping reveals the answer.
   CGFloat revealTop = CGRectGetMinY(self.revealCardBtn.frame);
@@ -178,8 +202,9 @@
   {
     revealTop = CGRectGetMinY(self.scrollView.frame) + [(CardViewController *)self.cardViewController revealAreaTop];
   }
-  CGPoint tap = [self.view convertPoint:CGPointMake(CGRectGetMidX(self.view.bounds), revealTop + 44.0) toView:host];
-  [FirstRunCoachHintView showInView:host spotlightRect:spot tapPoint:tap];
+  // Keep the ring inside the card even when large text pushes the reveal area down.
+  CGFloat tapY = MIN(revealTop + 44.0, bottom - 48.0);
+  *tap = [self.view convertPoint:CGPointMake(CGRectGetMidX(self.view.bounds), tapY) toView:host];
 }
 #endif
 
@@ -200,8 +225,9 @@
     CGFloat top = self.view.safeAreaInsets.top;
     CGFloat progressBottom = top + self.progressBarView.bounds.size.height;
 
-    // Give the action bar the height it asks for (the practice answer bar is two rows),
-    // pinned to the bottom of the safe area.
+#if defined (LWE_JFLASH)
+    // Give the action bar the height it asks for (the practice answer bar is two rows and grows
+    // with Dynamic Type), pinned to the bottom of the safe area.
     if ([self.actionBarController respondsToSelector:@selector(preferredBarHeight)]) {
       CGFloat barH = [(ActionBarViewController *)self.actionBarController preferredBarHeight];
       CGFloat bottomInset = self.view.safeAreaInsets.bottom;
@@ -222,6 +248,7 @@
       pc.y = CGRectGetMinY(self.actionbarView.frame) - 17.0;
       self.pageControl.center = pc;
     }
+#endif
 
     CGRect pf = self.progressBarView.frame;
     pf.origin.y = top;
@@ -296,8 +323,9 @@
       // Move the reveal button below the reading/headword area so the reading toggle
       // sits above it and can be tapped without triggering the definition reveal.
       if (self.revealCardBtn) {
+#if defined (LWE_JFLASH)
         // Starts below the headword / reading toggle / "+N readings" (still tappable) and
-        // stops at the answer bar, whose Actions & Bury buttons work before reveal too.
+        // stops at the answer bar, whose Actions button works before reveal too.
         CGFloat revealTop = self.scrollView.frame.origin.y + [cvc revealAreaTop];
         CGFloat revealBottom = CGRectGetMinY(self.actionbarView.frame);
         CGRect rf = self.revealCardBtn.frame;
@@ -306,11 +334,29 @@
         rf.origin.y = revealTop;
         rf.size.height = MAX(100.0, revealBottom - revealTop);
         self.revealCardBtn.frame = rf;
+        // The answer bar's "Show answer" button is the VoiceOver element for revealing; this
+        // invisible tap area would only be a second, duplicate "Show answer".
+        BOOL barHasShowAnswer = [self.actionBarController isKindOfClass:[ActionBarViewController class]] &&
+                                ((ActionBarViewController *)self.actionBarController).showAnswerBtn != nil;
+        self.revealCardBtn.isAccessibilityElement = (barHasShowAnswer == NO);
         self.revealCardBtn.accessibilityLabel = NSLocalizedString(@"Show answer", @"StudyViewController.ShowAnswerAccessibility");
+#else
+        // readingY (25% of containerH) + readingH (42) + gap (4) + headwordH (55) + buffer (10)
+        CGFloat headwordsBottom = roundf(containerH * 0.25) + 42.0 + 4.0 + 55.0 + 10.0;
+        CGFloat revealTop = self.scrollView.frame.origin.y + headwordsBottom;
+        CGRect rf = self.revealCardBtn.frame;
+        rf.origin.y = revealTop;
+        rf.size.height = MAX(100.0, self.view.bounds.size.height - revealTop);
+        self.revealCardBtn.frame = rf;
+#endif
       }
     }
   }
 
+#if defined (LWE_JFLASH)
+  // A coach hint on screen follows the card.
+  [FirstRunCoachHintView setNeedsLayoutInView:(self.tabBarController.view ?: self.view)];
+#endif
 }
 
 /**
@@ -928,6 +974,7 @@
  */
 -(void)setBackgroundColor_
 {
+#if defined (LWE_JFLASH)
   NSString *theme = [[NSUserDefaults standardUserDefaults] objectForKey:APP_THEME];
   if (theme == nil || [theme isEqualToString:SET_THEME_FIRE])
   {
@@ -938,6 +985,9 @@
   {
     self.practiceBgImage.backgroundColor = [[ThemeManager sharedThemeManager] currentThemeTintColor:0.9];
   }
+#else
+  self.practiceBgImage.backgroundColor = [[ThemeManager sharedThemeManager] currentThemeTintColor:0.9];
+#endif
   self.view.backgroundColor = [UIColor colorWithWhite:0.902 alpha:1.0];
 }
 

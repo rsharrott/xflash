@@ -13,9 +13,29 @@
 static const CGFloat kLWEBarPadTop       = 16.0;
 static const CGFloat kLWEBarPadSide      = 16.0;
 static const CGFloat kLWEBarGap          = 10.0;
-static const CGFloat kLWEBarSecondaryH   = 44.0;
-static const CGFloat kLWEBarPrimaryH     = 60.0;
+static const CGFloat kLWEBarSecondaryH   = 44.0;  // minimum; grows with Dynamic Type
+static const CGFloat kLWEBarPrimaryH     = 60.0;  // minimum; grows with Dynamic Type
 static const CGFloat kLWEBarPadBottom    = 14.0;
+// Dynamic Type: base sizes, and caps so "Actions" / "Wrong" etc. still fit a half-width button
+// on a 320pt-wide screen at the largest accessibility size.
+static const CGFloat kLWEBarSecondaryFontSize = 15.0;
+static const CGFloat kLWEBarSecondaryFontMax  = 24.0;
+static const CGFloat kLWEBarPrimaryFontSize   = 17.0;
+static const CGFloat kLWEBarPrimaryFontMax    = 28.0;
+
+static UIFont *LWEBarSecondaryFont(void)
+{
+  return LWEDesignScaledFont(UIFontTextStyleSubheadline, kLWEBarSecondaryFontSize, UIFontWeightMedium, kLWEBarSecondaryFontMax);
+}
+
+static UIFont *LWEBarPrimaryFont(void)
+{
+  return LWEDesignScaledFont(UIFontTextStyleBody, kLWEBarPrimaryFontSize, UIFontWeightSemibold, kLWEBarPrimaryFontMax);
+}
+
+//! Row heights: the 44 / 60pt design heights, or taller when the text needs it.
+static CGFloat LWEBarSecondaryHeight(void) { return MAX(kLWEBarSecondaryH, ceilf(LWEBarSecondaryFont().lineHeight + 24.0)); }
+static CGFloat LWEBarPrimaryHeight(void)   { return MAX(kLWEBarPrimaryH, ceilf(LWEBarPrimaryFont().lineHeight + 38.0)); }
 
 @interface ActionBarViewController ()
 {
@@ -26,7 +46,7 @@ static const CGFloat kLWEBarPadBottom    = 14.0;
 - (void) _setupPracticeBar API_AVAILABLE(ios(15.0));
 - (void) _layoutPracticeBar;
 - (void) _stylePracticeButton:(UIButton *)btn title:(NSString *)title symbol:(NSString *)symbol
-                         fill:(UIColor *)fill ink:(UIColor *)ink font:(UIFont *)font radius:(CGFloat)radius API_AVAILABLE(ios(15.0));
+                         fill:(UIColor *)fill ink:(UIColor *)ink primary:(BOOL)primary API_AVAILABLE(ios(15.0));
 - (void) _applyModernStyle:(UIButton *)btn symbolName:(NSString *)name label:(NSString *)labelText color:(UIColor *)color;
 @end
 
@@ -42,8 +62,11 @@ static const CGFloat kLWEBarPadBottom    = 14.0;
   [super viewDidLoad];
   _nibHeight = self.view.bounds.size.height;
 
+#if defined(LWE_JFLASH)
   // The practice NIB has right/wrong buttons; the browse NIB has prev/next instead.
+  // (Japanese in a Flash only -- Chinese Flash keeps the original bar.)
   _isPracticeBar = (self.rightBtn != nil && self.wrongBtn != nil);
+#endif
   if (_isPracticeBar)
   {
     if (@available(iOS 15.0, *)) {
@@ -99,8 +122,9 @@ static const CGFloat kLWEBarPadBottom    = 14.0;
 #pragma mark - Practice answer bar (paper panel)
 
 /**
- * Two rows on a paper panel: quieter Actions / Bury on top (always visible), and below
- * them either a full-width dark "Show answer" (before reveal) or Wrong / Right (after).
+ * Two rows on a paper panel: quieter Actions / Bury on top (Bury only once the answer is
+ * shown), and below them either a full-width dark "Show answer" (before reveal) or
+ * Wrong / Right (after).  Row heights start at 44 / 60pt and grow with Dynamic Type.
  * The buttons keep their NIB tags & actions (doCardBtn: via the responder chain,
  * showCardActionSheet), so behaviour is unchanged.
  */
@@ -117,29 +141,27 @@ static const CGFloat kLWEBarPadBottom    = 14.0;
   // The old brush-script "TAP FOR ANSWER" strip is replaced by the Show answer button.
   self.cardMeaningBtnHint.hidden = YES;
 
-  UIFont *secondaryFont = [UIFont systemFontOfSize:15 weight:UIFontWeightMedium];
-  UIFont *primaryFont = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
-
   [self _stylePracticeButton:self.addBtn title:NSLocalizedString(@"Actions", @"ActionBar.Actions") symbol:@"plus.circle"
-                        fill:LWEDesignPaperButton() ink:LWEDesignInk() font:secondaryFont radius:14];
+                        fill:LWEDesignPaperButton() ink:LWEDesignInk() primary:NO];
   self.addBtn.accessibilityLabel = NSLocalizedString(@"Actions", @"ActionBar.Actions");
 
   [self _stylePracticeButton:self.buryCardBtn title:NSLocalizedString(@"Bury", @"ActionBar.Bury") symbol:@"archivebox"
-                        fill:LWEDesignPaperButton() ink:LWEDesignInk() font:secondaryFont radius:14];
+                        fill:LWEDesignPaperButton() ink:LWEDesignInk() primary:NO];
   self.buryCardBtn.accessibilityLabel = NSLocalizedString(@"Bury it", @"ActionBar.BuryIt");
 
   [self _stylePracticeButton:self.wrongBtn title:NSLocalizedString(@"Wrong", @"ActionBar.Wrong") symbol:@"xmark"
-                        fill:LWEDesignWrongFill() ink:LWEDesignWrongInk() font:primaryFont radius:18];
+                        fill:LWEDesignWrongFill() ink:LWEDesignWrongInk() primary:YES];
   self.wrongBtn.accessibilityLabel = NSLocalizedString(@"Wrong", @"ActionBar.Wrong");
 
   [self _stylePracticeButton:self.rightBtn title:NSLocalizedString(@"Right", @"ActionBar.Right") symbol:@"checkmark"
-                        fill:LWEDesignRightFill() ink:LWEDesignRightInk() font:primaryFont radius:18];
+                        fill:LWEDesignRightFill() ink:LWEDesignRightInk() primary:YES];
   self.rightBtn.accessibilityLabel = NSLocalizedString(@"Right", @"ActionBar.Right");
 
-  // Show answer: same action as tapping the card (StudyViewController -revealCard via the responder chain)
+  // Show answer: same action as tapping the card (StudyViewController -revealCard via the responder chain).
+  // It is the only "Show answer" VoiceOver element; the card's invisible reveal area is hidden from VoiceOver.
   UIButton *show = [UIButton buttonWithType:UIButtonTypeCustom];
   [self _stylePracticeButton:show title:NSLocalizedString(@"Show answer", @"ActionBar.ShowAnswer") symbol:nil
-                        fill:LWEDesignInk() ink:[UIColor whiteColor] font:primaryFont radius:18];
+                        fill:LWEDesignInk() ink:[UIColor whiteColor] primary:YES];
   show.accessibilityLabel = NSLocalizedString(@"Show answer", @"ActionBar.ShowAnswer");
   [show addTarget:nil action:@selector(revealCard) forControlEvents:UIControlEventTouchUpInside];
   [self.view addSubview:show];
@@ -147,7 +169,7 @@ static const CGFloat kLWEBarPadBottom    = 14.0;
 }
 
 - (void) _stylePracticeButton:(UIButton *)btn title:(NSString *)title symbol:(NSString *)symbol
-                         fill:(UIColor *)fill ink:(UIColor *)ink font:(UIFont *)font radius:(CGFloat)radius
+                         fill:(UIColor *)fill ink:(UIColor *)ink primary:(BOOL)primary
 {
   if (btn == nil) return;
   // Clear the NIB's legacy images
@@ -159,24 +181,28 @@ static const CGFloat kLWEBarPadBottom    = 14.0;
   btn.backgroundColor = [UIColor clearColor];
   btn.autoresizingMask = UIViewAutoresizingNone;
 
-  UIButtonConfiguration *config = [UIButtonConfiguration filledButtonConfiguration];
-  config.baseBackgroundColor = fill;
-  config.baseForegroundColor = ink;
-  config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
-  config.background.cornerRadius = radius;
+  // Title font follows Dynamic Type (UIFontMetrics, capped); see LWEDesignButtonConfiguration.
+  UIButtonConfiguration *config = LWEDesignButtonConfiguration(title, fill, ink,
+    primary ? UIFontTextStyleBody : UIFontTextStyleSubheadline,
+    primary ? kLWEBarPrimaryFontSize : kLWEBarSecondaryFontSize,
+    primary ? UIFontWeightSemibold : UIFontWeightMedium,
+    primary ? kLWEBarPrimaryFontMax : kLWEBarSecondaryFontMax,
+    primary ? 18.0 : 14.0);
   config.imagePadding = 8.0;
   config.contentInsets = NSDirectionalEdgeInsetsMake(0, 8, 0, 8);
+  config.titleLineBreakMode = NSLineBreakByTruncatingTail;
   if (symbol)
   {
-    CGFloat pointSize = (radius >= 18) ? 16.0 : 17.0;
-    UIImageSymbolWeight weight = (radius >= 18) ? UIImageSymbolWeightBold : UIImageSymbolWeightRegular;
+    // Symbol scales with the title (16 / 17pt at the default size)
+    UIFont *font = primary ? LWEBarPrimaryFont() : LWEBarSecondaryFont();
+    CGFloat base = primary ? kLWEBarPrimaryFontSize : kLWEBarSecondaryFontSize;
+    CGFloat pointSize = roundf((primary ? 16.0 : 17.0) * font.pointSize / base);
+    UIImageSymbolWeight weight = primary ? UIImageSymbolWeightBold : UIImageSymbolWeightRegular;
     config.image = [UIImage systemImageNamed:symbol];
     config.preferredSymbolConfigurationForImage = [UIImageSymbolConfiguration configurationWithPointSize:pointSize weight:weight];
   }
-  NSAttributedString *attrTitle = [[[NSAttributedString alloc] initWithString:title
-                                                                   attributes:@{ NSFontAttributeName: font }] autorelease];
-  config.attributedTitle = [[[NSAttributedString alloc] initWithAttributedString:attrTitle] autorelease];
   btn.configuration = config;
+  btn.titleLabel.adjustsFontForContentSizeCategory = YES;
 }
 
 - (void) _layoutPracticeBar
@@ -186,21 +212,24 @@ static const CGFloat kLWEBarPadBottom    = 14.0;
   CGFloat innerW = w - 2.0 * kLWEBarPadSide;
   CGFloat halfW = floorf((innerW - kLWEBarGap) / 2.0);
 
-  CGFloat y1 = kLWEBarPadTop;
-  self.addBtn.frame      = CGRectMake(kLWEBarPadSide, y1, halfW, kLWEBarSecondaryH);
-  self.buryCardBtn.frame = CGRectMake(w - kLWEBarPadSide - halfW, y1, halfW, kLWEBarSecondaryH);
+  CGFloat secondaryH = LWEBarSecondaryHeight();
+  CGFloat primaryH = LWEBarPrimaryHeight();
 
-  CGFloat y2 = y1 + kLWEBarSecondaryH + kLWEBarGap;
-  self.wrongBtn.frame      = CGRectMake(kLWEBarPadSide, y2, halfW, kLWEBarPrimaryH);
-  self.rightBtn.frame      = CGRectMake(w - kLWEBarPadSide - halfW, y2, halfW, kLWEBarPrimaryH);
-  self.showAnswerBtn.frame = CGRectMake(kLWEBarPadSide, y2, innerW, kLWEBarPrimaryH);
+  CGFloat y1 = kLWEBarPadTop;
+  self.addBtn.frame      = CGRectMake(kLWEBarPadSide, y1, halfW, secondaryH);
+  self.buryCardBtn.frame = CGRectMake(w - kLWEBarPadSide - halfW, y1, halfW, secondaryH);
+
+  CGFloat y2 = y1 + secondaryH + kLWEBarGap;
+  self.wrongBtn.frame      = CGRectMake(kLWEBarPadSide, y2, halfW, primaryH);
+  self.rightBtn.frame      = CGRectMake(w - kLWEBarPadSide - halfW, y2, halfW, primaryH);
+  self.showAnswerBtn.frame = CGRectMake(kLWEBarPadSide, y2, innerW, primaryH);
 }
 
 - (CGFloat) preferredBarHeight
 {
   if (_isPracticeBar)
   {
-    return kLWEBarPadTop + kLWEBarSecondaryH + kLWEBarGap + kLWEBarPrimaryH + kLWEBarPadBottom;
+    return kLWEBarPadTop + LWEBarSecondaryHeight() + kLWEBarGap + LWEBarPrimaryHeight() + kLWEBarPadBottom;
   }
   return (_nibHeight > 0) ? _nibHeight : self.view.bounds.size.height;
 }

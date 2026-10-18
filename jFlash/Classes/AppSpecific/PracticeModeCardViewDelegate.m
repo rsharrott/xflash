@@ -141,7 +141,11 @@
 {
   // If practice mode, show the quiz stuff.  The faint "TAP FOR ANSWER" image in the middle
   // of the card is no longer shown -- the answer bar has a "Show answer" button instead.
+#if defined(LWE_JFLASH)
   svc.tapForAnswerImage.hidden = YES;
+#else
+  svc.tapForAnswerImage.hidden = NO;
+#endif
   svc.revealCardBtn.hidden = NO;
 
 	// In practice mode, scroll view should always start disabled!
@@ -152,7 +156,11 @@
 - (void) studyViewWillReveal:(StudyViewController *)svc
 {
   svc.revealCardBtn.hidden = YES;
+#if defined(LWE_JFLASH)
   svc.tapForAnswerImage.hidden = YES;
+#else
+  svc.tapForAnswerImage.hidden = NO;
+#endif
   
   // Now update scrollability (page control doesn't change)
   BOOL hasExampleSentences = [svc hasExampleSentences];

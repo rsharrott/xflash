@@ -36,3 +36,35 @@ static inline UIColor *LWEDesignWrongInk(void)  { return LWEDesignColorHex(0x7E1
 //! Right button, #D3EEDC on #0B5A2C
 static inline UIColor *LWEDesignRightFill(void) { return LWEDesignColorHex(0xD3EEDC, 1.0); }
 static inline UIColor *LWEDesignRightInk(void)  { return LWEDesignColorHex(0x0B5A2C, 1.0); }
+
+//! A system font of `size`/`weight` that follows Dynamic Type like `style` (UIFontMetrics),
+//! optionally capped at `maxPointSize` (0 = no cap) so fixed-width controls still fit.
+static inline UIFont *LWEDesignScaledFont(UIFontTextStyle style, CGFloat size, UIFontWeight weight, CGFloat maxPointSize)
+{
+  UIFont *base = [UIFont systemFontOfSize:size weight:weight];
+  UIFontMetrics *metrics = [UIFontMetrics metricsForTextStyle:style];
+  return (maxPointSize > 0) ? [metrics scaledFontForFont:base maximumPointSize:maxPointSize]
+                            : [metrics scaledFontForFont:base];
+}
+
+//! Filled button configuration whose title font is re-resolved through UIFontMetrics on every
+//! configuration update, so the title tracks the Dynamic Type setting while the app is running.
+API_AVAILABLE(ios(15.0))
+static inline UIButtonConfiguration *LWEDesignButtonConfiguration(NSString *title, UIColor *fill, UIColor *ink,
+                                                                  UIFontTextStyle style, CGFloat size, UIFontWeight weight,
+                                                                  CGFloat maxPointSize, CGFloat radius)
+{
+  UIButtonConfiguration *config = [UIButtonConfiguration filledButtonConfiguration];
+  config.baseBackgroundColor = fill;
+  config.baseForegroundColor = ink;
+  config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
+  config.background.cornerRadius = radius;
+  config.title = title;
+  config.titleAlignment = UIButtonConfigurationTitleAlignmentCenter;
+  config.titleTextAttributesTransformer = ^NSDictionary<NSAttributedStringKey, id> *(NSDictionary<NSAttributedStringKey, id> *incoming) {
+    NSMutableDictionary *attrs = [[incoming mutableCopy] autorelease];
+    attrs[NSFontAttributeName] = LWEDesignScaledFont(style, size, weight, maxPointSize);
+    return attrs;
+  };
+  return config;
+}

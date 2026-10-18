@@ -9,6 +9,9 @@
 #import "CardViewController.h"
 #import "UIScrollView+LWEUtilities.h"
 #import "LWEDesignTokens.h"
+#if defined(LWE_JFLASH)
+#import "JapaneseCard.h"
+#endif
 #import <AVFoundation/AVFoundation.h>
 
 // Study card (J->E) metrics from the 2026 design refresh
@@ -99,7 +102,6 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 
 @implementation CardViewController
 {
-  BOOL _displayMainHeadword;
   BOOL _modernCard;
   BOOL _readingsExpanded;
   CGFloat _lastLayoutWidth;
@@ -173,7 +175,6 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   self = [super initWithNibName:nibName bundle:nil];
   if (self)
   {
-    _displayMainHeadword = displayMainHeadword;
 #if defined(LWE_JFLASH)
     _modernCard = displayMainHeadword;
 #endif
@@ -268,16 +269,36 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   self.speakBtn.layer.cornerRadius = kLWESpeakBtnSize / 2.0;
 
   // "+N readings" pill
-  UIButton *pill = [UIButton buttonWithType:UIButtonTypeCustom];
-  pill.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
-  pill.layer.cornerRadius = 15.0;
-  pill.titleLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
-  [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.88] forState:UIControlStateNormal];
-  [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.5] forState:UIControlStateHighlighted];
-  pill.tintColor = [UIColor colorWithWhite:1.0 alpha:0.88];
-  pill.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft; // chevron after the text
-  pill.imageEdgeInsets = UIEdgeInsetsMake(0, 5, 0, 0);
-  pill.contentEdgeInsets = UIEdgeInsetsMake(0, 13, 0, 17);
+  UIButton *pill = nil;
+  if (@available(iOS 15.0, *))
+  {
+    // UIButtonConfiguration (replaces the deprecated image/content edge insets): chevron after the text
+    UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
+    config.baseForegroundColor = [UIColor colorWithWhite:1.0 alpha:0.88];
+    config.background.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
+    config.background.cornerRadius = 15.0;
+    config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
+    config.imagePlacement = NSDirectionalRectEdgeTrailing;
+    config.imagePadding = 5.0;
+    config.contentInsets = NSDirectionalEdgeInsetsMake(0, 13, 0, 13);
+    config.titleTextAttributesTransformer = ^NSDictionary<NSAttributedStringKey, id> *(NSDictionary<NSAttributedStringKey, id> *incoming) {
+      NSMutableDictionary *attrs = [[incoming mutableCopy] autorelease];
+      attrs[NSFontAttributeName] = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
+      return attrs;
+    };
+    pill = [UIButton buttonWithConfiguration:config primaryAction:nil];
+  }
+  else
+  {
+    pill = [UIButton buttonWithType:UIButtonTypeCustom];
+    pill.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
+    pill.layer.cornerRadius = 15.0;
+    pill.titleLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
+    [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.88] forState:UIControlStateNormal];
+    [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.5] forState:UIControlStateHighlighted];
+    pill.tintColor = [UIColor colorWithWhite:1.0 alpha:0.88];
+    pill.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft; // chevron after the text
+  }
   pill.hidden = YES;
   [pill addTarget:self action:@selector(_toggleMoreReadings:) forControlEvents:UIControlEventTouchUpInside];
   [self.view addSubview:pill];
@@ -296,6 +317,32 @@ static NSArray *LWESplitReadings(NSString *readings)
   return result;
 }
 
+//! The readings with exact duplicates removed, first occurrence kept.
+static NSArray *LWEUniqueReadings(NSArray *readings)
+{
+  NSMutableArray *result = [NSMutableArray array];
+  for (NSString *reading in readings)
+  {
+    if ([result containsObject:reading] == NO) [result addObject:reading];
+  }
+  return result;
+}
+
+//! How many readings are hidden behind the "+N readings" pill for the current reading mode.
+static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
+{
+  NSString *mode = [[NSUserDefaults standardUserDefaults] objectForKey:APP_READING];
+  if ([mode isEqualToString:SET_READING_ROMAJI])
+  {
+    return (NSInteger)[LWEUniqueReadings(romaji) count] - 1;
+  }
+  if ([mode isEqualToString:SET_READING_KANA])
+  {
+    return (NSInteger)[kana count] - 1;
+  }
+  return (NSInteger)MAX([kana count], [romaji count]) - 1;
+}
+
 //! Builds the reading label: kana on one line, muted romaji on the next (per APP_READING).
 - (void) _applyReadingText
 {
@@ -309,8 +356,12 @@ static NSArray *LWESplitReadings(NSString *readings)
   NSString *romajiText = nil;
   if (_readingsExpanded)
   {
+    // Kana list with the Japanese middle dot; the romaji list with an ASCII comma (a "・" or
+    // a Latin "·" between romanised words reads as part of the word).  When only romaji is
+    // shown, repeated romanisations (e.g. ひらがな and カタカナ spellings) are listed once.
     kanaText = [kana componentsJoinedByString:@"・"];
-    romajiText = [romaji componentsJoinedByString:@" · "];
+    NSArray *romajiList = showKana ? romaji : LWEUniqueReadings(romaji);
+    romajiText = [romajiList componentsJoinedByString:@", "];
   }
   else
   {
@@ -363,7 +414,7 @@ static NSArray *LWESplitReadings(NSString *readings)
 
 - (void) _updateMoreReadingsBtn
 {
-  NSInteger extra = (NSInteger)MAX([self.kanaReadings count], [self.romajiReadings count]) - 1;
+  NSInteger extra = LWEExtraReadingCount(self.kanaReadings, self.romajiReadings);
   BOOL readingShowing = (self.readingScrollContainer.hidden == NO);
   self.moreReadingsBtn.hidden = (extra <= 0 || readingShowing == NO);
   if (extra <= 0) return;
@@ -386,8 +437,24 @@ static NSArray *LWESplitReadings(NSString *readings)
     symbol = @"chevron.down";
   }
   UIImageSymbolConfiguration *cfg = [UIImageSymbolConfiguration configurationWithPointSize:10 weight:UIImageSymbolWeightBold];
-  [self.moreReadingsBtn setImage:[UIImage systemImageNamed:symbol withConfiguration:cfg] forState:UIControlStateNormal];
-  [self.moreReadingsBtn setTitle:title forState:UIControlStateNormal];
+  UIImage *chevron = [UIImage systemImageNamed:symbol withConfiguration:cfg];
+  BOOL configured = NO;
+  if (@available(iOS 15.0, *))
+  {
+    UIButtonConfiguration *config = [[self.moreReadingsBtn.configuration copy] autorelease];
+    if (config)
+    {
+      config.title = title;
+      config.image = chevron;
+      self.moreReadingsBtn.configuration = config;
+      configured = YES;
+    }
+  }
+  if (configured == NO)
+  {
+    [self.moreReadingsBtn setImage:chevron forState:UIControlStateNormal];
+    [self.moreReadingsBtn setTitle:title forState:UIControlStateNormal];
+  }
   self.moreReadingsBtn.accessibilityLabel = _readingsExpanded
     ? NSLocalizedString(@"Show fewer readings", @"CardViewController.FewerReadingsAccessibility")
     : [NSString stringWithFormat:NSLocalizedString(@"Show %d more readings", @"CardViewController.MoreReadingsAccessibility"), (int)extra];
@@ -461,7 +528,7 @@ static NSArray *LWESplitReadings(NSString *readings)
   self.toggleReadingBtn.frame = CGRectMake(hPad, readingY, contentW, readingContainerH);
 
   CGFloat bottom = readingY + readingContainerH;
-  NSInteger extra = (NSInteger)MAX([self.kanaReadings count], [self.romajiReadings count]) - 1;
+  NSInteger extra = LWEExtraReadingCount(self.kanaReadings, self.romajiReadings);
   if (extra > 0)
   {
     CGSize pillSize = [self.moreReadingsBtn sizeThatFits:CGSizeMake(contentW, 30)];
@@ -690,7 +757,7 @@ static NSArray *LWESplitReadings(NSString *readings)
   {
     // First reading only (kana, and romaji muted underneath); the rest sit behind "+N readings".
     self.kanaReadings = LWESplitReadings(card.hw_reading);
-    NSString *romaji = [card respondsToSelector:@selector(romaji)] ? [card performSelector:@selector(romaji)] : nil;
+    NSString *romaji = [card isKindOfClass:[JapaneseCard class]] ? [(JapaneseCard *)card romaji] : nil;
     self.romajiReadings = LWESplitReadings(romaji);
     _readingsExpanded = NO;
     _lastLayoutWidth = self.view.bounds.size.width;
@@ -823,7 +890,9 @@ static NSArray *LWESplitReadings(NSString *readings)
 // HTML Header content that will be displayed in the meaning UIWebView before the actual meaning
 NSString * const LWECardHTMLTemplate = @""
 "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
-"<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1' />"
+#if defined(LWE_JFLASH)
+// 2026 card: large, upright meaning; no maximum-scale, so pinch zoom stays available.
+"<meta name='viewport' content='width=device-width, initial-scale=1' />"
 "<style>"
 "body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:calc(##TEXTSIZE## * 1.5); font-weight:600; font-style:normal; font-family:-apple-system,'Helvetica Neue',Helvetica,sans-serif; color:#fff; line-height:1.25; letter-spacing:-0.4px; -webkit-text-size-adjust:none; } "
 "dfn{ text-shadow:none; font-style:normal; font-weight:600; color:#3a2a00; position:relative; top:-3px; font-family:-apple-system,sans-serif; font-size:13px; letter-spacing:0.1px; background-color:#FFD60A; line-height:1; margin:0 0 0 8px; padding:5px 9px 6px; -webkit-border-radius:8px; border:0; display:inline-block; vertical-align:middle; } "
@@ -831,6 +900,15 @@ NSString * const LWECardHTMLTemplate = @""
 "#container:before{ content:''; display:block; width:40px; height:2px; border-radius:1px; background:rgba(255,255,255,0.3); margin:0 auto 22px auto; } "
 "ol{color:white; text-align:left; font-size:0.75em; line-height:1.35; width:auto; margin:0 12px; padding-left:22px;} "
 "li{color:white; margin:0px; margin-bottom:8px;} "
+#else
+// Chinese Flash keeps the original card styling.
+"<style>"
+"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:##TEXTSIZE##; font-weight:bold; font-family:Helvetica,sanserif; color:#fff; line-height:1.4; } "
+"dfn{ text-shadow:none; font-weight:normal; color:#000; position:relative; top:-1px; font-family:verdana; font-size:10.5px; background-color:#C79810; line-height:1.4; margin:4px 4px 0px 0px; height:14px; padding:2px 3px; -webkit-border-radius:4px; border:1px solid #F9F7ED; display:inline-block;} "
+"#container{ width:100%; text-align:center; padding-top:12px; } "
+"ol{color:white; text-align:left; width:240px; margin:0px; margin-left:24px; padding-left:10px;} "
+"li{color:white; margin:0px; margin-bottom:7px;} "
+#endif
 "##THEMECSS##"
 "</style></head>"
 "<body><div id='container'>"

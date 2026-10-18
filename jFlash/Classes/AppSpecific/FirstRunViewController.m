@@ -74,19 +74,19 @@ static NSInteger LWELiveCardCount(Tag *tag)
     _titleLabel = [[UILabel alloc] init];
     _titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     _titleLabel.text = title;
-    _titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightMedium];
+    _titleLabel.font = LWEDesignScaledFont(UIFontTextStyleBody, 17, UIFontWeightMedium, 0);
+    _titleLabel.adjustsFontForContentSizeCategory = YES;
     _titleLabel.textColor = LWEDesignInk();
-    _titleLabel.adjustsFontSizeToFitWidth = YES;
-    _titleLabel.minimumScaleFactor = 0.8;
+    _titleLabel.numberOfLines = 0;
     [self addSubview:_titleLabel];
 
     _subtitleLabel = [[UILabel alloc] init];
     _subtitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     _subtitleLabel.text = subtitle;
-    _subtitleLabel.font = [UIFont systemFontOfSize:13];
+    _subtitleLabel.font = LWEDesignScaledFont(UIFontTextStyleFootnote, 13, UIFontWeightRegular, 0);
+    _subtitleLabel.adjustsFontForContentSizeCategory = YES;
     _subtitleLabel.textColor = LWEDesignMuted();
-    _subtitleLabel.adjustsFontSizeToFitWidth = YES;
-    _subtitleLabel.minimumScaleFactor = 0.8;
+    _subtitleLabel.numberOfLines = 0;
     [self addSubview:_subtitleLabel];
 
     _radio = [[UIView alloc] init];
@@ -161,9 +161,18 @@ static NSInteger LWELiveCardCount(Tag *tag)
   UISegmentedControl *_readingControl;
   UIButton *_startButton;
   UIActivityIndicatorView *_spinner;
+  UIScrollView *_scroll;
+  UILabel *_titleLabel;
+  UILabel *_footerNote;
+  UILabel *_scrollNote;
+  UIStackView *_segRow;
   BOOL _finishing;
 }
+- (void) _rowTapped:(LWEStarterSetRow *)row;
 - (void) _selectRow:(LWEStarterSetRow *)row;
+- (void) _applyTitle;
+- (void) _updateForContentSizeCategory;
++ (BOOL) _tag:(NSInteger)tagId isInGroup:(NSInteger)groupId;
 - (NSArray *) _starterSets;
 - (UIView *) _iconView;
 - (void) _finish;
@@ -212,7 +221,27 @@ static NSInteger LWELiveCardCount(Tag *tag)
   [_readingControl release];
   [_startButton release];
   [_spinner release];
+  [_scroll release];
+  [_titleLabel release];
+  [_footerNote release];
+  [_scrollNote release];
+  [_segRow release];
   [super dealloc];
+}
+
+//! YES if the system tag is actually filed under that group (group_tag_link), so a renumbered
+//! or different database can't put e.g. a JLPT tag under the "Survival Japanese" heading.
++ (BOOL) _tag:(NSInteger)tagId isInGroup:(NSInteger)groupId
+{
+  FMResultSet *rs = [[[LWEDatabase sharedLWEDatabase] dao] executeQuery:@"SELECT count(*) AS total FROM group_tag_link WHERE group_id = ? AND tag_id = ?",
+                     [NSNumber numberWithInt:(int)groupId], [NSNumber numberWithInt:(int)tagId]];
+  NSInteger total = 0;
+  while ([rs next])
+  {
+    total = [rs intForColumn:@"total"];
+  }
+  [rs close];
+  return (total > 0);
 }
 
 //! Returns an array of { title, subtitle, Tag } dictionaries read from the database.
@@ -234,6 +263,10 @@ static NSInteger LWELiveCardCount(Tag *tag)
     Group *group = [GroupPeer retrieveGroupById:kLWEStarterSets[i][0]];
     Tag *tag = [TagPeer retrieveTagById:kLWEStarterSets[i][1]];
     if (group == nil || tag == nil || [tag.tagName length] == 0 || tag.tagId == current.tagId)
+    {
+      continue;
+    }
+    if ([FirstRunWelcomeViewController _tag:tag.tagId isInGroup:group.groupId] == NO)
     {
       continue;
     }
@@ -306,28 +339,44 @@ static NSInteger LWELiveCardCount(Tag *tag)
   self.view.backgroundColor = LWEDesignPaper();
   self.presentationController.delegate = self;
 
-  // ---- Footer: Start studying + note, pinned above the home indicator
-  UIView *footer = [[[UIView alloc] init] autorelease];
+  // ---- Footer: Start studying (+ the note at regular text sizes), pinned above the home indicator
+  UIStackView *footer = [[[UIStackView alloc] init] autorelease];
   footer.translatesAutoresizingMaskIntoConstraints = NO;
-  footer.backgroundColor = LWEDesignPaper();
+  footer.axis = UILayoutConstraintAxisVertical;
+  footer.spacing = 12;
+  footer.layoutMarginsRelativeArrangement = YES;
+  footer.directionalLayoutMargins = NSDirectionalEdgeInsetsMake(12, 24, 6, 24);
   [self.view addSubview:footer];
 
-  _startButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+  NSString *startTitle = NSLocalizedString(@"Start studying", @"FirstRun.StartStudying");
+  if (@available(iOS 15.0, *))
+  {
+    UIButtonConfiguration *config = LWEDesignButtonConfiguration(startTitle, LWEDesignFire(), [UIColor whiteColor],
+                                                                 UIFontTextStyleBody, 17, UIFontWeightSemibold, 0, 18);
+    config.contentInsets = NSDirectionalEdgeInsetsMake(14, 44, 14, 44); // room for the spinner on the right
+    _startButton = [[UIButton buttonWithConfiguration:config primaryAction:nil] retain];
+  }
+  else
+  {
+    _startButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+    _startButton.backgroundColor = LWEDesignFire();
+    _startButton.layer.cornerRadius = 18;
+    _startButton.titleLabel.font = LWEDesignScaledFont(UIFontTextStyleBody, 17, UIFontWeightSemibold, 0);
+    _startButton.titleLabel.numberOfLines = 0;
+    _startButton.titleLabel.textAlignment = NSTextAlignmentCenter;
+    [_startButton setTitle:startTitle forState:UIControlStateNormal];
+    [_startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_startButton setTitleColor:[UIColor colorWithWhite:1 alpha:0.7] forState:UIControlStateHighlighted];
+  }
+  _startButton.titleLabel.adjustsFontForContentSizeCategory = YES;
   _startButton.translatesAutoresizingMaskIntoConstraints = NO;
-  _startButton.backgroundColor = LWEDesignFire();
-  _startButton.layer.cornerRadius = 18;
   _startButton.layer.cornerCurve = kCACornerCurveContinuous;
   _startButton.layer.shadowColor = LWEDesignFire().CGColor;
   _startButton.layer.shadowOpacity = 0.25;
   _startButton.layer.shadowRadius = 10;
   _startButton.layer.shadowOffset = CGSizeMake(0, 8);
-  _startButton.titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
-  _startButton.titleLabel.adjustsFontForContentSizeCategory = NO;
-  [_startButton setTitle:NSLocalizedString(@"Start studying", @"FirstRun.StartStudying") forState:UIControlStateNormal];
-  [_startButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-  [_startButton setTitleColor:[UIColor colorWithWhite:1 alpha:0.7] forState:UIControlStateHighlighted];
   [_startButton addTarget:self action:@selector(startStudying:) forControlEvents:UIControlEventTouchUpInside];
-  [footer addSubview:_startButton];
+  [footer addArrangedSubview:_startButton];
 
   _spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
   _spinner.translatesAutoresizingMaskIntoConstraints = NO;
@@ -335,27 +384,35 @@ static NSInteger LWELiveCardCount(Tag *tag)
   _spinner.hidesWhenStopped = YES;
   [_startButton addSubview:_spinner];
 
-  UILabel *note = [[[UILabel alloc] init] autorelease];
-  note.translatesAutoresizingMaskIntoConstraints = NO;
-  note.text = NSLocalizedString(@"You can switch sets anytime in the Study Sets tab.", @"FirstRun.SwitchSetsNote");
-  note.font = [UIFont systemFontOfSize:13];
-  note.textColor = LWEDesignMuted();
-  note.textAlignment = NSTextAlignmentCenter;
-  note.numberOfLines = 0;
-  [footer addSubview:note];
+  NSString *noteText = NSLocalizedString(@"You can switch sets anytime in the Study Sets tab.", @"FirstRun.SwitchSetsNote");
+  UILabel *notes[2];
+  for (NSInteger i = 0; i < 2; i++)
+  {
+    UILabel *note = [[UILabel alloc] init];
+    note.text = noteText;
+    note.font = LWEDesignScaledFont(UIFontTextStyleFootnote, 13, UIFontWeightRegular, 0);
+    note.adjustsFontForContentSizeCategory = YES;
+    note.textColor = LWEDesignMuted();
+    note.textAlignment = NSTextAlignmentCenter;
+    note.numberOfLines = 0;
+    notes[i] = note;
+  }
+  _footerNote = notes[0];   // regular sizes: under the button
+  _scrollNote = notes[1];   // accessibility sizes: at the end of the scrolling content
+  [footer addArrangedSubview:_footerNote];
 
-  // ---- Scrolling content
-  UIScrollView *scroll = [[[UIScrollView alloc] init] autorelease];
-  scroll.translatesAutoresizingMaskIntoConstraints = NO;
-  scroll.alwaysBounceVertical = NO;
-  scroll.showsVerticalScrollIndicator = NO;
-  [self.view addSubview:scroll];
+  // ---- Scrolling content (scrolls when large text makes it taller than the sheet)
+  _scroll = [[UIScrollView alloc] init];
+  _scroll.translatesAutoresizingMaskIntoConstraints = NO;
+  _scroll.alwaysBounceVertical = NO;
+  _scroll.showsVerticalScrollIndicator = YES;
+  [self.view addSubview:_scroll];
 
   UIStackView *stack = [[[UIStackView alloc] init] autorelease];
   stack.translatesAutoresizingMaskIntoConstraints = NO;
   stack.axis = UILayoutConstraintAxisVertical;
   stack.alignment = UIStackViewAlignmentFill;
-  [scroll addSubview:stack];
+  [_scroll addSubview:stack];
 
   UIView *icon = [self _iconView];
   UIView *iconRow = [[[UIView alloc] init] autorelease];
@@ -368,33 +425,18 @@ static NSInteger LWELiveCardCount(Tag *tag)
   [stack addArrangedSubview:iconRow];
   [stack setCustomSpacing:20 afterView:iconRow];
 
-  // Title: heavy, with "Flash!" in fire red
-  NSString *titleText = NSLocalizedString(@"Welcome to Japanese in a Flash!", @"StudyViewController.WelcomeAlertViewTitle");
-  // Keep "in a Flash!" together on the second line, as in the design.
-  titleText = [titleText stringByReplacingOccurrencesOfString:@" in a Flash!" withString:@" in\u00A0a\u00A0Flash!"];
-  NSMutableParagraphStyle *titlePara = [[[NSMutableParagraphStyle alloc] init] autorelease];
-  titlePara.lineHeightMultiple = 0.95;
-  NSMutableAttributedString *title = [[[NSMutableAttributedString alloc] initWithString:titleText attributes:@{
-    NSFontAttributeName: [UIFont systemFontOfSize:31 weight:UIFontWeightHeavy],
-    NSForegroundColorAttributeName: LWEDesignInk(),
-    NSKernAttributeName: @(-0.9),
-    NSParagraphStyleAttributeName: titlePara,
-  }] autorelease];
-  NSRange flash = [titleText rangeOfString:@"Flash!"];
-  if (flash.location != NSNotFound)
-  {
-    [title addAttribute:NSForegroundColorAttributeName value:LWEDesignFire() range:flash];
-  }
-  UILabel *titleLabel = [[[UILabel alloc] init] autorelease];
-  titleLabel.attributedText = title;
-  titleLabel.numberOfLines = 0;
-  titleLabel.accessibilityTraits = UIAccessibilityTraitHeader;
-  [stack addArrangedSubview:titleLabel];
-  [stack setCustomSpacing:10 afterView:titleLabel];
+  // Title: heavy, with "Flash!" in fire red (rebuilt when the text size changes)
+  _titleLabel = [[UILabel alloc] init];
+  _titleLabel.numberOfLines = 0;
+  _titleLabel.accessibilityTraits = UIAccessibilityTraitHeader;
+  [self _applyTitle];
+  [stack addArrangedSubview:_titleLabel];
+  [stack setCustomSpacing:10 afterView:_titleLabel];
 
   UILabel *lede = [[[UILabel alloc] init] autorelease];
   lede.text = NSLocalizedString(@"Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed.", @"FirstRun.Lede");
-  lede.font = [UIFont systemFontOfSize:16];
+  lede.font = LWEDesignScaledFont(UIFontTextStyleCallout, 16, UIFontWeightRegular, 0);
+  lede.adjustsFontForContentSizeCategory = YES;
   lede.textColor = LWEDesignMuted();
   lede.numberOfLines = 0;
   [stack addArrangedSubview:lede];
@@ -406,7 +448,9 @@ static NSInteger LWELiveCardCount(Tag *tag)
   {
     UILabel *pick = [[[UILabel alloc] init] autorelease];
     pick.text = NSLocalizedString(@"Pick a starter set", @"FirstRun.PickStarterSet");
-    pick.font = [UIFont systemFontOfSize:15 weight:UIFontWeightSemibold];
+    pick.font = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightSemibold, 0);
+    pick.adjustsFontForContentSizeCategory = YES;
+    pick.numberOfLines = 0;
     pick.textColor = LWEDesignInk();
     pick.accessibilityTraits = UIAccessibilityTraitHeader;
     UIView *pickRow = [[[UIView alloc] init] autorelease];
@@ -457,73 +501,113 @@ static NSInteger LWELiveCardCount(Tag *tag)
     [self _selectRow:[_rows objectAtIndex:0]];
   }
 
-  // Reading mode: maps onto the existing APP_READING setting (KANA / BOTH)
-  UIView *segRow = [[[UIView alloc] init] autorelease];
+  // Reading mode: maps onto the existing APP_READING setting (KANA / BOTH).  Label and control
+  // sit side by side, or stacked at accessibility text sizes.
+  _segRow = [[UIStackView alloc] init];
+  _segRow.spacing = 8;
   UILabel *segLabel = [[[UILabel alloc] init] autorelease];
-  segLabel.translatesAutoresizingMaskIntoConstraints = NO;
   segLabel.text = NSLocalizedString(@"Show readings as", @"FirstRun.ShowReadingsAs");
-  segLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightMedium];
+  segLabel.font = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightMedium, 0);
+  segLabel.adjustsFontForContentSizeCategory = YES;
+  segLabel.numberOfLines = 0;
   segLabel.textColor = LWEDesignInk();
-  [segRow addSubview:segLabel];
+  [segLabel setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+  [_segRow addArrangedSubview:segLabel];
 
   _readingControl = [[UISegmentedControl alloc] initWithItems:@[
     NSLocalizedString(@"Kana", @"FirstRun.ReadingKana"),
     NSLocalizedString(@"Kana + romaji", @"FirstRun.ReadingKanaRomaji"),
   ]];
-  _readingControl.translatesAutoresizingMaskIntoConstraints = NO;
   NSString *reading = [[NSUserDefaults standardUserDefaults] objectForKey:APP_READING];
   _readingControl.selectedSegmentIndex = [reading isEqualToString:SET_READING_KANA] ? 0 : 1;
   _readingControl.backgroundColor = LWEDesignPaper2();
   _readingControl.selectedSegmentTintColor = [UIColor whiteColor];
-  [_readingControl setTitleTextAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:14 weight:UIFontWeightMedium],
+  _readingControl.apportionsSegmentWidthsByContent = YES;
+  // Capped so both segments still fit the sheet width at the largest sizes.
+  [_readingControl setTitleTextAttributes:@{ NSFontAttributeName: LWEDesignScaledFont(UIFontTextStyleSubheadline, 14, UIFontWeightMedium, 24),
                                              NSForegroundColorAttributeName: LWEDesignColorHex(0x4A4238, 1.0) } forState:UIControlStateNormal];
-  [_readingControl setTitleTextAttributes:@{ NSFontAttributeName: [UIFont systemFontOfSize:14 weight:UIFontWeightSemibold],
+  [_readingControl setTitleTextAttributes:@{ NSFontAttributeName: LWEDesignScaledFont(UIFontTextStyleSubheadline, 14, UIFontWeightSemibold, 24),
                                              NSForegroundColorAttributeName: LWEDesignInk() } forState:UIControlStateSelected];
   _readingControl.accessibilityLabel = segLabel.text;
-  [segRow addSubview:_readingControl];
-  [NSLayoutConstraint activateConstraints:@[
-    [segLabel.leadingAnchor constraintEqualToAnchor:segRow.leadingAnchor constant:2],
-    [segLabel.centerYAnchor constraintEqualToAnchor:segRow.centerYAnchor],
-    [segLabel.trailingAnchor constraintLessThanOrEqualToAnchor:_readingControl.leadingAnchor constant:-8],
-    [_readingControl.trailingAnchor constraintEqualToAnchor:segRow.trailingAnchor],
-    [_readingControl.topAnchor constraintEqualToAnchor:segRow.topAnchor],
-    [_readingControl.bottomAnchor constraintEqualToAnchor:segRow.bottomAnchor],
-    [_readingControl.heightAnchor constraintEqualToConstant:34],
-  ]];
-  [stack addArrangedSubview:segRow];
+  [_readingControl setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  [_readingControl setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  [_readingControl.heightAnchor constraintGreaterThanOrEqualToConstant:34].active = YES;
+  [_segRow addArrangedSubview:_readingControl];
+  [stack addArrangedSubview:_segRow];
+  [stack setCustomSpacing:24 afterView:_segRow];
+  [stack addArrangedSubview:_scrollNote];
 
   UILayoutGuide *safe = self.view.safeAreaLayoutGuide;
   [NSLayoutConstraint activateConstraints:@[
-    [scroll.topAnchor constraintEqualToAnchor:self.view.topAnchor],
-    [scroll.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-    [scroll.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-    [scroll.bottomAnchor constraintEqualToAnchor:footer.topAnchor],
+    [_scroll.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+    [_scroll.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+    [_scroll.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+    [_scroll.bottomAnchor constraintEqualToAnchor:footer.topAnchor],
 
-    [stack.topAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.topAnchor constant:34],
-    [stack.bottomAnchor constraintEqualToAnchor:scroll.contentLayoutGuide.bottomAnchor constant:-16],
-    [stack.leadingAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.leadingAnchor constant:24],
-    [stack.trailingAnchor constraintEqualToAnchor:scroll.frameLayoutGuide.trailingAnchor constant:-24],
+    [stack.topAnchor constraintEqualToAnchor:_scroll.contentLayoutGuide.topAnchor constant:34],
+    [stack.bottomAnchor constraintEqualToAnchor:_scroll.contentLayoutGuide.bottomAnchor constant:-16],
+    [stack.leadingAnchor constraintEqualToAnchor:_scroll.frameLayoutGuide.leadingAnchor constant:24],
+    [stack.trailingAnchor constraintEqualToAnchor:_scroll.frameLayoutGuide.trailingAnchor constant:-24],
 
     [footer.leadingAnchor constraintEqualToAnchor:safe.leadingAnchor],
     [footer.trailingAnchor constraintEqualToAnchor:safe.trailingAnchor],
     [footer.bottomAnchor constraintEqualToAnchor:safe.bottomAnchor],
-    [_startButton.topAnchor constraintEqualToAnchor:footer.topAnchor constant:12],
-    [_startButton.leadingAnchor constraintEqualToAnchor:footer.leadingAnchor constant:24],
-    [_startButton.trailingAnchor constraintEqualToAnchor:footer.trailingAnchor constant:-24],
-    [_startButton.heightAnchor constraintEqualToConstant:56],
+    [_startButton.heightAnchor constraintGreaterThanOrEqualToConstant:56],
     [_spinner.trailingAnchor constraintEqualToAnchor:_startButton.trailingAnchor constant:-20],
     [_spinner.centerYAnchor constraintEqualToAnchor:_startButton.centerYAnchor],
-    [note.topAnchor constraintEqualToAnchor:_startButton.bottomAnchor constant:12],
-    [note.leadingAnchor constraintEqualToAnchor:footer.leadingAnchor constant:24],
-    [note.trailingAnchor constraintEqualToAnchor:footer.trailingAnchor constant:-24],
-    [note.bottomAnchor constraintEqualToAnchor:footer.bottomAnchor constant:-6],
   ]];
+  [self _updateForContentSizeCategory];
+}
+
+- (void) _applyTitle
+{
+  NSString *titleText = NSLocalizedString(@"Welcome to Japanese in a Flash!", @"StudyViewController.WelcomeAlertViewTitle");
+  // Keep "in a Flash!" together on the second line, as in the design.
+  titleText = [titleText stringByReplacingOccurrencesOfString:@" in a Flash!" withString:@" in\u00A0a\u00A0Flash!"];
+  NSMutableParagraphStyle *titlePara = [[[NSMutableParagraphStyle alloc] init] autorelease];
+  titlePara.lineHeightMultiple = 0.95;
+  UIFont *font = LWEDesignScaledFont(UIFontTextStyleTitle1, 31, UIFontWeightHeavy, 0);
+  NSMutableAttributedString *title = [[[NSMutableAttributedString alloc] initWithString:titleText attributes:@{
+    NSFontAttributeName: font,
+    NSForegroundColorAttributeName: LWEDesignInk(),
+    NSKernAttributeName: @(-0.9),
+    NSParagraphStyleAttributeName: titlePara,
+  }] autorelease];
+  NSRange flash = [titleText rangeOfString:@"Flash!"];
+  if (flash.location != NSNotFound)
+  {
+    [title addAttribute:NSForegroundColorAttributeName value:LWEDesignFire() range:flash];
+  }
+  _titleLabel.attributedText = title;
+}
+
+//! Accessibility text sizes: stack the reading row and move the note into the scrolling content
+//! so the pinned footer stays small and the rest of the sheet can scroll.
+- (void) _updateForContentSizeCategory
+{
+  BOOL large = UIContentSizeCategoryIsAccessibilityCategory(self.traitCollection.preferredContentSizeCategory);
+  _segRow.axis = large ? UILayoutConstraintAxisVertical : UILayoutConstraintAxisHorizontal;
+  _segRow.alignment = large ? UIStackViewAlignmentLeading : UIStackViewAlignmentCenter;
+  _footerNote.hidden = large;
+  _scrollNote.hidden = !large;
+}
+
+- (void) traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  [super traitCollectionDidChange:previousTraitCollection];
+  if ([previousTraitCollection.preferredContentSizeCategory isEqualToString:self.traitCollection.preferredContentSizeCategory] == NO)
+  {
+    [self _applyTitle];
+    [self _updateForContentSizeCategory];
+  }
 }
 
 - (void) viewDidAppear:(BOOL)animated
 {
   [super viewDidAppear:animated];
   [FirstRunWelcomeViewController markWelcomeShown];
+  // Hint that there's more below when large text pushes content off the sheet.
+  [_scroll flashScrollIndicators];
 #if defined(LWE_DEBUG)
   // Screenshot hook (Debug builds only): `simctl launch <udid> <bundle> -LWEDebugAutoStartWelcome YES`
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"LWEDebugAutoStartWelcome"])
@@ -537,6 +621,12 @@ static NSInteger LWELiveCardCount(Tag *tag)
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
       [self startStudying:nil];
     });
+  }
+  // -LWEDebugScrollWelcomeToEnd YES: scroll to the bottom (large-text screenshots)
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"LWEDebugScrollWelcomeToEnd"])
+  {
+    CGFloat maxY = MAX(0, _scroll.contentSize.height - _scroll.bounds.size.height + _scroll.adjustedContentInset.bottom);
+    [_scroll setContentOffset:CGPointMake(0, maxY) animated:NO];
   }
 #endif
 }
@@ -581,7 +671,18 @@ static NSInteger LWELiveCardCount(Tag *tag)
   CurrentState *state = [CurrentState sharedCurrentState];
   if (chosen && chosen.tagId != state.activeTag.tagId && chosen.cardCount > 0)
   {
-    _startButton.enabled = NO;
+    // While the set loads, the sheet can't be swiped away and nothing else can be changed.
+    if (@available(iOS 13.0, *))
+    {
+      self.modalInPresentation = YES;
+    }
+    // (userInteractionEnabled rather than enabled, so the button keeps its colour behind the spinner)
+    _startButton.userInteractionEnabled = NO;
+    _readingControl.enabled = NO;
+    for (LWEStarterSetRow *row in _rows)
+    {
+      row.enabled = NO;
+    }
     [_spinner startAnimating];
     [state setActiveTag:chosen completionHandler:^{
       [_spinner stopAnimating];
@@ -617,6 +718,11 @@ static NSInteger LWELiveCardCount(Tag *tag)
 
 #pragma mark - Coach hint
 
+static const CGFloat kLWEHintRingRadius   = 40.0;  // the tap ring is 80pt across
+static const CGFloat kLWEHintArrowGap     = 14.0;  // ring edge -> bubble
+static const CGFloat kLWEHintEdgeMargin   = 16.0;  // bubble <-> safe area edge
+static const CGFloat kLWEHintArrowInset   = 30.0;  // arrow stays this far inside the bubble's corners
+
 @interface FirstRunCoachHintView ()
 {
   CGRect _spotlight;
@@ -626,29 +732,44 @@ static NSInteger LWELiveCardCount(Tag *tag)
   UIView *_ring;
   UIView *_bubble;
   UIView *_arrow;
+  BOOL _dismissing;
 }
+@property (nonatomic, copy) LWECoachHintSpotlightProvider spotlightProvider;
 - (void) _dismiss:(id)sender;
+- (void) _dimTapped:(UITapGestureRecognizer *)recognizer;
 @end
 
 @implementation FirstRunCoachHintView
+@synthesize spotlightProvider;
 
 + (BOOL) shouldShowHint
 {
   return ([[NSUserDefaults standardUserDefaults] boolForKey:LWEFirstRunCardHintShownKey] == NO);
 }
 
-+ (FirstRunCoachHintView *) showInView:(UIView *)hostView spotlightRect:(CGRect)spotlightRect tapPoint:(CGPoint)tapPoint
++ (FirstRunCoachHintView *) showInView:(UIView *)hostView spotlightProvider:(LWECoachHintSpotlightProvider)provider
 {
   FirstRunCoachHintView *hint = [[[FirstRunCoachHintView alloc] initWithFrame:hostView.bounds] autorelease];
-  hint->_spotlight = spotlightRect;
-  hint->_tapPoint = tapPoint;
+  hint.spotlightProvider = provider;
   hint.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   hint.alpha = 0.0;
   [hostView addSubview:hint];
   [hint setNeedsLayout];
+  [hint layoutIfNeeded];
   [UIView animateWithDuration:0.25 animations:^{ hint.alpha = 1.0; }];
   UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, hint->_bubble);
   return hint;
+}
+
++ (void) setNeedsLayoutInView:(UIView *)hostView
+{
+  for (UIView *subview in hostView.subviews)
+  {
+    if ([subview isKindOfClass:[FirstRunCoachHintView class]])
+    {
+      [subview setNeedsLayout];
+    }
+  }
 }
 
 - (id) initWithFrame:(CGRect)frame
@@ -671,7 +792,7 @@ static NSInteger LWELiveCardCount(Tag *tag)
     [self.layer addSublayer:_outlineLayer];
 
     // Tap ring: a dot in two concentric circles
-    _ring = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 80, 80)];
+    _ring = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 2 * kLWEHintRingRadius, 2 * kLWEHintRingRadius)];
     _ring.userInteractionEnabled = NO;
     UIView *outer = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 80, 80)] autorelease];
     outer.layer.cornerRadius = 40;
@@ -706,10 +827,12 @@ static NSInteger LWELiveCardCount(Tag *tag)
     _bubble.layer.shadowOffset = CGSizeMake(0, 14);
     [self addSubview:_bubble];
 
+    // Dynamic Type, capped so the whole bubble still fits beside the card on a 667pt screen.
     UILabel *text = [[[UILabel alloc] init] autorelease];
     text.translatesAutoresizingMaskIntoConstraints = NO;
     text.text = NSLocalizedString(@"Tap the card to see the answer, then mark it right or wrong.", @"FirstRun.CardHint");
-    text.font = [UIFont systemFontOfSize:17 weight:UIFontWeightMedium];
+    text.font = LWEDesignScaledFont(UIFontTextStyleBody, 17, UIFontWeightMedium, 30);
+    text.adjustsFontForContentSizeCategory = YES;
     text.textColor = LWEDesignInk();
     text.numberOfLines = 0;
     [_bubble addSubview:text];
@@ -717,19 +840,36 @@ static NSInteger LWELiveCardCount(Tag *tag)
     UILabel *step = [[[UILabel alloc] init] autorelease];
     step.translatesAutoresizingMaskIntoConstraints = NO;
     step.text = NSLocalizedString(@"One-time tip", @"FirstRun.OneTimeTip");
-    step.font = [UIFont systemFontOfSize:13 weight:UIFontWeightMedium];
+    step.font = LWEDesignScaledFont(UIFontTextStyleFootnote, 13, UIFontWeightMedium, 24);
+    step.adjustsFontForContentSizeCategory = YES;
     step.textColor = LWEDesignMuted();
+    step.numberOfLines = 0;
     [_bubble addSubview:step];
 
-    UIButton *got = [UIButton buttonWithType:UIButtonTypeCustom];
+    NSString *gotTitle = NSLocalizedString(@"Got it", @"FirstRun.GotIt");
+    UIButton *got = nil;
+    if (@available(iOS 15.0, *))
+    {
+      UIButtonConfiguration *config = LWEDesignButtonConfiguration(gotTitle, LWEDesignFire(), [UIColor whiteColor],
+                                                                   UIFontTextStyleCallout, 16, UIFontWeightSemibold, 26, 20);
+      config.contentInsets = NSDirectionalEdgeInsetsMake(8, 20, 8, 20);
+      got = [UIButton buttonWithConfiguration:config primaryAction:nil];
+    }
+    else
+    {
+      got = [UIButton buttonWithType:UIButtonTypeCustom];
+      got.backgroundColor = LWEDesignFire();
+      got.layer.cornerRadius = 20;
+      got.titleLabel.font = LWEDesignScaledFont(UIFontTextStyleCallout, 16, UIFontWeightSemibold, 26);
+      [got setTitle:gotTitle forState:UIControlStateNormal];
+      [got setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+      [got setTitleColor:[UIColor colorWithWhite:1 alpha:0.7] forState:UIControlStateHighlighted];
+      CGSize titleSize = [gotTitle sizeWithAttributes:@{ NSFontAttributeName: got.titleLabel.font }];
+      [got.widthAnchor constraintGreaterThanOrEqualToConstant:ceilf(titleSize.width) + 40].active = YES;
+    }
+    got.titleLabel.adjustsFontForContentSizeCategory = YES;
     got.translatesAutoresizingMaskIntoConstraints = NO;
-    got.backgroundColor = LWEDesignFire();
-    got.layer.cornerRadius = 20;
-    got.contentEdgeInsets = UIEdgeInsetsMake(0, 20, 0, 20);
-    got.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
-    [got setTitle:NSLocalizedString(@"Got it", @"FirstRun.GotIt") forState:UIControlStateNormal];
-    [got setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [got setTitleColor:[UIColor colorWithWhite:1 alpha:0.7] forState:UIControlStateHighlighted];
+    [got setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
     [got addTarget:self action:@selector(_dismiss:) forControlEvents:UIControlEventTouchUpInside];
     [_bubble addSubview:got];
 
@@ -739,19 +879,47 @@ static NSInteger LWELiveCardCount(Tag *tag)
       [text.trailingAnchor constraintEqualToAnchor:_bubble.trailingAnchor constant:-18],
       [got.topAnchor constraintEqualToAnchor:text.bottomAnchor constant:14],
       [got.trailingAnchor constraintEqualToAnchor:_bubble.trailingAnchor constant:-18],
-      [got.heightAnchor constraintEqualToConstant:40],
+      [got.heightAnchor constraintGreaterThanOrEqualToConstant:40],
       [got.bottomAnchor constraintEqualToAnchor:_bubble.bottomAnchor constant:-16],
       [step.leadingAnchor constraintEqualToAnchor:text.leadingAnchor],
+      [step.trailingAnchor constraintLessThanOrEqualToAnchor:got.leadingAnchor constant:-10],
       [step.centerYAnchor constraintEqualToAnchor:got.centerYAnchor],
+      [step.topAnchor constraintGreaterThanOrEqualToAnchor:text.bottomAnchor constant:8],
     ]];
+
+    // A tap anywhere outside the bubble (on the dimmed area or the card) also dismisses.
+    UITapGestureRecognizer *tap = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(_dimTapped:)] autorelease];
+    [self addGestureRecognizer:tap];
   }
   return self;
+}
+
+- (void) traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  [super traitCollectionDidChange:previousTraitCollection];
+  [self setNeedsLayout];
+}
+
+- (void) safeAreaInsetsDidChange
+{
+  [super safeAreaInsetsDidChange];
+  [self setNeedsLayout];
 }
 
 - (void) layoutSubviews
 {
   [super layoutSubviews];
   CGRect b = self.bounds;
+
+  // The card can move (rotation, text size, tab bar / safe-area changes), so ask again each pass.
+  if (self.spotlightProvider)
+  {
+    CGRect spot = _spotlight;
+    CGPoint tap = _tapPoint;
+    self.spotlightProvider(&spot, &tap);
+    _spotlight = spot;
+    _tapPoint = tap;
+  }
 
   UIBezierPath *dim = [UIBezierPath bezierPathWithRect:b];
   UIBezierPath *hole = [UIBezierPath bezierPathWithRoundedRect:_spotlight cornerRadius:32];
@@ -763,38 +931,77 @@ static NSInteger LWELiveCardCount(Tag *tag)
 
   _ring.center = _tapPoint;
 
-  CGFloat bubbleX = MAX(28.0, CGRectGetMinX(_spotlight) + 14.0);
-  CGFloat bubbleW = MIN(b.size.width - 2.0 * bubbleX, 420.0);
-  bubbleX = roundf((b.size.width - bubbleW) / 2.0);
+  // ---- Bubble: centred in the safe area (inset by a margin), below the tap ring if it fits,
+  // otherwise above it, otherwise on whichever side has more room, clamped on screen.
+  CGRect safe = UIEdgeInsetsInsetRect(b, self.safeAreaInsets);
+  safe = CGRectInset(safe, kLWEHintEdgeMargin, kLWEHintEdgeMargin);
+  CGFloat bubbleW = MIN(MAX(safe.size.width, 120.0), 420.0);
+  CGFloat bubbleX = roundf(CGRectGetMidX(safe) - bubbleW / 2.0);
   CGSize fit = [_bubble systemLayoutSizeFittingSize:CGSizeMake(bubbleW, UILayoutFittingCompressedSize.height)
                       withHorizontalFittingPriority:UILayoutPriorityRequired
                             verticalFittingPriority:UILayoutPriorityFittingSizeLevel];
-  CGFloat bubbleY = _tapPoint.y + 40.0 + 14.0;
-  _bubble.frame = CGRectMake(bubbleX, bubbleY, bubbleW, fit.height);
-  _arrow.center = CGPointMake(_tapPoint.x, bubbleY + 1.0);
+  CGFloat bubbleH = ceilf(fit.height);
+
+  CGFloat belowY = _tapPoint.y + kLWEHintRingRadius + kLWEHintArrowGap;
+  CGFloat aboveY = _tapPoint.y - kLWEHintRingRadius - kLWEHintArrowGap - bubbleH;
+  BOOL fitsBelow = (belowY + bubbleH <= CGRectGetMaxY(safe));
+  BOOL fitsAbove = (aboveY >= CGRectGetMinY(safe));
+  BOOL below = fitsBelow || (!fitsAbove && (CGRectGetMaxY(safe) - belowY) >= (_tapPoint.y - CGRectGetMinY(safe)));
+  CGFloat bubbleY = below ? belowY : aboveY;
+  BOOL clamped = NO;
+  if (bubbleY + bubbleH > CGRectGetMaxY(safe)) { bubbleY = CGRectGetMaxY(safe) - bubbleH; clamped = YES; }
+  if (bubbleY < CGRectGetMinY(safe))           { bubbleY = CGRectGetMinY(safe); clamped = YES; }
+  _bubble.frame = CGRectMake(bubbleX, roundf(bubbleY), bubbleW, bubbleH);
+
+  // Arrow on the edge facing the ring, kept inside the bubble's rounded corners.  If the bubble
+  // had to be clamped over the ring, the arrow would point nowhere useful, so hide it.
+  CGFloat arrowX = MIN(MAX(_tapPoint.x, CGRectGetMinX(_bubble.frame) + kLWEHintArrowInset), CGRectGetMaxX(_bubble.frame) - kLWEHintArrowInset);
+  CGFloat arrowY = below ? CGRectGetMinY(_bubble.frame) + 1.0 : CGRectGetMaxY(_bubble.frame) - 1.0;
+  _arrow.center = CGPointMake(arrowX, arrowY);
+  _arrow.hidden = clamped;
 }
 
-//! Swallow all touches outside the bubble so the card isn't revealed underneath the tip.
+//! Swallow all touches so the card isn't revealed underneath the tip.
 - (UIView *) hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
   UIView *hit = [super hitTest:point withEvent:event];
   return hit ?: self;
 }
 
+- (void) _dimTapped:(UITapGestureRecognizer *)recognizer
+{
+  if (CGRectContainsPoint(_bubble.frame, [recognizer locationInView:self]) == NO)
+  {
+    [self _dismiss:recognizer];
+  }
+}
+
+//! VoiceOver two-finger scrub dismisses too.
+- (BOOL) accessibilityPerformEscape
+{
+  [self _dismiss:nil];
+  return YES;
+}
+
 - (void) _dismiss:(id)sender
 {
+  if (_dismissing) return;
+  _dismissing = YES;
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   [settings setBool:YES forKey:LWEFirstRunCardHintShownKey];
   [settings synchronize];
+  self.spotlightProvider = nil;
   [UIView animateWithDuration:0.2 animations:^{
     self.alpha = 0.0;
   } completion:^(BOOL finished) {
     [self removeFromSuperview];
+    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, nil);
   }];
 }
 
 - (void) dealloc
 {
+  [spotlightProvider release];
   [_dimLayer release];
   [_outlineLayer release];
   [_ring release];
