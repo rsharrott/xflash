@@ -169,7 +169,10 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(CurrentState);
   [settings setInteger:DEFAULT_REMINDER_DAYS forKey:APP_REMINDER];
   [settings setValue:DEFAULT_THEME forKey:APP_THEME];
   [settings setValue:SET_MODE_QUIZ forKey:APP_MODE];
+#if defined(LWE_JFLASH)
+  // Kana-only display is a Japanese-only setting (not defined for cFlash)
   [settings setValue:SET_KANA_ONLY_ON forKey:APP_KANA_ONLY];
+#endif
   [settings setValue:SET_J_TO_E forKey:APP_HEADWORD];
   [settings setValue:LWE_CURRENT_VERSION forKey:APP_DATA_VERSION];
   [settings setValue:LWE_CURRENT_VERSION forKey:APP_SETTINGS_VERSION];

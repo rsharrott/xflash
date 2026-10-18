@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA2B000519000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000419000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000319000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000219000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA2B000119000020000000AA /* JFlashUpdateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 496461CA1580929A00C3AB80 /* JFlashUpdateManager.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -1447,6 +1452,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B000319000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EB14FD069400CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C814FD05C700CF5C44 /* CoreData.framework in Frameworks */,
 				49A3EC1514DB99C800621183 /* CoreText.framework in Frameworks */,
@@ -1469,6 +1475,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B000519000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EA14FD068D00CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C914FD05CF00CF5C44 /* CoreData.framework in Frameworks */,
 				496C670214728BDC009F04D4 /* Security.framework in Frameworks */,
@@ -1491,6 +1498,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B000419000020000000AA /* WebKit.framework in Frameworks */,
 				499448D11472817800671849 /* libsqlite3.a in Frameworks */,
 				242A174814628AF4002977E6 /* AudioToolbox.framework in Frameworks */,
 				242A17401461AB60002977E6 /* AVFoundation.framework in Frameworks */,
@@ -1513,6 +1521,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B000219000020000000AA /* WebKit.framework in Frameworks */,
 				919FBDBD16230000001FD77B /* Social.framework in Frameworks */,
 				91D3FA5C1580294F00CB8F1E /* libsqlite3.a in Frameworks */,
 				91D3FA5D1580294F00CB8F1E /* AudioToolbox.framework in Frameworks */,
@@ -3490,6 +3499,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B000119000020000000AA /* JFlashUpdateManager.m in Sources */,
 				91D3F9D01580294F00CB8F1E /* main.m in Sources */,
 				91D3F9D11580294F00CB8F1E /* AddStudySetInputViewController.m in Sources */,
 				91D3F9D21580294F00CB8F1E /* AddTagViewController.m in Sources */,
