@@ -77,9 +77,13 @@
 
 - (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  if ([keyPath isEqualToString:APP_HEADWORD_TYPE] && self.tableView)
+  if ([keyPath isEqualToString:APP_HEADWORD_TYPE])
   {
-    [self.tableView reloadData];
+    // Our key: never hand it to super (NSObject raises for unhandled KVO), even when there is nothing to refresh yet.
+    if (self.isViewLoaded)
+    {
+      [self.tableView reloadData];
+    }
   }
   else
   {
