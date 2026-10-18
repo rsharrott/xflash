@@ -283,6 +283,26 @@
 
   // Replace the placeholder rootViewController with the actual tab bar controller.
   // This is deferred until here so that viewDidLoad methods don't fire before the DB is open.
+  // The tab & navigation bar titles come from MainWindow.xib in English; translate them (Interface.strings).
+  // The Search tab is a system item, so UIKit already localizes it.  Done before the tab bar is
+  // installed: retitling items after the first layout left the unselected labels lower (iOS 26).
+  for (UIViewController *tabVC in self.tabBarController.viewControllers)
+  {
+    NSString *tabTitle = tabVC.tabBarItem.title;
+    if (tabTitle)
+    {
+      // A "Tab.<English>" entry wins, for languages where the full title doesn't fit in the tab bar.
+      NSString *tabKey = [@"Tab." stringByAppendingString:tabTitle];
+      NSString *shortTitle = LWEInterfaceString(tabKey);
+      tabVC.tabBarItem.title = [shortTitle isEqualToString:tabKey] ? LWEInterfaceString(tabTitle) : shortTitle;
+    }
+    if ([tabVC isKindOfClass:[UINavigationController class]])
+    {
+      UIViewController *rootVC = [[(UINavigationController *)tabVC viewControllers] firstObject];
+      if (rootVC.navigationItem.title) rootVC.navigationItem.title = LWEInterfaceString(rootVC.navigationItem.title);
+    }
+  }
+
   [self.window setTintColor:[[ThemeManager sharedThemeManager] currentThemeTintColor]];
 
   // Make the tab bar opaque so UIKit sizes child view controllers' views to end above
@@ -304,24 +324,6 @@
 
   self.window.rootViewController = self.tabBarController;
 
-  // The tab & navigation bar titles come from MainWindow.xib in English; translate them (Interface.strings).
-  // The Search tab is a system item, so UIKit already localizes it.
-  for (UIViewController *tabVC in self.tabBarController.viewControllers)
-  {
-    NSString *tabTitle = tabVC.tabBarItem.title;
-    if (tabTitle)
-    {
-      // A "Tab.<English>" entry wins, for languages where the full title doesn't fit in the tab bar.
-      NSString *tabKey = [@"Tab." stringByAppendingString:tabTitle];
-      NSString *shortTitle = LWEInterfaceString(tabKey);
-      tabVC.tabBarItem.title = [shortTitle isEqualToString:tabKey] ? LWEInterfaceString(tabTitle) : shortTitle;
-    }
-    if ([tabVC isKindOfClass:[UINavigationController class]])
-    {
-      UIViewController *rootVC = [[(UINavigationController *)tabVC viewControllers] firstObject];
-      if (rootVC.navigationItem.title) rootVC.navigationItem.title = LWEInterfaceString(rootVC.navigationItem.title);
-    }
-  }
 #if defined (LWE_DEBUG)
   // Screenshot hook (Debug builds only): `simctl launch <udid> <bundle> -LWEDebugSelectTab 3` opens Settings
   NSInteger debugTab = [[NSUserDefaults standardUserDefaults] integerForKey:@"LWEDebugSelectTab"];

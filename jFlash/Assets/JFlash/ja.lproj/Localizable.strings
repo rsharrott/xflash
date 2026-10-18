@@ -222,7 +222,7 @@
 "You can switch sets anytime in the Study Sets tab." = "セットは下の「セット」タブからいつでも変更できます。";
 
 /* FirstRun.Lede  (FirstRunViewController.m) */
-"Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed." = "英単語と日本語のフラッシュカード。\n単語帳はiPhoneの中だけに保存。アカウント登録も不要です。";
+"Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed." = "漢字・かな・単語のフラッシュカード。\n単語帳はiPhoneの中に保存されます。アカウントは不要です。";
 
 /* FirstRun.PickStarterSet  (FirstRunViewController.m) */
 "Pick a starter set" = "最初に学習するセットを選んでください";
@@ -372,7 +372,7 @@
 "Common Kana Words" = "かな書きが多い語";
 
 /* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
-"Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese Flash Logo & Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese Flashは、ある連休（Long Weekend）にステーキと何本かのコロナビールを片手に生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリはEDICT辞書と田中コーパスのデータを使用しています。EDICTファイルはElectronic Dictionary Research and Development Groupの所有物であり、同グループのライセンスに従って使用しています。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese Flashのロゴと製品名はオリジナルの創作物であり、他の商標との類似は意図したものではなく、まったくの偶然です。";
+"Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese Flash Logo & Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese Flashは、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリはEDICT辞書とTanaka Corpus（田中コーパス）のデータも使用しています。EDICTファイルはElectronic Dictionary Research and Development Groupの所有物であり、同グループのライセンスに従って使用しています。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese Flashのロゴと製品名はオリジナルの創作物であり、他の商標との類似は意図したものではなく、まったくの偶然です。";
 
 /* PleaseWait  (PluginSettingsViewController.m) */
 "Please Wait" = "お待ちください";
