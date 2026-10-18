@@ -339,7 +339,8 @@ static NSInteger LWELiveCardCount(Tag *tag)
   self.view.backgroundColor = LWEDesignPaper();
   self.presentationController.delegate = self;
 
-  // ---- Footer: Start studying (+ the note at regular text sizes), pinned above the home indicator
+  // ---- Footer: Start studying (+ the note at regular text sizes), pinned above the home indicator.
+  // Its title is capped (28pt) so the pinned footer never takes over the sheet at large sizes.
   UIStackView *footer = [[[UIStackView alloc] init] autorelease];
   footer.translatesAutoresizingMaskIntoConstraints = NO;
   footer.axis = UILayoutConstraintAxisVertical;
@@ -352,7 +353,7 @@ static NSInteger LWELiveCardCount(Tag *tag)
   if (@available(iOS 15.0, *))
   {
     UIButtonConfiguration *config = LWEDesignButtonConfiguration(startTitle, LWEDesignFire(), [UIColor whiteColor],
-                                                                 UIFontTextStyleBody, 17, UIFontWeightSemibold, 0, 18);
+                                                                 UIFontTextStyleBody, 17, UIFontWeightSemibold, 28, 18);
     config.contentInsets = NSDirectionalEdgeInsetsMake(14, 44, 14, 44); // room for the spinner on the right
     _startButton = [[UIButton buttonWithConfiguration:config primaryAction:nil] retain];
   }
@@ -361,7 +362,7 @@ static NSInteger LWELiveCardCount(Tag *tag)
     _startButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
     _startButton.backgroundColor = LWEDesignFire();
     _startButton.layer.cornerRadius = 18;
-    _startButton.titleLabel.font = LWEDesignScaledFont(UIFontTextStyleBody, 17, UIFontWeightSemibold, 0);
+    _startButton.titleLabel.font = LWEDesignScaledFont(UIFontTextStyleBody, 17, UIFontWeightSemibold, 28);
     _startButton.titleLabel.numberOfLines = 0;
     _startButton.titleLabel.textAlignment = NSTextAlignmentCenter;
     [_startButton setTitle:startTitle forState:UIControlStateNormal];
@@ -566,7 +567,8 @@ static NSInteger LWELiveCardCount(Tag *tag)
   titleText = [titleText stringByReplacingOccurrencesOfString:@" in a Flash!" withString:@" in\u00A0a\u00A0Flash!"];
   NSMutableParagraphStyle *titlePara = [[[NSMutableParagraphStyle alloc] init] autorelease];
   titlePara.lineHeightMultiple = 0.95;
-  UIFont *font = LWEDesignScaledFont(UIFontTextStyleTitle1, 31, UIFontWeightHeavy, 0);
+  // Capped a little so a word like "Japanese" still fits a 320pt-wide line at the largest size.
+  UIFont *font = LWEDesignScaledFont(UIFontTextStyleTitle1, 31, UIFontWeightHeavy, 52);
   NSMutableAttributedString *title = [[[NSMutableAttributedString alloc] initWithString:titleText attributes:@{
     NSFontAttributeName: font,
     NSForegroundColorAttributeName: LWEDesignInk(),

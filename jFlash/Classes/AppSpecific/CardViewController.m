@@ -19,6 +19,7 @@ static const CGFloat kLWEHeadwordMaxPointSize = 88.0;
 static const CGFloat kLWEHeadwordMinPointSize = 34.0;
 static const CGFloat kLWESpeakBtnSize         = 44.0;
 static const CGFloat kLWESpeakBtnGap          = 14.0;
+static const CGFloat kLWECompactCardHeight    = 420.0; // card areas shorter than this use the compact layout
 
 // Maps iOS system text size category to a CSS font-size string for WKWebView/UIWebView HTML.
 static NSString *LWEDynamicTypeCSSFontSize(void)
@@ -105,6 +106,7 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
   BOOL _modernCard;
   BOOL _readingsExpanded;
   CGFloat _lastLayoutWidth;
+  CGFloat _lastLayoutHeight;
 }
 
 @synthesize delegate;
@@ -369,7 +371,10 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     romajiText = [romaji count] > 0 ? [romaji objectAtIndex:0] : nil;
   }
 
-  CGFloat dt = MIN(LWEDynamicTypeSizeMultiplier(), 1.35f);
+  // A short card (small phone, or a tall answer bar at large text sizes) keeps the reading at
+  // its base size so the meaning still has room.
+  CGFloat dt = (self.view.bounds.size.height > 0 && self.view.bounds.size.height < kLWECompactCardHeight)
+             ? 1.0f : MIN(LWEDynamicTypeSizeMultiplier(), 1.35f);
   NSMutableParagraphStyle *para = [[[NSMutableParagraphStyle alloc] init] autorelease];
   para.alignment = NSTextAlignmentCenter;
   para.paragraphSpacing = 2.0;
@@ -476,11 +481,17 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   CGFloat hPad = 24.0;
   CGFloat contentW = w - 2.0 * hPad;
   CGFloat dt = MIN(LWEDynamicTypeSizeMultiplier(), 1.2f);
+  // Short card: scale the headword with the available height (not below 48pt) and tighten the
+  // spacing, so reading, pill and meaning still fit above the answer bar.
+  BOOL compact = (h < kLWECompactCardHeight);
+  CGFloat compactScale = compact ? MAX(0.55f, h / kLWECompactCardHeight) : 1.0f;
 
   // Re-flow the reading for the final width (the first card is prepared before layout).
-  if (fabs(w - _lastLayoutWidth) > 0.5)
+  // Re-flow the reading when the width or height changed (the reading size depends on both).
+  if (fabs(w - _lastLayoutWidth) > 0.5 || fabs(h - _lastLayoutHeight) > 0.5)
   {
     _lastLayoutWidth = w;
+    _lastLayoutHeight = h;
     [self _applyReadingText];
   }
 
@@ -488,7 +499,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   // it would otherwise be smaller than the minimum.
   NSString *headword = self.headwordLabel.text ?: @"";
   CGFloat textAvailW = contentW - 2.0 * (kLWESpeakBtnSize + kLWESpeakBtnGap);
-  CGFloat size = floorf(kLWEHeadwordMaxPointSize * dt);
+  CGFloat size = floorf(MAX(compact ? 48.0f : 0.0f, kLWEHeadwordMaxPointSize * dt * compactScale));
   UIFont *font = [UIFont systemFontOfSize:size weight:UIFontWeightBold];
   CGFloat oneLineW = [headword sizeWithAttributes:@{NSFontAttributeName: font}].width;
   if (oneLineW > textAvailW && oneLineW > 0)
@@ -505,7 +516,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   CGFloat maxHwH = roundf(h * 0.36);
   CGFloat containerH = MIN(hwH, maxHwH);
 
-  CGFloat headwordY = MAX(16.0, roundf(h * 0.16));
+  CGFloat headwordY = compact ? MAX(8.0, roundf(h * 0.06)) : MAX(16.0, roundf(h * 0.16));
   self.headwordScrollContainer.frame = CGRectMake(hPad, headwordY, contentW, containerH);
   self.headwordLabel.frame = CGRectMake(roundf((contentW - textAvailW) / 2.0), 0, textAvailW, hwH);
   self.headwordScrollContainer.contentSize = CGSizeMake(contentW, hwH);
@@ -514,7 +525,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [self _updateSpeakBtnPosition];
 
   // ---- Reading under the headword
-  CGFloat readingY = headwordY + containerH + 16.0;
+  CGFloat readingY = headwordY + containerH + (compact ? 6.0 : 16.0);
   CGSize readingFit = [self.readingLabel.attributedText boundingRectWithSize:CGSizeMake(contentW, CGFLOAT_MAX)
                                                                      options:NSStringDrawingUsesLineFragmentOrigin
                                                                      context:nil].size;
@@ -533,12 +544,12 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   {
     CGSize pillSize = [self.moreReadingsBtn sizeThatFits:CGSizeMake(contentW, 30)];
     CGFloat pillW = MIN(contentW, ceilf(pillSize.width));
-    self.moreReadingsBtn.frame = CGRectMake(roundf((w - pillW) / 2.0), bottom + 12.0, pillW, 30.0);
+    self.moreReadingsBtn.frame = CGRectMake(roundf((w - pillW) / 2.0), bottom + (compact ? 6.0 : 12.0), pillW, 30.0);
     bottom = CGRectGetMaxY(self.moreReadingsBtn.frame);
   }
 
   // ---- Meaning: a short rule, then the meaning (both drawn by the HTML template)
-  CGFloat webY = bottom + 20.0;
+  CGFloat webY = bottom + (compact ? 10.0 : 20.0);
   CGFloat webH = MAX(60.0, h - webY - 8.0);
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
 }
@@ -761,6 +772,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     self.romajiReadings = LWESplitReadings(romaji);
     _readingsExpanded = NO;
     _lastLayoutWidth = self.view.bounds.size.width;
+    _lastLayoutHeight = self.view.bounds.size.height;
     [self _applyReadingText];
     [self _layoutModernCard];
     return;
