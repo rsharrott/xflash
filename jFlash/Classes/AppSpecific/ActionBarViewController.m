@@ -122,9 +122,9 @@ static CGFloat LWEBarPrimaryHeight(void)   { return MAX(kLWEBarPrimaryH, ceilf(L
 #pragma mark - Practice answer bar (paper panel)
 
 /**
- * Two rows on a paper panel: quieter Actions / Bury on top (Bury only once the answer is
- * shown), and below them either a full-width dark "Show answer" (before reveal) or
- * Wrong / Right (after).  Row heights start at 44 / 60pt and grow with Dynamic Type.
+ * Two rows on a paper panel: quieter Actions / Bury on top (shown only once the answer is
+ * revealed; the row's space is kept so nothing moves), and below them either a full-width
+ * dark "Show answer" (before reveal) or Wrong / Right (after).  Row heights start at 44 / 60pt and grow with Dynamic Type.
  * The buttons keep their NIB tags & actions (doCardBtn: via the responder chain,
  * showCardActionSheet), so behaviour is unchanged.
  */

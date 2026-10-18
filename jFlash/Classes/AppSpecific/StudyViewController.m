@@ -325,7 +325,7 @@
       if (self.revealCardBtn) {
 #if defined (LWE_JFLASH)
         // Starts below the headword / reading toggle / "+N readings" (still tappable) and
-        // stops at the answer bar, whose Actions button works before reveal too.
+        // stops at the answer bar.
         CGFloat revealTop = self.scrollView.frame.origin.y + [cvc revealAreaTop];
         CGFloat revealBottom = CGRectGetMinY(self.actionbarView.frame);
         CGRect rf = self.revealCardBtn.frame;

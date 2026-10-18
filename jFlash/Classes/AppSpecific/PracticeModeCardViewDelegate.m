@@ -199,13 +199,13 @@
   avc.wrongBtn.hidden = YES;
   if (avc.showAnswerBtn)
   {
-    // New answer bar: Actions is always shown; Bury only appears once the answer is
-    // revealed, in its own fixed slot (right half of the top row) so nothing moves.
-    // "Show answer" holds the spot Wrong / Right will take, so nothing jumps on reveal.
+    // New answer bar, before reveal: only the full-width "Show answer".  Actions and Bury
+    // appear once the answer is revealed; their top-row space stays reserved (empty paper)
+    // and "Show answer" sits exactly where Wrong / Right will be, so nothing moves on reveal.
     // Hidden buttons are also hidden from VoiceOver.
     avc.showAnswerBtn.hidden = NO;
     avc.buryCardBtn.hidden = YES;
-    avc.addBtn.hidden = NO;
+    avc.addBtn.hidden = YES;
     avc.cardMeaningBtnHint.hidden = YES;
   }
   else
@@ -226,7 +226,7 @@
   avc.cardMeaningBtnHint.hidden = YES;
   if (avc.showAnswerBtn)
   {
-    // Show answer was replaced by Wrong / Right (and Bury appeared): move VoiceOver to Wrong.
+    // Show answer was replaced by Wrong / Right (and Actions / Bury appeared): move VoiceOver to Wrong.
     UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, avc.wrongBtn);
   }
 }
