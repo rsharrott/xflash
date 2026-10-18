@@ -99,6 +99,46 @@
 
 #pragma mark - Core Methods
 
+#if defined(LWE_JFLASH)
+//! Text from the databases, made safe to put into the HTML: a few sentences contain "<Sign>",
+//! "R & B" or an already-escaped "&amp;", so known entities are decoded first, then all escaped.
+static NSString *LWEExampleHTMLEscape(NSString *text)
+{
+  if ([text length] == 0) return @"";
+  NSMutableString *s = [[text mutableCopy] autorelease];
+  NSArray *entities = @[@[@"&lt;", @"<"], @[@"&gt;", @">"], @[@"&quot;", @"\""], @[@"&#39;", @"'"], @[@"&amp;", @"&"]];
+  for (NSArray *pair in entities)
+  {
+    [s replaceOccurrencesOfString:pair[0] withString:pair[1] options:0 range:NSMakeRange(0, [s length])];
+  }
+  [s replaceOccurrencesOfString:@"&" withString:@"&amp;" options:0 range:NSMakeRange(0, [s length])];
+  [s replaceOccurrencesOfString:@"<" withString:@"&lt;" options:0 range:NSMakeRange(0, [s length])];
+  [s replaceOccurrencesOfString:@">" withString:@"&gt;" options:0 range:NSMakeRange(0, [s length])];
+  [s replaceOccurrencesOfString:@"\"" withString:@"&quot;" options:0 range:NSMakeRange(0, [s length])];
+  [s replaceOccurrencesOfString:@"'" withString:@"&#39;" options:0 range:NSMakeRange(0, [s length])];
+  return s;
+}
+
+//! The escaped sentence with the first occurrence of the (escaped) headword wrapped in the
+//! highlight span.  A single kana headword (e.g. を, ん) would match random characters, so
+//! it isn't highlighted.
+static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *headword)
+{
+  NSString *html = LWEExampleHTMLEscape(sentence);
+  if ([headword length] == 0) return html;
+  if ([headword length] == 1)
+  {
+    unichar c = [headword characterAtIndex:0];
+    BOOL isKana = (c >= 0x3040 && c <= 0x30FF) || (c >= 0xFF66 && c <= 0xFF9F);
+    if (isKana) return html;
+  }
+  NSString *word = LWEExampleHTMLEscape(headword);
+  NSRange r = [html rangeOfString:word];
+  if (r.location == NSNotFound) return html;
+  return [html stringByReplacingCharactersInRange:r withString:[NSString stringWithFormat:@"<span class='hl'>%@</span>", word]];
+}
+#endif
+
 //* setup the example sentences view with information from the datasource
 - (void) setupWithCard:(Card *)card
 {
@@ -111,7 +151,8 @@
   NSMutableString *sentencesHTML = [[NSMutableString alloc] initWithFormat:
     @"<div class='exHeader'><h2 class='headwordLabel'>%@</h2><div class='readingLabel'>%@ <span class='romaji'>%@</span></div></div>"
     @"<div class='exTitle'>%@</div><ol>",
-    card.headword, kanaPart, romajiPart, NSLocalizedString(@"Example sentences", @"ExampleSentences.Title")];
+    LWEExampleHTMLEscape(card.headword), LWEExampleHTMLEscape(kanaPart), LWEExampleHTMLEscape(romajiPart),
+    LWEExampleHTMLEscape(NSLocalizedString(@"Example sentences", @"ExampleSentences.Title"))];
 #else
   NSMutableString *sentencesHTML = [[NSMutableString alloc] initWithFormat:@"<div class='readingLabel'>%@</div><h2 class='headwordLabel'>%@</h2><ol>",card.reading,card.headword];
 #endif
@@ -130,14 +171,9 @@
       SPEAK_SENTENCE, sentence.sentenceId, speakSVG];
 
 #if defined(LWE_JFLASH)
-    // The studied word is highlighted inside the sentence (when it appears as written).
-    NSString *ja = sentence.sentenceJa ?: @"";
-    if ([card.headword length] > 0)
-    {
-      ja = [ja stringByReplacingOccurrencesOfString:card.headword
-                                         withString:[NSString stringWithFormat:@"<span class='hl'>%@</span>", card.headword]];
-    }
-    [sentencesHTML appendFormat:@"<li><div class='ja'>%@</div><div class='en'>%@</div>", ja, sentence.sentenceEn];
+    // Escaped text; the studied word's first occurrence (as written) is highlighted.
+    NSString *ja = LWEExampleHighlightedSentence(sentence.sentenceJa, card.headword);
+    [sentencesHTML appendFormat:@"<li><div class='ja'>%@</div><div class='en'>%@</div>", ja, LWEExampleHTMLEscape(sentence.sentenceEn)];
     if (_useOldPluginMethods == NO)
     {
       [sentencesHTML appendFormat:@"<div class='showWordsDiv'><a id='anchor%d' href='http://xflash.com/%@?id=%d&open=0'><span class='button'>%@</span></a> %@</div>",

@@ -205,6 +205,7 @@ static UIFont *LWEShowAnswerSubFont(void)
   show.isAccessibilityElement = YES;
   show.accessibilityTraits = UIAccessibilityTraitButton;
   show.accessibilityLabel = NSLocalizedString(@"Show answer", @"ActionBar.ShowAnswer");
+  show.accessibilityHint = NSLocalizedString(@"Then mark it Wrong or Right", @"ActionBar.ShowAnswerSubline");
 
   UIImageView *eye = [[[UIImageView alloc] init] autorelease];
   eye.tag = kLWEShowAnswerEyeTag;
