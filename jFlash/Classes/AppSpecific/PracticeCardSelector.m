@@ -7,6 +7,7 @@
 //
 
 #import "PracticeCardSelector.h"
+#import "PracticeCardSelectorMath.h"
 
 @implementation PracticeCardSelector
 #pragma mark - Level algorithm
@@ -19,14 +20,12 @@
   LWE_ASSERT_EXC(([tag.cardLevelCounts count] == 6),@"There must be 6 card levels (1-5 plus unseen cards)");
   
   // control variables
-  // controls how many words to show from new before preferring seen words
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-  NSInteger weightingFactor = [settings integerForKey:APP_FREQUENCY_MULTIPLIER];
   BOOL hideLearnedCards = [settings boolForKey:APP_HIDE_BURIED_CARDS];
   
   // Total number of cards in this set and its level
   NSInteger numLevels = 5;
-  NSInteger unseenCount = [[tag.cardLevelCounts objectAtIndex:kLWEUnseenCardLevel] intValue];
+  NSInteger unseenCount = [[tag.cardLevelCounts objectAtIndex:kLWEUnseenCardLevel] integerValue];
   NSInteger totalCardsInSet = tag.cardCount;
   
   // This is a quick return case; if all cards are unseen, just return that
@@ -58,57 +57,45 @@
   LWE_ASSERT_EXC(totalCardsInSet > 0, @"Beyond this point we assume we have some cards!");
   
   // Get m cards in n bins, figure out total percentages
-  // Calculate different of weights and percentages and adjust accordingly
-  NSInteger denominatorTotal = 0, weightedTotal = 0, cardsSeenTotal = 0, numeratorTotal = 0;
-  
-  // the guts to get the total of card seen so far
-  NSInteger totalArray[6];
+  NSInteger cardsSeenTotal = 0, numeratorTotal = 0;
+  long levelCounts[LWE_SRS_MAX_LEVELS + 1] = {0};
+  levelCounts[kLWEUnseenCardLevel] = unseenCount;
   for (NSInteger levelId = 1; levelId <= numLevels; levelId++)
   {
-    // Get denominator values from cache/database
-    NSInteger tmpTotal = [[tag.cardLevelCounts objectAtIndex:levelId] intValue];
-    totalArray[levelId-1] = tmpTotal;   // all the level references (& the math) are 1-indexed, the array is 0 indexed
+    NSInteger tmpTotal = [[tag.cardLevelCounts objectAtIndex:levelId] integerValue];
+    levelCounts[levelId] = tmpTotal;
     cardsSeenTotal = cardsSeenTotal + tmpTotal;
-    denominatorTotal = denominatorTotal + (tmpTotal * weightingFactor * (numLevels - levelId + 1)); 
     numeratorTotal = numeratorTotal + (tmpTotal * levelId);
   }
   
   CGFloat p_unseen = [self calculateProbabilityOfUnseenWithCardsSeen:cardsSeenTotal 
                                                           totalCards:totalCardsInSet
                                                            numerator:numeratorTotal 
-                                                       levelOneCards:totalArray[0]];
+                                                       levelOneCards:levelCounts[1]];
   
-  CGFloat randomNum = ((CGFloat)rand() / (CGFloat)RAND_MAX);
-  CGFloat p = 0, pTotal = 0;
-  //this for works like russian roulette where there is a 'randomNum' 
-  //and each level has its own probability scaled 0-1 and if it sum-ed it would be 1.
-  //this for enumerate through that level, accumulate the probability until it reach the 'randomNum'.
-  for (NSInteger levelId = 1; levelId <= numLevels; levelId++)
+  // Uniform in [0,1). (rand() was never seeded -- the app delegate seeds random() -- so use arc4random.)
+  double randomNum = (double)arc4random() / ((double)UINT32_MAX + 1.0);
+  
+  // Russian roulette: each seen level gets a slice of (1 - p_unseen), weighted towards less-known
+  // levels; the remaining p_unseen slice is the unseen level. See PracticeCardSelectorMath.h
+  long nextLevel = LWEPickCardLevel(levelCounts, numLevels, p_unseen, randomNum);
+  if (nextLevel < 0)
   {
-    // For this array, the levels are 0-indexed, so we have to minus one (see above)
-    weightedTotal = (totalArray[levelId-1] * weightingFactor * (numLevels - levelId + 1));
-    p = ((CGFloat)weightedTotal / (CGFloat)denominatorTotal);
-    p = (1 - p_unseen) * p;
-    pTotal = pTotal + p;
-	  if (pTotal > randomNum)
+    // Every level is empty -- shouldn't happen given the assert above
+    if (error != NULL)
     {
-		  return levelId;
-	  }
+      *error = [NSError errorWithDomain:kTagErrorDomain code:kLWETagUnknownError userInfo:nil];
+    }
+    return kLWEUnseenCardLevel;
   }
-  
-  // If we get here, that would be an error (we should return in the above for loop) -- fail with level unseen
-  if (error != NULL)
-  {
-    *error = [NSError errorWithDomain:kTagErrorDomain code:kLWETagUnknownError userInfo:nil];
-  }
-  return kLWEUnseenCardLevel;
+  return (NSInteger)nextLevel;
 }
 
 /**
  *  \brief  Calculate the probability of the unseen cards showing for the next 'round'
  *  \return The float ranged 0-1 for the probability of unseen card showing next.
  */
-- (CGFloat)calculateProbabilityOfUnseenWithCardsSeen:(NSUInteger)cardsSeenTotal totalCards:(NSUInteger)totalCardsInSet numerator:(NSUInteger)numeratorTotal levelOneCards:(NSUInteger)levelOneTotal
+- (CGFloat)calculateProbabilityOfUnseenWithCardsSeen:(NSInteger)cardsSeenTotal totalCards:(NSInteger)totalCardsInSet numerator:(NSInteger)numeratorTotal levelOneCards:(NSInteger)levelOneTotal
 {
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   NSInteger maxCardsToStudy = [settings integerForKey:APP_MAX_STUDYING];
@@ -116,23 +103,8 @@
   LWE_ASSERT_EXC((maxCardsToStudy > 0), @"This value must be non-zero");
   LWE_ASSERT_EXC((weightingFactor > 0), @"This value must be non-zero");
   
-  // Quick return of 0 probability if we've already seen all the cards in a set, or aren't taking any more
-  if ((cardsSeenTotal == totalCardsInSet) || (levelOneTotal >= maxCardsToStudy))
-  {
-    return 0;
-  }
-  else
-  {
-    LWE_ASSERT_EXC((cardsSeenTotal < totalCardsInSet), @"To get to this point, there should be more cards in the set than cards seen");
-    
-    // Sets probability if we have less cards in the study pool than MAX allowed
-    CGFloat p_unseen = 0, mean = 0;
-    mean = (CGFloat)numeratorTotal / (CGFloat)cardsSeenTotal;
-    p_unseen = (mean - 1.0f);
-    p_unseen = pow((p_unseen / 4.0f), weightingFactor);
-    p_unseen = p_unseen + (1.0f - p_unseen)*(pow((maxCardsToStudy - cardsSeenTotal),0.25)/pow(maxCardsToStudy,0.25));
-    return p_unseen;
-  }
+  return (CGFloat)LWEProbabilityOfUnseenCard(cardsSeenTotal, totalCardsInSet, numeratorTotal,
+                                             levelOneTotal, maxCardsToStudy, weightingFactor);
 }
 
 

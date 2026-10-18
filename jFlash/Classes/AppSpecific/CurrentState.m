@@ -148,6 +148,17 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(CurrentState);
   {
     self.isFirstLoad = NO;
   }
+  
+  // STEP 3 - Older installs were created with frequency 1 while the difficulty said Medium (whose
+  // preset is frequency 2). Nothing in the UI produces that pair -- choosing Medium always writes 2 --
+  // so it means "never opened Change Difficulty". The frequency slider's direction was fixed (see
+  // PracticeCardSelectorMath.h); bring these users to the real Medium preset so their new-card rate
+  // stays about the same instead of jumping to the least-often end.
+  if (([settings integerForKey:APP_DIFFICULTY] == DEFAULT_DIFFICULTY) &&
+      ([settings integerForKey:APP_FREQUENCY_MULTIPLIER] == 1))
+  {
+    [settings setInteger:DEFAULT_FREQUENCY_MULTIPLIER forKey:APP_FREQUENCY_MULTIPLIER];
+  }
 }
 
 #pragma mark - Default - First time run.

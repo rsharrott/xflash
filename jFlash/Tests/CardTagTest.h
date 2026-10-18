@@ -22,6 +22,10 @@
   Tag *tag_;
 }
 
+- (void)testProbabilityOfUnseenWhenMoreSeenThanPoolSize;
+- (void)testProbabilityOfUnseenStaysInRange;
+- (void)testPickCardLevelPicksSeenCardsAndNeverAnEmptyLevel;
+- (void)testFrequencySliderMoreOftenMeansMoreNewCards;
 - (void)testCalculateNextCardLevelWithError;
 - (void) testUpdateLevelCounts;
 - (void)testAddThenRemoveCardsFromStudySet;

@@ -10,5 +10,5 @@
 
 @interface PracticeCardSelector : NSObject
 - (NSInteger)calculateNextCardLevelForTag:(Tag *)tag error:(NSError **)error;
-- (CGFloat)calculateProbabilityOfUnseenWithCardsSeen:(NSUInteger)cardsSeenTotal totalCards:(NSUInteger)totalCardsInSet numerator:(NSUInteger)numeratorTotal levelOneCards:(NSUInteger)levelOneTotal;
+- (CGFloat)calculateProbabilityOfUnseenWithCardsSeen:(NSInteger)cardsSeenTotal totalCards:(NSInteger)totalCardsInSet numerator:(NSInteger)numeratorTotal levelOneCards:(NSInteger)levelOneTotal;
 @end
