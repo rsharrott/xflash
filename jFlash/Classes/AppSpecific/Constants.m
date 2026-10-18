@@ -125,6 +125,8 @@ NSString * const LWE_SUPPORT_EMAIL        = @"support@longweekendmobile.com";
 
 #elif defined(LWE_CFLASH)
       NSString * const LWE_APP_SPLASH_IMAGE         = @"chinese-flash-splash.png";
+      // cFlash never shipped a 4-inch splash; reuse the standard one
+      NSString * const LWE_APP_SPLASH_IMAGE_568h    = @"chinese-flash-splash.png";
 
       // Tapjoy
       NSString * const LWE_TAPJOY_APP_ID            = @"d05949e8-ab10-4039-b6f6-51ff3504084a";
