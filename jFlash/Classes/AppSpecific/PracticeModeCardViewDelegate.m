@@ -195,11 +195,17 @@
   avc.wrongBtn.hidden = YES;
   if (avc.showAnswerBtn)
   {
-    // New answer bar, before reveal: only the full-width "Show answer".  Actions and Bury
-    // appear once the answer is revealed; their top-row space stays reserved (empty paper)
-    // and "Show answer" sits exactly where Wrong / Right will be, so nothing moves on reveal.
+    // New answer bar, before reveal: one "Show answer" button covering the area of the
+    // Actions / Bury / Wrong / Right grid it is replaced by, so nothing moves on reveal.
     // Hidden buttons are also hidden from VoiceOver.
+    for (UIView *v in @[avc.showAnswerBtn, avc.rightBtn, avc.wrongBtn, avc.buryCardBtn, avc.addBtn])
+    {
+      [v.layer removeAllAnimations];
+      v.alpha = 1.0;
+    }
     avc.showAnswerBtn.hidden = NO;
+    avc.showAnswerBtn.userInteractionEnabled = YES;
+    avc.showAnswerBtn.accessibilityElementsHidden = NO;
     avc.buryCardBtn.hidden = YES;
     avc.addBtn.hidden = YES;
     avc.cardMeaningBtnHint.hidden = YES;
@@ -214,6 +220,29 @@
 
 -(void) actionBarWillReveal:(ActionBarViewController*)avc
 {
+  if (avc.showAnswerBtn && avc.showAnswerBtn.hidden == NO)
+  {
+    // Short cross-fade from "Show answer" to the 2x2 grid (same frame, so nothing moves).
+    UIButton *show = avc.showAnswerBtn;
+    NSArray *grid = @[avc.rightBtn, avc.wrongBtn, avc.buryCardBtn, avc.addBtn];
+    show.userInteractionEnabled = NO;
+    show.accessibilityElementsHidden = YES;
+    for (UIView *v in grid) { v.alpha = 0.0; v.hidden = NO; }
+    avc.cardMeaningBtnHint.hidden = YES;
+    [UIView animateWithDuration:0.18 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+      for (UIView *v in grid) v.alpha = 1.0;
+      show.alpha = 0.0;
+    } completion:^(BOOL finished) {
+      // Only finish the hand-over if the next card hasn't set up "Show answer" again meanwhile.
+      if (show.accessibilityElementsHidden)
+      {
+        show.hidden = YES;
+        show.alpha = 1.0;
+      }
+    }];
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, avc.wrongBtn);
+    return;
+  }
   avc.rightBtn.hidden = NO;
   avc.wrongBtn.hidden = NO;
   avc.buryCardBtn.hidden = NO;
