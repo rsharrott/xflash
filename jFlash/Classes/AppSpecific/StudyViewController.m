@@ -272,9 +272,7 @@
   // not really a cancel button, just button two
   if (buttonIndex == LWE_ALERT_CANCEL_BTN)
   {
-    LWENetworkUtils *tmpNet = [[LWENetworkUtils alloc] init];
-    [tmpNet followLinkshareURL:@"http://click.linksynergy.com/fs-bin/stat?id=qGx1VSppku4&offerid=146261&type=3&subid=0&tmpid=1826&RD_PARM1=http%253A%252F%252Fitunes.apple.com%252Fus%252Fapp%252Fid380853144%253Fmt%253D8%2526uo%253D4%2526partnerId%253D30&u1=JFLASH_APP_WELCOME_MESSAGE"];
-    [tmpNet release];
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://apps.apple.com/us/app/id380853144"] options:@{} completionHandler:nil];
   }
 }
 
