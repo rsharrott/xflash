@@ -92,11 +92,8 @@
   {
     _alreadyShowedAlertView = YES;
 #if defined (LWE_JFLASH)
-    [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Welcome to Japanese Flash!",@"StudyViewController.WelcomeAlertViewTitle")
-                                       message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nTo study other sets, tap the 'Study Sets' tab below.\n\nLike Japanese Flash? Checkout Rikai Browser: Reading Japanese on your iPhone just got easier!",@"RootViewController.WelcomeAlertViewMessage")
-                                            ok:NSLocalizedString(@"Later", @"StudyViewController.Later")
-                                        cancel:NSLocalizedString(@"Get Rikai", @"WebViewController.RikaiAppStore")
-                                      delegate:self];
+    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Welcome to Japanese in a Flash!",@"StudyViewController.WelcomeAlertViewTitle")
+                                       message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nTo study other sets, tap the 'Study Sets' tab below.",@"RootViewController.WelcomeAlertViewMessage")];
 #elif (LWE_CFLASH)
     [LWEUIAlertView confirmationAlertWithTitle:NSLocalizedString(@"Welcome to Chinese Flash!",@"StudyViewController.WelcomeAlertViewTitle")
                                        message:NSLocalizedString(@"We've loaded our favorite word set to get you started.\n\nIf you want to study other sets, tap the 'Study Sets' tab below.",@"RootViewController.WelcomeAlertViewMessage")
@@ -266,8 +263,9 @@
 #pragma mark - UIAlertView delegate method
 
 /**
- * We prompt users to get Rikai if it is JFlash.
- * This is the delegate method to handle the response of what the user taps.
+ * Handles the button tap on the legacy (pre-1.7) upgrade alerts shown by
+ * UpdateManager showUpgradeAlertView:delegate:. The first-launch welcome alert
+ * no longer uses this delegate.
  */
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {

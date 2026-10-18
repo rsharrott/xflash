@@ -143,8 +143,6 @@
 /** App delegate method, point of entry for the app */
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)userInfo
 {
-  NSSetUncaughtExceptionHandler(&LWEUncaughtExceptionHandler);  // in case we crash, we can log it
-
   // iOS 26 no longer auto-loads NSMainNibFile when UIApplicationSceneManifest is present.
   // Load it explicitly so all IBOutlets (tabBarController, splashView, managers) are wired
   // before any outlet-based code below runs.
@@ -152,9 +150,6 @@
 
   srandomdev();    // Seed random generator
 
-  // Log user sessions on release builds & connect to Tapjoy for CPI ads
-  [LWEAnalytics startSessionWithKey:LWE_FLURRY_API_KEY];
-  
   // 1. This call initializes app settings in NSUserDefaults if not already done.  Important!  Do this FIRST!
   [[CurrentState sharedCurrentState] initializeSettings];
   
