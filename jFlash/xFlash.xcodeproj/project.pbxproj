@@ -7,11 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA2D001419000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
-		AA2D001319000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
-		AA2D001219000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
-		AA2D001119000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
-		AA2D001019000040000000AA /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA2D000119000040000000AA /* StoreKit.framework */; };
 		AA2C001219000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
 		AA2C001119000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
 		AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */; };
@@ -980,7 +975,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		AA2D000119000040000000AA /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		AA2C000119000030000000AA /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D6058910D05DD3D006BFB54 /* jFlash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = jFlash.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1435,7 +1429,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA2D001019000040000000AA /* StoreKit.framework in Frameworks */,
 				919FBDBB1622E9D2001FD77B /* Social.framework in Frameworks */,
 				499448D01472817000671849 /* libsqlite3.a in Frameworks */,
 				242A174914628B17002977E6 /* AudioToolbox.framework in Frameworks */,
@@ -1460,7 +1453,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA2D001319000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000319000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EB14FD069400CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C814FD05C700CF5C44 /* CoreData.framework in Frameworks */,
@@ -1484,7 +1476,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA2D001419000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000519000020000000AA /* WebKit.framework in Frameworks */,
 				49A465EA14FD068D00CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C914FD05CF00CF5C44 /* CoreData.framework in Frameworks */,
@@ -1508,7 +1499,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA2D001119000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000419000020000000AA /* WebKit.framework in Frameworks */,
 				499448D11472817800671849 /* libsqlite3.a in Frameworks */,
 				242A174814628AF4002977E6 /* AudioToolbox.framework in Frameworks */,
@@ -1532,7 +1522,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA2D001219000040000000AA /* StoreKit.framework in Frameworks */,
 				AA2B000219000020000000AA /* WebKit.framework in Frameworks */,
 				919FBDBD16230000001FD77B /* Social.framework in Frameworks */,
 				91D3FA5C1580294F00CB8F1E /* libsqlite3.a in Frameworks */,
@@ -1584,7 +1573,6 @@
 			isa = PBXGroup;
 			children = (
 				AA1A600019000010000000AA /* WebKit.framework */,
-				AA2D000119000040000000AA /* StoreKit.framework */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";

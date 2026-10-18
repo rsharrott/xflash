@@ -8,7 +8,6 @@
 
 #import "SettingsViewController.h"
 #import "PluginSettingsViewController.h"
-#import <StoreKit/StoreKit.h>
 #import "AlgorithmSettingsViewController.h"
 #import "ReminderSettingsViewController.h"
 #import "UserViewController.h"
@@ -114,14 +113,18 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 
 #pragma mark - Private Methods
 
-//! Asks iOS to show the system rating prompt (iOS decides whether/when it actually appears)
+//! "Rate Us" is a user-initiated action, so open the App Store's write-a-review page directly
+//! (Apple's recommendation for buttons; SKStoreReviewController is rate-limited, may show
+//! nothing, and its ObjC API is deprecated in iOS 18).
 - (void) _requestReview
 {
-  UIWindowScene *scene = self.view.window.windowScene;
-  if (scene)
+  NSString *appURL = LWEAppStoreURLString();
+  if (appURL == nil)
   {
-    [SKStoreReviewController requestReviewInScene:scene];
+    return;
   }
+  NSURL *reviewURL = [NSURL URLWithString:[appURL stringByAppendingString:@"?action=write-review"]];
+  [[UIApplication sharedApplication] openURL:reviewURL options:@{} completionHandler:nil];
 }
 
 - (void) _shareJFlash
@@ -316,7 +319,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     // One special case, theme: reload the nav bar for this page
     if ([key isEqualToString:APP_THEME])
     {
-      UIWindow *window = [[UIApplication sharedApplication] keyWindow];
+      UIWindow *window = self.view.window;
       window.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
       self.navigationController.navigationBar.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
     }

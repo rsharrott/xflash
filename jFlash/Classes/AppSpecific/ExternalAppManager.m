@@ -115,7 +115,7 @@
   LWE_ASSERT_EXC(handler, @"You must have a URL handler set for bundle ID");
   
   NSString *urlString = [NSString stringWithFormat:@"%@://foobar",handler];
-  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString]];
+  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString] options:@{} completionHandler:nil];
 }
 
 #pragma mark - Private Methods

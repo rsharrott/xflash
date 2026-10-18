@@ -93,7 +93,7 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
   self.navigationItem.rightBarButtonItem = _addButton;
   
   self.tagArray = [[self.group.childTags mutableCopy] autorelease];
-  self.activityIndicator = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray] autorelease];
+  self.activityIndicator = [[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium] autorelease];
 
   self.tableView.rowHeight = UITableViewAutomaticDimension;
   self.tableView.estimatedRowHeight = 60;

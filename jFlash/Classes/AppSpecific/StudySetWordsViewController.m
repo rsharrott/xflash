@@ -42,7 +42,7 @@
     self.tag = initTag;
     [self performSelectorInBackground:@selector(_loadWordListInBackground) withObject:nil];
     
-    UIActivityIndicatorView *av = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+    UIActivityIndicatorView *av = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleMedium];
     self.activityIndicator = av;
     [av release];
 
