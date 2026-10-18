@@ -143,6 +143,22 @@
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self revealCard]; });
     }
+    //   simctl launch <udid> <bundle> -LWEDebugShowExamples YES  -> reveal, then open the example sentences page
+    if ([settings boolForKey:@"LWEDebugShowExamples"])
+    {
+      [settings setBool:YES forKey:LWEFirstRunCardHintShownKey]; // never cover it with the coach hint
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if ([settings boolForKey:@"LWEDebugAutoReveal"] == NO) [self revealCard];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+          if (self.pageControl.numberOfPages > 1)
+          {
+            self.pageControl.currentPage = 1;
+            [self changePage:self.pageControl animated:NO];
+            _isChangingPage = NO;
+          }
+        });
+      });
+    }
   }
 #endif
 }
