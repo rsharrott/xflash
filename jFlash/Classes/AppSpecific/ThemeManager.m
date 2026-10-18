@@ -36,7 +36,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
                           [NSNumber numberWithFloat:0.105],@"G",
                           [NSNumber numberWithFloat:0.000],@"B",
                           @"cd4833",@"WEB_SELECTED",
-                          @"dfn, button { background-color:orange; border-color:yellow; }",@"CSS",
+                          @"dfn, button { background-color:#FFD60A; border-color:#FFD60A; }",@"CSS",
                           nil];
     
     // Defines the Blue Water theme tint values & CSS

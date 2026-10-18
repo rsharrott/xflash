@@ -139,8 +139,9 @@
 
 - (void) studyViewWillSetup:(StudyViewController*)svc
 {
-  // If practice mode, show the quiz stuff.
-  svc.tapForAnswerImage.hidden = NO;
+  // If practice mode, show the quiz stuff.  The faint "TAP FOR ANSWER" image in the middle
+  // of the card is no longer shown -- the answer bar has a "Show answer" button instead.
+  svc.tapForAnswerImage.hidden = YES;
   svc.revealCardBtn.hidden = NO;
 
 	// In practice mode, scroll view should always start disabled!
@@ -188,9 +189,21 @@
 {
   avc.rightBtn.hidden = YES;
   avc.wrongBtn.hidden = YES;
-  avc.buryCardBtn.hidden = YES;
-  avc.addBtn.hidden = YES;
-  avc.cardMeaningBtnHint.hidden = NO;
+  if (avc.showAnswerBtn)
+  {
+    // New answer bar: Actions / Bury stay put in both states; "Show answer" holds the
+    // spot Wrong / Right will take, so nothing jumps on reveal.
+    avc.showAnswerBtn.hidden = NO;
+    avc.buryCardBtn.hidden = NO;
+    avc.addBtn.hidden = NO;
+    avc.cardMeaningBtnHint.hidden = YES;
+  }
+  else
+  {
+    avc.buryCardBtn.hidden = YES;
+    avc.addBtn.hidden = YES;
+    avc.cardMeaningBtnHint.hidden = NO;
+  }
 }
 
 -(void) actionBarWillReveal:(ActionBarViewController*)avc
@@ -199,6 +212,7 @@
   avc.wrongBtn.hidden = NO;
   avc.buryCardBtn.hidden = NO;
   avc.addBtn.hidden = NO;
+  avc.showAnswerBtn.hidden = YES;
   avc.cardMeaningBtnHint.hidden = YES;
 }
 

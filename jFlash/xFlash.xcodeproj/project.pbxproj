@@ -411,6 +411,7 @@
 		496C7B0E12632763004B6B90 /* ProgressBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91E1B0E611AE11E1003CCDC2 /* ProgressBarViewController.m */; };
 		496C7B0F12632764004B6B90 /* ProgressDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */; };
 		496C7B1012632765004B6B90 /* StudyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD811AB7C4600016BD2 /* StudyViewController.m */; };
+		652BB0BAD61C32359E7DCB41 /* FirstRunViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F711798CDF3B99F08413F65 /* FirstRunViewController.m */; };
 		496C7B121263276C004B6B90 /* AlgorithmSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91170DB311BF896F00D4A680 /* AlgorithmSettingsViewController.m */; };
 		496C7B131263276D004B6B90 /* PluginSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4908209811B794A500150499 /* PluginSettingsViewController.m */; };
 		496C7B141263276E004B6B90 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9181901711D3392300746B09 /* SettingsViewController.m */; };
@@ -624,6 +625,7 @@
 		917A5BE511AB7C4600016BD2 /* StudySetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD411AB7C4600016BD2 /* StudySetViewController.m */; };
 		917A5BE611AB7C4600016BD2 /* StudySetWordsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD611AB7C4600016BD2 /* StudySetWordsViewController.m */; };
 		917A5BE711AB7C4600016BD2 /* StudyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD811AB7C4600016BD2 /* StudyViewController.m */; };
+		49AD6F71C80B401639C9F84E /* FirstRunViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F711798CDF3B99F08413F65 /* FirstRunViewController.m */; };
 		917A5BE811AB7C4600016BD2 /* UserDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BDA11AB7C4600016BD2 /* UserDetailsViewController.m */; };
 		917A5BE911AB7C4600016BD2 /* UserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BDC11AB7C4600016BD2 /* UserViewController.m */; };
 		917A5BFA11AB7CD700016BD2 /* Card.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BEB11AB7CD700016BD2 /* Card.m */; };
@@ -748,6 +750,7 @@
 		91D3F9D61580294F00CB8F1E /* StudySetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD411AB7C4600016BD2 /* StudySetViewController.m */; };
 		91D3F9D71580294F00CB8F1E /* StudySetWordsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD611AB7C4600016BD2 /* StudySetWordsViewController.m */; };
 		91D3F9D81580294F00CB8F1E /* StudyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BD811AB7C4600016BD2 /* StudyViewController.m */; };
+		2D5052300FCE95C13C35DD91 /* FirstRunViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2F711798CDF3B99F08413F65 /* FirstRunViewController.m */; };
 		91D3F9D91580294F00CB8F1E /* UserDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BDA11AB7C4600016BD2 /* UserDetailsViewController.m */; };
 		91D3F9DA1580294F00CB8F1E /* UserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BDC11AB7C4600016BD2 /* UserViewController.m */; };
 		91D3F9DB1580294F00CB8F1E /* Card.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BEB11AB7CD700016BD2 /* Card.m */; };
@@ -1311,6 +1314,9 @@
 		917A5BD611AB7C4600016BD2 /* StudySetWordsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StudySetWordsViewController.m; path = AppSpecific/StudySetWordsViewController.m; sourceTree = "<group>"; };
 		917A5BD711AB7C4600016BD2 /* StudyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StudyViewController.h; path = AppSpecific/StudyViewController.h; sourceTree = "<group>"; };
 		917A5BD811AB7C4600016BD2 /* StudyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StudyViewController.m; path = AppSpecific/StudyViewController.m; sourceTree = "<group>"; };
+		2F711798CDF3B99F08413F65 /* FirstRunViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FirstRunViewController.m; path = AppSpecific/FirstRunViewController.m; sourceTree = "<group>"; };
+		2361D37D4CEE19E7DAC1F912 /* FirstRunViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FirstRunViewController.h; path = AppSpecific/FirstRunViewController.h; sourceTree = "<group>"; };
+		D252B6DE5EB34B7E0230F7AC /* LWEDesignTokens.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LWEDesignTokens.h; path = AppSpecific/LWEDesignTokens.h; sourceTree = "<group>"; };
 		917A5BD911AB7C4600016BD2 /* UserDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UserDetailsViewController.h; path = AppSpecific/UserDetailsViewController.h; sourceTree = "<group>"; };
 		917A5BDA11AB7C4600016BD2 /* UserDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UserDetailsViewController.m; path = AppSpecific/UserDetailsViewController.m; sourceTree = "<group>"; };
 		917A5BDB11AB7C4600016BD2 /* UserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UserViewController.h; path = AppSpecific/UserViewController.h; sourceTree = "<group>"; };
@@ -2375,6 +2381,9 @@
 				49AAB8CD147127E40015D64B /* StudyViewProtocols.h */,
 				917A5BD711AB7C4600016BD2 /* StudyViewController.h */,
 				917A5BD811AB7C4600016BD2 /* StudyViewController.m */,
+				2F711798CDF3B99F08413F65 /* FirstRunViewController.m */,
+				2361D37D4CEE19E7DAC1F912 /* FirstRunViewController.h */,
+				D252B6DE5EB34B7E0230F7AC /* LWEDesignTokens.h */,
 				49AAB8B8147106BE0015D64B /* CardViewController.h */,
 				49AAB8B9147106BE0015D64B /* CardViewController.m */,
 				496BE54B11EC5303003AB713 /* ActionBarViewController.h */,
@@ -3039,6 +3048,7 @@
 				917A5BE511AB7C4600016BD2 /* StudySetViewController.m in Sources */,
 				917A5BE611AB7C4600016BD2 /* StudySetWordsViewController.m in Sources */,
 				917A5BE711AB7C4600016BD2 /* StudyViewController.m in Sources */,
+				49AD6F71C80B401639C9F84E /* FirstRunViewController.m in Sources */,
 				917A5BE811AB7C4600016BD2 /* UserDetailsViewController.m in Sources */,
 				917A5BE911AB7C4600016BD2 /* UserViewController.m in Sources */,
 				917A5BFA11AB7CD700016BD2 /* Card.m in Sources */,
@@ -3388,6 +3398,7 @@
 				496C7B0E12632763004B6B90 /* ProgressBarViewController.m in Sources */,
 				496C7B0F12632764004B6B90 /* ProgressDetailsViewController.m in Sources */,
 				496C7B1012632765004B6B90 /* StudyViewController.m in Sources */,
+				652BB0BAD61C32359E7DCB41 /* FirstRunViewController.m in Sources */,
 				496C7B121263276C004B6B90 /* AlgorithmSettingsViewController.m in Sources */,
 				496C7B131263276D004B6B90 /* PluginSettingsViewController.m in Sources */,
 				496C7B141263276E004B6B90 /* SettingsViewController.m in Sources */,
@@ -3499,6 +3510,7 @@
 				91D3F9D61580294F00CB8F1E /* StudySetViewController.m in Sources */,
 				91D3F9D71580294F00CB8F1E /* StudySetWordsViewController.m in Sources */,
 				91D3F9D81580294F00CB8F1E /* StudyViewController.m in Sources */,
+				2D5052300FCE95C13C35DD91 /* FirstRunViewController.m in Sources */,
 				91D3F9D91580294F00CB8F1E /* UserDetailsViewController.m in Sources */,
 				91D3F9DA1580294F00CB8F1E /* UserViewController.m in Sources */,
 				91D3F9DB1580294F00CB8F1E /* Card.m in Sources */,
