@@ -136,6 +136,14 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
     Plugin *plugin = (Plugin*)[unarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
     [unarchiver finishDecoding];
     [unarchiver release];
+
+    // Corrupt or unreadable settings data decodes to nil (or not a Plugin). Skip that
+    // entry rather than handing nil to loadPlugin: (the other plugins still load)
+    if ([plugin isKindOfClass:[Plugin class]] == NO)
+    {
+      LWE_LOG(@"Skipping plugin settings entry %@: could not decode it", pluginKey);
+      continue;
+    }
     
     // Now try to load it
     NSError *error = nil;

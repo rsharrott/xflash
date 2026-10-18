@@ -35,6 +35,13 @@
 
 @implementation LWESceneDelegate
 
+// MRC: the "strong" window property is retained, so release it with the delegate
+- (void)dealloc
+{
+  [_window release];
+  [super dealloc];
+}
+
 - (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions {
   if (@available(iOS 13.0, *)) {
     if (![scene isKindOfClass:[UIWindowScene class]]) return;
@@ -54,12 +61,14 @@
     UIViewController *placeholder = [[UIViewController alloc] init];
     placeholder.view.backgroundColor = [UIColor whiteColor];
     window.rootViewController = placeholder;
+    [placeholder release];
     if (appDelegate.splashView) {
       [window addSubview:appDelegate.splashView];
     }
     appDelegate.window = window;
     self.window = window;
     [window makeKeyAndVisible];
+    [window release]; // retained by self.window and appDelegate.window
 
     // Cold launch via jflash://WORD -- with a scene manifest, iOS delivers the URL
     // here instead of application:openURL:options:.
