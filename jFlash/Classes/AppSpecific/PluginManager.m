@@ -57,6 +57,13 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 
 - (void) _initDownloadablePluginsDict
 {
+  // Nothing can be downloaded while remote plugins are off, so offer nothing
+  if ([PluginManager remotePluginsEnabled] == NO)
+  {
+    self.downloadablePlugins = [NSDictionary dictionary];
+    return;
+  }
+
 	NSString *docPath = [LWEFile createDocumentPathWithFilename:LWE_AVAILABLE_PLUGIN_PLIST];
   NSString *bundlePath = [LWEFile createBundlePathWithFilename:LWE_AVAILABLE_PLUGIN_PLIST];
   
@@ -334,12 +341,22 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
 
 #pragma mark - Check for New Plugins
 
+//! YES only when a plugin server is configured in Constants.m (currently it isn't)
++ (BOOL) remotePluginsEnabled
+{
+  return ([LWE_PLUGIN_SERVER length] > 0 && [LWE_PLUGIN_LIST_REL_URL length] > 0);
+}
+
 /**
  * Tells whether update check is necessary
  * \return YES if settings' PLUGIN_LAST_UPDATE is more than LWE_PLUGIN_UPDATE_PERIOD days ago
  */
 - (BOOL) isTimeForCheckingUpdate
 {
+  if ([PluginManager remotePluginsEnabled] == NO)
+  {
+    return NO;
+  }
 	NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
 	NSDate *date = [settings objectForKey:PLUGIN_LAST_UPDATE];
 	date = [date addDays:LWE_PLUGIN_UPDATE_PERIOD];
@@ -355,6 +372,12 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
  */
 - (void)checkNewPluginsWithCompletion:(void (^)(BOOL))completion
 {
+  if ([PluginManager remotePluginsEnabled] == NO)
+  {
+    if (completion) dispatch_async(dispatch_get_main_queue(), ^{ completion(NO); });
+    return;
+  }
+
   NSString *urlStr = [LWE_PLUGIN_SERVER stringByAppendingString:LWE_PLUGIN_LIST_REL_URL];
   NSURL *url = [NSURL URLWithString:urlStr];
   if (url == nil)

@@ -125,6 +125,12 @@
  */
 - (void) _showDownloaderModal:(NSNotification*)aNotification
 {
+  // Remote plugins are switched off (no server), so there is nothing to download
+  if ([PluginManager remotePluginsEnabled] == NO || aNotification.object == nil)
+  {
+    return;
+  }
+
   // Already showing!  Don't do it again.
   if (self.baseViewController.presentedViewController != nil)
   {

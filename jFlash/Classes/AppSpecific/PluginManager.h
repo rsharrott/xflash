@@ -38,6 +38,8 @@ extern NSString * const LWEPluginDidInstall;
 
 //========= THESE GIVE STATE ========
 
+//! NO while LWE_PLUGIN_SERVER is empty (see Constants.m): no update checks, no downloads
++ (BOOL) remotePluginsEnabled;
 - (BOOL) isTimeForCheckingUpdate;
 
 //! Fetches the latest available-plugins plist from the server using NSURLSession.

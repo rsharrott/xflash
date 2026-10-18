@@ -129,14 +129,14 @@ NSString * LWEAppStoreURLString(void)
 
       // This is here for legacy migration only, as of JFLash 1.6.
       NSString * const LWE_DOWNLOADED_PLUGIN_PLIST  = @"downloadedPlugin.plist";
-// Don't use Cloudfront in development
-#if defined(LWE_DEBUG)
-      NSString * const LWE_PLUGIN_SERVER            = @"https://s3.amazonaws.com";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/japanese-flash/jFlash-available.plist";
-#else
-      NSString * const LWE_PLUGIN_SERVER            = @"https://d3580k8bnen6up.cloudfront.net";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/jFlash-available.plist";
-#endif
+// Remote plugin updates are switched off in every build: the old S3 buckets
+// (japanese-flash / chinese-flash) and CloudFront distributions are gone, so
+// the check and any download would only fail. Bundled plugins still load.
+// TODO: re-host the available-plugins plist and plugin packages, then set
+// LWE_PLUGIN_SERVER / LWE_PLUGIN_LIST_REL_URL here (and the targetURLs in
+// Plugins/*-available.plist) to turn updates back on.
+      NSString * const LWE_PLUGIN_SERVER            = @"";
+      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"";
 
 #elif defined(LWE_CFLASH)
       NSString * const LWE_APP_SPLASH_IMAGE         = @"chinese-flash-splash.png";
@@ -176,13 +176,14 @@ NSString * LWEAppStoreURLString(void)
       // This pertains to the plugin manager
       NSString * const LWE_AVAILABLE_PLUGIN_PLIST   = @"cFlash-available.plist";
       NSString * const LWE_PREINSTALLED_PLUGIN_PLIST   = @"cFlash-installed.plist";
-  #if defined(LWE_DEBUG)
-      NSString * const LWE_PLUGIN_SERVER            = @"https://s3.amazonaws.com";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/chinese-flash/cFlash-available.plist";
-  #else
-      NSString * const LWE_PLUGIN_SERVER            = @"https://d3jxezdeu5e50q.cloudfront.net";
-      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"/cFlash-available.plist";
-  #endif
+      // Remote plugin updates are switched off in every build: the old S3 buckets
+      // (japanese-flash / chinese-flash) and CloudFront distributions are gone, so
+      // the check and any download would only fail. Bundled plugins still load.
+      // TODO: re-host the available-plugins plist and plugin packages, then set
+      // LWE_PLUGIN_SERVER / LWE_PLUGIN_LIST_REL_URL here (and the targetURLs in
+      // Plugins/*-available.plist) to turn updates back on.
+      NSString * const LWE_PLUGIN_SERVER            = @"";
+      NSString * const LWE_PLUGIN_LIST_REL_URL      = @"";
 #endif
 
 

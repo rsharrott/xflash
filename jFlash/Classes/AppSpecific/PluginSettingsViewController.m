@@ -99,6 +99,8 @@
   self.btnCheckUpdate.frame = CGRectMake(16, 12, screenWidth - 32, 44);
   self.btnCheckUpdate.autoresizingMask = UIViewAutoresizingFlexibleWidth;
   [headerView addSubview:self.btnCheckUpdate];
+  // Nothing to check against while remote plugins are off
+  self.btnCheckUpdate.hidden = ([PluginManager remotePluginsEnabled] == NO);
 
   self.lblLastUpdate.frame = CGRectMake(16, 64, screenWidth - 32, 21);
   self.lblLastUpdate.autoresizingMask = UIViewAutoresizingFlexibleWidth;
@@ -290,6 +292,10 @@
 	}
 	
   self.lblLastUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Last update : %@",@"LastUpdate"), str];
+  if ([PluginManager remotePluginsEnabled] == NO)
+  {
+    self.lblLastUpdate.text = NSLocalizedString(@"Online updates are not available right now.",@"PluginSettings.UpdatesUnavailable");
+  }
 }
 
 @end
