@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA2B001119000020000000AA /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
+		AA2B001019000020000000AA /* DisplaySearchedSentenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */; };
 		AA2B000519000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
 		AA2B000419000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
 		AA2B000319000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
@@ -3270,6 +3272,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA2B001119000020000000AA /* UserHistoryPeer.m in Sources */,
+				AA2B001019000020000000AA /* DisplaySearchedSentenceViewController.m in Sources */,
 				49E3D17E1472803900F79308 /* CardTagTest.m in Sources */,
 				49E3D1801472803900F79308 /* SetupDatabaseHelper.m in Sources */,
 				49E3D1831472804400F79308 /* CFlashSearchTest.m in Sources */,
