@@ -11,7 +11,7 @@
 #import "PracticeModeCardViewDelegate.h"
 #import "TagPeer.h"
 #import "PracticeCardSelector.h"
-#import "PracticeCardSelectorMath.h"
+#import "../Classes/AppSpecific/PracticeCardSelectorMath.h"   // header-only, not in the project file
 #import "CardPeer.h"
 #import "UserHistoryPeer.h"
 
