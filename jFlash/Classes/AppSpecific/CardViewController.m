@@ -940,7 +940,7 @@ NSString * const LWECardHTMLTemplate = @""
 // English-first cards show the Japanese answer in this web view: name a Japanese font first in jFlash
 // (Helvetica has no kana/kanji); cFlash keeps its original stack so Chinese doesn't get Japanese glyph forms.
 #if defined(LWE_JFLASH)
-  #define LWE_ETOJ_FONT_STACK "-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif"
+  #define LWE_ETOJ_FONT_STACK "'Hiragino Sans','Hiragino Kaku Gothic ProN',Helvetica,sans-serif"
 #else
   #define LWE_ETOJ_FONT_STACK "Helvetica,sanserif"
 #endif
