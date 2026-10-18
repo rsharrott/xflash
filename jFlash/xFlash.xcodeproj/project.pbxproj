@@ -953,6 +953,9 @@
 		CA5AAE2CD187409796A303E1 /* UserPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 491D7B2811C4776C00BF8323 /* UserPeer.m */; };
 		8E7A78D2E4F94E2AA7357CBF /* DisplaySearchedSentenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */; };
 		ABEDDAE28290466B896CF174 /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF711AB7CD700016BD2 /* User.m */; };
+		D8E55F12EB5869DC90AD4663 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 150BFBE91CEF5AB398F769DB /* Localizable.strings */; };
+		00CF337ED4F7AF6798912C9A /* Interface.strings in Resources */ = {isa = PBXBuildFile; fileRef = F1EBFC9FCDFD447E9F2C51ED /* Interface.strings */; };
+		1EE5CCAE823A9C2A6333A9C5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0BBE7DC801ED7B4C70E2D99F /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1422,6 +1425,12 @@
 		D35B07721116456D00DB5E02 /* talkbubble-ft.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "talkbubble-ft.png"; path = "Assets/talkbubble-ft.png"; sourceTree = "<group>"; };
 		D3C17FFF1488864600834EAC /* glyphish-style-listen-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "glyphish-style-listen-icon.png"; path = "Assets/glyphish-style-listen-icon.png"; sourceTree = "<group>"; };
 		D3C180001488864600834EAC /* glyphish-style-listen-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "glyphish-style-listen-icon@2x.png"; path = "Assets/glyphish-style-listen-icon@2x.png"; sourceTree = "<group>"; };
+		0F34B486AE674934B36413A2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Assets/JFlash/en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		67023D53229EA7CEDC5F1E18 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Assets/JFlash/ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		254625CA077AD06EE65C8F2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Assets/JFlash/en.lproj/Interface.strings; sourceTree = "<group>"; };
+		2716F902FA73FDCD01C57EC8 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Assets/JFlash/ja.lproj/Interface.strings; sourceTree = "<group>"; };
+		2F52A716F461FA5B1E65D25F /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Assets/JFlash/ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		17AA8A9F0C3789260C019FB2 /* LWELocalization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LWELocalization.h; path = AppSpecific/LWELocalization.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -2130,6 +2139,9 @@
 			isa = PBXGroup;
 			children = (
 				49BBA499144D4BBF00E6A9AE /* help */,
+				150BFBE91CEF5AB398F769DB /* Localizable.strings */,
+				F1EBFC9FCDFD447E9F2C51ED /* Interface.strings */,
+				0BBE7DC801ED7B4C70E2D99F /* InfoPlist.strings */,
 				9129D4F411550A2A0036C4D3 /* iTunesArtwork */,
 				49DADB7E1277F36F00B8FD72 /* Default.png */,
 				49DADB7F1277F36F00B8FD72 /* Default@2x.png */,
@@ -2362,6 +2374,7 @@
 				2F711798CDF3B99F08413F65 /* FirstRunViewController.m */,
 				2361D37D4CEE19E7DAC1F912 /* FirstRunViewController.h */,
 				D252B6DE5EB34B7E0230F7AC /* LWEDesignTokens.h */,
+				17AA8A9F0C3789260C019FB2 /* LWELocalization.h */,
 				49AAB8B8147106BE0015D64B /* CardViewController.h */,
 				49AAB8B9147106BE0015D64B /* CardViewController.m */,
 				496BE54B11EC5303003AB713 /* ActionBarViewController.h */,
@@ -2733,6 +2746,9 @@
 				493ABDC115562B41007F8B5E /* jflash_162_to_17.sql in Resources */,
 				49C0C97C1629151900F8966C /* Default-568h@2x.png in Resources */,
 				49C0C97E16291B8400F8966C /* HelpWebViewController.xib in Resources */,
+				D8E55F12EB5869DC90AD4663 /* Localizable.strings in Resources */,
+				00CF337ED4F7AF6798912C9A /* Interface.strings in Resources */,
+				1EE5CCAE823A9C2A6333A9C5 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3591,6 +3607,35 @@
 			targetProxy = 493DBDBE14727CF6003EB18B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		150BFBE91CEF5AB398F769DB /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				0F34B486AE674934B36413A2 /* en */,
+				67023D53229EA7CEDC5F1E18 /* ja */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		F1EBFC9FCDFD447E9F2C51ED /* Interface.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				254625CA077AD06EE65C8F2D /* en */,
+				2716F902FA73FDCD01C57EC8 /* ja */,
+			);
+			name = Interface.strings;
+			sourceTree = "<group>";
+		};
+		0BBE7DC801ED7B4C70E2D99F /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2F52A716F461FA5B1E65D25F /* ja */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		1D6058940D05DD3E006BFB54 /* Debug */ = {

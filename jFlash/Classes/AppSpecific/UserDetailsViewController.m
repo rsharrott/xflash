@@ -7,6 +7,7 @@
 //
 
 #import "UserDetailsViewController.h"
+#import "LWELocalization.h"
 #import "UserViewController.h"
 #import "UserPeer.h"
 
@@ -38,6 +39,8 @@
 - (void) viewDidLoad
 {
   [super viewDidLoad];
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
 
   self.view.backgroundColor = [[ThemeManager sharedThemeManager] backgroundColor];
 

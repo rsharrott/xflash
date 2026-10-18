@@ -7,6 +7,7 @@
 //
 
 #import "CardViewController.h"
+#import "LWELocalization.h"
 #import "UIScrollView+LWEUtilities.h"
 #import "LWEDesignTokens.h"
 #if defined(LWE_JFLASH)
@@ -197,6 +198,8 @@ static const CGFloat kLWEPillHitInset = 7.0;
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  // Swap the English XIB text for the current language (Interface.strings)
+  LWELocalizeInterface(self.view);
 
   // Create the WKWebView programmatically inside the XIB-instantiated container.
   // (UIWebView is removed in modern iOS so we no longer instantiate it from the XIB.)
@@ -730,7 +733,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [self _updateReadingContainer];
   
   self.readingScrollContainer.hidden = YES;
-  [self.toggleReadingBtn setTitle:@"Show Reading" forState:UIControlStateNormal];
+  [self.toggleReadingBtn setTitle:NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading") forState:UIControlStateNormal];
 
   // This will handle the "more" icon after the state change
   [self _updateReadingContainer];
@@ -934,11 +937,18 @@ NSString * const LWECardHTMLTemplate = @""
 "<body><div id='container'>"
 "</div></body></html>";
 
+// English-first cards show the Japanese answer in this web view: name a Japanese font first in jFlash
+// (Helvetica has no kana/kanji); cFlash keeps its original stack so Chinese doesn't get Japanese glyph forms.
+#if defined(LWE_JFLASH)
+  #define LWE_ETOJ_FONT_STACK "'Hiragino Sans','Hiragino Kaku Gothic ProN',Helvetica,sans-serif"
+#else
+  #define LWE_ETOJ_FONT_STACK "Helvetica,sanserif"
+#endif
 NSString * const LWECardHTMLTemplate_EtoJ = @""
 "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 "<style>"
 "html,body{ height:100%; } "
-"body{ background-color:transparent; display:-webkit-flex; display:flex; -webkit-justify-content:center; justify-content:center; -webkit-align-items:flex-start; align-items:flex-start; margin:0; padding:10px 0 0 0; box-sizing:border-box; font-size:##TEXTSIZE##; font-weight:bold; font-family:Helvetica,sanserif; color:#fff; line-height:1.4; } "
+"body{ background-color:transparent; display:-webkit-flex; display:flex; -webkit-justify-content:center; justify-content:center; -webkit-align-items:flex-start; align-items:flex-start; margin:0; padding:10px 0 0 0; box-sizing:border-box; font-size:##TEXTSIZE##; font-weight:bold; font-family:" LWE_ETOJ_FONT_STACK "; color:#fff; line-height:1.4; } "
 "dfn{ text-shadow:none; font-weight:normal; color:#000; position:relative; top:-1px; font-family:verdana; font-size:10.5px; background-color:#C79810; line-height:1.4; margin:4px 4px 0px 0px; height:14px; padding:2px 3px; -webkit-border-radius:4px; border:1px solid #F9F7ED; display:inline-block;} "
 "#container{ width:100%; text-align:center; font-size:34px; padding-left:3px; line-height:1.4; } "
 "ol{color:white; text-align:left; width:240px; margin:0px; margin-left:24px; padding-left:10px;} "

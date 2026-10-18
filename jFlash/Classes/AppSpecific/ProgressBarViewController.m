@@ -7,6 +7,7 @@
 //
 
 #import "ProgressBarViewController.h"
+#import "LWELocalization.h"
 
 // The label tags are set in the NIB file!! Be careful!  (That's how we find out what the labels are, not a reference)
 #define PROGRESS_BAR_TAG 100
@@ -14,6 +15,13 @@
 
 @implementation ProgressBarViewController
 @synthesize tag;
+
+- (void)viewDidLoad
+{
+  [super viewDidLoad];
+  // Level names (tags 301-305) come from the NIB in English; Interface.strings has the short translations.
+  LWELocalizeInterface(self.view);
+}
 
 - (UIProgressView *)_progressBarForLevel:(NSInteger)i
 {

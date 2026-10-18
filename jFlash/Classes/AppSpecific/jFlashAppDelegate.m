@@ -5,6 +5,7 @@
 //  Copyright LONG WEEKEND INC 2009. All rights reserved.
 
 #import "jFlashAppDelegate.h"
+#import "LWELocalization.h"
 #import <objc/runtime.h>
 
 // Centers UITabBarButton subviews vertically in the full tab bar frame,
@@ -282,6 +283,26 @@
 
   // Replace the placeholder rootViewController with the actual tab bar controller.
   // This is deferred until here so that viewDidLoad methods don't fire before the DB is open.
+  // The tab & navigation bar titles come from MainWindow.xib in English; translate them (Interface.strings).
+  // The Search tab is a system item, so UIKit already localizes it.  Done before the tab bar is
+  // installed: retitling items after the first layout left the unselected labels lower (iOS 26).
+  for (UIViewController *tabVC in self.tabBarController.viewControllers)
+  {
+    NSString *tabTitle = tabVC.tabBarItem.title;
+    if (tabTitle)
+    {
+      // A "Tab.<English>" entry wins, for languages where the full title doesn't fit in the tab bar.
+      NSString *tabKey = [@"Tab." stringByAppendingString:tabTitle];
+      NSString *shortTitle = LWEInterfaceString(tabKey);
+      tabVC.tabBarItem.title = [shortTitle isEqualToString:tabKey] ? LWEInterfaceString(tabTitle) : shortTitle;
+    }
+    if ([tabVC isKindOfClass:[UINavigationController class]])
+    {
+      UIViewController *rootVC = [[(UINavigationController *)tabVC viewControllers] firstObject];
+      if (rootVC.navigationItem.title) rootVC.navigationItem.title = LWEInterfaceString(rootVC.navigationItem.title);
+    }
+  }
+
   [self.window setTintColor:[[ThemeManager sharedThemeManager] currentThemeTintColor]];
 
   // Make the tab bar opaque so UIKit sizes child view controllers' views to end above
@@ -302,6 +323,15 @@
   object_setClass(self.tabBarController.tabBar, [LWECenteredTabBar class]);
 
   self.window.rootViewController = self.tabBarController;
+
+#if defined (LWE_DEBUG)
+  // Screenshot hook (Debug builds only): `simctl launch <udid> <bundle> -LWEDebugSelectTab 3` opens Settings
+  NSInteger debugTab = [[NSUserDefaults standardUserDefaults] integerForKey:@"LWEDebugSelectTab"];
+  if (debugTab > 0 && debugTab < (NSInteger)[self.tabBarController.viewControllers count])
+  {
+    self.tabBarController.selectedIndex = debugTab;
+  }
+#endif
 
   // Finish setting up & load tab bar
   [self _registerObservers];

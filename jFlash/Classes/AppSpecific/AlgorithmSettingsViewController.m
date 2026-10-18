@@ -7,6 +7,7 @@
 //
 
 #import "AlgorithmSettingsViewController.h"
+#import "LWELocalization.h"
 
 #define FREQUENCY_SLIDER_TAG 100
 #define MAX_CARDS_SLIDER_TAG 101
@@ -33,6 +34,9 @@ enum ControlSectionRows
 {
   [super viewDidLoad];
   self.navigationItem.title = NSLocalizedString(@"Change Difficulty",@"AlgorithmSettingsViewController.NavBarTitle");
+  // Easy / Medium / Hard / Custom segment titles come from the XIB (Interface.strings)
+  LWELocalizeInterface(self.view);
+  LWELocalizeInterface(self.difficultySegmentControl);
 
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   self.maxCardsSlider.minimumValue = MIN_MAX_STUDYING;
@@ -149,7 +153,7 @@ enum ControlSectionRows
     UILabel *rightLabel = [[UILabel alloc] initWithFrame:CGRectMake(210, 5, 95, 35)];
     // TODO: iPad customization!
     rightLabel.font = [UIFont boldSystemFontOfSize:17];
-    rightLabel.text = [NSString stringWithFormat:@"More Often"];
+    rightLabel.text = NSLocalizedString(@"More Often", @"AlgorithmVC.NewCardFrequency_MoreOften");
     [cell addSubview:rightLabel];
     [rightLabel release];
   }

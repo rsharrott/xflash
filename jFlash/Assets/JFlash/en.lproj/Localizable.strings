@@ -1,0 +1,555 @@
+/*
+  Localizable.strings (English)
+  Japanese in a Flash! (jFlash target)
+  Keys are the English text passed to NSLocalizedString in code, so a target without
+  this file (cFlash, jFlashJr) falls back to the same English.
+*/
+
+/* ActionBar.Caption.Actions  (ActionBarViewController.m) */
+"actions" = "actions";
+
+/* ActionBar.Caption.Right  (ActionBarViewController.m) */
+"right" = "right";
+
+/* ActionBar.Caption.Wrong  (ActionBarViewController.m) */
+"wrong" = "wrong";
+
+/* ActionBar.Caption.BuryIt  (ActionBarViewController.m) */
+"bury it" = "bury it";
+
+/* ActionBar.Caption.Previous  (ActionBarViewController.m) */
+"prev" = "prev";
+
+/* ActionBar.Caption.Next  (ActionBarViewController.m) */
+"next" = "next";
+
+/* ActionBar.Actions  (ActionBarViewController.m) */
+"Actions" = "Actions";
+
+/* ActionBar.Bury  (ActionBarViewController.m) */
+"Bury" = "Bury";
+
+/* ActionBar.BuryIt  (ActionBarViewController.m) */
+"Bury it" = "Bury it";
+
+/* ActionBar.Wrong  (ActionBarViewController.m) */
+"Wrong" = "Wrong";
+
+/* ActionBar.Right  (ActionBarViewController.m) */
+"Right" = "Right";
+
+/* ActionBar.ShowAnswer  (ActionBarViewController.m, StudyViewController.m) */
+"Show answer" = "Show answer";
+
+/* ActionBar.ShowAnswerSubline  (ActionBarViewController.m) */
+"Then mark it Wrong or Right" = "Then mark it Wrong or Right";
+
+/* ActionBarViewController.ActionSheetRemoveFromFavorites  (ActionBarViewController.m) */
+"Remove from Starred" = "Remove from Starred";
+
+/* ActionBarViewController.ActionSheetAddToFavorites  (ActionBarViewController.m) */
+"Add to Starred" = "Add to Starred";
+
+/* ActionBarViewController.ActionSheetTitle  (ActionBarViewController.m) */
+"Card Actions" = "Card Actions";
+
+/* AddTagViewController.AlertViewLastCardTitle  (ActionBarViewController.m, AddTagViewController.m, SearchViewController.m, StudySetWordsViewController.m) */
+"Last Card in Set" = "Last Card in Set";
+
+/* ActionBarViewController.ActionSheetAddToSet  (ActionBarViewController.m) */
+"Add to Study Set" = "Add to Study Set";
+
+/* AddTagViewController.NavDoneButtonTitle  (ActionBarViewController.m, ExampleSentencesViewController.m) */
+"Done" = "Done";
+
+/* ActionBarViewController.ActionSheetReportBadData  (ActionBarViewController.m) */
+"Fix Card" = "Fix Card";
+
+/* Action Sheet Button to post on FB  (ActionBarViewController.m) */
+"Share This Card" = "Share This Card";
+
+/* ActionBarViewController.ActionSheetCancel  (ActionBarViewController.m, LWEUIAlertView.m, StudySetWordsViewController.m) */
+"Cancel" = "Cancel";
+
+/* emailVM.notAvailable.title  (ActionBarViewController.m, HelpViewController.m) */
+"Email Not Available" = "Email Not Available";
+
+/* emailVM.notAvailable.body  (ActionBarViewController.m) */
+"Oh no!! We can't send mail right now." = "Oh no!! We can't send mail right now.";
+
+/* AddStudySetInputViewController.NavBarTitle  (AddStudySetInputViewController.m) */
+"Create Study Set" = "Create Study Set";
+
+/* AddStudySetInputViewController.NavBarTitle  (AddStudySetInputViewController.m) */
+"Update Study Set" = "Update Study Set";
+
+/*   (AddStudySetInputViewController.m) */
+"Please Tap a Name" = "Please Tap a Name";
+
+/*   (AddStudySetInputViewController.m) */
+"We need to call your new set something.  Please tap a name and press 'Save'." = "We need to call your new set something.  Please tap a name and press 'Save'.";
+
+/* AddStudySetInputViewController.AlertViewTitle  (AddStudySetInputViewController.m) */
+"Enter Set Name" = "Enter Set Name";
+
+/* AddStudySetInputViewController.AlertViewMessage  (AddStudySetInputViewController.m) */
+"Please enter a new set name or click 'Cancel'." = "Please enter a new set name or click 'Cancel'.";
+
+/* AddTagViewController.NavBarTitle  (AddTagViewController.m) */
+"Add Card To Set" = "Add Card To Set";
+
+/* AddTagViewController.NavBarTitle  (AddTagViewController.m) */
+"Dictionary Entry" = "Dictionary Entry";
+
+/* Cell that displays example sentences  (AddTagViewController.m) */
+"Example Sentences" = "Example Sentences";
+
+/* AddTagViewController.TableHeader_MySets  (AddTagViewController.m) */
+"My Sets" = "My Sets";
+
+/* AddTagViewController.TableHeader_AllSets  (AddTagViewController.m) */
+"Other Sets with this Card" = "Other Sets with this Card";
+
+/* AlgorithmSettingsViewController.NavBarTitle  (AlgorithmSettingsViewController.m) */
+"Change Difficulty" = "Change Difficulty";
+
+/* AlgorithmVC.Difficulty  (AlgorithmSettingsViewController.m, ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Difficulty" = "Difficulty";
+
+/* AlgorithmVC.NewCardFrequency_MoreOften  (AlgorithmSettingsViewController.m) */
+"More Often" = "More Often";
+
+/* AlgorithmVC.HideLearnedCards  (AlgorithmSettingsViewController.m) */
+"Hide Learned Cards" = "Hide Learned Cards";
+
+/* AlgorithmVC.NumberCards  (AlgorithmSettingsViewController.m) */
+"Number of Cards in Study Pool" = "Number of Cards in Study Pool";
+
+/* AlgorithmVC.NewCardFrequency  (AlgorithmSettingsViewController.m) */
+"Frequency of New Cards" = "Frequency of New Cards";
+
+/* CardViewController.SpeakWordAccessibility  (CardViewController.m) */
+"Speak word" = "Speak word";
+
+/* CardViewController.FewerReadings  (CardViewController.m) */
+"Fewer readings" = "Fewer readings";
+
+/* CardViewController.OneMoreReading  (CardViewController.m) */
+"+1 reading" = "+1 reading";
+
+/* CardViewController.NMoreReadings  (CardViewController.m) */
+"+%d readings" = "+%d readings";
+
+/* CardViewController.FewerReadingsAccessibility  (CardViewController.m) */
+"Show fewer readings" = "Show fewer readings";
+
+/* CardViewController.MoreReadingsAccessibility  (CardViewController.m) */
+"Show %d more readings" = "Show %d more readings";
+
+/* CardViewController.ShowReading  (CardViewController.m) */
+"Show Reading" = "Show Reading";
+
+/* SettingsViewController.Practice  (ChineseSettingsDataSource.m, HelpViewController.m, JapaneseSettingsDataSource.m) */
+"Practice" = "Practice";
+
+/* SettingsViewController.Browse  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Browse" = "Browse";
+
+/* SettingsViewController.HeadwordLanguage_English  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"English" = "English";
+
+/* SettingsViewController.On  (ChineseSettingsDataSource.m, SettingsViewController.m) */
+"On" = "On";
+
+/* SettingsViewController.Off  (ChineseSettingsDataSource.m, SettingsViewController.m) */
+"Off" = "Off";
+
+/* SettingsViewController.SettingNames_StudyMode  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Study Mode" = "Study Mode";
+
+/* SettingsViewController.SettingNames_StudyLanguage  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Study Language" = "Study Language";
+
+/* SettingsViewController.TableHeader_Studying  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Studying" = "Studying";
+
+/* SettingsViewController.SettingNames_Theme  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Theme" = "Theme";
+
+/* SettingsViewController.SettingNames_StudyReminders  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m, ReminderSettingsViewController.m) */
+"Study Reminders" = "Study Reminders";
+
+/* SettingsViewController.SettingNames_ActiveUser  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Active User" = "Active User";
+
+/* SettingsViewController.SettingNames_DownloadExtras  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Updates" = "Updates";
+
+/* SettingsViewController.TableHeader_Application  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Application" = "Application";
+
+/* SettingsViewController.TableHeader_Acknowledgements  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
+"Acknowledgements" = "Acknowledgements";
+
+/* DisplaySearchedSentenceViewController.NavBarTitle  (DisplaySearchedSentenceViewController.m) */
+"Examples" = "Examples";
+
+/* PluginError.AlertMsgTitle  (DownloadManager.m) */
+"Problem Installing Update" = "Problem Installing Update";
+
+/* ModalTaskViewController_Update.NavBarTitle  (DownloadManager.m) */
+"Get Update" = "Get Update";
+
+/* ReadButton  (ExampleSentencesViewController.m) */
+"Read" = "Read";
+
+/* CloseButton  (ExampleSentencesViewController.m) */
+"Close" = "Close";
+
+/* AddButton  (ExampleSentencesViewController.m) */
+"Add" = "Add";
+
+/* ExampleSentences.Title  (ExampleSentencesViewController.m) */
+"Example sentences" = "Example sentences";
+
+/* Rikai Browser  (ExternalAppManager.m) */
+"Rikai Browser" = "Rikai Browser";
+
+/* FirstRun.OneWord  (FirstRunViewController.m) */
+"1 word" = "1 word";
+
+/* FirstRun.NWords  (FirstRunViewController.m) */
+"%d words" = "%d words";
+
+/* FirstRun.StartStudying  (FirstRunViewController.m) */
+"Start studying" = "Start studying";
+
+/* FirstRun.SwitchSetsNote  (FirstRunViewController.m) */
+"You can switch sets anytime in the Study Sets tab." = "You can switch sets anytime in the Study Sets tab.";
+
+/* FirstRun.Lede  (FirstRunViewController.m) */
+"Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed." = "Flashcards for kanji, kana, and vocabulary. Your decks stay on your phone. No account needed.";
+
+/* FirstRun.PickStarterSet  (FirstRunViewController.m) */
+"Pick a starter set" = "Pick a starter set";
+
+/* FirstRun.ShowReadingsAs  (FirstRunViewController.m) */
+"Show readings as" = "Show readings as";
+
+/* FirstRun.ReadingKana  (FirstRunViewController.m, JapaneseSettingsDataSource.m) */
+"Kana" = "Kana";
+
+/* FirstRun.ReadingKanaRomaji  (FirstRunViewController.m) */
+"Kana + romaji" = "Kana + romaji";
+
+/* StudyViewController.WelcomeAlertViewTitle  (FirstRunViewController.m) */
+"Welcome to Japanese in a Flash!" = "Welcome to Japanese in a Flash!";
+
+/* FirstRun.CardHint  (FirstRunViewController.m) */
+"Tap the card to see the answer, then mark it right or wrong." = "Tap the card to see the answer, then mark it right or wrong.";
+
+/* FirstRun.OneTimeTip  (FirstRunViewController.m) */
+"One-time tip" = "One-time tip";
+
+/* FirstRun.GotIt  (FirstRunViewController.m) */
+"Got it" = "Got it";
+
+/* HelpViewController.Table_Welcome  (HelpViewController.m) */
+"Welcome" = "Welcome";
+
+/* HelpViewController.Table_StudySets  (HelpViewController.m) */
+"Study Sets" = "Study Sets";
+
+/* HelpViewController.Table_BrowseMode  (HelpViewController.m) */
+"Browse Mode" = "Browse Mode";
+
+/* HelpViewController.Table_WordSearch  (HelpViewController.m) */
+"Search" = "Search";
+
+/* HelpViewController.Table_Corrections  (HelpViewController.m) */
+"Corrections" = "Corrections";
+
+/* HelpViewController.Table_LearningAlgorithm  (HelpViewController.m) */
+"Learning Algorithm" = "Learning Algorithm";
+
+/* HelpViewController.Table_Sharing  (HelpViewController.m) */
+"Sharing" = "Sharing";
+
+/* HelpViewController.Table_Integration  (HelpViewController.m) */
+"Integration" = "Integration";
+
+/* HelpViewController.Table_TagGlossary  (HelpViewController.m) */
+"Tag Glossary" = "Tag Glossary";
+
+/* HelpViewController.GetSatsifactionLink  (HelpViewController.m) */
+"Ask Us" = "Ask Us";
+
+/* HelpViewController.SupportAlertMsgTitle  (HelpViewController.m) */
+"Support" = "Support";
+
+/* HelpViewController.SupportAlertMsgMsg  (HelpViewController.m) */
+"Do you have a question?\nA feature request?\n\nVisit our support site or send us an email!" = "Do you have a question?\nA feature request?\n\nVisit our support site or send us an email!";
+
+/* Visit Site  (HelpViewController.m) */
+"Visit Support Site" = "Visit Support Site";
+
+/* Mail Us  (HelpViewController.m) */
+"Send an Email" = "Send an Email";
+
+/* emailVM.notAvailable.body  (HelpViewController.m) */
+"It looks like your device isn't set up for Mail yet. You can write to us at %@." = "It looks like your device isn't set up for Mail yet. You can write to us at %@.";
+
+/* HelpViewController.PrivacyPolicy  (HelpViewController.m) */
+"Privacy Policy" = "Privacy Policy";
+
+/* Cancel  (HelpViewController.m) */
+"No Thanks" = "No Thanks";
+
+/* HelpViewController.Next  (HelpViewController.m) */
+"Next >" = "Next >";
+
+/* JFlash1.7 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated to Japanese in a Flash! 1.7" = "Updated to Japanese in a Flash! 1.7";
+
+/* JFlash1.7 upgrade alert msg  (JFlashUpdateManager.m) */
+"Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries." = "Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries.";
+
+/* SettingsViewController.OneUpdateAvailable  (JapaneseSettingsDataSource.m) */
+"1 Update Available" = "1 Update Available";
+
+/* SettingsViewController.NUpdatesAvailable  (JapaneseSettingsDataSource.m) */
+"%d Updates Available" = "%d Updates Available";
+
+/* SettingsViewController.TableHeader_AvailableUpdate  (JapaneseSettingsDataSource.m) */
+"Available Update" = "Available Update";
+
+/* SettingsViewController.TableHeader_AvailableUpdates  (JapaneseSettingsDataSource.m) */
+"Available Updates" = "Available Updates";
+
+/* SettingsViewController.HeadwordLanguage_Japanese  (JapaneseSettingsDataSource.m) */
+"Japanese" = "Japanese";
+
+/* Theme name  (JapaneseSettingsDataSource.m) */
+"Fire" = "Fire";
+
+/* Theme name  (JapaneseSettingsDataSource.m) */
+"Water" = "Water";
+
+/* Theme name  (JapaneseSettingsDataSource.m) */
+"Tame" = "Tame";
+
+/* SettingsViewController.DisplayReading_Romaji  (JapaneseSettingsDataSource.m) */
+"Romaji" = "Romaji";
+
+/* SettingsViewController.DisplayReading_Both  (JapaneseSettingsDataSource.m) */
+"Both" = "Both";
+
+/* SettingsViewController.On  (JapaneseSettingsDataSource.m) */
+"Prefer Kana" = "Prefer Kana";
+
+/* SettingsViewController.Off  (JapaneseSettingsDataSource.m) */
+"Prefer Kanji" = "Prefer Kanji";
+
+/* SettingsViewController.SettingNames_DisplayFuriganaReading  (JapaneseSettingsDataSource.m) */
+"Furigana / Reading" = "Furigana / Reading";
+
+/* SettingsViewController.SettingNames_KanaOnlyWords  (JapaneseSettingsDataSource.m) */
+"Common Kana Words" = "Common Kana Words";
+
+/* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
+"Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental.";
+
+/* PleaseWait  (PluginSettingsViewController.m) */
+"Please Wait" = "Please Wait";
+
+/* PluginSettingsViewController.NavBarTitle  (PluginSettingsViewController.m) */
+"Get Updates" = "Get Updates";
+
+/* PluginSettingsViewController.TableHeader_Installed  (PluginSettingsViewController.m) */
+"Installed" = "Installed";
+
+/* PluginSettingsViewController.TableHeader_Available  (PluginSettingsViewController.m) */
+"Available (Tap to Download)" = "Available (Tap to Download)";
+
+/* NeverUpdated  (PluginSettingsViewController.m) */
+"Never" = "Never";
+
+/* LastUpdate  (PluginSettingsViewController.m) */
+"Last update : %@" = "Last update : %@";
+
+/* PluginSettings.UpdatesUnavailable  (PluginSettingsViewController.m) */
+"Online updates are not available right now." = "Online updates are not available right now.";
+
+/* Study Set Learned  (PracticeModeCardViewDelegate.m) */
+"Study Set Learned" = "Study Set Learned";
+
+/* Congratulations! You've already learned this set. We will show cards that would usually be hidden.  (PracticeModeCardViewDelegate.m) */
+"Congratulations! You've already learned this set. We will show cards that would usually be hidden." = "Congratulations! You've already learned this set. We will show cards that would usually be hidden.";
+
+/* ProgressDetailsViewController.NumWrongStreak  (ProgressDetailsViewController.m) */
+"%i wrong" = "%i wrong";
+
+/* ProgressDetailsViewController.NumRightStreak  (ProgressDetailsViewController.m) */
+"%i right" = "%i right";
+
+/* ReminderVC.pickerFormatPlural  (ReminderSettingsViewController.m) */
+"%@ days" = "%@ days";
+
+/* ReminderVC.pickerFormatSingle  (ReminderSettingsViewController.m) */
+"%@ day" = "%@ day";
+
+/* ReminderVC.SettingsSectionHeader  (ReminderSettingsViewController.m) */
+"Reminder Settings" = "Reminder Settings";
+
+/* ReminderVC.SettingsSectionFooter  (ReminderSettingsViewController.m) */
+"Reminders are reset each time the app is opened.  If you're diligent about studying, you may never see one!" = "Reminders are reset each time the app is opened.  If you're diligent about studying, you may never see one!";
+
+/* RemindersVC.DaysAfterLastSesssionLabel  (ReminderSettingsViewController.m) */
+"Days After Last Session" = "Days After Last Session";
+
+/* SearchViewController.SearchBarPlaceholder_InstallPlugin  (SearchViewController.m) */
+"Tap here to install search" = "Tap here to install search";
+
+/* SearchViewController.SearchBarPlaceholder_douzo  (SearchViewController.m) */
+"Enter search keyword" = "Enter search keyword";
+
+/* SearchViewController.NoResults  (SearchViewController.m, StudySetViewController.m) */
+"No Results Found" = "No Results Found";
+
+/* ExternalAppReturnButtonFormat  (SearchViewController.m) */
+"Return to %@" = "Return to %@";
+
+/* Remove from Set Error  (SearchViewController.m) */
+"Remove From Set Error" = "Remove From Set Error";
+
+/* SettingsViewController.RateUsButton  (SettingsViewController.m) */
+"Rate Us" = "Rate Us";
+
+/* SettingsViewController.Plugins_NumInstalled  (SettingsViewController.m) */
+"%d installed" = "%d installed";
+
+/* Global.None  (SettingsViewController.m) */
+"None" = "None";
+
+/* SettingsViewController.VersionFooter  (SettingsViewController.m) */
+"Settings: %@, Data: %@, Build: %@" = "Settings: %@, Data: %@, Build: %@";
+
+/* StudySetViewController.SearchPlaceholder  (StudySetViewController.m) */
+"Search Sets By Name" = "Search Sets By Name";
+
+/* StudySetViewController.WordCount  (StudySetViewController.m) */
+"%d Words" = "%d Words";
+
+/* StudySetViewController.LoadingCards  (StudySetViewController.m) */
+"Loading cards..." = "Loading cards...";
+
+/* StudySetViewController.premiumSets  (StudySetViewController.m) */
+"Get More Sets" = "Get More Sets";
+
+/* StudySetViewController.details  (StudySetViewController.m) */
+"Tap For Details" = "Tap For Details";
+
+/* StudySetViewController.GroupCount  (StudySetViewController.m) */
+"%d Groups" = "%d Groups";
+
+/* StudySetViewController.TagCount  (StudySetViewController.m) */
+"%d Sets" = "%d Sets";
+
+/* StudySetViewController.StartStudy_AlertViewMessage  (StudySetViewController.m) */
+"Do you want to start this set?  Progress on your last set will be saved." = "Do you want to start this set?  Progress on your last set will be saved.";
+
+/* StudySetViewController.NoWords_AlertViewTitle  (StudySetViewController.m, StudySetWordsViewController.m) */
+"No Words In Set" = "No Words In Set";
+
+/* StudySetViewController.NoWords_AlertViewMessage  (StudySetViewController.m, StudySetWordsViewController.m) */
+"To add words to this set, you can use Search." = "To add words to this set, you can use Search.";
+
+/* StudySetWordsViewController.LoadingWords  (StudySetWordsViewController.m) */
+"Loading words..." = "Loading words...";
+
+/* StudySetWordsViewController.BeginStudyingThese  (StudySetWordsViewController.m) */
+"Begin Studying These" = "Begin Studying These";
+
+/* StudySetWordsViewController.EditSetDetails  (StudySetWordsViewController.m) */
+"Edit Set Details" = "Edit Set Details";
+
+/* StudyViewController.OK  (LWEUIAlertView.m, StudyViewController.m) */
+"OK" = "OK";
+
+/* AddTagViewController.AlertViewLastCardMessage  (TagPeer.m) */
+"This set only contains the card you are currently studying.  To delete a set entirely, please change to a different set first." = "This set only contains the card you are currently studying.  To delete a set entirely, please change to a different set first.";
+
+/* UserDetailsViewController.NavBarTitle  (UserDetailsViewController.m) */
+"Add User" = "Add User";
+
+/* UserDetailsViewController.EnterNameAlertTitle  (UserDetailsViewController.m) */
+"Enter a Name" = "Enter a Name";
+
+/* UserDetailsViewController.EnterNameAlertMsg  (UserDetailsViewController.m) */
+"Please enter a user name or tap back to cancel." = "Please enter a user name or tap back to cancel.";
+
+/* UserViewController.NavBarTitle  (UserViewController.m) */
+"Choose User" = "Choose User";
+
+/* UserViewController.SwitchingUserDialog  (UserViewController.m) */
+"Switching User..." = "Switching User...";
+
+/* UserViewController.ChangeUser_AlertViewMessage  (UserViewController.m) */
+"Set the active user to %@?" = "Set the active user to %@?";
+
+/* UserViewController.ChangeUser_AlertViewTitle  (UserViewController.m) */
+"Activate User" = "Activate User";
+
+/* UserViewController.CannotDelete_AlertViewTitle  (UserViewController.m) */
+"Cannot Delete User" = "Cannot Delete User";
+
+/* UserViewController.CannotDelete_AlertViewMessage  (UserViewController.m) */
+"The default user can be edited, but not deleted." = "The default user can be edited, but not deleted.";
+
+/* FirstLoadModalText  (jFlashAppDelegate.m) */
+"Setting up...\nThis will take a moment." = "Setting up...\nThis will take a moment.";
+
+/* StudyNotification.Body  (jFlashAppDelegate.m) */
+"You're Awesome!  It's time to learn some more words!" = "You're Awesome!  It's time to learn some more words!";
+
+/* StudyNotification.Action  (jFlashAppDelegate.m) */
+"Study" = "Study";
+
+/* Default DSActivtyView label text  (DSActivityView.m) */
+"Loading..." = "Loading...";
+
+/* LWEDownloader.cancelled  (LWEDecompressor.m) */
+"Download cancelled" = "Download cancelled";
+
+/* LWEDownloader.decompressFail  (LWEDecompressor.m) */
+"Failed to decompress" = "Failed to decompress";
+
+/* LWENetworkUtils.No Internet  (LWENetworkUtils.m) */
+"Cannot open the page because it is not connected to the internet." = "Cannot open the page because it is not connected to the internet.";
+
+/* LWENetworkUtils.No Page  (LWENetworkUtils.m) */
+"Could not open the page you requested. The server is not responding." = "Could not open the page you requested. The server is not responding.";
+
+/* LWENetworkUtils.AlertView Title  (LWENetworkUtils.m) */
+"Cannot Open Page" = "Cannot Open Page";
+
+/* LWEPackageDownloader.Status.ConnectingToServer  (LWEPackageDownloader.m) */
+"Connecting to server" = "Connecting to server";
+
+/* LWEPackageDownloader.status.DownloadingWithKB  (LWEPackageDownloader.m) */
+"Downloading (%d KB)" = "Downloading (%d KB)";
+
+/* LWEPackageDownloader.Status.Decompressing  (LWEPackageDownloader.m) */
+"Decompressing" = "Decompressing";
+
+/* LWEPackageDownloader.Status.Finished  (LWEPackageDownloader.m) */
+"Finished" = "Finished";
+
+/* Network.UnableToConnect_AlertViewTitle  (LWEUIAlertView.m) */
+"No Network Access" = "No Network Access";
+
+/* Network.UnableToConnect_AlertViewMessage  (LWEUIAlertView.m) */
+"Please check your network connection and try again." = "Please check your network connection and try again.";
+
+/* Next  (LWEFormView.m) */
+"Next" = "Next";
