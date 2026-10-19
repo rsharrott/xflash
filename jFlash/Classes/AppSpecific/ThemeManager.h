@@ -4,33 +4,61 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
+extern NSString * const SET_THEME_PAPER;
 extern NSString * const SET_THEME_FIRE;
 extern NSString * const SET_THEME_WATER;
-extern NSString * const SET_THEME_TAME;
 extern NSString * const DEFAULT_THEME;
+
+//! Study card shape, shared by every theme (themes v2: inset 12pt, radius-3xl 28)
+extern const CGFloat kLWECardInset;
+extern const CGFloat kLWECardCornerRadius;
 
 @interface ThemeManager : NSObject
 
 + (ThemeManager*) sharedThemeManager;
 - (UIColor*) currentThemeTintColor;
 - (UIColor*) currentThemeTintColor:(float)customAlpha;
+//! The shared paper screen colour (paper-2, #E7E1D6); the same in every theme
 - (UIColor*) backgroundColor;
 - (NSString*) currentThemeFileName;
 - (NSString*) currentThemeName;
 - (NSString*) currentThemeCSS;
+//! CSS for the example-sentences web view (SENTENCES_CSS)
+- (NSString*) sentencesCSS;
 - (NSString*) currentThemeWebSelectionColor;
 - (NSString*) elementWithCurrentTheme:(NSString*)element;
+//! The current theme's dictionary; an unknown or missing stored key falls back to DEFAULT_THEME (never nil)
 - (NSDictionary*) _currentTheme;
 - (NSArray*) _themeListWithKey:(NSString*)key;
 
-//! Provide list of names of all available themes
+/**
+ * Colour for a named slot of the current theme (themes v2 slot table), e.g. @"cardFill",
+ * @"headwordInk", @"showAnswerBorder".  Shared paper-screen slots (cellFill, tabBarFill, ...)
+ * resolve to the same value in every theme.  Unknown slots return nil.
+ */
+- (UIColor*) colorForSlot:(NSString*)slot;
+
+//! Paints `layer` as the current theme's study card: cardFill, radius 28, ring and shadow (cardStyle)
+- (void) applyCardStyleToLayer:(CALayer*)layer;
+
+//! Same as colorForSlot: for a given theme key (e.g. a Settings swatch); unknown keys use DEFAULT_THEME
+- (UIColor*) colorForSlot:(NSString*)slot themeKey:(NSString*)themeKey;
+
+//! Provide list of names of all available themes, in display order (Paper, Fire, Water)
 - (NSArray*) themeNameList;
 
-//! Provide dictionary-safe key reference names for all available themes
+//! Provide dictionary-safe key reference names for all available themes, in display order
 - (NSArray*) themeKeysList;
 
-//! Holds themes dictionary
+//! The theme key that follows `themeKey` in display order (wraps; unknown keys give the first theme)
+- (NSString*) themeKeyAfter:(NSString*)themeKey;
+
+//! Holds themes dictionary, keyed on the theme key
 @property (nonatomic, retain) NSDictionary *themes;
+
+//! Theme dictionaries in display order (Settings cycle, themeNameList, themeKeysList)
+@property (nonatomic, retain) NSArray *orderedThemes;
 
 @end

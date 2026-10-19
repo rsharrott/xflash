@@ -11,7 +11,8 @@
 #import "LWEDesignTokens.h"
 
 //! Mascot next to the encouragement line (same image the old XIB used; folder reference in jFlash and cFlash).
-static NSString * const kLWEProgressMascotImage = @"redtheme-cookie-cutters/mood-icons/positive/hh-happy.png";
+//! Resolved at runtime via ThemeManager (red flame on Paper/Fire, blue flame on Water)
+static NSString * const kLWEProgressMascotRelativePath = @"mood-icons/positive/hh-happy.png";
 
 //! Custom detent sized to the content (iOS 16+)
 static NSString * const kLWEProgressFitDetent = @"com.longweekend.progress.fit";
@@ -348,7 +349,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
     NSString *format = NSLocalizedString(@"You are studying %1$@%3$@ cards out of %2$@ in this set.", @"ProgressDetailsViewController.StudyingSentenceCapped");
     NSString *markerText = NSLocalizedStringWithDefaultValue(@"StudyPoolCapMarker", nil, [NSBundle mainBundle], @"*", @"ProgressDetailsViewController.CapMarker");
     NSMutableDictionary *markerAttrs = [[numberAttrs mutableCopy] autorelease];
-    markerAttrs[NSForegroundColorAttributeName] = LWEDesignFire();
+    markerAttrs[NSForegroundColorAttributeName] = [[ThemeManager sharedThemeManager] colorForSlot:@"progressAccentInk"];
     NSAttributedString *marker = [[[NSAttributedString alloc] initWithString:markerText attributes:markerAttrs] autorelease];
     lead.attributedText = LWEProgressAttributedFormat(format, textAttrs, @[current, total, marker]);
     // VoiceOver reads the sentence without the marker ("asterisk").
@@ -375,7 +376,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   NSMutableAttributedString *text = [[[NSMutableAttributedString alloc] initWithString:[note stringByAppendingString:gap]
                                                                              attributes:@{ NSFontAttributeName: font, NSForegroundColorAttributeName: LWEDesignMuted() }] autorelease];
   [text appendAttributedString:[[[NSAttributedString alloc] initWithString:[settings stringByAppendingString:@"\u00A0\u203A"]
-                                                                attributes:@{ NSFontAttributeName: linkFont, NSForegroundColorAttributeName: LWEDesignFire() }] autorelease]];
+                                                                attributes:@{ NSFontAttributeName: linkFont, NSForegroundColorAttributeName: [[ThemeManager sharedThemeManager] colorForSlot:@"progressAccentInk"] }] autorelease]];
 
   // A label inside a plain button: the label wraps and drives the height (UIButton's own title
   // label doesn't report a multi-line size), the button keeps a 44pt minimum tap height.
@@ -517,7 +518,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
                                                                        attributes:@{ NSFontAttributeName: pctFont, NSForegroundColorAttributeName: LWEDesignMuted() }] autorelease]];
     UILabel *value = LWEProgressLabel(font, LWEDesignInk2());
     value.attributedText = valueText;
-    UIView *track = [self _trackWithFraction:fraction fill:(i == kLWEUnseenCardLevel ? LWEDesignMuted() : LWEDesignFire()) hasCards:(count > 0)];
+    UIView *track = [self _trackWithFraction:fraction fill:(i == kLWEUnseenCardLevel ? LWEDesignMuted() : [[ThemeManager sharedThemeManager] colorForSlot:@"progressBarFill"]) hasCards:(count > 0)];
 
     UIStackView *row = nil;
     if (stacked)
@@ -587,7 +588,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 
 - (UIView *) _moodView
 {
-  UIImageView *mascot = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:kLWEProgressMascotImage]] autorelease];
+  UIImageView *mascot = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:[[ThemeManager sharedThemeManager] elementWithCurrentTheme:kLWEProgressMascotRelativePath]]] autorelease];
   mascot.translatesAutoresizingMaskIntoConstraints = NO;
   mascot.contentMode = UIViewContentModeScaleAspectFit;
   mascot.isAccessibilityElement = NO;

@@ -336,13 +336,13 @@
 "Japanese" = "Japanese";
 
 /* Theme name  (JapaneseSettingsDataSource.m) */
+"Paper" = "Paper";
+
+/* Theme name  (JapaneseSettingsDataSource.m) */
 "Fire" = "Fire";
 
 /* Theme name  (JapaneseSettingsDataSource.m) */
 "Water" = "Water";
-
-/* Theme name  (JapaneseSettingsDataSource.m) */
-"Tame" = "Tame";
 
 /* SettingsViewController.DisplayReading_Romaji  (JapaneseSettingsDataSource.m) */
 "Romaji" = "Romaji";

@@ -29,13 +29,14 @@
     UIProgressView *progressView = (UIProgressView *)[self.view viewWithTag:(i+PROGRESS_BAR_TAG)];
     if (progressView == nil)
     {
-        NSArray *lineColors = [NSArray arrayWithObjects:[UIColor darkGrayColor],[UIColor redColor],[UIColor darkGrayColor],[UIColor cyanColor],[UIColor orangeColor],[UIColor greenColor], nil];
         progressView = [[[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault] autorelease];
         progressView.tag = i+PROGRESS_BAR_TAG;
-        [progressView setProgressTintColor:[lineColors objectAtIndex:i]];
-        [progressView setTrackTintColor:[UIColor whiteColor]];
         [self.view addSubview:progressView];
     }
+    // Themes v2: one fill for all five levels (the theme accent) on the shared line track
+    ThemeManager *tm = [ThemeManager sharedThemeManager];
+    [progressView setProgressTintColor:[tm colorForSlot:@"stripBarFill"]];
+    [progressView setTrackTintColor:[tm colorForSlot:@"stripBarTrack"]];
     return progressView;
 }
 
@@ -48,6 +49,7 @@
   CGFloat hPad = 4.0;
 
   NSInteger thisLevelCount = self.tag.seenCardCount;
+  UIColor *stripInk = [[ThemeManager sharedThemeManager] colorForSlot:@"stripInk"];
 
   // For levels 1-5
   for (NSInteger i = 1; i < 6; i++)
@@ -81,6 +83,7 @@
     {
       countLabel.text = [NSString stringWithFormat:@"%d", [[self.tag.cardLevelCounts objectAtIndex:i] integerValue]];
       countLabel.frame = CGRectMake(labelX, 20, labelW, 21);
+      countLabel.textColor = stripInk;
       [self.view bringSubviewToFront:countLabel];
     }
 
@@ -88,6 +91,7 @@
     if (headerLabel)
     {
       headerLabel.frame = CGRectMake(labelX, -1, labelW, 21);
+      headerLabel.textColor = stripInk;
     }
   }
 }

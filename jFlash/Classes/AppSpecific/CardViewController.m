@@ -232,7 +232,7 @@ static const CGFloat kLWEPillHitInset = 7.0;
   UIButton *speak = [UIButton buttonWithType:UIButtonTypeSystem];
   UIImage *speakerImg = [UIImage systemImageNamed:@"speaker.wave.2"];
   [speak setImage:speakerImg forState:UIControlStateNormal];
-  speak.tintColor = [UIColor whiteColor];
+  speak.tintColor = [[ThemeManager sharedThemeManager] colorForSlot:@"speakerInk"];
   speak.accessibilityLabel = NSLocalizedString(@"Speak word", @"CardViewController.SpeakWordAccessibility");
   [speak addTarget:self action:@selector(doSpeakHeadword) forControlEvents:UIControlEventTouchUpInside];
   [self.view addSubview:speak];
@@ -242,14 +242,26 @@ static const CGFloat kLWEPillHitInset = 7.0;
   {
     [self _setupModernCard];
   }
+  else
 #endif
+  {
+    // Older card layouts (E-to-J, Chinese Flash): the XIB's white / yellow labels follow the theme card
+    ThemeManager *tm = [ThemeManager sharedThemeManager];
+    self.headwordLabel.textColor = [tm colorForSlot:@"headwordInk"];
+    self.readingLabel.textColor = [tm colorForSlot:@"readingInk"];
+    self.headwordLabel.shadowColor = nil;
+    self.readingLabel.shadowColor = nil;
+    [self.toggleReadingBtn setTitleColor:[tm colorForSlot:@"toggleInk"] forState:UIControlStateNormal];
+  }
 }
 
 #if defined(LWE_JFLASH)
 - (void) _setupModernCard
 {
-  // Headword: heavy & yellow; the size is set per card in -_layoutModernCard.
-  self.headwordLabel.textColor = LWEDesignYellow();
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  // Headword: heavy, in the theme's headword ink (Paper ink-2, Fire yellow, Water white); the size
+  // is set per card in -_layoutModernCard.
+  self.headwordLabel.textColor = [tm colorForSlot:@"headwordInk"];
   self.headwordLabel.shadowOffset = CGSizeZero;
   self.headwordLabel.shadowColor = nil;
   self.headwordLabel.lineBreakMode = NSLineBreakByCharWrapping;
@@ -267,13 +279,13 @@ static const CGFloat kLWEPillHitInset = 7.0;
   self.readingMoreIcon.hidden = YES;
 
   self.toggleReadingBtn.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
-  [self.toggleReadingBtn setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.85] forState:UIControlStateNormal];
+  [self.toggleReadingBtn setTitleColor:[tm colorForSlot:@"toggleInk"] forState:UIControlStateNormal];
   self.toggleReadingBtn.autoresizingMask = UIViewAutoresizingNone;
 
-  // Speaker: 44pt translucent circle next to the headword
+  // Speaker: 44pt circle next to the headword (speakerFill / speakerInk)
   UIImageSymbolConfiguration *cfg = [UIImageSymbolConfiguration configurationWithPointSize:19 weight:UIImageSymbolWeightMedium];
   [self.speakBtn setImage:[UIImage systemImageNamed:@"speaker.wave.2" withConfiguration:cfg] forState:UIControlStateNormal];
-  self.speakBtn.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.16];
+  self.speakBtn.backgroundColor = [tm colorForSlot:@"speakerFill"];
   self.speakBtn.layer.cornerRadius = kLWESpeakBtnSize / 2.0;
 
   // "+N readings" pill
@@ -282,9 +294,9 @@ static const CGFloat kLWEPillHitInset = 7.0;
   {
     // UIButtonConfiguration (replaces the deprecated image/content edge insets): chevron after the text
     UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
-    // White text (5.1:1 on the pill); the visible pill is 30pt tall inside a 44pt-tall hit area.
-    config.baseForegroundColor = [UIColor whiteColor];
-    config.background.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
+    // moreReadingsInk on moreReadingsFill; the visible pill is 30pt tall inside a 44pt-tall hit area.
+    config.baseForegroundColor = [tm colorForSlot:@"moreReadingsInk"];
+    config.background.backgroundColor = [tm colorForSlot:@"moreReadingsFill"];
     config.background.cornerRadius = 15.0;
     config.background.backgroundInsets = NSDirectionalEdgeInsetsMake(kLWEPillHitInset, 0, kLWEPillHitInset, 0);
     config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
@@ -301,12 +313,13 @@ static const CGFloat kLWEPillHitInset = 7.0;
   else
   {
     pill = [UIButton buttonWithType:UIButtonTypeCustom];
-    pill.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.14];
+    UIColor *pillInk = [tm colorForSlot:@"moreReadingsInk"];
+    pill.backgroundColor = [tm colorForSlot:@"moreReadingsFill"];
     pill.layer.cornerRadius = 15.0;
     pill.titleLabel.font = [UIFont systemFontOfSize:13 weight:UIFontWeightSemibold];
-    [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.88] forState:UIControlStateNormal];
-    [pill setTitleColor:[UIColor colorWithWhite:1.0 alpha:0.5] forState:UIControlStateHighlighted];
-    pill.tintColor = [UIColor colorWithWhite:1.0 alpha:0.88];
+    [pill setTitleColor:pillInk forState:UIControlStateNormal];
+    [pill setTitleColor:[pillInk colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
+    pill.tintColor = pillInk;
     pill.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft; // chevron after the text
   }
   pill.hidden = YES;
@@ -401,7 +414,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     }
     [text appendAttributedString:[[[NSAttributedString alloc] initWithString:kanaText attributes:@{
       NSFontAttributeName: [UIFont systemFontOfSize:kanaSize weight:UIFontWeightMedium],
-      NSForegroundColorAttributeName: [UIColor whiteColor],
+      NSForegroundColorAttributeName: [[ThemeManager sharedThemeManager] colorForSlot:@"readingInk"],
       NSParagraphStyleAttributeName: para,
     }] autorelease]];
   }
@@ -415,7 +428,8 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     CGFloat romajiSize = (romajiOnly ? 24.0 : 17.0) * dt;
     [text appendAttributedString:[[[NSAttributedString alloc] initWithString:romajiText attributes:@{
       NSFontAttributeName: [UIFont systemFontOfSize:romajiSize weight:UIFontWeightMedium],
-      NSForegroundColorAttributeName: [UIColor colorWithWhite:1.0 alpha:(romajiOnly ? 1.0 : 0.88)],
+      // Romaji on its own is the reading, so it takes the reading ink; under kana it is the muted romajiInk
+      NSForegroundColorAttributeName: [[ThemeManager sharedThemeManager] colorForSlot:(romajiOnly ? @"readingInk" : @"romajiInk")],
       NSKernAttributeName: @(0.2),
       NSParagraphStyleAttributeName: para,
     }] autorelease]];
@@ -917,12 +931,13 @@ NSString * const LWECardHTMLTemplate = @""
 // 2026 card: large, upright meaning; no maximum-scale, so pinch zoom stays available.
 "<meta name='viewport' content='width=device-width, initial-scale=1' />"
 "<style>"
-"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:calc(##TEXTSIZE## * 1.5); font-weight:600; font-style:normal; font-family:-apple-system,'Helvetica Neue',Helvetica,sans-serif; color:#fff; line-height:1.25; letter-spacing:-0.4px; -webkit-text-size-adjust:none; } "
+"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:calc(##TEXTSIZE## * 1.5); font-weight:600; font-style:normal; font-family:-apple-system,'Helvetica Neue',Helvetica,sans-serif; line-height:1.25; letter-spacing:-0.4px; -webkit-text-size-adjust:none; } "
 "dfn{ text-shadow:none; font-style:normal; font-weight:600; color:#3a2a00; position:relative; top:-3px; font-family:-apple-system,sans-serif; font-size:13px; letter-spacing:0.1px; background-color:#FFD60A; line-height:1; margin:0 0 0 8px; padding:5px 9px 6px; -webkit-border-radius:8px; border:0; display:inline-block; vertical-align:middle; } "
 "#container{ width:100%; text-align:center; padding-top:0; } "
-"#container:before{ content:''; display:block; width:40px; height:2px; border-radius:1px; background:rgba(255,255,255,0.3); margin:0 auto 22px auto; } "
-"ol{color:white; text-align:left; font-size:0.75em; line-height:1.35; width:auto; margin:0 12px; padding-left:22px;} "
-"li{color:white; margin:0px; margin-bottom:8px;} "
+// Meaning ink, the rule colour and the noun pill come from the theme CSS (meaningInk, meaningRule).
+"#container:before{ content:''; display:block; width:40px; height:2px; border-radius:1px; margin:0 auto 22px auto; } "
+"ol{text-align:left; font-size:0.75em; line-height:1.35; width:auto; margin:0 12px; padding-left:22px;} "
+"li{margin:0px; margin-bottom:8px;} "
 #else
 // Chinese Flash keeps the original card styling.
 "<style>"

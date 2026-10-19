@@ -43,6 +43,8 @@ static const CGFloat kLWEShowAnswerFontMax     = 28.0;
 static const CGFloat kLWEShowAnswerSubFontSize = 13.0;
 static const CGFloat kLWEShowAnswerSubFontMax  = 19.0;
 static const NSInteger kLWEShowAnswerEyeTag    = 9101;
+static const NSInteger kLWEShowAnswerTitleTag  = 9102;
+static const NSInteger kLWEShowAnswerSubTag    = 9103;
 
 static UIFont *LWEShowAnswerFont(void)
 {
@@ -187,8 +189,10 @@ static UIFont *LWEShowAnswerSubFont(void)
 }
 
 /**
- * Design option C: one paper (#FFFDF9) button, 2pt fire (#C01B00) outline, 18pt corners,
- * centred "[eye] Show answer" in fire red with the muted subline "Then mark it Wrong or Right".
+ * Design option C: one paper-raised (#FFFDF9) button, 2pt outline, 18pt corners, centred
+ * "[eye] Show answer" with the muted subline "Then mark it Wrong or Right".  The outline, label
+ * and sub-line take the theme accent (showAnswerBorder / showAnswerInk / showAnswerSubInk; see
+ * -applyTheme); the fill is the same in every theme.
  * Its frame is the whole revealed 2x2 grid (see _layoutPracticeBar), so the panel never resizes.
  * The labels are subviews of the button, so VoiceOver sees one element: "Show answer".
  */
@@ -196,13 +200,11 @@ static UIFont *LWEShowAnswerSubFont(void)
 {
   UIButton *show = [UIButton buttonWithType:UIButtonTypeCustom];
   show.autoresizingMask = UIViewAutoresizingNone;
-  show.backgroundColor = LWEDesignColorHex(0xFFFDF9, 1.0);
   show.layer.cornerRadius = 18.0;
   if (@available(iOS 13.0, *)) {
     show.layer.cornerCurve = kCACornerCurveContinuous;
   }
   show.layer.borderWidth = 2.0;
-  show.layer.borderColor = LWEDesignFire().CGColor;
   show.isAccessibilityElement = YES;
   show.accessibilityTraits = UIAccessibilityTraitButton;
   show.accessibilityLabel = NSLocalizedString(@"Show answer", @"ActionBar.ShowAnswer");
@@ -210,7 +212,6 @@ static UIFont *LWEShowAnswerSubFont(void)
 
   UIImageView *eye = [[[UIImageView alloc] init] autorelease];
   eye.tag = kLWEShowAnswerEyeTag;
-  eye.tintColor = LWEDesignFire();
   eye.contentMode = UIViewContentModeScaleAspectFit;
   if (@available(iOS 13.0, *)) {
     eye.image = [UIImage systemImageNamed:@"eye"];
@@ -218,10 +219,10 @@ static UIFont *LWEShowAnswerSubFont(void)
   }
 
   UILabel *title = [[[UILabel alloc] init] autorelease];
+  title.tag = kLWEShowAnswerTitleTag;
   title.text = NSLocalizedString(@"Show answer", @"ActionBar.ShowAnswer");
   title.font = LWEShowAnswerFont();
   title.adjustsFontForContentSizeCategory = YES;
-  title.textColor = LWEDesignFire();
   title.adjustsFontSizeToFitWidth = YES;
   title.minimumScaleFactor = 0.7;
 
@@ -231,10 +232,10 @@ static UIFont *LWEShowAnswerSubFont(void)
   titleRow.spacing = 9.0;
 
   UILabel *sub = [[[UILabel alloc] init] autorelease];
+  sub.tag = kLWEShowAnswerSubTag;
   sub.text = NSLocalizedString(@"Then mark it Wrong or Right", @"ActionBar.ShowAnswerSubline");
   sub.font = LWEShowAnswerSubFont();
   sub.adjustsFontForContentSizeCategory = YES;
-  sub.textColor = LWEDesignColorHex(0xA3341C, 1.0);
   sub.textAlignment = NSTextAlignmentCenter;
   sub.adjustsFontSizeToFitWidth = YES;
   sub.minimumScaleFactor = 0.7;
@@ -256,17 +257,38 @@ static UIFont *LWEShowAnswerSubFont(void)
   [show addTarget:self action:@selector(_showAnswerTouchDown:) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragEnter];
   [show addTarget:self action:@selector(_showAnswerTouchUp:)
      forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchDragExit | UIControlEventTouchCancel];
+  [self _applyShowAnswerTheme:show];
   return show;
+}
+
+//! Show answer colours from the current theme (fill shared, outline / label / sub-line themed)
+- (void) _applyShowAnswerTheme:(UIButton *)show
+{
+  if (show == nil) return;
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  UIColor *ink = [tm colorForSlot:@"showAnswerInk"];
+  show.backgroundColor = [tm colorForSlot:@"showAnswerFill"];
+  show.layer.borderColor = [tm colorForSlot:@"showAnswerBorder"].CGColor;
+  [(UIImageView *)[show viewWithTag:kLWEShowAnswerEyeTag] setTintColor:ink];
+  [(UILabel *)[show viewWithTag:kLWEShowAnswerTitleTag] setTextColor:ink];
+  [(UILabel *)[show viewWithTag:kLWEShowAnswerSubTag] setTextColor:[tm colorForSlot:@"showAnswerSubInk"]];
+}
+
+- (void) applyTheme
+{
+  [self _applyShowAnswerTheme:self.showAnswerBtn];
 }
 
 - (void) _showAnswerTouchDown:(UIButton *)sender
 {
-  sender.backgroundColor = LWEDesignColorHex(0xF6E7E1, 1.0);
+  // Pressed: a light wash of the theme accent over the panel
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  sender.backgroundColor = [[tm colorForSlot:@"showAnswerBorder"] colorWithAlphaComponent:0.08];
 }
 
 - (void) _showAnswerTouchUp:(UIButton *)sender
 {
-  sender.backgroundColor = LWEDesignColorHex(0xFFFDF9, 1.0);
+  sender.backgroundColor = [[ThemeManager sharedThemeManager] colorForSlot:@"showAnswerFill"];
 }
 
 - (void) _stylePracticeButton:(UIButton *)btn title:(NSString *)title symbol:(NSString *)symbol

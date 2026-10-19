@@ -66,6 +66,11 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 
   self.tableView.rowHeight = UITableViewAutomaticDimension;
   self.tableView.estimatedRowHeight = 60;
+
+  // Shared paper screen (same in every theme): paper-2 behind paper cells, hairline separators
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  self.tableView.backgroundColor = [tm colorForSlot:@"groupedBackground"];
+  self.tableView.separatorColor = [tm colorForSlot:@"separator"];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -150,11 +155,20 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 - (void) iterateSetting: (NSString*) setting
 {
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  NSString *currentValue = [settings objectForKey:setting];
+  NSString *nextValue = nil;
+
+  // Themes cycle in their display order (Paper, Fire, Water), not the settings dictionary's hash order
+  if ([setting isEqualToString:APP_THEME])
+  {
+    NSString *currentTheme = [[[ThemeManager sharedThemeManager] _currentTheme] objectForKey:@"key"];
+    [settings setValue:[[ThemeManager sharedThemeManager] themeKeyAfter:currentTheme] forKey:setting];
+    return;
+  }
+
   NSDictionary *dict = [self.dataSource.settingsHash objectForKey:setting];
   NSEnumerator *enumerator = [dict keyEnumerator];
-  NSString *currentValue = [settings objectForKey:setting];
   NSString *lclKey = nil;
-  NSString *nextValue = nil;
   
   // Find current match in the enumeration and return the next object
   while ((lclKey = [enumerator nextObject]))
@@ -260,7 +274,13 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     // Anything else
     cell = [LWEUITableUtils reuseCellForIdentifier:key onTable:lclTableView usingStyle:UITableViewCellStyleValue1];
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.detailTextLabel.text = [[self.dataSource.settingsHash objectForKey:key] objectForKey:[settings objectForKey:key]];        
+    NSString *value = [settings objectForKey:key];
+    if ([key isEqualToString:APP_THEME])
+    {
+      // An unknown stored key shows (and uses) the default theme
+      value = [[[ThemeManager sharedThemeManager] _currentTheme] objectForKey:@"key"];
+    }
+    cell.detailTextLabel.text = [[self.dataSource.settingsHash objectForKey:key] objectForKey:value];
   }
   
   cell.textLabel.lineBreakMode = NSLineBreakByWordWrapping;
@@ -272,6 +292,25 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 #pragma mark - UITableViewDelegate Methods
 
 
+
+//! Paper cells: paper fill, ink label, muted value (shared by every theme)
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  cell.backgroundColor = [tm colorForSlot:@"cellFill"];
+  cell.textLabel.textColor = [tm colorForSlot:@"cellLabelInk"];
+  cell.detailTextLabel.textColor = [tm colorForSlot:@"cellValueInk"];
+}
+
+//! Section headers in ink-2 on paper-2
+- (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section
+{
+  if ([view isKindOfClass:[UITableViewHeaderFooterView class]])
+  {
+    UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
+    header.textLabel.textColor = [[ThemeManager sharedThemeManager] colorForSlot:@"sectionHeaderInk"];
+  }
+}
 
 //! Make selection for a table cell
 - (void)tableView:(UITableView *)lclTableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -324,9 +363,22 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     // One special case, theme: reload the nav bar for this page
     if ([key isEqualToString:APP_THEME])
     {
+      ThemeManager *tm = [ThemeManager sharedThemeManager];
       UIWindow *window = self.view.window;
-      window.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
-      self.navigationController.navigationBar.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
+      window.tintColor = [tm currentThemeTintColor];
+      self.navigationController.navigationBar.tintColor = [tm currentThemeTintColor];
+      // Re-colour the cream tab bar's selected state (tint) — unselected stays paper/ink-2
+      if (@available(iOS 15.0, *)) {
+        UITabBar *tabBar = self.tabBarController.tabBar;
+        UITabBarAppearance *app = [[tabBar.standardAppearance copy] autorelease];
+        if (app == nil) {
+          app = [[[UITabBarAppearance alloc] init] autorelease];
+          [app configureWithOpaqueBackground];
+        }
+        app.backgroundColor = [tm colorForSlot:@"tabBarFill"];
+        tabBar.standardAppearance = app;
+        tabBar.scrollEdgeAppearance = app;
+      }
     }
   }
 }
