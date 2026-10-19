@@ -48,7 +48,7 @@
 		49046616147272A0004C44E2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242A173F1461AB60002977E6 /* AVFoundation.framework */; };
 		49046617147272AD004C44E2 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242A174714628AF4002977E6 /* AudioToolbox.framework */; };
 		4904661A147274B5004C44E2 /* jFlash.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E2811D1A2F600CFCACD /* jFlash.db */; };
-		4904661B147274B8004C44E2 /* jFlash-CARD-1.1.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-1.1.db */; };
+		4904661B147274B8004C44E2 /* jFlash-CARD-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */; };
 		4904662F14727835004C44E2 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242A174714628AF4002977E6 /* AudioToolbox.framework */; };
 		4904663014727835004C44E2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 242A173F1461AB60002977E6 /* AVFoundation.framework */; };
 		4904663114727835004C44E2 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49C521DE144D2461002011BD /* CoreText.framework */; };
@@ -224,8 +224,8 @@
 		49111A05147C9CDE0059D620 /* AudioSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 242A17431462893E002977E6 /* AudioSessionManager.m */; };
 		49111A06147C9CDF0059D620 /* AudioSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 242A17431462893E002977E6 /* AudioSessionManager.m */; };
 		4919507C144F1BFE00DB81F7 /* jFlash-available.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4919507A144F1BFE00DB81F7 /* jFlash-available.plist */; };
-		49195080144F9E7900DB81F7 /* jFlash-FTS-1.1.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507E144F9E7900DB81F7 /* jFlash-FTS-1.1.db */; };
-		49195081144F9E7900DB81F7 /* jFlash-EX-1.2.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507F144F9E7900DB81F7 /* jFlash-EX-1.2.db */; };
+		49195080144F9E7900DB81F7 /* jFlash-FTS-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507E144F9E7900DB81F7 /* jFlash-FTS-2.0.db */; };
+		49195081144F9E7900DB81F7 /* jFlash-EX-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507F144F9E7900DB81F7 /* jFlash-EX-2.0.db */; };
 		491D7B2911C4776C00BF8323 /* UserPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 491D7B2811C4776C00BF8323 /* UserPeer.m */; };
 		491D7D0811C4EFFE00BF8323 /* SentenceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 491D7D0611C4EFFE00BF8323 /* SentenceView.xib */; };
 		491E276E14F5DA7B00C5243A /* ExternalAppManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 491E276D14F5DA7B00C5243A /* ExternalAppManager.m */; };
@@ -296,10 +296,6 @@
 		4965FD84126F7002000AC280 /* redtheme-cookie-cutters in Resources */ = {isa = PBXBuildFile; fileRef = 4965FD83126F7002000AC280 /* redtheme-cookie-cutters */; };
 		4965FD85126F7002000AC280 /* redtheme-cookie-cutters in Resources */ = {isa = PBXBuildFile; fileRef = 4965FD83126F7002000AC280 /* redtheme-cookie-cutters */; };
 		4966C30112686DCE00F34E24 /* jflash_12_to_13.sql in Resources */ = {isa = PBXBuildFile; fileRef = 49AF3CF51265E2B900CEAA52 /* jflash_12_to_13.sql */; };
-		49695844150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
-		49695845150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
-		49695846150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
-		49695847150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
 		496BE55211EC5320003AB713 /* ActionBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE54F11EC5320003AB713 /* ActionBarViewController.xib */; };
 		496BE55311EC5320003AB713 /* AlgorithmSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */; };
 		496BE55411EC5320003AB713 /* SearchView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55111EC5320003AB713 /* SearchView.xib */; };
@@ -401,7 +397,6 @@
 		496C7AE412632730004B6B90 /* ModalTaskView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49F9686811AF604900DFC3C9 /* ModalTaskView.xib */; };
 		496C7AE512632730004B6B90 /* PluginSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 490820A411B7959500150499 /* PluginSettingsView.xib */; };
 		496C7AE612632730004B6B90 /* ProgressBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91E1B0E711AE11E1003CCDC2 /* ProgressBarViewController.xib */; };
-		496C7AE712632730004B6B90 /* ProgressView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6B11AB844300016BD2 /* ProgressView.xib */; };
 		496C7AE912632730004B6B90 /* SentenceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 491D7D0611C4EFFE00BF8323 /* SentenceView.xib */; };
 		496C7AEA12632730004B6B90 /* StudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6D11AB844300016BD2 /* StudySetView.xib */; };
 		496C7AEB12632730004B6B90 /* StudyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6E11AB844300016BD2 /* StudyView.xib */; };
@@ -657,7 +652,6 @@
 		917A5C7211AB844300016BD2 /* HelpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6811AB844300016BD2 /* HelpView.xib */; };
 		917A5C7311AB844300016BD2 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6911AB844300016BD2 /* MainWindow.xib */; };
 		917A5C7411AB844300016BD2 /* AddStudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6A11AB844300016BD2 /* AddStudySetView.xib */; };
-		917A5C7511AB844300016BD2 /* ProgressView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6B11AB844300016BD2 /* ProgressView.xib */; };
 		917A5C7711AB844300016BD2 /* StudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6D11AB844300016BD2 /* StudySetView.xib */; };
 		917A5C7811AB844300016BD2 /* StudyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6E11AB844300016BD2 /* StudyView.xib */; };
 		917A5C7911AB844300016BD2 /* UserDetailsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6F11AB844300016BD2 /* UserDetailsView.xib */; };
@@ -695,7 +689,6 @@
 		91D3F9371580294F00CB8F1E /* HelpView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6811AB844300016BD2 /* HelpView.xib */; };
 		91D3F9381580294F00CB8F1E /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6911AB844300016BD2 /* MainWindow.xib */; };
 		91D3F9391580294F00CB8F1E /* AddStudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6A11AB844300016BD2 /* AddStudySetView.xib */; };
-		91D3F93A1580294F00CB8F1E /* ProgressView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6B11AB844300016BD2 /* ProgressView.xib */; };
 		91D3F93B1580294F00CB8F1E /* StudySetView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6D11AB844300016BD2 /* StudySetView.xib */; };
 		91D3F93C1580294F00CB8F1E /* StudyView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6E11AB844300016BD2 /* StudyView.xib */; };
 		91D3F93D1580294F00CB8F1E /* UserDetailsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6F11AB844300016BD2 /* UserDetailsView.xib */; };
@@ -708,7 +701,7 @@
 		91D3F9441580294F00CB8F1E /* ExamplesUnavailable.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49B4ABC311C1D03600CFC308 /* ExamplesUnavailable.xib */; };
 		91D3F9451580294F00CB8F1E /* SentenceView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 491D7D0611C4EFFE00BF8323 /* SentenceView.xib */; };
 		91D3F9461580294F00CB8F1E /* practice-btn-actions.png in Resources */ = {isa = PBXBuildFile; fileRef = 91D3CDE911D0C03F008565F8 /* practice-btn-actions.png */; };
-		91D3F9481580294F00CB8F1E /* jFlash-CARD-1.1.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-1.1.db */; };
+		91D3F9481580294F00CB8F1E /* jFlash-CARD-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */; };
 		91D3F9491580294F00CB8F1E /* plugin-resources in Resources */ = {isa = PBXBuildFile; fileRef = D322367A11D370B900B1AF15 /* plugin-resources */; };
 		91D3F94C1580294F00CB8F1E /* ActionBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE54F11EC5320003AB713 /* ActionBarViewController.xib */; };
 		91D3F94D1580294F00CB8F1E /* AlgorithmSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */; };
@@ -754,7 +747,6 @@
 		91D3F9C61580294F00CB8F1E /* CardViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49FE8C7614A9B83200579716 /* CardViewController.xib */; };
 		91D3F9CB1580294F00CB8F1E /* jflash_16_to_161.sql in Resources */ = {isa = PBXBuildFile; fileRef = 4937876014DB8D9700361203 /* jflash_16_to_161.sql */; };
 		91D3F9CC1580294F00CB8F1E /* jflash_161_to_162.sql in Resources */ = {isa = PBXBuildFile; fileRef = 49BA6DB414F4887500A48A21 /* jflash_161_to_162.sql */; };
-		91D3F9CD1580294F00CB8F1E /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */; };
 		91D3F9CE1580294F00CB8F1E /* jflash_162_to_17.sql in Resources */ = {isa = PBXBuildFile; fileRef = 493ABDC015562B41007F8B5E /* jflash_162_to_17.sql */; };
 		91D3F9D01580294F00CB8F1E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		91D3F9D11580294F00CB8F1E /* AddStudySetInputViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BC411AB7C4600016BD2 /* AddStudySetInputViewController.m */; };
@@ -930,8 +922,8 @@
 		A34F45CA184B22AA00FA137C /* starred-tag.png in Resources */ = {isa = PBXBuildFile; fileRef = A34F45C3184B22AA00FA137C /* starred-tag.png */; };
 		A34F45CB184B22AA00FA137C /* starred-tag@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A34F45C4184B22AA00FA137C /* starred-tag@2x.png */; };
 		A34F45CC184B22AA00FA137C /* starred-tag@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = A34F45C4184B22AA00FA137C /* starred-tag@2x.png */; };
-		AA1A507E19000001000000AA /* jFlash-FTS-1.1.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507E144F9E7900DB81F7 /* jFlash-FTS-1.1.db */; };
-		AA1A507F19000002000000AA /* jFlash-EX-1.2.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507F144F9E7900DB81F7 /* jFlash-EX-1.2.db */; };
+		AA1A507E19000001000000AA /* jFlash-FTS-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507E144F9E7900DB81F7 /* jFlash-FTS-2.0.db */; };
+		AA1A507F19000002000000AA /* jFlash-EX-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507F144F9E7900DB81F7 /* jFlash-EX-2.0.db */; };
 		AA1A600119000010000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
 		AA3C000119000020000000AA /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3C000019000010000000AA /* UserNotifications.framework */; };
 		D322368611D370B900B1AF15 /* plugin-resources in Resources */ = {isa = PBXBuildFile; fileRef = D322367A11D370B900B1AF15 /* plugin-resources */; };
@@ -953,7 +945,7 @@
 		D3C180031488864600834EAC /* glyphish-style-listen-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D3C180001488864600834EAC /* glyphish-style-listen-icon@2x.png */; };
 		D3C180041488864600834EAC /* glyphish-style-listen-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D3C180001488864600834EAC /* glyphish-style-listen-icon@2x.png */; };
 		D3CD3DA411D3021200F7A62C /* jFlash.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E2811D1A2F600CFCACD /* jFlash.db */; };
-		D3CD3DA511D3021300F7A62C /* jFlash-CARD-1.1.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-1.1.db */; };
+		D3CD3DA511D3021300F7A62C /* jFlash-CARD-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */; };
 		3699AD28DD324B5EB79FA3C7 /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
 		CA5AAE2CD187409796A303E1 /* UserPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 491D7B2811C4776C00BF8323 /* UserPeer.m */; };
 		8E7A78D2E4F94E2AA7357CBF /* DisplaySearchedSentenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */; };
@@ -1099,8 +1091,8 @@
 		490D447D153BAB3B0003EA47 /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SBJsonWriter.h; path = Classes/SBJsonWriter.h; sourceTree = "<group>"; };
 		490D447E153BAB3B0003EA47 /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SBJsonWriter.m; path = Classes/SBJsonWriter.m; sourceTree = "<group>"; };
 		4919507A144F1BFE00DB81F7 /* jFlash-available.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "jFlash-available.plist"; path = "Plugins/jFlash-available.plist"; sourceTree = "<group>"; };
-		4919507E144F9E7900DB81F7 /* jFlash-FTS-1.1.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-FTS-1.1.db"; path = "sql/plugins/jFlash-FTS-1.1.db"; sourceTree = "<group>"; };
-		4919507F144F9E7900DB81F7 /* jFlash-EX-1.2.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-EX-1.2.db"; path = "sql/plugins/jFlash-EX-1.2.db"; sourceTree = "<group>"; };
+		4919507E144F9E7900DB81F7 /* jFlash-FTS-2.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-FTS-2.0.db"; path = "sql/plugins/jFlash-FTS-2.0.db"; sourceTree = "<group>"; };
+		4919507F144F9E7900DB81F7 /* jFlash-EX-2.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-EX-2.0.db"; path = "sql/plugins/jFlash-EX-2.0.db"; sourceTree = "<group>"; };
 		491D7B2711C4776C00BF8323 /* UserPeer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UserPeer.h; path = AppSpecific/UserPeer.h; sourceTree = "<group>"; };
 		491D7B2811C4776C00BF8323 /* UserPeer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UserPeer.m; path = AppSpecific/UserPeer.m; sourceTree = "<group>"; };
 		491D7D0611C4EFFE00BF8323 /* SentenceView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = SentenceView.xib; path = XIBs/SentenceView.xib; sourceTree = "<group>"; };
@@ -1152,7 +1144,6 @@
 		4965FD30126F6417000AC280 /* practice-btn-wrong@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btn-wrong@2x.png"; path = "Assets/practice-btn-wrong@2x.png"; sourceTree = "<group>"; };
 		4965FD80126F6FCF000AC280 /* bluetheme-cookie-cutters */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "bluetheme-cookie-cutters"; path = "Assets/bluetheme-cookie-cutters"; sourceTree = "<group>"; };
 		4965FD83126F7002000AC280 /* redtheme-cookie-cutters */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "redtheme-cookie-cutters"; path = "Assets/redtheme-cookie-cutters"; sourceTree = "<group>"; };
-		49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = "MainWindow-iPad.xib"; path = "XIBs/MainWindow-iPad.xib"; sourceTree = "<group>"; };
 		496BE54B11EC5303003AB713 /* ActionBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ActionBarViewController.h; path = AppSpecific/ActionBarViewController.h; sourceTree = "<group>"; };
 		496BE54C11EC5303003AB713 /* ActionBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ActionBarViewController.m; path = AppSpecific/ActionBarViewController.m; sourceTree = "<group>"; };
 		496BE54F11EC5320003AB713 /* ActionBarViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ActionBarViewController.xib; path = XIBs/ActionBarViewController.xib; sourceTree = "<group>"; };
@@ -1355,7 +1346,6 @@
 		917A5C6811AB844300016BD2 /* HelpView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = HelpView.xib; path = XIBs/HelpView.xib; sourceTree = "<group>"; };
 		917A5C6911AB844300016BD2 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = MainWindow.xib; path = XIBs/MainWindow.xib; sourceTree = "<group>"; };
 		917A5C6A11AB844300016BD2 /* AddStudySetView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = AddStudySetView.xib; path = XIBs/AddStudySetView.xib; sourceTree = "<group>"; };
-		917A5C6B11AB844300016BD2 /* ProgressView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ProgressView.xib; path = XIBs/ProgressView.xib; sourceTree = "<group>"; };
 		917A5C6D11AB844300016BD2 /* StudySetView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = StudySetView.xib; path = XIBs/StudySetView.xib; sourceTree = "<group>"; };
 		917A5C6E11AB844300016BD2 /* StudyView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = StudyView.xib; path = XIBs/StudyView.xib; sourceTree = "<group>"; };
 		917A5C6F11AB844300016BD2 /* UserDetailsView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = UserDetailsView.xib; path = XIBs/UserDetailsView.xib; sourceTree = "<group>"; };
@@ -1375,7 +1365,7 @@
 		91910154148992EC003E9A19 /* TagTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TagTest.h; path = Tests/TagTest.h; sourceTree = SOURCE_ROOT; };
 		91910155148992EC003E9A19 /* TagTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TagTest.m; path = Tests/TagTest.m; sourceTree = SOURCE_ROOT; };
 		91992E2811D1A2F600CFCACD /* jFlash.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = jFlash.db; path = sql/jFlash.db; sourceTree = "<group>"; };
-		91992E3311D1A31B00CFCACD /* jFlash-CARD-1.1.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-CARD-1.1.db"; path = "sql/jFlash-CARD-1.1.db"; sourceTree = "<group>"; };
+		91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-CARD-2.0.db"; path = "sql/jFlash-CARD-2.0.db"; sourceTree = "<group>"; };
 		919FBDBA1622E9D2001FD77B /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		91B3E2F0144FD8ED003F8986 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		91CBA67711BB496C004BD0D0 /* ExampleSentencesView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ExampleSentencesView.xib; path = XIBs/ExampleSentencesView.xib; sourceTree = "<group>"; };
@@ -1930,9 +1920,9 @@
 				49BA6DB414F4887500A48A21 /* jflash_161_to_162.sql */,
 				493ABDC015562B41007F8B5E /* jflash_162_to_17.sql */,
 				91992E2811D1A2F600CFCACD /* jFlash.db */,
-				91992E3311D1A31B00CFCACD /* jFlash-CARD-1.1.db */,
-				4919507E144F9E7900DB81F7 /* jFlash-FTS-1.1.db */,
-				4919507F144F9E7900DB81F7 /* jFlash-EX-1.2.db */,
+				91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */,
+				4919507E144F9E7900DB81F7 /* jFlash-FTS-2.0.db */,
+				4919507F144F9E7900DB81F7 /* jFlash-EX-2.0.db */,
 			);
 			name = JFlash;
 			sourceTree = "<group>";
@@ -2430,14 +2420,12 @@
 				49B4ABC311C1D03600CFC308 /* ExamplesUnavailable.xib */,
 				917A5C6811AB844300016BD2 /* HelpView.xib */,
 				917A5C6911AB844300016BD2 /* MainWindow.xib */,
-				49695843150C3F8300DCC8F5 /* MainWindow-iPad.xib */,
 				497125231487300A00D4D150 /* MoodIcon.xib */,
 				917A5C6A11AB844300016BD2 /* AddStudySetView.xib */,
 				49377B1E1485259D00BD80C5 /* GroupDescriptionView.xib */,
 				49F9686811AF604900DFC3C9 /* ModalTaskView.xib */,
 				490820A411B7959500150499 /* PluginSettingsView.xib */,
 				91E1B0E711AE11E1003CCDC2 /* ProgressBarViewController.xib */,
-				917A5C6B11AB844300016BD2 /* ProgressView.xib */,
 				49716141144EC74D006BBEB4 /* ReminderSettingsViewController.xib */,
 				496BE55111EC5320003AB713 /* SearchView.xib */,
 				4982292C1490A0BD009EC2CD /* SearchingTableCell.xib */,
@@ -2673,7 +2661,6 @@
 				917A5C7211AB844300016BD2 /* HelpView.xib in Resources */,
 				917A5C7311AB844300016BD2 /* MainWindow.xib in Resources */,
 				917A5C7411AB844300016BD2 /* AddStudySetView.xib in Resources */,
-				917A5C7511AB844300016BD2 /* ProgressView.xib in Resources */,
 				917A5C7711AB844300016BD2 /* StudySetView.xib in Resources */,
 				917A5C7811AB844300016BD2 /* StudyView.xib in Resources */,
 				917A5C7911AB844300016BD2 /* UserDetailsView.xib in Resources */,
@@ -2687,9 +2674,9 @@
 				491D7D0811C4EFFE00BF8323 /* SentenceView.xib in Resources */,
 				91D3CDEA11D0C03F008565F8 /* practice-btn-actions.png in Resources */,
 				D3CD3DA411D3021200F7A62C /* jFlash.db in Resources */,
-				D3CD3DA511D3021300F7A62C /* jFlash-CARD-1.1.db in Resources */,
-				AA1A507E19000001000000AA /* jFlash-FTS-1.1.db in Resources */,
-				AA1A507F19000002000000AA /* jFlash-EX-1.2.db in Resources */,
+				D3CD3DA511D3021300F7A62C /* jFlash-CARD-2.0.db in Resources */,
+				AA1A507E19000001000000AA /* jFlash-FTS-2.0.db in Resources */,
+				AA1A507F19000002000000AA /* jFlash-EX-2.0.db in Resources */,
 				D322368611D370B900B1AF15 /* plugin-resources in Resources */,
 				496BE55211EC5320003AB713 /* ActionBarViewController.xib in Resources */,
 				496BE55311EC5320003AB713 /* AlgorithmSettingsView.xib in Resources */,
@@ -2754,7 +2741,6 @@
 				49FE8C7914A9B83200579716 /* CardViewController.xib in Resources */,
 				4937876114DB8D9700361203 /* jflash_16_to_161.sql in Resources */,
 				49BA6DB514F4887500A48A21 /* jflash_161_to_162.sql in Resources */,
-				49695844150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 				493ABDC115562B41007F8B5E /* jflash_162_to_17.sql in Resources */,
 				49C0C97C1629151900F8966C /* Default-568h@2x.png in Resources */,
 				49C0C97E16291B8400F8966C /* HelpWebViewController.xib in Resources */,
@@ -2768,10 +2754,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				49195080144F9E7900DB81F7 /* jFlash-FTS-1.1.db in Resources */,
-				49195081144F9E7900DB81F7 /* jFlash-EX-1.2.db in Resources */,
+				49195080144F9E7900DB81F7 /* jFlash-FTS-2.0.db in Resources */,
+				49195081144F9E7900DB81F7 /* jFlash-EX-2.0.db in Resources */,
 				4904661A147274B5004C44E2 /* jFlash.db in Resources */,
-				4904661B147274B8004C44E2 /* jFlash-CARD-1.1.db in Resources */,
+				4904661B147274B8004C44E2 /* jFlash-CARD-2.0.db in Resources */,
 				493A4790146A829900F1E718 /* ActionBarViewController-Browse.xib in Resources */,
 				493A4794146A89BB00F1E718 /* SettingsView.xib in Resources */,
 				49377B211485259D00BD80C5 /* GroupDescriptionView.xib in Resources */,
@@ -2783,7 +2769,6 @@
 				49FE8C7814A9B83200579716 /* CardViewController-EtoJ.xib in Resources */,
 				49FE8C7A14A9B83200579716 /* CardViewController.xib in Resources */,
 				4937876214DB8D9700361203 /* jflash_16_to_161.sql in Resources */,
-				49695846150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2801,7 +2786,6 @@
 				498229301490A0BE009EC2CD /* SearchingTableCell.xib in Resources */,
 				49FE8C7214A9B82300579716 /* CardViewController-EtoJ.xib in Resources */,
 				49FE8C7414A9B82300579716 /* CardViewController.xib in Resources */,
-				49695847150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2843,7 +2827,6 @@
 				496C7AE412632730004B6B90 /* ModalTaskView.xib in Resources */,
 				496C7AE512632730004B6B90 /* PluginSettingsView.xib in Resources */,
 				496C7AE612632730004B6B90 /* ProgressBarViewController.xib in Resources */,
-				496C7AE712632730004B6B90 /* ProgressView.xib in Resources */,
 				496C7AE912632730004B6B90 /* SentenceView.xib in Resources */,
 				496C7AEA12632730004B6B90 /* StudySetView.xib in Resources */,
 				496C7AEB12632730004B6B90 /* StudyView.xib in Resources */,
@@ -2902,7 +2885,6 @@
 				A34F45C6184B22AA00FA137C /* starred-folder.png in Resources */,
 				49FE8C7114A9B82300579716 /* CardViewController-EtoJ.xib in Resources */,
 				49FE8C7314A9B82300579716 /* CardViewController.xib in Resources */,
-				49695845150C3F8300DCC8F5 /* MainWindow-iPad.xib in Resources */,
 				4922ED95155678E000645F61 /* cflash_11_to_12.sql in Resources */,
 				49C0C97F16291B8400F8966C /* HelpWebViewController.xib in Resources */,
 			);
@@ -2930,7 +2912,6 @@
 				91D3F9371580294F00CB8F1E /* HelpView.xib in Resources */,
 				91D3F9381580294F00CB8F1E /* MainWindow.xib in Resources */,
 				91D3F9391580294F00CB8F1E /* AddStudySetView.xib in Resources */,
-				91D3F93A1580294F00CB8F1E /* ProgressView.xib in Resources */,
 				91D3F93B1580294F00CB8F1E /* StudySetView.xib in Resources */,
 				91D3F93C1580294F00CB8F1E /* StudyView.xib in Resources */,
 				91D3F93D1580294F00CB8F1E /* UserDetailsView.xib in Resources */,
@@ -2943,7 +2924,7 @@
 				91D3F9441580294F00CB8F1E /* ExamplesUnavailable.xib in Resources */,
 				91D3F9451580294F00CB8F1E /* SentenceView.xib in Resources */,
 				91D3F9461580294F00CB8F1E /* practice-btn-actions.png in Resources */,
-				91D3F9481580294F00CB8F1E /* jFlash-CARD-1.1.db in Resources */,
+				91D3F9481580294F00CB8F1E /* jFlash-CARD-2.0.db in Resources */,
 				91D3F9491580294F00CB8F1E /* plugin-resources in Resources */,
 				91D3F94C1580294F00CB8F1E /* ActionBarViewController.xib in Resources */,
 				91D3F94D1580294F00CB8F1E /* AlgorithmSettingsView.xib in Resources */,
@@ -2989,7 +2970,6 @@
 				91D3F9C61580294F00CB8F1E /* CardViewController.xib in Resources */,
 				91D3F9CB1580294F00CB8F1E /* jflash_16_to_161.sql in Resources */,
 				91D3F9CC1580294F00CB8F1E /* jflash_161_to_162.sql in Resources */,
-				91D3F9CD1580294F00CB8F1E /* MainWindow-iPad.xib in Resources */,
 				91D3F9CE1580294F00CB8F1E /* jflash_162_to_17.sql in Resources */,
 				499F07E915802FC1006B7A14 /* UpgradeAdViewController.xib in Resources */,
 				915FEC5115807BF300BEDF5F /* jFlashJr.db in Resources */,

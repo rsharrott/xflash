@@ -35,39 +35,6 @@
 /* Progress level: learned */
 "Learned" = "Learned";
 
-/* Progress popup motivation line */
-"You're doing great, keep going!" = "You're doing great, keep going!";
-
-/* Progress popup: right count this session */
-"Times Right" = "Times Right";
-
-/* Progress popup: wrong count this session */
-"Times Wrong" = "Times Wrong";
-
-/* Progress popup level: not seen yet */
-"Untested" = "Untested";
-
-/* Progress popup: cards seen */
-"Cards Seen" = "Cards Seen";
-
-/* Progress popup: current streak label (value is e.g. ○ 3回) */
-"Streak!" = "Streak!";
-
-/* Progress popup sentence, part 1: [You are studying] 50 [cards] */
-"You are studying" = "You are studying";
-
-/* Progress popup sentence, part 2 (counter after the study-pool number) */
-"cards" = "cards";
-
-/* Progress popup sentence, line 2: [out of] 120 [in this set.] */
-"out of" = "out of";
-
-/* Progress popup sentence, line 2 end */
-"in this set." = "in this set.";
-
-/* Progress popup footnote, followed by the Settings button */
-"*You can change this in" = "*You can change this in";
-
 /* Placeholder for a new study set name */
 "e.g. New Words I Heard on TV" = "e.g. New Words I Heard on TV";
 

@@ -308,6 +308,12 @@
 /* HelpViewController.Next  (HelpViewController.m) */
 "Next >" = "次へ";
 
+/* JFlash2.0 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated to Japanese in a Flash! 2.0" = "Japanese in a Flash! 2.0にアップデートしました";
+
+/* JFlash2.0 upgrade alert msg  (JFlashUpdateManager.m) */
+"The dictionary has been updated to the current JMdict, with new example sentences from Tatoeba. Because the cards changed, your study progress and sets from the previous version have been reset." = "辞書を最新のJMdictに更新し、Tatoebaの新しい例文を追加しました。カードが変わったため、以前のバージョンの学習記録とセットはリセットされました。";
+
 /* JFlash1.7 upgrade alert title  (JFlashUpdateManager.m) */
 "Updated to Japanese in a Flash! 1.7" = "Japanese in a Flash! 1.7にアップデートしました";
 
@@ -357,7 +363,7 @@
 "Common Kana Words" = "かな書きが多い語";
 
 /* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
-"Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash!（旧Japanese Flash）は、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリはEDICT辞書とTanaka Corpus（田中コーパス）のデータも使用しています。EDICTファイルはElectronic Dictionary Research and Development Groupの所有物であり、同グループのライセンスに従って使用しています。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese in a Flash!のロゴと製品名はオリジナルの創作物であり、ほかの商標との類似は意図したものではなく、まったくの偶然です。";
+"Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application includes material from the JMdict (EDICT, etc.) dictionary files in accordance with the licence provisions of the Electronic Dictionary Research and Development Group (EDRDG). The files are the property of the EDRDG and are used, converted and modified here under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0); the modified dictionary data is shared under the same licence at https://github.com/rsharrott/xflash. EDRDG licence: https://www.edrdg.org/edrdg/licence.html  JMdict project: https://www.edrdg.org/jmdict/j_jmdict.html  Example sentences are from the Tatoeba Project (https://tatoeba.org, originally the Tanaka Corpus) and are used under the Creative Commons Attribution 2.0 France licence (CC BY 2.0 FR): https://creativecommons.org/licenses/by/2.0/fr/. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash!（旧Japanese Flash）は、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリには、Electronic Dictionary Research and Development Group（EDRDG）のライセンス規定に従い、JMdict（EDICTなど）辞書ファイルの内容が含まれています。これらのファイルはEDRDGの所有物であり、クリエイティブ・コモンズ 表示-継承 4.0（CC BY-SA 4.0）ライセンスの下で使用・変換・改変しています。改変した辞書データも同じライセンスでhttps://github.com/rsharrott/xflash にて提供しています。EDRDGライセンス：https://www.edrdg.org/edrdg/licence.html　JMdictプロジェクト：https://www.edrdg.org/jmdict/j_jmdict.html　例文はTatoebaプロジェクト（https://tatoeba.org、旧Tanaka Corpus／田中コーパス）のもので、クリエイティブ・コモンズ 表示 2.0 フランス（CC BY 2.0 FR）ライセンスの下で使用しています：https://creativecommons.org/licenses/by/2.0/fr/。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese in a Flash!のロゴと製品名はオリジナルの創作物であり、ほかの商標との類似は意図したものではなく、まったくの偶然です。";
 
 /* PleaseWait  (PluginSettingsViewController.m) */
 "Please Wait" = "お待ちください";
@@ -380,11 +386,11 @@
 /* Congratulations! You've already learned this set. We will show cards that would usually be hidden.  (PracticeModeCardViewDelegate.m) */
 "Congratulations! You've already learned this set. We will show cards that would usually be hidden." = "おめでとうございます！このセットはすべて覚えました。ふだんは表示されないカードも出題します。";
 
-/* ProgressDetailsViewController.NumWrongStreak  (ProgressDetailsViewController.m) */
-"%i wrong" = "× %i回";
+/* ProgressDetailsViewController.NumWrongStreak  (ProgressDetailsViewController.m): Streak pill value */
+"%@ wrong" = "× %@回";
 
-/* ProgressDetailsViewController.NumRightStreak  (ProgressDetailsViewController.m) */
-"%i right" = "○ %i回";
+/* ProgressDetailsViewController.NumRightStreak  (ProgressDetailsViewController.m): Streak pill value */
+"%@ right" = "○ %@回";
 
 /* ReminderVC.pickerFormatPlural  (ReminderSettingsViewController.m) */
 "%@ days" = "%@日";
@@ -565,3 +571,47 @@
 
 /* ReminderVC.NotificationsDenied.OpenSettings  (ReminderSettingsViewController.m) */
 "Open Settings" = "設定を開く";
+
+/* ---- Progress sheet (ProgressDetailsViewController.m) ---- */
+
+/* Progress sheet: heading over the Right/Wrong counts and streak (since the app opened or the set changed) */
+"This session" = "今回の学習";
+
+/* Progress sheet: wrong answers this session (chip in the Wrong button colours) */
+"Times Wrong" = "不正解数";
+
+/* Progress sheet: right answers this session, buried cards included (chip in the Right button colours) */
+"Times Right" = "正解数";
+
+/* Progress sheet pill: current run of right or wrong answers; the value is "3 right" / "3 wrong" */
+"Streak" = "連続";
+
+/* Progress sheet pill: cards in this set answered at least once (all time); the value is "4 of 14" */
+"Seen" = "出題済み";
+
+/* Progress sheet Seen pill value: [cards seen] of [cards in the set] (ja puts the total first, like the lead line: 全14枚中) */
+"Seen pill: %1$@ of %2$@" = "%2$@枚中%1$@枚";
+
+/* Progress sheet level: cards never answered yet (was Untested) */
+"Unseen" = "未出題";
+
+/* Progress sheet sentence: [cards in the study pool] / [cards in the set]; both numbers are drawn large */
+"You are studying %1$@ cards out of %2$@ in this set." = "学習中：%1$@枚（全%2$@枚中）";
+
+/* Progress sheet footnote, followed by the Settings link */
+"*You can change this in" = "※枚数の変更：";
+
+/* Progress sheet encouragement line (default) */
+"You're doing great, keep going!" = "いい調子です！このまま続けましょう";
+
+/* Progress sheet encouragement line before any card has been answered this session */
+"Answer a few cards and this session's counts show up here." = "カードに答えると、今回の学習の記録がここに表示されます。";
+
+/* Progress sheet encouragement line when every card in the set is at the Learned level */
+"You've learned every card in this set." = "このセットのカードはすべて覚えました。";
+
+/* Progress sheet sentence when the study pool is capped below the set size: %1$@ pool, %3$@ the footnote marker (StudyPoolCapMarker), %2$@ cards in the set */
+"You are studying %1$@%3$@ cards out of %2$@ in this set." = "学習中：%1$@枚%3$@（全%2$@枚中）";
+
+/* Progress sheet footnote marker after the capped study-pool number; must match the start of "*You can change this in" */
+"StudyPoolCapMarker" = "※";

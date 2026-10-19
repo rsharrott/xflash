@@ -159,7 +159,7 @@
 
   // Only the column name (one of our own constants) and the integer limit are formatted into the SQL.
   NSString *sql = [NSString stringWithFormat:@"SELECT card_id FROM cards_search_content WHERE "
-                   "%@ MATCH ? ORDER BY LENGTH(%@) ASC, ptag DESC LIMIT %ld", column, column, (long)limit];
+                   "%@ MATCH ? ORDER BY LENGTH(content) ASC, ptag DESC LIMIT %ld", column, (long)limit];
   return [[LWEDatabase sharedLWEDatabase].dao executeQuery:sql withArgumentsInArray:[NSArray arrayWithObject:searchString]];
 }
 

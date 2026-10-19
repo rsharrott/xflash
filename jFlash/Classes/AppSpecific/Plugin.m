@@ -160,15 +160,11 @@
 
 - (BOOL) isNewVersionOfPlugin:(Plugin *)plugin
 {
-  BOOL returnVal = NO;
-  double pluginVersion = [plugin.version doubleValue];
-  double myVersion = [self.version doubleValue];
-  // Note that "isNewVersion" is being asked about self, not the parameter -- so this logic seems backward but isn't
-  if (pluginVersion < myVersion)
-  {
-    returnVal = YES;
-  }
-  return returnVal;
+  // Is self newer than plugin?  Compare component by component ("1.10" > "1.9", "1.0.1" > "1.0");
+  // doubleValue got both of those wrong.  A missing version counts as oldest.
+  NSString *mine = self.version ? self.version : @"";
+  NSString *theirs = plugin.version ? plugin.version : @"";
+  return ([mine compare:theirs options:NSNumericSearch] == NSOrderedDescending);
 }
 
 - (BOOL) isDirectoryPlugin

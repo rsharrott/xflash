@@ -1,0 +1,29 @@
+{
+  "jmdict_created": "2026-10-18",
+  "files": {
+    "JMdict_e.gz": {
+      "url": "https://www.edrdg.org/pub/Nihongo/JMdict_e.gz",
+      "bytes": 10586132,
+      "sha256": "9cb6cb9806e031f04e61ce0026ce7e7be06f53de259c3c4813375f561ee163f6",
+      "last_modified": "2026-10-18T03:30:23+00:00"
+    },
+    "edicthdr.txt": {
+      "url": "https://www.edrdg.org/pub/Nihongo/edicthdr.txt",
+      "bytes": 187,
+      "sha256": "53a347531c5686fedf8057d19077eda6a46f7d9eff70d65dd4f41a404347d191",
+      "last_modified": "2026-10-18T03:30:28+00:00"
+    },
+    "jpn_indices.tar.bz2": {
+      "url": "https://downloads.tatoeba.org/exports/jpn_indices.tar.bz2",
+      "bytes": 2865779,
+      "sha256": "20b20f6e39dc40473b22bc5a2f050fd97b24d7ad0085ff5701915e37d7b30f2e",
+      "last_modified": "2026-10-17T06:32:32+00:00"
+    },
+    "sentences.tar.bz2": {
+      "url": "https://downloads.tatoeba.org/exports/sentences.tar.bz2",
+      "bytes": 219219103,
+      "sha256": "489e53327b2930f6746a47624c2de7e7cab4c63a395cd5014672da4364b01655",
+      "last_modified": "2026-10-17T06:19:48+00:00"
+    }
+  }
+}

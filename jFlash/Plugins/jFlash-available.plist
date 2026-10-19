@@ -19,11 +19,11 @@
 &lt;body style=&quot;background-color:transparent;&quot;&gt;
 
 &lt;img src=&quot;fast-search@2x.png&quot; border=&quot;0&quot; width=&quot;290&quot; class=&quot;title retina&quot;/&gt;
-&lt;div class=&quot;subtitle&quot;&gt;&lt;small&gt;Version 1.1, 12.1MB&lt;br/&gt;
+&lt;div class=&quot;subtitle&quot;&gt;&lt;small&gt;Version 2.0, 45MB&lt;br/&gt;
 WiFi: 2 min / 3G: 12+ mins (approx)&lt;/small&gt;&lt;/div&gt;
 &lt;div id=&quot;release-notes&quot;&gt;
 &lt;p&gt;
-Japanese Flash is more than just a flash card program.  When you download &amp;amp; install this update, it&apos;s also a blazingly fast dictionary that can search 150,000 entries in less than a second.
+Japanese Flash is more than just a flash card program.  When you download &amp;amp; install this update, it&apos;s also a blazingly fast dictionary that can search over 200,000 entries in less than a second.
 &lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Press &amp;quot;Start Download&amp;quot; to begin updating.&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;You&apos;ll need a network connection for the download. &lt;strong&gt;We strongly recommend using a WiFi connection.&lt;/strong&gt;
@@ -53,19 +53,19 @@ That platform isn&apos;t quite ready yet - but we are working on it - and this c
 			<key>pluginId</key>
 			<string>FTS_DB</string>
 			<key>version</key>
-			<string>1.1</string>
+			<string>2.0</string>
 			<key>pluginType</key>
 			<string>database</string>
 			<key>name</key>
-			<string>Awesomely Fast Search v1.1</string>
+			<string>Awesomely Fast Search v2.0</string>
 			<key>details</key>
-			<string>Adds sub-second full dictionary search (12MB)</string>
+			<string>Adds sub-second full dictionary search (45MB)</string>
 			<key>targetURL</key>
-			<string>https://d3580k8bnen6up.cloudfront.net/jFlash-FTS-1.1.zip</string>
+			<string>https://d3580k8bnen6up.cloudfront.net/jFlash-FTS-2.0.zip</string>
 			<key>targetPath</key>
-			<string>jFlash-FTS-1.1.zip</string>
+			<string>jFlash-FTS-2.0.zip</string>
 			<key>filePath</key>
-			<string>jFlash-FTS-1.1/jFlash-FTS-1.1.db</string>
+			<string>jFlash-FTS-2.0/jFlash-FTS-2.0.db</string>
 		</dict>
 		<dict>
 			<key>comment</key>
@@ -81,12 +81,12 @@ That platform isn&apos;t quite ready yet - but we are working on it - and this c
 &lt;/head&gt;
 &lt;body style=&quot;background-color:transparent;&quot;&gt;
 &lt;img src=&quot;example-sentences@2x.png&quot; border=&quot;0&quot; width=&quot;290&quot; class=&quot;title retina&quot;/&gt;
-&lt;div class=&quot;subtitle&quot;&gt;&lt;small&gt;Version 1.2, 17MB&lt;br/&gt;
+&lt;div class=&quot;subtitle&quot;&gt;&lt;small&gt;Version 2.0, 18MB&lt;br/&gt;
 WiFi: 3 mins / 3G: 15+ mins (approx)&lt;/small&gt;&lt;/div&gt;
 &lt;div id=&quot;release-notes&quot;&gt;
-&lt;h3&gt;&lt;em style=&quot;color:red;line-height:16px;&quot;&gt;New in 1.2:&lt;br/&gt;Words are cross-referenced!&lt;/em&gt;&lt;/h3&gt;
+&lt;h3&gt;&lt;em style=&quot;color:red;line-height:16px;&quot;&gt;New in 2.0:&lt;br/&gt;Fresh sentences from Tatoeba!&lt;/em&gt;&lt;/h3&gt;
 &lt;p&gt;
-We heard you loud and clear. Since the first release of Japanese Flash, more than anything else, users have asked for example sentences. We&apos;ve added 50,000 of them - integrated into Japanese Flash&apos;s existing study flow - and we think you&apos;ll find it Awesome.
+We heard you loud and clear. Since the first release of Japanese Flash, more than anything else, users have asked for example sentences. We&apos;ve added over 100,000 of them, from the Tatoeba Project - integrated into Japanese Flash&apos;s existing study flow - and we think you&apos;ll find it Awesome.
 &lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Press &amp;quot;Start Download&amp;quot; to begin updating.&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;You&apos;ll need a network connection for the download. &lt;strong&gt;We strongly recommend using a WiFi connection.&lt;/strong&gt;
@@ -94,7 +94,7 @@ You can get the update via your mobile network (3G), however it takes a while du
 &lt;/p&gt;
 &lt;h3&gt;Here&apos;s how it works&lt;/h3&gt;
 &lt;p&gt;
-When you&apos;re studying cards, swipe sideways to reveal example sentences. Not every card has example sentences, but over 17,000 of the most common do.
+When you&apos;re studying cards, swipe sideways to reveal example sentences. Not every card has example sentences, but over 29,000 of them do.
 &lt;/p&gt;
 &lt;p&gt;
 Also, all of the example sentences are cross-referenced.  If you see a new word that you want to remember in an example sentence, tap the &lt;strong&gt;Readings&lt;/strong&gt; button to show all words in that sentence; you can then add them to your own study sets!
@@ -122,19 +122,19 @@ That platform isn&apos;t quite ready yet - but we are working on it - and this c
 			<key>pluginId</key>
 			<string>EX_DB</string>
 			<key>version</key>
-			<string>1.2</string>
+			<string>2.0</string>
 			<key>pluginType</key>
 			<string>database</string>
 			<key>name</key>
-			<string>Fifty Thousand Examples v1.2</string>
+			<string>Tatoeba Example Sentences v2.0</string>
 			<key>details</key>
-			<string>Adds sentences to practice screen (17MB)</string>
+			<string>Adds sentences to practice screen (18MB)</string>
 			<key>targetURL</key>
-			<string>https://d3580k8bnen6up.cloudfront.net/jFlash-EX-1.2.zip</string>
+			<string>https://d3580k8bnen6up.cloudfront.net/jFlash-EX-2.0.zip</string>
 			<key>targetPath</key>
-			<string>jFlash-EX-1.2.zip</string>
+			<string>jFlash-EX-2.0.zip</string>
 			<key>filePath</key>
-			<string>jFlash-EX-1.2/jFlash-EX-1.2.db</string>
+			<string>jFlash-EX-2.0/jFlash-EX-2.0.db</string>
 		</dict>
 	</array>
 </dict>
