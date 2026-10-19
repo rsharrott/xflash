@@ -250,8 +250,8 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 #pragma mark - Content
 
 //! Height the scrolling content needs at the sheet's width (what the fit detent resolves to).
-//! The stack is pinned to the scroll view's content guide (not its frame), so its height is free;
-//! it's measured at a required width with the lowest vertical priority, i.e. its compressed fitting height.
+//! The stack is pinned to the scroll view's content guide (not its frame), so nothing outside it fixes
+//! its height; it's measured at a required width with the lowest vertical priority (compressed fitting height).
 - (CGFloat) _fittingContentHeight
 {
   if ([self isViewLoaded] == NO || _stack == nil)
@@ -266,12 +266,9 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   CGSize size = [_stack systemLayoutSizeFittingSize:CGSizeMake(width, UILayoutFittingCompressedSize.height)
                       withHorizontalFittingPriority:UILayoutPriorityRequired
                             verticalFittingPriority:UILayoutPriorityFittingSizeLevel];
-  // Cross-check against the laid-out content when the sheet already has that width.
-  if (self.view.bounds.size.width == width)
-  {
-    [self.view layoutIfNeeded];
-    size.height = MAX(size.height, _scroll.contentSize.height);
-  }
+  // No -layoutIfNeeded here: UIKit resolves detents during the sheet's own layout, and forcing a
+  // layout pass from the resolver trips a UIKit assertion (EXC_BREAKPOINT in _UISheetInteraction).
+  // The Debug-only LWEDebugProgressFit log compares this value with the laid-out contentSize.
   return ceil(size.height);
 }
 
