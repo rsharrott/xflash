@@ -359,6 +359,7 @@
 
 /* Theme name read by VoiceOver: Water */
 "Water.accessibility" = "Water";
+
 /* SettingsViewController.DisplayReading_Romaji  (JapaneseSettingsDataSource.m) */
 "Romaji" = "Romaji";
 
@@ -648,3 +649,9 @@
 
 /* AlgorithmVC.NewCardFrequency_LessOften  (AlgorithmSettingsViewController.m) */
 "Less Often" = "Less Often";
+
+/* SearchViewController.StarButtonAccessibilityLabel  (SearchViewController.h) */
+"Star" = "Star";
+
+/* SearchViewController.NotStarredAccessibilityValue  (SearchViewController.h) */
+"Not starred" = "Not starred";

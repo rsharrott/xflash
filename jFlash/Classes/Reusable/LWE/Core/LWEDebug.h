@@ -25,8 +25,13 @@
   #define LWE_ASSERT(STATEMENT) do { assert(STATEMENT); } while(0)
 #endif
 
+// The Beta configuration defines LWE_RELEASE_AD_HOC; the old misspelling silently selected the debug branches
+#if defined(LWE_RELEASE_ADHOC)
+  #error "Use LWE_RELEASE_AD_HOC (with the underscore), as defined by the Beta build configuration"
+#endif
+
 // Errors - do nothing in production, crash otherwise
-#if defined(LWE_RELEASE_APP_STORE) || defined(LWE_RELEASE_ADHOC)
+#if defined(LWE_RELEASE_APP_STORE) || defined(LWE_RELEASE_AD_HOC)
   #define LWE_LOG_ERROR(MSG,...);
 #else
   #define LWE_LOG_ERROR(MSG,...) do {\

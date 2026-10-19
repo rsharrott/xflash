@@ -228,13 +228,21 @@
 
 - (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey
 {
+  NSString *currentThemeKey = [[[ThemeManager sharedThemeManager] _currentTheme] objectForKey:@"key"];
+  return [self readingComponentsUsingToneColors:useToneColors themeKey:themeKey currentThemeKey:currentThemeKey];
+}
+
+- (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey currentThemeKey:(NSString *)currentThemeKey
+{
   // Pinyin Coloring ON (the default): each syllable in its tone colour, from the theme's palette.
   // OFF: every syllable in the theme's readingInk, the same ink as jFlash's kana.  Neutral-tone (5)
   // syllables use readingInk either way.  Read fresh on every call, so a setting or theme change shows
   // on the next card render (StudyViewController observes both).
   // themeKey nil = the current theme (the card); tests pass a key so they needn't change the setting.
   ThemeManager *tm = [ThemeManager sharedThemeManager];
-  if (themeKey == nil) themeKey = [[tm _currentTheme] objectForKey:@"key"];
+  // nil or an unknown key = the current theme, for the palette as well as ink and card fill (the
+  // Kimono palette is picked by key, so an unresolved key would get the generic light one on Kimono).
+  if (themeKey == nil || [[tm themes] objectForKey:themeKey] == nil) themeKey = currentThemeKey;
   UIColor *ink = [tm colorForSlot:@"readingInk" themeKey:themeKey] ?: [UIColor colorWithRed:0.227 green:0.208 blue:0.180 alpha:1.0]; // ink-2 #3A352E
   NSDictionary *toneColors = nil;
   if (useToneColors)

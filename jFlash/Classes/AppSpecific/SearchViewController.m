@@ -593,11 +593,13 @@ const NSInteger KSegmentedTableHeader = 100;
 
   // SF Symbol star, about the old 28pt art at body size
   UIImageSymbolConfiguration *starCfg = [UIImageSymbolConfiguration configurationWithPointSize:floorf(20 * scale) weight:UIImageSymbolWeightRegular];
-  UIImage *image = [UIImage systemImageNamed:@"star" withConfiguration:starCfg];
+  // Now set its state: a filled gold star when starred (shape and colour), with a spoken value
+  BOOL starred = [self _checkMembershipCacheForCard:card];
+  UIImage *image = [UIImage systemImageNamed:LWESearchStarSymbolName(starred) withConfiguration:starCfg];
   image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
   [starButton setImage:image forState:UIControlStateNormal];
-  // Now set its state
-  if ([self _checkMembershipCacheForCard:card])
+  LWESearchStarApplyAccessibility(starButton, starred);
+  if (starred)
   {
     [starButton setTintColor:[UIColor colorWithHex:[NSNumber numberWithInt:0xFFD700]]];
   }

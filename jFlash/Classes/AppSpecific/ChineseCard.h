@@ -32,6 +32,8 @@ typedef enum
 //! As readingComponents / attributedReading, for an explicit setting and theme key (nil = the current theme)
 - (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey;
 - (NSAttributedString *) attributedReadingUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey;
+//! As above with the current theme passed in (tests): a nil or unknown themeKey uses currentThemeKey's palette, ink and card fill
+- (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey currentThemeKey:(NSString *)currentThemeKey;
 - (NSString *) pinyinReading;
 - (NSString *) sandhiReading;
 
