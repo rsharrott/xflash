@@ -29,6 +29,9 @@ extern NSString * const APP_NEW_UPDATE;
 @interface LWEMenuSettingCell : UITableViewCell
 @property (nonatomic, readonly) UILabel *titleLabel;
 @property (nonatomic, readonly) UIButton *menuButton;
+//! Optional, parallel to optionTitles: what VoiceOver reads as the button value for each option (NSNull = the title).
+//! UIAction has no public accessibility label, so menu rows still read their titles. Set before -configureWithTitle:...
+@property (nonatomic, copy) NSArray *optionAccessibilityLabels;
 //! titles/values are parallel arrays; handler is called with the chosen value (not called for the current one)
 - (void) configureWithTitle:(NSString *)title
                 optionTitles:(NSArray *)optionTitles

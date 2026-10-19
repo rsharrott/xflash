@@ -280,6 +280,18 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     {
       currentValue = [[tm _currentTheme] objectForKey:@"key"];
     }
+    // Theme names that VoiceOver would misread (ja 紅 / 藍) get an explicit reading; other rows use the titles
+    NSMutableArray *axLabels = nil;
+    if ([key isEqualToString:APP_THEME])
+    {
+      axLabels = [NSMutableArray arrayWithCapacity:[values count]];
+      for (NSString *value in values)
+      {
+        NSString *ax = [tm accessibilityNameForThemeKey:value];
+        [axLabels addObject:(ax ?: (id)[NSNull null])];
+      }
+    }
+    menuCell.optionAccessibilityLabels = axLabels;
     __block SettingsViewController *blockSelf = self;   // MRC: don't retain self from the cell
     // Design: every Settings row value uses muted cellValueInk, never the accent
     [menuCell configureWithTitle:displayName
@@ -447,6 +459,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 @implementation LWEMenuSettingCell
 
 @synthesize titleLabel = _titleLabel, menuButton = _menuButton;
+@synthesize optionAccessibilityLabels = _optionAccessibilityLabels;
 
 - (id) initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -546,6 +559,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 - (void) _rebuildMenu
 {
   NSString *currentTitle = @"";
+  NSString *currentAccessibilityLabel = nil;
   NSMutableArray *actions = [NSMutableArray arrayWithCapacity:[_optionValues count]];
   __block LWEMenuSettingCell *blockSelf = self;
   for (NSUInteger i = 0; i < [_optionValues count]; i++)
@@ -553,7 +567,13 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     id value = [_optionValues objectAtIndex:i];
     NSString *optionTitle = [_optionTitles objectAtIndex:i];
     BOOL isCurrent = [value isEqual:_currentValue];
-    if (isCurrent) currentTitle = optionTitle;
+    id axLabel = (i < [_optionAccessibilityLabels count]) ? [_optionAccessibilityLabels objectAtIndex:i] : nil;
+    if (![axLabel isKindOfClass:[NSString class]]) axLabel = nil;
+    if (isCurrent)
+    {
+      currentTitle = optionTitle;
+      currentAccessibilityLabel = axLabel;
+    }
     UIAction *action = [UIAction actionWithTitle:optionTitle image:nil identifier:nil handler:^(__kindof UIAction *a) {
       [blockSelf _choose:value];
     }];
@@ -569,7 +589,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   UIButtonConfiguration *config = [[_menuButton.configuration copy] autorelease];
   config.title = currentTitle;
   _menuButton.configuration = config;
-  _menuButton.accessibilityValue = currentTitle;
+  _menuButton.accessibilityValue = currentAccessibilityLabel ?: currentTitle;
   _menuButton.menu = [UIMenu menuWithTitle:@"" children:actions];
 }
 
@@ -597,6 +617,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
   [_titleLabel release];
+  [_optionAccessibilityLabels release];
   ((LWEMenuRowButton *)_menuButton).touchTargetView = nil;   // the button can outlive the cell (e.g. while its menu is up)
   [_menuButton release];
   [_stack release];

@@ -557,6 +557,22 @@ static UIImage *LWESeigaihaImage(CGFloat width, CGFloat scale, UIColor *cardFill
 }
 
 
+//! Single-kanji ja names are read wrongly by VoiceOver (紅 → こう), so give them an explicit reading.
+//! The default value keeps cFlash (no Localizable.strings) on the English name.
+- (NSString*) accessibilityNameForThemeKey:(NSString*)themeKey
+{
+  if ([themeKey isEqualToString:SET_THEME_FIRE])
+  {
+    return NSLocalizedStringWithDefaultValue(@"Fire.accessibility", nil, [NSBundle mainBundle], @"Fire", @"Theme name read by VoiceOver: Fire");
+  }
+  if ([themeKey isEqualToString:SET_THEME_WATER])
+  {
+    return NSLocalizedStringWithDefaultValue(@"Water.accessibility", nil, [NSBundle mainBundle], @"Water", @"Theme name read by VoiceOver: Water");
+  }
+  return nil;
+}
+
+
 //! Provide dictionary-safe key reference names for all available themes
 - (NSArray*) themeKeysList
 {
