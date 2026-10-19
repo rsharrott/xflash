@@ -84,6 +84,8 @@
 
 - (void) startTabAnimation
 {
+  // Starting twice must not orphan the first (repeating) timer
+  LWE_STOP_TIMER(self.tabIconTimer);
   self.tabIconTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(tabIconTimerDidFire:) userInfo:nil repeats:YES];
   self.tabIconImages = [DownloadManager _turningGearImages];
   self.tabIconIndex = 0;

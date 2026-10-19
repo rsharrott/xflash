@@ -34,7 +34,8 @@ static UIImage *LWEStudySetRowSymbol(NSString *name)
 /**
  * The Starred Words set and recommended groups show the tag / folder symbol with a small star on it
  * (there is no starred tag or folder SF Symbol).  starCenter is where the star goes, as a fraction of
- * the symbol's size; the star is knocked out of the outline so it reads at small sizes.
+ * the symbol's size; a bold filled star is drawn on top of the outline so it reads at small sizes.
+ * The badge is also announced to VoiceOver (accessibilityValue "Starred" / "Recommended").
  */
 static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 {
@@ -335,10 +336,13 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
       if (tmpTag.tagId == STARRED_TAG_ID)
       {
         tmpView.image = LWEStudySetStarredRowSymbol(@"tag", CGPointMake(0.43f, 0.57f));
+        // VoiceOver: the star badge is only drawn, so say it too
+        cell.accessibilityValue = NSLocalizedString(@"Starred", @"StudySetViewController.StarredBadgeAccessibility");
       }
       else
       {
         tmpView.image = LWEStudySetRowSymbol(@"tag");
+        cell.accessibilityValue = nil;
       }
       
       cell.textLabel.numberOfLines = 0;
@@ -402,11 +406,14 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
     {
       tmpView.tintColor = [tm currentThemeTintColor];
       tmpView.image = LWEStudySetStarredRowSymbol(@"folder", CGPointMake(0.5f, 0.58f));
+      // VoiceOver: the star badge is only drawn, so say it too
+      cell.accessibilityValue = NSLocalizedString(@"Recommended", @"StudySetViewController.RecommendedBadgeAccessibility");
     }
     else
     {
       tmpView.tintColor = [tm currentThemeTintColor];
       tmpView.image = LWEStudySetRowSymbol(@"folder");
+      cell.accessibilityValue = nil;
     }
     
     cell.accessoryType = UITableViewCellAccessoryNone;

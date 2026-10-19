@@ -458,6 +458,12 @@
 /* StudySetViewController.GroupCount  (StudySetViewController.m) */
 "%d Groups" = "%d Groups";
 
+/* StudySetViewController.StarredBadgeAccessibility  (StudySetViewController.m) */
+"Starred" = "Starred";
+
+/* StudySetViewController.RecommendedBadgeAccessibility  (StudySetViewController.m) */
+"Recommended" = "Recommended";
+
 /* StudySetViewController.TagCount  (StudySetViewController.m) */
 "%d Sets" = "%d Sets";
 

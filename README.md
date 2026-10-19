@@ -9,6 +9,8 @@ The source code is MIT licensed (see `LICENSE`). The bundled dictionary and
 example-sentence data is not: JMdict/EDICT is CC BY-SA 4.0 (EDRDG) and the
 Tatoeba sentences are CC BY 2.0 FR. See `jFlash/sql/DATA-LICENSE.md`, and
 `tools/dictbuild/` for how the jFlash data is built.
+The Android tab and menu icons are Google Material Symbols
+(https://fonts.google.com/icons), Apache License 2.0; the iOS icons are Apple SF Symbols.
 
 Known Issues
 ============

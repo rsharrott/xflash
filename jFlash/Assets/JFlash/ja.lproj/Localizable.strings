@@ -458,6 +458,12 @@
 /* StudySetViewController.GroupCount  (StudySetViewController.m) */
 "%d Groups" = "%dグループ";
 
+/* StudySetViewController.StarredBadgeAccessibility  (StudySetViewController.m) */
+"Starred" = "スター付き";
+
+/* StudySetViewController.RecommendedBadgeAccessibility  (StudySetViewController.m) */
+"Recommended" = "おすすめ";
+
 /* StudySetViewController.TagCount  (StudySetViewController.m) */
 "%d Sets" = "%dセット";
 
