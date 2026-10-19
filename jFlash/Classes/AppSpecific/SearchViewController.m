@@ -170,9 +170,13 @@ const NSInteger KSegmentedTableHeader = 100;
 - (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
   // If you call "self.tableView" to ask if it's nil, that would launch the loading of the view.. not what we want, so we use isViewLoaded
-  if ([keyPath isEqualToString:APP_HEADWORD_TYPE] && self.isViewLoaded)
+  if ([keyPath isEqualToString:APP_HEADWORD_TYPE])
   {
-    [self.tableView reloadData];
+    // Our key: never hand it to super (NSObject raises for unhandled KVO), even when there is nothing to refresh yet.
+    if (self.isViewLoaded)
+    {
+      [self.tableView reloadData];
+    }
   }
   else
   {
