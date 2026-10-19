@@ -5,8 +5,8 @@
   python3 build.py                    # -> jFlash/sql/jFlash-CARD-2.0.db,
                                       #    jFlash/sql/plugins/jFlash-FTS-2.0.db,
                                       #    jFlash/sql/plugins/jFlash-EX-2.0.db
-                                      #    + refreshes tags.count in the user DB templates
-                                      #      (jFlash.db, and jFlashJr.db only if it exists)
+                                      #    + refreshes tags.count in the user DB template
+                                      #      (jFlash.db, if it exists)
 
 Inputs kept in the repo (see migrate_legacy.py for how they were made):
   data/curated_cards.jsonl  hand-made kana / word / phrase cards, copied verbatim
@@ -100,8 +100,8 @@ def main():
     card_path = os.path.join(a.sql_dir, 'jFlash-CARD-%s.db' % VERSION)
     fts_path = os.path.join(a.sql_dir, 'plugins', 'jFlash-FTS-%s.db' % VERSION)
     ex_path = os.path.join(a.sql_dir, 'plugins', 'jFlash-EX-%s.db' % VERSION)
-    # jFlashJr.db goes away with the jFlashJr target (PR #7); only touch templates that exist.
-    user_dbs = [p for p in (os.path.join(a.sql_dir, n) for n in ('jFlash.db', 'jFlashJr.db'))
+    # User DB templates whose cached tags.count is refreshed; only touch templates that exist.
+    user_dbs = [p for p in (os.path.join(a.sql_dir, n) for n in ('jFlash.db',))
                 if os.path.exists(p)]
     report = collections.OrderedDict()
     lock = fetch_sources.verify(a.sources)      # exits unless sources match sources.lock.json
