@@ -73,8 +73,7 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 
 #if defined (LWE_CFLASH)
   #import "ChineseCard.h"
-  #import "TTTAttributedLabel.h"
-#endif
+  #endif
 
 // Private Methods
 //! The "+N readings" pill is 30pt tall; its button extends this far above and below it (44pt hit area).
@@ -189,6 +188,15 @@ static const CGFloat kLWEPillHitInset = 7.0;
     html = [html stringByReplacingOccurrencesOfString:@"##THEMECSS##" withString:cssHeader];
     
     html = [html stringByReplacingOccurrencesOfString:@"##TEXTSIZE##" withString:LWEDynamicTypeCSSFontSize()];
+#if !defined(LWE_JFLASH)
+    // Prefer TC glyph forms when the user studies Traditional characters.
+    NSString *hwType = [[NSUserDefaults standardUserDefaults] objectForKey:APP_HEADWORD_TYPE];
+    if ([hwType isEqualToString:SET_HEADWORD_TYPE_TRAD])
+    {
+      html = [html stringByReplacingOccurrencesOfString:@"'PingFang SC','PingFang TC'"
+                                               withString:@"'PingFang TC','PingFang SC'"];
+    }
+#endif
     
     self.baseHtml = html;
   }
@@ -277,7 +285,7 @@ static const CGFloat kLWEPillHitInset = 7.0;
   self.readingLabel.numberOfLines = 0;
   self.readingLabel.lineBreakMode = NSLineBreakByWordWrapping;
   self.readingLabel.textAlignment = NSTextAlignmentCenter;
-  self.readingLabel.textColor = [tm colorForSlot:@"readingInk"]; // base for TTTAttributedLabel / non-tone
+  self.readingLabel.textColor = [tm colorForSlot:@"readingInk"]; // base for non-tone readings
   self.readingLabel.shadowColor = nil;
   self.readingLabel.shadowOffset = CGSizeZero;
   self.readingLabel.autoresizingMask = UIViewAutoresizingNone;
