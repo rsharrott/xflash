@@ -35,8 +35,24 @@ static UIImage *LWEStudySetRowSymbol(NSString *name)
  * The Starred Words set and recommended groups show the tag / folder symbol with a small star on it
  * (there is no starred tag or folder SF Symbol).  starCenter is where the star goes, as a fraction of
  * the symbol's size; a bold filled star is drawn on top of the outline so it reads at small sizes.
- * The badge is also announced to VoiceOver (accessibilityValue "Starred" / "Recommended").
+ * The badge is also announced to VoiceOver (accessibilityValue "Starred" / "Recommended"), unless
+ * the row's title already says it (see LWEStudySetBadgeAccessibilityValue).
  */
+/**
+ * VoiceOver value for a drawn badge: nil when the row's title already contains the badge word
+ * (localized or English, case-insensitive), so "My Starred Words" isn't read as "..., Starred".
+ */
+static NSString *LWEStudySetBadgeAccessibilityValue(NSString *title, NSString *englishWord, NSString *localizedWord)
+{
+  NSStringCompareOptions opts = NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch;
+  if (title && ([title rangeOfString:englishWord options:opts].location != NSNotFound ||
+                [title rangeOfString:localizedWord options:opts].location != NSNotFound))
+  {
+    return nil;
+  }
+  return localizedWord;
+}
+
 static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 {
   UIImage *base = LWEStudySetRowSymbol(name);
@@ -337,7 +353,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
       {
         tmpView.image = LWEStudySetStarredRowSymbol(@"tag", CGPointMake(0.43f, 0.57f));
         // VoiceOver: the star badge is only drawn, so say it too
-        cell.accessibilityValue = NSLocalizedString(@"Starred", @"StudySetViewController.StarredBadgeAccessibility");
+        cell.accessibilityValue = LWEStudySetBadgeAccessibilityValue(tmpTag.tagName, @"Starred",
+                                    NSLocalizedString(@"Starred", @"StudySetViewController.StarredBadgeAccessibility"));
       }
       else
       {
@@ -407,7 +424,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
       tmpView.tintColor = [tm currentThemeTintColor];
       tmpView.image = LWEStudySetStarredRowSymbol(@"folder", CGPointMake(0.5f, 0.58f));
       // VoiceOver: the star badge is only drawn, so say it too
-      cell.accessibilityValue = NSLocalizedString(@"Recommended", @"StudySetViewController.RecommendedBadgeAccessibility");
+      cell.accessibilityValue = LWEStudySetBadgeAccessibilityValue(tmpGroup.groupName, @"Recommended",
+                                  NSLocalizedString(@"Recommended", @"StudySetViewController.RecommendedBadgeAccessibility"));
     }
     else
     {
