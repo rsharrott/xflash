@@ -28,6 +28,7 @@
 - (void)_setupPageControl:(NSInteger)page;
 - (void) _setupDelegateForStudyMode:(NSString*)studyMode;
 - (void) _setupSubviews;
+- (void) _applyCardChrome;
 - (Card*) _getNextCardWithDirection:(NSString*)directionOrNil currentCard:(Card *)theCurrentCard;
 #if defined (LWE_JFLASH)
 - (void) _showWelcomeSheet;
@@ -144,6 +145,20 @@
     if ([settings boolForKey:@"LWEDebugAutoReveal"])
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self revealCard]; });
+    }
+    //   simctl launch <udid> <bundle> -LWEDebugShowReading YES  -> force the reading row visible (cFlash pinyin shots)
+    if ([settings boolForKey:@"LWEDebugShowReading"])
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        CardViewController *cvc = (CardViewController *)self.cardViewController;
+        if ([self.currentCard respondsToSelector:@selector(attributedReading)])
+        {
+          cvc.readingLabel.attributedText = [self.currentCard attributedReading];
+        }
+        cvc.readingVisible = YES;
+        [cvc turnReadingOn];
+        [cvc layoutCardSubviews];
+      });
     }
     //   simctl launch --console <udid> <bundle> -LWEDebugCheckRevealTapGuard YES
     //     -> reveal, then log what a tap on the Right button's spot would hit (UIKit hit-testing, which
@@ -372,6 +387,9 @@
     }
   }
 
+  // Keep the inset card + footer colours / shadowPath in sync with the live scroll bounds (jFlash and cFlash)
+  [self _applyCardChrome];
+
   // Lay out the card content to fill its container vertically.
   // Reading/headword sit near the top; webview fills remaining space to the mood icon.
   if (self.cardViewController && self.cardView.bounds.size.height > 0) {
@@ -577,6 +595,14 @@
   else if ([keyPath isEqualToString:APP_THEME])
   {
     [self setBackgroundColor_];
+    if ([self.actionBarController respondsToSelector:@selector(applyTheme)])
+    {
+      [(ActionBarViewController *)self.actionBarController applyTheme];
+    }
+    if (self.progressBarViewController.tag)
+    {
+      [self.progressBarViewController drawProgressBar];
+    }
     [self _setupSubviews];
     [self doChangeCard:self.currentCard direction:nil];
   }
@@ -961,9 +987,10 @@
 - (BOOL) hasExampleSentences
 {
 #if defined (LWE_JFLASH)
-  // JFlash is currently the only code base with example sentences
+  // When EX_DB is missing, page 2 is ExamplesUnavailable (download prompt).
   return [self _shouldShowExampleViewForCard:self.currentCard];
 #else
+  // cFlash has no EX plugin and remote plugins are off — do not show the dead download page.
   return NO;
 #endif
 }
@@ -1037,10 +1064,40 @@
     vc.view.tag = LWE_EX_SENTENCE_INSTALLER_VIEW_TAG;
   }
   
-  // Resize our second view to fill the second page of the scroll view
+  // Resize our second view to fill the second page of the scroll view (inset like page 1's card)
 	CGFloat cx = self.scrollView.frame.size.width;
-	CGRect rect = CGRectMake(cx, 0, cx, self.scrollView.frame.size.height);
+  CGFloat inset = kLWECardInset;
+  CGFloat footerReserve = 28.0;
+  CGFloat cardH = MAX(0, self.scrollView.frame.size.height - footerReserve - inset);
+	CGRect rect = CGRectMake(cx + inset, inset, MAX(0, cx - 2.0 * inset), cardH);
 	vc.view.frame = rect;
+  ThemeManager *tmEx = [ThemeManager sharedThemeManager];
+  [tmEx applyCardStyleToLayer:vc.view.layer];
+  vc.view.layer.masksToBounds = NO;
+  // Keep layer.backgroundColor (cardFill); UIView.backgroundColor would clear it.
+  // ExamplesUnavailable.xib hard-codes near-white label + dark emboss shadow for the old
+  // dark Fire cards. On Paper (cream) that reads as faint embossed white — theme the
+  // labels to meaningInk / white by card luminance and drop the shadow.
+  if (vc.view.tag == LWE_EX_SENTENCE_INSTALLER_VIEW_TAG)
+  {
+    UIColor *cardFill = [tmEx colorForSlot:@"cardFill"];
+    CGFloat rr = 0, gg = 0, bb = 0, aa = 0;
+    [cardFill getRed:&rr green:&gg blue:&bb alpha:&aa];
+    CGFloat lum = 0.2126 * rr + 0.7152 * gg + 0.0722 * bb;
+    UIColor *promptInk = (lum > 0.45)
+      ? ([tmEx colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.227 green:0.208 blue:0.180 alpha:1.0])
+      : [UIColor whiteColor];
+    for (UIView *sub in vc.view.subviews)
+    {
+      if ([sub isKindOfClass:[UILabel class]])
+      {
+        UILabel *lab = (UILabel *)sub;
+        lab.textColor = promptInk;
+        lab.shadowColor = nil;
+        lab.shadowOffset = CGSizeZero;
+      }
+    }
+  }
   
   // Set the content size for the width * the number of views
 	NSInteger numViews = 2;
@@ -1082,23 +1139,72 @@
 /** 
  * Choose the background based on the current theme
  */
+/**
+ * Themes v2: every theme shares the paper-2 screen; only the study card (cardView) takes cardFill.
+ * practiceBgImage is cleared (no practice-bg image) and sits behind the card as the screen colour.
+ */
 -(void)setBackgroundColor_
 {
-#if defined (LWE_JFLASH)
-  NSString *theme = [[NSUserDefaults standardUserDefaults] objectForKey:APP_THEME];
-  if (theme == nil || [theme isEqualToString:SET_THEME_FIRE])
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  UIColor *screen = [tm colorForSlot:@"screenBackground"] ?: [tm backgroundColor];
+  self.view.backgroundColor = screen;
+  // practiceBgImage used to be the full-bleed theme colour; it is now the paper screen behind the card.
+  self.practiceBgImage.image = nil;
+  self.practiceBgImage.backgroundColor = screen;
+  [self _applyCardChrome];
+}
+
+//! Paints cardView as the inset study card (fill, radius, shadow) and colours the footer / page dots
+- (void) _applyCardChrome
+{
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  UIView *card = self.cardView;
+  if (card)
   {
-    // Solid #C01B00 (the old 90% tint over gray came out as a duller #C42F17)
-    self.practiceBgImage.backgroundColor = LWEDesignFire();
+    // Inset the card inside the scroll area so paper shows around it (themes v2: 12pt)
+    UIView *host = card.superview; // scrollView
+    CGFloat inset = kLWECardInset;
+    if (host)
+    {
+      CGRect bounds = host.bounds;
+      // Keep the footer labels (cardSetLabel / remainingCardsLabel) on the paper below the card:
+      // the card fills the scroll area above them (~21pt labels near the bottom).
+      CGFloat footerReserve = 28.0;
+      CGFloat cardH = MAX(0, bounds.size.height - footerReserve - inset);
+      card.frame = CGRectMake(inset, inset, MAX(0, bounds.size.width - 2.0 * inset), cardH);
+    }
+    // Shadow + fill on cardView; clipsToBounds stays NO so the shadow is visible.  Content that
+    // reaches the edge is rare (the card VC pads), and the mood icon sits inset from the corner.
+    card.backgroundColor = [UIColor clearColor];
+    [tm applyCardStyleToLayer:card.layer];
+    card.layer.masksToBounds = NO;
+    // Bounds are final here (frame was just set); keep the shadow cheap and matching the rounded card
+    card.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:card.bounds cornerRadius:kLWECardCornerRadius].CGPath;
+    if (self.cardViewController)
+    {
+      self.cardViewController.view.backgroundColor = [UIColor clearColor];
+    }
   }
-  else
+  // Keep page 2 (examples) on the same card chrome
+  if (self.exampleSentencesViewController.view.superview == self.scrollView)
   {
-    self.practiceBgImage.backgroundColor = [[ThemeManager sharedThemeManager] currentThemeTintColor:0.9];
+    UIView *ex = self.exampleSentencesViewController.view;
+    CGFloat inset = kLWECardInset;
+    CGFloat footerReserve = 28.0;
+    CGFloat cx = self.scrollView.bounds.size.width;
+    CGFloat cardH = MAX(0, self.scrollView.bounds.size.height - footerReserve - inset);
+    ex.frame = CGRectMake(cx + inset, inset, MAX(0, cx - 2.0 * inset), cardH);
+    [tm applyCardStyleToLayer:ex.layer];
+    ex.layer.masksToBounds = NO;
+    ex.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:ex.bounds cornerRadius:kLWECardCornerRadius].CGPath;
+    // Do not set backgroundColor here: UIView.backgroundColor overwrites layer.backgroundColor (cardFill).
   }
-#else
-  self.practiceBgImage.backgroundColor = [[ThemeManager sharedThemeManager] currentThemeTintColor:0.9];
-#endif
-  self.view.backgroundColor = [UIColor colorWithWhite:0.902 alpha:1.0];
+
+  UIColor *foot = [tm colorForSlot:@"footInk"];
+  self.cardSetLabel.textColor = foot;
+  self.remainingCardsLabel.textColor = foot;
+  self.pageControl.currentPageIndicatorTintColor = [tm colorForSlot:@"pageDotOn"];
+  self.pageControl.pageIndicatorTintColor = [tm colorForSlot:@"pageDotOff"];
 }
 
 #pragma mark - Class plumbing

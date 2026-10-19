@@ -18,12 +18,26 @@ static inline UIColor *LWEDesignColorHex(uint32_t hex, CGFloat alpha)
 
 //! Card background ("fire"), #C01B00 -- replaces the old blended #C42F17
 static inline UIColor *LWEDesignFire(void)      { return LWEDesignColorHex(0xC01B00, 1.0); }
+//! Deep red ("fire-deep"), #8E1400 -- Paper theme accent, Fire theme card
+static inline UIColor *LWEDesignFireDeep(void)  { return LWEDesignColorHex(0x8E1400, 1.0); }
+//! Muted fire (Show answer sub-line), #A3341C
+static inline UIColor *LWEDesignFireMuted(void) { return LWEDesignColorHex(0xA3341C, 1.0); }
+//! Fire wash (pressed Show answer, 67% bubble), #F6E7E1
+static inline UIColor *LWEDesignFireWash(void)  { return LWEDesignColorHex(0xF6E7E1, 1.0); }
+//! Water theme accent ("water"), #1356A7
+static inline UIColor *LWEDesignWater(void)     { return LWEDesignColorHex(0x1356A7, 1.0); }
+//! Water theme card ("water-deep"), #134685
+static inline UIColor *LWEDesignWaterDeep(void) { return LWEDesignColorHex(0x134685, 1.0); }
 //! Headword yellow, #FFD60A
 static inline UIColor *LWEDesignYellow(void)    { return LWEDesignColorHex(0xFFD60A, 1.0); }
 //! Warm paper background, #FBF8F3
 static inline UIColor *LWEDesignPaper(void)     { return LWEDesignColorHex(0xFBF8F3, 1.0); }
-//! Darker paper (segmented control track), #E7E1D6
+//! Darker paper (the shared screen background in every theme; segmented control track), #E7E1D6
 static inline UIColor *LWEDesignPaper2(void)    { return LWEDesignColorHex(0xE7E1D6, 1.0); }
+//! Raised paper (Show answer fill), #FFFDF9
+static inline UIColor *LWEDesignPaperRaised(void) { return LWEDesignColorHex(0xFFFDF9, 1.0); }
+//! Line on paper (level-strip track, page dot off), #CFC6B8
+static inline UIColor *LWEDesignLine(void)      { return LWEDesignColorHex(0xCFC6B8, 1.0); }
 //! Secondary button fill on paper, #EDE6DA
 static inline UIColor *LWEDesignPaperButton(void) { return LWEDesignColorHex(0xEDE6DA, 1.0); }
 //! Primary ink, #1D1A16

@@ -27,7 +27,7 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES" flexibleMaxY="YES"/>
             <subviews>
-                <imageView opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="scaleToFill" image="redtheme-cookie-cutters/practice-bg.png" id="177" userLabel="practiceBgImage">
+                <imageView opaque="NO" clearsContextBeforeDrawing="NO" userInteractionEnabled="NO" contentMode="scaleToFill" id="177" userLabel="practiceBgImage">
                     <rect key="frame" x="0.0" y="0.0" width="320" height="392"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" heightSizable="YES"/>
                 </imageView>
@@ -141,6 +141,5 @@
     <resources>
         <image name="glyphish-style-listen-icon.png" width="32" height="29"/>
         <image name="practice-btn-unrevealed-mini.png" width="139" height="20"/>
-        <image name="redtheme-cookie-cutters/practice-bg.png" width="16" height="16"/>
     </resources>
 </document>

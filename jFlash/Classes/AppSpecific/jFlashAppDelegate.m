@@ -350,13 +350,25 @@ static BOOL LWEAppHasEnteredBackground = NO;
   // behaviour). This prevents the glass/white strip that appears between the action-bar
   // buttons and the tab bar items.
   self.tabBarController.tabBar.translucent = NO;
-  if (@available(iOS 15.0, *)) {
-    UITabBarAppearance *tabAppearance = [[UITabBarAppearance alloc] init];
-    [tabAppearance configureWithOpaqueBackground];
-    self.tabBarController.tabBar.standardAppearance = tabAppearance;
-    self.tabBarController.tabBar.scrollEdgeAppearance = tabAppearance;
-    [tabAppearance release];
-  }
+  // Themes v2: cream tab bar (paper), paper-button selected pill, ink-2 unselected; selected icon/label stay tint
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  UIColor *tabFill = [tm colorForSlot:@"tabBarFill"];
+  UIColor *tabInk = [tm colorForSlot:@"tabInk"];
+  // Deployment target ≥ 15: always use UITabBarAppearance
+  UITabBarAppearance *tabAppearance = [[UITabBarAppearance alloc] init];
+  [tabAppearance configureWithOpaqueBackground];
+  tabAppearance.backgroundColor = tabFill;
+  tabAppearance.shadowColor = [UIColor clearColor];
+  NSDictionary *normalAttrs = @{ NSForegroundColorAttributeName: tabInk };
+  tabAppearance.stackedLayoutAppearance.normal.iconColor = tabInk;
+  tabAppearance.stackedLayoutAppearance.normal.titleTextAttributes = normalAttrs;
+  tabAppearance.inlineLayoutAppearance.normal.iconColor = tabInk;
+  tabAppearance.inlineLayoutAppearance.normal.titleTextAttributes = normalAttrs;
+  tabAppearance.compactInlineLayoutAppearance.normal.iconColor = tabInk;
+  tabAppearance.compactInlineLayoutAppearance.normal.titleTextAttributes = normalAttrs;
+  self.tabBarController.tabBar.standardAppearance = tabAppearance;
+  self.tabBarController.tabBar.scrollEdgeAppearance = tabAppearance;
+  [tabAppearance release];
 
   // XIB customClass is ignored for the tabBar property of UITabBarController, so we
   // isa-swap the existing instance to our centering subclass instead.

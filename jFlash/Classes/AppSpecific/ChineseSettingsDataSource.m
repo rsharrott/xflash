@@ -63,15 +63,8 @@
   self.settingsHash = [NSDictionary dictionaryWithObjects:dictObjects forKeys:dictKeys];
 
   // The order the options appear in each row's pop-up menu (dictionaries have no order)
-  NSMutableArray *themeOrder = [NSMutableArray array];
-  for (NSString *themeKey in [NSArray arrayWithObjects:SET_THEME_FIRE,SET_THEME_WATER,SET_THEME_TAME,nil])
-  {
-    if ([themeDict objectForKey:themeKey]) [themeOrder addObject:themeKey];
-  }
-  for (NSString *themeKey in [tm themeKeysList])
-  {
-    if ([themeOrder containsObject:themeKey] == NO) [themeOrder addObject:themeKey];
-  }
+  // Theme menu order follows ThemeManager (Paper, Fire, Water, …) — never hard-code removed keys
+  NSArray *themeOrder = [tm themeKeysList];
   NSArray *orderObjects = [NSArray arrayWithObjects:headwordKeys,themeOrder,colorKeys,hwTypeKeys,modeKeys,nil];
   self.settingsOrder = [NSDictionary dictionaryWithObjects:orderObjects forKeys:dictKeys];
   
