@@ -17,6 +17,11 @@
 #import "FirstRunViewController.h"
 #import "LWEDesignTokens.h"
 
+//! cFlash sample-audio play button: 44pt hit area / circle, inset from the card's top-right corner
+//! (clear of the 28pt corner radius and the Kutani double rim)
+static const CGFloat kLWEPronounceBtnSize  = 44.0;
+static const CGFloat kLWEPronounceBtnInset = 12.0;
+
 @interface StudyViewController()
 //private methods
 - (void) _applicationDidEnterBackground:(NSNotification*)notification;
@@ -390,6 +395,17 @@
   // Keep the inset card + footer colours / shadowPath in sync with the live scroll bounds (jFlash and cFlash)
   [self _applyCardChrome];
 
+  // Sample-audio play button (cFlash): inside the card's top-right corner, clear of the rounded corner.
+  // Measured from the scroll view's frame (not its content offset) so it stays put on the examples page.
+  if (self.pronounceBtn && self.cardView.superview == self.scrollView)
+  {
+    CGRect card = CGRectOffset(self.cardView.frame, CGRectGetMinX(self.scrollView.frame), CGRectGetMinY(self.scrollView.frame));
+    CGFloat inset = kLWEPronounceBtnInset;
+    self.pronounceBtn.frame = CGRectMake(CGRectGetMaxX(card) - inset - kLWEPronounceBtnSize,
+                                         CGRectGetMinY(card) + inset,
+                                         kLWEPronounceBtnSize, kLWEPronounceBtnSize);
+  }
+
   // Lay out the card content to fill its container vertically.
   // Reading/headword sit near the top; webview fills remaining space to the mood icon.
   if (self.cardViewController && self.cardView.bounds.size.height > 0) {
@@ -511,8 +527,12 @@
   // Initialize the scroll view
   [self _setupScrollView];
   
-  // Sample-audio play button: SF Symbol instead of a bundled image (same 32x29 frame from the NIB).
-  // Its tint follows the theme's speakerInk in -setBackgroundColor_, like CardViewController's speaker.
+  // Sample-audio play button (cFlash): SF Symbol in a 44pt speakerFill circle like jFlash's card
+  // speaker; viewDidLayoutSubviews keeps it inside the card's top-right corner.  Fill and tint follow
+  // the theme in -setBackgroundColor_.
+  self.pronounceBtn.frame = CGRectMake(0, 0, kLWEPronounceBtnSize, kLWEPronounceBtnSize);
+  self.pronounceBtn.autoresizingMask = UIViewAutoresizingNone;
+  self.pronounceBtn.layer.cornerRadius = kLWEPronounceBtnSize / 2.0;
   UIImageSymbolConfiguration *playCfg = [UIImageSymbolConfiguration configurationWithPointSize:19 weight:UIImageSymbolWeightMedium];
   [self.pronounceBtn setImage:[UIImage systemImageNamed:@"speaker.wave.2" withConfiguration:playCfg] forState:UIControlStateNormal];
   self.pronounceBtn.accessibilityLabel = NSLocalizedString(@"Speak word", @"CardViewController.SpeakWordAccessibility");
@@ -1160,8 +1180,9 @@
   // practiceBgImage used to be the full-bleed theme colour; it is now the paper screen behind the card.
   self.practiceBgImage.image = nil;
   self.practiceBgImage.backgroundColor = screen;
-  // Play button (sample audio) sits on the card, so it takes the card's speaker ink
+  // Play button (sample audio) sits on the card, so it takes the card's speaker circle + ink
   self.pronounceBtn.tintColor = [tm colorForSlot:@"speakerInk"];
+  self.pronounceBtn.backgroundColor = [tm colorForSlot:@"speakerFill"];
   [self _applyCardChrome];
 }
 
