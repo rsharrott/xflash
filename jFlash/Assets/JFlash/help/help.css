@@ -123,7 +123,7 @@ th, td { padding: 0.5em 0.6em; border-bottom: 1px solid var(--line); vertical-al
 }
 html:lang(ja) body { line-height: 1.75; }
 html:lang(ja) h2, html:lang(ja) h3 { letter-spacing: 0; font-feature-settings: "palt"; line-height: 1.3; }
-html:lang(ja) strong, html:lang(ja) b { font-weight: 700; white-space: nowrap; }   /* UI terms (正解1回, もう覚えた) never split */
+html:lang(ja) strong, html:lang(ja) b { font-weight: 700; }   /* may wrap; short UI terms carry class="nw" */
 .nw { white-space: nowrap; }   /* glue a short word that must not split, e.g. <span class="nw">4回連続</span> */
 
 @media (min-width: 600px) {     /* iPad */
