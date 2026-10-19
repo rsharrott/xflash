@@ -234,7 +234,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
     };
     NSString *kimonoCSS = @"body{color:#1F3558;} #container:before{background:#8A3B1C;} ol,li{color:#1F3558;} dfn{background-color:#FFD60A;border-color:#FFD60A;color:#3A2A00;}";
     // Light-card sentences: kakishibu underline (README hl color + v2 quiet-underline pattern)
-    NSString *kimonoSentencesCSS = @"body{color:#1D1A16;} .headwordLabel{color:#1F3558;} .readingLabel{color:#1F3558;} .romaji,.exTitle{color:#1F3558;} li{background:#FBF8F3;} .ja{color:#1D1A16;} .hl{color:#8A3B1C;background:transparent;text-decoration-line:underline;text-decoration-color:#8A3B1C;text-decoration-thickness:2px;} .en,.ContentCell{color:#3A352E;} .button{color:#1F3558;background:#FFFDF9;} .ExpandedSentencesTable td{border-top-color:rgba(60,40,20,0.08);} .HeadwordCell{color:#8A3B1C;} dfn{background-color:#FFD60A;color:#3A2A00;}";
+    NSString *kimonoSentencesCSS = @"body{color:#1D1A16;} .headwordLabel{color:#1F3558;} .readingLabel{color:#1F3558;} .romaji,.exTitle{color:#1F3558;} li{background:#FBF8F3;} .ja{color:#1D1A16;} .hl{color:#8A3B1C;background:transparent;text-decoration-line:underline;text-decoration-color:#8A3B1C;text-decoration-thickness:2px;} .en,.ContentCell{color:#3A352E;} .button{color:#1F3558;background:#EDE6DA;} .ExpandedSentencesTable td{border-top-color:rgba(60,40,20,0.08);} .HeadwordCell{color:#8A3B1C;} dfn{background-color:#FFD60A;color:#3A2A00;}";
 
     // KUTANI: deep green glaze, ochre ink, aubergine accent, double rim
     NSDictionary *kutaniSlots = @{
