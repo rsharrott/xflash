@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 """Download the dictionary sources into tools/dictbuild/sources/ (git-ignored)
-and record their dates and checksums in sources/manifest.json.
+and check them against sources.lock.json (committed).
 
   JMdict_e.gz           EDRDG, CC BY-SA 4.0   https://www.edrdg.org/pub/Nihongo/
   edicthdr.txt          EDRDG release header (date / entry count)
   jpn_indices.tar.bz2   Tatoeba, CC BY 2.0 FR https://downloads.tatoeba.org/exports/
   sentences.tar.bz2     Tatoeba (all languages; only jpn/eng rows are used)
 
-ftp.edrdg.org is often unreachable; www.edrdg.org serves the same /pub/Nihongo tree.
+  python3 fetch_sources.py                 # download + verify against the lock; fails on mismatch
+  python3 fetch_sources.py --update-lock   # take whatever upstream serves now and rewrite the lock
+
+All URLs are https.  They are "latest" URLs: EDRDG and Tatoeba overwrite the
+files in place (JMdict daily, Tatoeba weekly), so a plain fetch fails as soon as
+upstream publishes a new release.  That is deliberate: a refresh is an explicit
+--update-lock + build + commit of the lock and the DBs together.  Keep a copy of
+sources/ if you need to rebuild a given release byte for byte later.
 KANJIDIC2 is not fetched: the app ships no kanji (card_type 2) cards.
 """
 
+import argparse
 import hashlib
 import json
 import os
@@ -21,55 +29,93 @@ import urllib.request
 from email.utils import parsedate_to_datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+LOCK = os.path.join(HERE, 'sources.lock.json')
 SOURCES = [
-    ('JMdict_e.gz', ['https://www.edrdg.org/pub/Nihongo/JMdict_e.gz',
-                     'http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz']),
-    ('edicthdr.txt', ['https://www.edrdg.org/pub/Nihongo/edicthdr.txt',
-                      'http://ftp.edrdg.org/pub/Nihongo/edicthdr.txt']),
-    ('jpn_indices.tar.bz2', ['https://downloads.tatoeba.org/exports/jpn_indices.tar.bz2']),
-    ('sentences.tar.bz2', ['https://downloads.tatoeba.org/exports/sentences.tar.bz2']),
+    ('JMdict_e.gz', 'https://www.edrdg.org/pub/Nihongo/JMdict_e.gz'),
+    ('edicthdr.txt', 'https://www.edrdg.org/pub/Nihongo/edicthdr.txt'),
+    ('jpn_indices.tar.bz2', 'https://downloads.tatoeba.org/exports/jpn_indices.tar.bz2'),
+    ('sentences.tar.bz2', 'https://downloads.tatoeba.org/exports/sentences.tar.bz2'),
 ]
 
 
-def fetch(name, urls, dest):
-    last = None
-    for url in urls:
-        try:
-            req = urllib.request.Request(url, headers={'User-Agent': 'xflash-dictbuild/2.0'})
-            with urllib.request.urlopen(req, timeout=60) as r, open(dest + '.part', 'wb') as f:
-                shutil.copyfileobj(r, f, 1 << 20)
-                lm = r.headers.get('Last-Modified')
-            os.replace(dest + '.part', dest)
-            return url, lm
-        except Exception as e:  # try the next mirror
-            last = e
-            print('  %s failed: %s' % (url, e), file=sys.stderr)
-    raise SystemExit('Could not download %s: %s' % (name, last))
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for chunk in iter(lambda: f.read(1 << 20), b''):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def load_lock():
+    with open(LOCK) as f:
+        return json.load(f)
+
+
+def verify(sources_dir, lock=None):
+    """Raise SystemExit unless every locked file in sources_dir has the locked sha256."""
+    lock = lock or load_lock()
+    bad = []
+    for name, want in lock['files'].items():
+        path = os.path.join(sources_dir, name)
+        got = sha256(path) if os.path.exists(path) else 'missing'
+        if got != want['sha256']:
+            bad.append('%s: expected %s, got %s' % (name, want['sha256'], got))
+    if bad:
+        raise SystemExit('Source files do not match sources.lock.json:\n  ' + '\n  '.join(bad) +
+                         '\nUpstream publishes new releases under the same URLs; run '
+                         'fetch_sources.py --update-lock to move to the current release.')
+    return lock
+
+
+def fetch(url, dest):
+    if not url.startswith('https://'):
+        raise SystemExit('refusing non-https URL %s' % url)
+    req = urllib.request.Request(url, headers={'User-Agent': 'xflash-dictbuild/2.0'})
+    with urllib.request.urlopen(req, timeout=120) as r, open(dest + '.part', 'wb') as f:
+        shutil.copyfileobj(r, f, 1 << 20)
+        lm = r.headers.get('Last-Modified')
+    os.replace(dest + '.part', dest)
+    return parsedate_to_datetime(lm).isoformat() if lm else None
 
 
 def main():
-    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'sources')
-    os.makedirs(out, exist_ok=True)
-    manifest = {}
-    for name, urls in SOURCES:
-        dest = os.path.join(out, name)
-        print('Fetching', name, file=sys.stderr)
-        url, lm = fetch(name, urls, dest)
-        h = hashlib.sha256()
-        with open(dest, 'rb') as f:
-            for chunk in iter(lambda: f.read(1 << 20), b''):
-                h.update(chunk)
-        manifest[name] = {
-            'url': url, 'bytes': os.path.getsize(dest), 'sha256': h.hexdigest(),
-            'last_modified': parsedate_to_datetime(lm).isoformat() if lm else None,
-        }
-    with open(os.path.join(out, 'edicthdr.txt'), 'rb') as f:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--sources', default=os.path.join(HERE, 'sources'))
+    ap.add_argument('--update-lock', action='store_true',
+                    help='accept the files upstream serves now and rewrite sources.lock.json')
+    ap.add_argument('--offline', action='store_true',
+                    help="don't download; only verify the files already in --sources")
+    a = ap.parse_args()
+    os.makedirs(a.sources, exist_ok=True)
+    old = load_lock() if os.path.exists(LOCK) else {'files': {}}
+
+    files = {}
+    for name, url in SOURCES:
+        dest = os.path.join(a.sources, name)
+        prev = old['files'].get(name, {})
+        if a.offline:
+            lm = prev.get('last_modified')
+        else:
+            print('Fetching', url, file=sys.stderr)
+            lm = fetch(url, dest)
+        files[name] = {'url': url, 'bytes': os.path.getsize(dest), 'sha256': sha256(dest),
+                       'last_modified': lm}
+    with open(os.path.join(a.sources, 'edicthdr.txt'), 'rb') as f:
         hdr = f.read().decode('euc-jp', 'replace')
     m = re.search(r'Created: (\d{4}-\d{2}-\d{2})', hdr)
-    manifest['edicthdr.txt']['created'] = m.group(1) if m else None
-    with open(os.path.join(out, 'manifest.json'), 'w') as f:
-        json.dump(manifest, f, indent=2)
-    print(json.dumps(manifest, indent=2))
+    new = {'jmdict_created': m.group(1) if m else None, 'files': files}
+
+    if a.update_lock:
+        with open(LOCK, 'w') as f:
+            json.dump(new, f, indent=2)
+            f.write('\n')
+        print('Wrote', LOCK, file=sys.stderr)
+    else:
+        if not old['files']:
+            raise SystemExit('No sources.lock.json yet; run with --update-lock')
+        verify(a.sources, old)
+        print('All sources match sources.lock.json', file=sys.stderr)
+    print(json.dumps(new, indent=2))
 
 
 if __name__ == '__main__':

@@ -79,7 +79,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 8	Adverbs	37104	奇態なことに	きたいなことに	strange to say	unmatched
 8	Adverbs	39153	下に	しもに	down	unmatched
 8	Adverbs	41474	ぴょこんと	ぴょこんと	quickly, in a bouncing way (e.g. for a bow)	unmatched
-8	Adverbs	44934	孰	いずれ	where	reading-only (legacy kanji form gone) (mapped to 何れ いずれ; いづれ)
+8	Adverbs	44934	孰	いずれ	where	unmatched
 8	Adverbs	51479	口に	くちに	eating	unmatched
 8	Adverbs	51755	ぺろりと	ぺろりと	while sticking out one's tongue	unmatched
 8	Adverbs	53674	恨みっこのないように	うらみっこのないように	making it even	unmatched
@@ -165,7 +165,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 8	Adverbs	140305	パタンと	パタンと	with a snap	unmatched
 8	Adverbs	141222	言いなりに	いいなりに	exactly as said	unmatched
 8	Adverbs	142199	未発に	みはつに	before anything happens	unmatched
-8	Adverbs	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 9	~と Adverbs	4080	消然	しょうぜん	dejected	unmatched
 9	~と Adverbs	17795	負けじ	まけじ	indomitably	unmatched
 9	~と Adverbs	50089	ぐしゃっ	ぐしゃっ	crushed flat	unmatched
@@ -185,10 +184,10 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 15	Archaic	29418	己所不欲勿施於人	おのれのほっせざるところひとにほどこすことなかれ	don't do unto others what you would not have done unto you	unmatched
 15	Archaic	32310	教うるは学ぶの半ばなり	おしうるはまなぶのなかばなり	Teaching others teaches yourself	unmatched
 15	Archaic	40034	鮎	あい	sweetfish (Plecoglossus altivelis altivelis)	headword-only (mapped to 鮎 あゆ)
-15	Archaic	44133	敏い	とい	nimble	headword-only (mapped to 聡い さとい)
+15	Archaic	44133	敏い	とい	nimble	headword-only, different meaning (dropped)
 15	Archaic	44168	乾せる	かせる	to dry up	unmatched
 15	Archaic	91203	崎陽	きよう	Nagasaki	unmatched
-15	Archaic	95773	褻	せつ	informality	headword-only (mapped to 褻 け)
+15	Archaic	95773	褻	せつ	informality	headword-only, different meaning (dropped)
 15	Archaic	96678	柵封	さくほう	documents of feudal appointment (in China)	unmatched
 15	Archaic	100022	開く	はだく	to open	ambiguous
 15	Archaic	114053	御座居る	ございる	to be (very pol.)	unmatched
@@ -206,7 +205,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 21	Aux ~する Reg. Verbs	6723	車両化	しゃりょうか	motorization	unmatched
 21	Aux ~する Reg. Verbs	9564	お花見	おはなみ	cherry blossom viewing	unmatched
 21	Aux ~する Reg. Verbs	9815	棒腹絶倒	ほうふくぜっとう	very funny	unmatched
-21	Aux ~する Reg. Verbs	10545	挙示	きょし	assignment	headword-only (mapped to 挙示 きょじ)
+21	Aux ~する Reg. Verbs	10545	挙示	きょし	assignment	headword-only, different meaning (dropped)
 21	Aux ~する Reg. Verbs	16777	御降誕	ごこうたん	birth (regal)	unmatched
 21	Aux ~する Reg. Verbs	19346	アカムパニ	アカムパニ	accompany	unmatched
 21	Aux ~する Reg. Verbs	23019	摸牌	もうぱい	identifying a piece by touch in a mah-jongg game (mahjong)	headword-only (mapped to 摸牌 モーパイ; モーはい)
@@ -236,7 +235,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 21	Aux ~する Reg. Verbs	97822	国内規格化	こくないきかくか	international standardization	unmatched
 21	Aux ~する Reg. Verbs	99007	抱き合せで販売	だきあわせではんばい	bundle (goods for sale)	unmatched
 21	Aux ~する Reg. Verbs	100781	仮住	かりずまい	temporary residence	unmatched
-21	Aux ~する Reg. Verbs	103360	真婿	まんこ; マンコ	vagina	reading-only (legacy kanji form gone) (mapped to マンコ マンコ; まんこ)
+21	Aux ~する Reg. Verbs	103360	真婿	まんこ; マンコ	vagina	unmatched
 21	Aux ~する Reg. Verbs	107977	納刀	のと	maneuver to return a sword to its scabbard	headword-only (mapped to 納刀 のうとう)
 21	Aux ~する Reg. Verbs	110535	アグリゲイション	アグリゲイション	aggregation	unmatched
 21	Aux ~する Reg. Verbs	113324	仏作	ほとけづくる	becoming haggard	unmatched
@@ -260,19 +259,19 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 26	Buddhist Religion	68146	烏芻沙摩妙王	うすさまみょうおう	Ususama Vidya-raja	unmatched
 26	Buddhist Religion	107887	修行者	しゅぎょうしゃ	practitioner of austerities	headword-only (mapped to 修行者 しゅぎょうじゃ; すぎょうざ)
 26	Buddhist Religion	114729	仏頂尊勝	ぶちょうそんしょう	Usnisavijaya	headword-only (mapped to 仏頂尊勝 ぶっちょうそんしょう)
-26	Buddhist Religion	119332	鞴韜	たたら; フクトウ	(pair of) bellows	reading-only (legacy kanji form gone) (mapped to 踏鞴 たたら)
+26	Buddhist Religion	119332	鞴韜	たたら; フクトウ	(pair of) bellows	unmatched
 26	Buddhist Religion	132021	大元帥明王	たいげんすいみょうおう	Atavaka (guardian deity)	headword-only (mapped to 大元帥明王 たいげんみょうおう; だいげんすいみょうおう)
 26	Buddhist Religion	143165	孔雀妙王	くじゃくみょうおう	Mayuri Vidya-raja	unmatched
 35	Chinese Words	44500	プートンファ	プートンファ	putonghua	unmatched
 38	Colloquialisms	13676	人間のデカさ	にんげんのデカさ	a man's worth	unmatched
-38	Colloquialisms	23929	御珍々	おちんちん	penis (child)	reading-only (legacy kanji form gone) (mapped to おちんちん おちんちん)
+38	Colloquialisms	23929	御珍々	おちんちん	penis (child)	unmatched
 38	Colloquialisms	28490	状況に依る	じょうきょうによる	It depends on the situation	unmatched
 38	Colloquialisms	34862	ダイエットふりかけ	ダイエットふりかけ	furikake put on rice to make it blue, which is said to act as an appetite suppressant	unmatched
 38	Colloquialisms	37339	ああそうそう	ああそうそう	oh yes!	unmatched
 38	Colloquialisms	52979	スマラン	スマラン	Excuse me (coll. form of sumaranai)	unmatched
-38	Colloquialisms	58724	あげ間	あげまん	woman purported to bring good luck to the man she is near	reading-only (legacy kanji form gone) (mapped to 上げまん あげまん)
+38	Colloquialisms	58724	あげ間	あげまん	woman purported to bring good luck to the man she is near	unmatched
 38	Colloquialisms	66137	ちゅっと	ちゅっと	kissing	unmatched
-38	Colloquialisms	67476	吝嗇る	ケチる; けちる	to be stingy	reading-only (legacy kanji form gone) (mapped to ケチる ケチる; けちる)
+38	Colloquialisms	67476	吝嗇る	ケチる; けちる	to be stingy	unmatched
 38	Colloquialisms	70246	恥ずかしげもなく	はずずかしげもなく	brazenly	headword-only (mapped to 恥ずかしげもなく はずかしげもなく)
 38	Colloquialisms	73537	レゲエおじさん	レゲエおじさん	beggar	unmatched
 38	Colloquialisms	75790	撃沈した	げきちんした	rejected by a woman	unmatched
@@ -280,13 +279,11 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 38	Colloquialisms	97256	どうしたもの	どうしたもの	what's up with	unmatched
 38	Colloquialisms	100561	ズマン	ズマン	Excuse me (coll. form of sumimasen)	unmatched
 38	Colloquialisms	102392	日本のチベット	にほんのチベット	unpopulated, undeveloped or high-altitude region of Japan	unmatched
-38	Colloquialisms	103360	真婿	まんこ; マンコ	vagina	reading-only (legacy kanji form gone) (mapped to マンコ マンコ; まんこ)
+38	Colloquialisms	103360	真婿	まんこ; マンコ	vagina	unmatched
 38	Colloquialisms	112622	撃沈された	げきちんされた	fallen completely in love with a woman	unmatched
 38	Colloquialisms	116736	ちゃんたま	ちゃんたま	testicles	unmatched
 38	Colloquialisms	120408	手を貸しましょうか	てをかしましょうか	Can I lend a hand?	unmatched
 38	Colloquialisms	122129	珍矛	ちんぽこ	penis	reading-only (legacy kanji form gone) (mapped to ちんぽこ ちんぽこ; チンポコ; ちんぼこ; チンボコ)
-38	Colloquialisms	148734	雌珍々	めちんちん	vulva (child)	reading-only (legacy kanji form gone) (mapped to めちんちん めちんちん)
-39	Colors	145534	黄緑色	きみどりいろ	yellow-green	headword-only (mapped to 黄緑色 おうりょくしょく)
 40	Colors (More)	57684	形と色を変える	かたちといろをかえる	to change the shape and color of something	unmatched
 42	Common Words	110	グリニッジ	グリニッジ	Greenwich (Mean Time)	unmatched
 42	Common Words	3061	ノーベル	ノーベル	Nobel	unmatched
@@ -311,24 +308,24 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 42	Common Words	28731	ナポリ	ナポリ	Naples (cf. Napoli)	unmatched
 42	Common Words	30065	広がった枝	ひろがったえだ	spreading branches	unmatched
 42	Common Words	30938	驚かされる	おどろかされる	to be surprised	unmatched
-42	Common Words	31123	畝ねり	うねり	wave motion	reading-only (legacy kanji form gone) (mapped to 畝り うねり)
+42	Common Words	31123	畝ねり	うねり	wave motion	unmatched
 42	Common Words	31129	畝ねる	うねる	to undulate	unmatched
 42	Common Words	34762	サンタクララ	サンタクララ	Santa Clara (in California)	unmatched
 42	Common Words	34908	デイリーニュース	デイリーニュース	daily news	unmatched
 42	Common Words	36200	協	きょう	cooperation	unmatched
 42	Common Words	37949	白山	はくさん	mountain in Gifu Prefecture	unmatched
 42	Common Words	38267	日本航空	にっぽんこうくう	Japan Air Lines	unmatched
-42	Common Words	39105	中越	ちゅうごし	over center field (centre)	headword-only (mapped to 中越 ちゅうえつ)
+42	Common Words	39105	中越	ちゅうごし	over center field (centre)	headword-only, different meaning (dropped)
 42	Common Words	40676	ベルサイユ	ベルサイユ	Versailles	unmatched
 42	Common Words	41776	プロスィーディング	プロスィーディング	proceeding	unmatched
 42	Common Words	42660	Ｗ杯	ワールドカップ; ダブルはい	World Cup (soccer)	headword-only (mapped to Ｗ杯 ダブリューはい)
 42	Common Words	43844	ノイマン	ノイマン	Neumann	unmatched
-42	Common Words	44934	孰	いずれ	where	reading-only (legacy kanji form gone) (mapped to 何れ いずれ; いづれ)
+42	Common Words	44934	孰	いずれ	where	unmatched
 42	Common Words	45784	ノーランストッキング	ノーランストッキング	no-run stockings	unmatched
 42	Common Words	48191	サール	サール	Searle	unmatched
 42	Common Words	49723	其れ共	それとも	or	reading-only (legacy kanji form gone) (mapped to 其れとも それとも)
 42	Common Words	50323	ピサ	ピサ	Pisa	unmatched
-42	Common Words	52270	存廃	ぞんぱい	(whether to) continue or eliminate	headword-only (mapped to 存廃 そんぱい)
+42	Common Words	52270	存廃	ぞんぱい	(whether to) continue or eliminate	headword-only, different meaning (dropped)
 42	Common Words	52581	ブリティッシュエアウェイズ	ブリティッシュエアウェイズ	British Airways	unmatched
 42	Common Words	53715	時計	ときはかり	watch	headword-only (mapped to 時計 とけい)
 42	Common Words	54610	ヘルムホルツ	ヘルムホルツ	Helmholtz	unmatched
@@ -1126,7 +1123,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 46	Computers	69653	ウィンタッチ	ウィンタッチ	WinTach	unmatched
 46	Computers	69696	レックス	レックス	REXX	unmatched
 46	Computers	69792	コンピュータグラフィクスのメタファイル	コンピュータグラフィクスのメタファイル	Computer Graphics Metafile	unmatched
-46	Computers	69825	ノート型	ノートかた	note-type	headword-only (mapped to ノート型 ノートがた)
+46	Computers	69825	ノート型	ノートかた	note-type	headword-only, different meaning (dropped)
 46	Computers	69922	アノイボット	アノイボット	annoybot	unmatched
 46	Computers	70005	完備した表	かんびしたひょう	complete table	unmatched
 46	Computers	70094	ソフトセクタ式ディスク	ソフトセクタしきディスク	soft-sectored diskette	unmatched
@@ -1743,33 +1740,25 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 47	Conjunctions	49723	其れ共	それとも	or	reading-only (legacy kanji form gone) (mapped to 其れとも それとも)
 47	Conjunctions	55627	一つ度も	ひとつども	(with negative predicate) not even once, never	unmatched
 47	Conjunctions	55715	否か	いなか	.. or not	unmatched
-47	Conjunctions	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 49	Counter Kanji	45024	１個当り	ひとつとうり	each	headword-only (mapped to 一個あたり いっこあたり)
 49	Counter Kanji	47158	箇	じ	counter for the hito-futa-mi counting system (forming hitotsu, futatsu, mitsu, and misoji, yasoji, etc.)	ambiguous
 51	Derogatory	138320	ダブルハット	ダブルハット	double hat-trick	unmatched
-52	Drinking Words	145891	ロゼ	ローゼ	blush wine	headword-only (mapped to ロゼ ロゼ)
-58	Everyday Expressions	145593	ああ、そうですか	ああ、そうですか	Is that so?	reading-only (legacy kanji form gone) (mapped to ああ ああ)
-60	Family	145685	弟さん	おとうつさん	younger brother (polite)	headword-only (mapped to 弟さん おとうとさん)
-62	Female Expressions	148734	雌珍々	めちんちん	vulva (child)	reading-only (legacy kanji form gone) (mapped to めちんちん めちんちん)
-63	Financial	145748	五千円札	ごまんえんさつ	5000 yen bill	headword-only (mapped to ５０００円札 ごせんえんさつ)
-64	Food	145681	羊肉	ひつじにく	lamb	headword-only (mapped to 羊肉 ようにく)
 65	Food (More)	34860	寿司を握る	すしをにぎる	to make hand-rolled sushi	unmatched
 65	Food (More)	91005	寿司一折り	すしひとおり	a box of sushi	unmatched
 66	French Words	732	ブリオッシ	ブリオッシ	brioche	unmatched
 66	French Words	5038	ラフォーレ	ラフォーレ	the forest (cf. la foret)	unmatched
 66	French Words	43875	ブルジェアジー	ブルジェアジー	bourgeoisie	unmatched
 66	French Words	91749	サンスーシ	サンスーシ	sans-souci	unmatched
-66	French Words	102004	ムール貝	ムールかい	moule	headword-only (mapped to ムール貝 ムールがい)
+66	French Words	102004	ムール貝	ムールかい	moule	headword-only, different meaning (dropped)
 66	French Words	114463	アクサンスィルコンフレックス	アクサンスィルコンフレックス	circumflex accent (cf. accent circonflexe)	unmatched
 66	French Words	114558	ネスパ	ネスパ	Is it so? (cf. N'est-ce pas?)	unmatched
 66	French Words	118408	ロープデコルテ	ロープデコルテ	robe decolletee	unmatched
 70	German Words	79203	デリカテセン	デリカテセン	delicatessen (cf. Delikatessen)	unmatched
-73	Greetings	145895	はい、元気です	はい、げんきです	I'm fine	reading-only (legacy kanji form gone) (mapped to はい はい; へい)
 77	Honorifics	42267	於かれましては	おかれましては	in respect of	unmatched
 77	Honorifics	67235	御存じの方	ごぞんじのかた	your acquaintance	unmatched
 77	Honorifics	105557	お過ごし	おすごし	getting along	unmatched
 79	Humble Language	71896	兄後	あにご	elder brother	unmatched
-80	Idiomatic Expressions	305	為る様に為る	なるようになる	Let nature take its course	reading-only (legacy kanji form gone) (mapped to 成るように成る なるようになる)
+80	Idiomatic Expressions	305	為る様に為る	なるようになる	Let nature take its course	unmatched
 80	Idiomatic Expressions	3242	寝る程楽は無かりけり	ねるほどらくはなかりけり	There is nothing better than sleeping	unmatched
 80	Idiomatic Expressions	6030	魚心有れば水心有り	うおこころあればみずこころあり	Scratch my back and I'll scratch yours	unmatched
 80	Idiomatic Expressions	16883	盗人を捕らえて見れば我が子也	ぬすびとをとらえてみればわがこなり	The thief caught turn out to be one's own son	unmatched
@@ -1808,7 +1797,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 80	Idiomatic Expressions	122783	我が身を抓って人の痛さを知る	わがみをつねってひとのいたさをしる	He that has a head of glasses must not throw stones at another	unmatched
 80	Idiomatic Expressions	124969	空腹は最上のソースである	くうふくはさいじょうのソースである	Hunger is the best sauce	unmatched
 80	Idiomatic Expressions	126890	聖ソフィア大聖堂	せいソフィアだいせいどう	St Sophia's Cathedral	unmatched
-80	Idiomatic Expressions	130142	何方も何方	どっちもどっち	They are both to blame	reading-only (legacy kanji form gone) (mapped to 何方もどっち どっちもどっち)
+80	Idiomatic Expressions	130142	何方も何方	どっちもどっち	They are both to blame	unmatched
 80	Idiomatic Expressions	133118	念には念を入れよ	ねんにはねんをいれよ	Make assurance double sure	unmatched
 80	Idiomatic Expressions	136826	此処が思案のし所	ここがしあんのしどころ	This is the point we need to think about	unmatched
 80	Idiomatic Expressions	137442	聞くは一時の恥聞かぬは末代の恥	きくはいっときのはじきかぬはまつだいのはじ	Better ask than go astray	headword-only (mapped to 聞くは一時の恥、聞かぬは末代の恥 きくはいっときのはじ、きかぬはまつだいのはじ)
@@ -1824,9 +1813,9 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 83	Interjections	110787	好きやねん	すきやねん	love it!	unmatched
 84	Intransitive Verbs	8713	屯す	とんす	to gather in large numbers (of people)	headword-only (mapped to 屯す たむろす)
 84	Intransitive Verbs	17553	乾枯らびる	ひからびる	to dry up completely	unmatched
-84	Intransitive Verbs	43336	曇る	くぐもる	to mumble	headword-only (mapped to 曇る くもる)
+84	Intransitive Verbs	43336	曇る	くぐもる	to mumble	headword-only, different meaning (dropped)
 84	Intransitive Verbs	46812	堪へる	たへる	to bear	unmatched
-84	Intransitive Verbs	64584	縛れる	しばれる	to tie	reading-only (legacy kanji form gone) (mapped to 凍れる しばれる)
+84	Intransitive Verbs	64584	縛れる	しばれる	to tie	unmatched
 84	Intransitive Verbs	67931	結べる	むすべる	to tie	unmatched
 84	Intransitive Verbs	98436	怖気立つ	おぞけたつ	to be horrified	headword-only (mapped to 怖気立つ おぞけだつ; おじけだつ; こわけたつ)
 84	Intransitive Verbs	100366	知り渡る	しりわたる	(mispelling of 知れ渡る) to be well known	unmatched
@@ -1850,34 +1839,28 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 91	Japanglish (Wasei Eigo)	122363	ネガディブリスト	ネガディブリスト	import restriction list (cf. negative list)	unmatched
 92	JLPT Level N1	11155	×	ばつ; ぺけ; ペケ	x-mark (used to indicate an incorrect answer in a test, etc.)	unmatched
 92	JLPT Level N1	13029	依ると	よると	according to	unmatched
-92	JLPT Level N1	43073	傾らか	なだらか	gently-sloping	reading-only (legacy kanji form gone) (mapped to なだらか なだらか)
-92	JLPT Level N1	44934	孰	いずれ	where	reading-only (legacy kanji form gone) (mapped to 何れ いずれ; いづれ)
+92	JLPT Level N1	43073	傾らか	なだらか	gently-sloping	unmatched
+92	JLPT Level N1	44934	孰	いずれ	where	unmatched
 92	JLPT Level N1	49723	其れ共	それとも	or	reading-only (legacy kanji form gone) (mapped to 其れとも それとも)
 92	JLPT Level N1	85836	嫋か	しなやか	supple	reading-only (legacy kanji form gone) (mapped to しなやか しなやか)
 92	JLPT Level N1	92295	矢鱈に	やたらに	randomly	unmatched
 92	JLPT Level N1	120281	滑れる	ずれる	to slide	reading-only (legacy kanji form gone) (mapped to ずれる ずれる; ズレる)
 92	JLPT Level N1	126176	嘱する	ぞくする	to entrust	headword-only (mapped to 嘱する しょくする)
 92	JLPT Level N1	128519	だと	だと	if it's the case	unmatched
-92	JLPT Level N1	132222	打つかる	ぶつかる	to strike	reading-only (legacy kanji form gone) (mapped to ぶつかる ぶつかる; ぶっつかる)
+92	JLPT Level N1	132222	打つかる	ぶつかる	to strike	unmatched
 92	JLPT Level N1	137012	一段と	いちだんと	greater	unmatched
-92	JLPT Level N1	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
-92	JLPT Level N1	146200	兆	きざし	sign	headword-only (mapped to 兆 ちょう)
-92	JLPT Level N1	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-92	JLPT Level N1	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
+92	JLPT Level N1	140270	滑らす	ずらす	to shift	headword-only, different meaning (dropped)
 93	JLPT Level N2	11155	×	ばつ; ぺけ; ペケ	x-mark (used to indicate an incorrect answer in a test, etc.)	unmatched
 93	JLPT Level N2	13029	依ると	よると	according to	unmatched
-93	JLPT Level N2	43073	傾らか	なだらか	gently-sloping	reading-only (legacy kanji form gone) (mapped to なだらか なだらか)
-93	JLPT Level N2	44934	孰	いずれ	where	reading-only (legacy kanji form gone) (mapped to 何れ いずれ; いづれ)
+93	JLPT Level N2	43073	傾らか	なだらか	gently-sloping	unmatched
+93	JLPT Level N2	44934	孰	いずれ	where	unmatched
 93	JLPT Level N2	49723	其れ共	それとも	or	reading-only (legacy kanji form gone) (mapped to 其れとも それとも)
 93	JLPT Level N2	92295	矢鱈に	やたらに	randomly	unmatched
 93	JLPT Level N2	120281	滑れる	ずれる	to slide	reading-only (legacy kanji form gone) (mapped to ずれる ずれる; ズレる)
 93	JLPT Level N2	126176	嘱する	ぞくする	to entrust	headword-only (mapped to 嘱する しょくする)
-93	JLPT Level N2	132222	打つかる	ぶつかる	to strike	reading-only (legacy kanji form gone) (mapped to ぶつかる ぶつかる; ぶっつかる)
+93	JLPT Level N2	132222	打つかる	ぶつかる	to strike	unmatched
 93	JLPT Level N2	137012	一段と	いちだんと	greater	unmatched
-93	JLPT Level N2	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
-93	JLPT Level N2	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-93	JLPT Level N2	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
-94	JLPT Level N3	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
+93	JLPT Level N2	140270	滑らす	ずらす	to shift	headword-only, different meaning (dropped)
 97	Kansai Dialect	18641	本真に	ほんまに	really	unmatched
 97	Kansai Dialect	27754	ちょう待って	ちょうまって	Wait a minute	unmatched
 97	Kansai Dialect	75376	エーコッコシー	エーコッコシー	someone who is overly concerned with status. Can be used enviously with reference to someone of real accomplishment	unmatched
@@ -1913,7 +1896,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 105	L1 Verbs	52896	うっとりさせる	うっとりさせる	to enchant	unmatched
 105	L1 Verbs	59438	元気過ぎる	げんきすぎる	to be too energetic	unmatched
 105	L1 Verbs	64396	手伝って着せる	てつだってきせる	to help (a person) dress	unmatched
-105	L1 Verbs	64584	縛れる	しばれる	to tie	reading-only (legacy kanji form gone) (mapped to 凍れる しばれる)
+105	L1 Verbs	64584	縛れる	しばれる	to tie	unmatched
 105	L1 Verbs	65905	雪で被われる	ゆきでおおわれる	to be covered with snow	unmatched
 105	L1 Verbs	66088	潮の如く押し寄せる	うしおのごとくおしよせる	to rush like a flood	unmatched
 105	L1 Verbs	67931	結べる	むすべる	to tie	unmatched
@@ -1992,16 +1975,14 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 115	L5 Verbs (~す ending)	91563	潤かす	ふやかす	to soak	headword-only (mapped to 潤かす うるかす)
 115	L5 Verbs (~す ending)	95060	出しっ放す	だしっぱなす	to leave on	unmatched
 115	L5 Verbs (~す ending)	110211	寝付けす	ねつけす	to put (someone) to bed	unmatched
-115	L5 Verbs (~す ending)	111484	逸らかす	はぐらかす	to dodge	reading-only (legacy kanji form gone) (mapped to はぐらかす はぐらかす)
-115	L5 Verbs (~す ending)	119213	時めかす	ときめかす	to beat fast (e.g. the heart)	reading-only (legacy kanji form gone) (mapped to ときめかす ときめかす)
+115	L5 Verbs (~す ending)	111484	逸らかす	はぐらかす	to dodge	unmatched
+115	L5 Verbs (~す ending)	119213	時めかす	ときめかす	to beat fast (e.g. the heart)	unmatched
 115	L5 Verbs (~す ending)	122036	扶け起こす	たすけおこす	to help a person to his (her) feet	unmatched
 115	L5 Verbs (~す ending)	122154	尋ね出す	たずねいだす	to locate	headword-only (mapped to 尋ね出す たずねだす)
 115	L5 Verbs (~す ending)	123201	身振りで示す	みぶりでしめす	to express by gestures	unmatched
 115	L5 Verbs (~す ending)	131991	倹しく暮す	つましくくらす	to live frugally	unmatched
-115	L5 Verbs (~す ending)	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
+115	L5 Verbs (~す ending)	140270	滑らす	ずらす	to shift	headword-only, different meaning (dropped)
 115	L5 Verbs (~す ending)	143612	普く捜す	あまねくさがす	to make a wide search	unmatched
-115	L5 Verbs (~す ending)	148696	使って表す	つかってひょうす	express ... in terms of ...	headword-only (mapped to 使って表す つかってあらわす)
-115	L5 Verbs (~す ending)	149857	用いて表す	もちいいてひょうす	express ... in terms of ...	headword-only (mapped to 用いて表す もちいてあらわす)
 117	L5 Verbs (~つ ending)	28046	気を長く持つ	きをながくのつ	to be patient	headword-only (mapped to 気を長く持つ きをながくもつ)
 117	L5 Verbs (~つ ending)	98436	怖気立つ	おぞけたつ	to be horrified	headword-only (mapped to 怖気立つ おぞけだつ; おじけだつ; こわけたつ)
 119	L5 Verbs (~ぶ ending)	80483	外で遊ぶ	そとであそぶ	to play outdoors	unmatched
@@ -2017,17 +1998,17 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 120	L5 Verbs (~む ending)	130513	攻め苛む	せめさいなむ	to torture	unmatched
 121	L5 Verbs (~る ending)	1554	行きたがる	いきたがる	to be anxious to go	unmatched
 121	L5 Verbs (~る ending)	22717	見捨てて去る	みすててさる	to leave behind	unmatched
-121	L5 Verbs (~る ending)	29249	喜がる	よがる	to satisfy oneself	reading-only (legacy kanji form gone) (mapped to 善がる よがる)
+121	L5 Verbs (~る ending)	29249	喜がる	よがる	to satisfy oneself	unmatched
 121	L5 Verbs (~る ending)	31129	畝ねる	うねる	to undulate	unmatched
 121	L5 Verbs (~る ending)	33305	判決が下る	はんけつがくだる	to be judged	unmatched
 121	L5 Verbs (~る ending)	33360	固く固まる	かたくかたまる	to form a hard mass	unmatched
 121	L5 Verbs (~る ending)	38925	かんかん怒る	かんかんおこる	to get very mad	unmatched
 121	L5 Verbs (~る ending)	39389	狂い回る	くるいまわる	to rave	unmatched
-121	L5 Verbs (~る ending)	43336	曇る	くぐもる	to mumble	headword-only (mapped to 曇る くもる)
+121	L5 Verbs (~る ending)	43336	曇る	くぐもる	to mumble	headword-only, different meaning (dropped)
 121	L5 Verbs (~る ending)	58696	良家の生まれである	りょうけのうまれである	to be of good family	unmatched
 121	L5 Verbs (~る ending)	60111	殴られて伸びる	なぐられてのびる	to be knocked out cold	unmatched
 121	L5 Verbs (~る ending)	63271	擦れて薄くなる	すれてうすくなる	to wear thin	unmatched
-121	L5 Verbs (~る ending)	67476	吝嗇る	ケチる; けちる	to be stingy	reading-only (legacy kanji form gone) (mapped to ケチる ケチる; けちる)
+121	L5 Verbs (~る ending)	67476	吝嗇る	ケチる; けちる	to be stingy	unmatched
 121	L5 Verbs (~る ending)	67817	お婆はる	おばはる	to shamelessly demand one's rights	unmatched
 121	L5 Verbs (~る ending)	75333	沒る	いる	to set beyond the Western horizon (i.e. the sun)	unmatched
 121	L5 Verbs (~る ending)	77053	貞はる	さだはる	to harp too long on a subject	unmatched
@@ -2039,7 +2020,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 121	L5 Verbs (~る ending)	120395	同工異曲である	どうこういきょくである	to be equally excellent in workmanship though difficult in style	unmatched
 121	L5 Verbs (~る ending)	121338	ぷりぷり怒る	ぷりぷりおこる	to be in a huff	unmatched
 121	L5 Verbs (~る ending)	127344	跳び過ぎる	とびすぎる	to overjump	unmatched
-121	L5 Verbs (~る ending)	132222	打つかる	ぶつかる	to strike	reading-only (legacy kanji form gone) (mapped to ぶつかる ぶつかる; ぶっつかる)
+121	L5 Verbs (~る ending)	132222	打つかる	ぶつかる	to strike	unmatched
 121	L5 Verbs (~る ending)	134919	黒く染まる	くろくそまる	to be dyed black	unmatched
 121	L5 Verbs (~る ending)	136141	ぽとりと落ちる	ぽとりとおちる	to fall down with a "plop"	unmatched
 121	L5 Verbs (~る ending)	138061	一字削る	いちじけずる	to delete a letter	unmatched
@@ -2047,7 +2028,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 121	L5 Verbs (~る ending)	142242	窺い探る	うかがいさぐる	to spy out	unmatched
 123	Linguistics	132292	統語的な整合性	とうごてきなせいごうせい	well-formedness	unmatched
 123	Linguistics	136631	ｂｅ動詞	ビーどうし	the 'to be' verb	unmatched
-127	Manga Slang	65973	ｘｘ	ちょめちょめ	(sometimes also **, ○○, etc.) blankety-blank	reading-only (legacy kanji form gone) (mapped to チョメチョメ チョメチョメ; ちょめちょめ)
+127	Manga Slang	65973	ｘｘ	ちょめちょめ	(sometimes also **, ○○, etc.) blankety-blank	unmatched
 128	Martial Arts	38014	潛心力	せんしんりょく	potential power	unmatched
 128	Martial Arts	44343	隠れ身の術	かくれみのじゅつ	Ninja art of camouflage	unmatched
 128	Martial Arts	58203	七方出	しっぽうで	seven disguises of the ninja	headword-only (mapped to 七方出 しちほうで)
@@ -2183,7 +2164,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 133	Nouns	4555	エフェクトコンパイラ	エフェクトコンパイラ	effect compiler	unmatched
 133	Nouns	4606	アルタビスタ	アルタビスタ	ALTA VISTA	unmatched
 133	Nouns	4686	中童子	ちゅうどうし	temple pageboy	headword-only (mapped to 中童子 ちゅうどうじ)
-133	Nouns	4688	＠	アットマーク	"at" mark	reading-only (legacy kanji form gone) (mapped to アットマーク アットマーク; アット・マーク)
+133	Nouns	4688	＠	アットマーク	"at" mark	unmatched
 133	Nouns	4719	構造表記法	こうぞうひょうきほう	structured notation	unmatched
 133	Nouns	4768	厳密認証	げんみつにんしょう	strong authentication	unmatched
 133	Nouns	4781	ゼロサプレス機能	ゼロサプレスきのう	zero suppression function	unmatched
@@ -2236,7 +2217,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 133	Nouns	6839	ＮＨＫ教育テレビジョン	エヌエッチケーきょういくテレビジョン	NHK Educational TV	headword-only (mapped to ＮＨＫ教育テレビジョン エヌエイチケーきょういくテレビジョン)
 133	Nouns	6926	完ぺきさ	かんぺきさ	perfection	unmatched
 133	Nouns	6997	角張った顔	かくばったかお	squarish face	unmatched
-133	Nouns	7007	賦存量	ふそんりょう	abundance	headword-only (mapped to 賦存量 ふぞんりょう)
+133	Nouns	7007	賦存量	ふそんりょう	abundance	headword-only, different meaning (dropped)
 133	Nouns	7034	滄海一滴	そうかいいってき	a drop in the ocean (bucket)	unmatched
 133	Nouns	7145	給油口のふた	きゅうゆこうのふた	petrol cap	unmatched
 133	Nouns	7245	ノンポリティカル	ノンポリティカル	nonpolitical	unmatched
@@ -2293,7 +2274,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 133	Nouns	9366	同期転送モード	どうきてんそうモード	Synchronous Transfer Mode	unmatched
 133	Nouns	9388	柔らかな風	やわらかなかぜ	gentle breeze	unmatched
 133	Nouns	9426	エムティービーエフ	エムティービーエフ	MTBF	unmatched
-133	Nouns	9472	如何ともし難い	いかんともしがたい	impenetrably difficult	reading-only (legacy kanji form gone) (mapped to 如何ともしがたい いかんともしがたい)
+133	Nouns	9472	如何ともし難い	いかんともしがたい	impenetrably difficult	unmatched
 133	Nouns	9492	一足先	ひとあしさき	one step ahead	unmatched
 133	Nouns	9515	クロコン	クロコン	cross-country skiing	unmatched
 133	Nouns	9564	お花見	おはなみ	cherry blossom viewing	unmatched
@@ -2310,7 +2291,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 133	Nouns	9899	著作権保護期間	ちょさくけんほごきかん	copyright protection period	unmatched
 133	Nouns	9902	オラクルナインアイエーエス	オラクルナインアイエーエス	Oracle 9iAS	unmatched
 133	Nouns	10007	連結処理の連鎖	れんけつしょりのれんさ	chain of link processes	unmatched
-133	Nouns	10138	真秀等間	まほらま	great and splendid land (Yamato word)	reading-only (legacy kanji form gone) (mapped to まほらま まほらま)
+133	Nouns	10138	真秀等間	まほらま	great and splendid land (Yamato word)	unmatched
 133	Nouns	10146	表示更新モード	ひょうじこうしんモード	display update state	unmatched
 133	Nouns	10174	肋筋	ろっきん	stirrup (in reinforced concrete construction)	headword-only (mapped to あばら筋 あばらきん)
 133	Nouns	10300	サンタクルーズ	サンタクルーズ	Santa Cruz	unmatched
@@ -2324,7 +2305,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 133	Nouns	10489	ゾープ	ゾープ	Zope	unmatched
 133	Nouns	10509	俊馬	しゅんば; しゅんめ	swift horse	unmatched
 133	Nouns	10526	ポップアップアイテム	ポップアップアイテム	pop-up item	unmatched
-133	Nouns	10545	挙示	きょし	assignment	headword-only (mapped to 挙示 きょじ)
+133	Nouns	10545	挙示	きょし	assignment	headword-only, different meaning (dropped)
 133	Nouns	10605	内容評価制度	ないようひょうかせいど	content rating system (for TV, movies)	unmatched
 133	Nouns	10627	新鮮さ	しんせんさ	freshness	unmatched
 133	Nouns	10654	ホームセキュリティーシステム	ホームセキュリティーシステム	home security system	unmatched
@@ -2360,7 +2341,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 133	Nouns	11481	大衆車	だいしゅうしゃ	popular car	headword-only (mapped to 大衆車 たいしゅうしゃ)
 133	Nouns	11518	負荷増大	ふかぞうたい	load increase	unmatched
 133	Nouns	11546	ビープラス	ビープラス	B plus	unmatched
-134	Numeric	146200	兆	きざし	sign	headword-only (mapped to 兆 ちょう)
 135	Obscure	1489	口から砂糖が出る	くちからさとうがでる	sickly sweet	unmatched
 135	Obscure	2689	時宣を得る	じせんをえる	suitable time	unmatched
 135	Obscure	2698	骭	はぎ	shin	headword-only (mapped to 骭 かん)
@@ -2373,7 +2353,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 135	Obscure	39938	形式的な性	けいしきてきなせい	formal gender	unmatched
 135	Obscure	45805	衝撃式印字装置	しょうげきしきいんじそうち	impact printer	unmatched
 135	Obscure	50717	摩ってしまう	すってしまう; スッてしまう	to squander one's money (through gambling, Pachinko, etc.)	unmatched
-135	Obscure	55008	下品	かひん	inferior article	headword-only (mapped to 下品 げひん)
+135	Obscure	55008	下品	かひん	inferior article	headword-only, different meaning (dropped)
 135	Obscure	62536	クロスリファレンス形式	クロスリファレンスけいしき	cross-referenced	unmatched
 135	Obscure	67182	挑戦いかに	ちょうせんいかに	How dare you!	unmatched
 135	Obscure	87773	滅多に見られない図	めったにみられないず	seldom seen sight	unmatched
@@ -2416,13 +2396,11 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 138	Onomatopoeia	138503	どしんと	どしんと	plump	unmatched
 138	Onomatopoeia	141874	ぐいっ	ぐいっ	with a jerk	unmatched
 140	Particles	139084	一高い	いちたかい	highest	unmatched
-141	Parts of Speech	145457	子音	しいいん	consonant	headword-only (mapped to 子音 しいん; しおん)
 144	People at School	109111	教頭先生	きょうとうせんせい	vice principal	unmatched
-144	People at School	145507	四年生	よんねんせい	fourth year student	headword-only (mapped to 四年生 よねんせい)
 147	Common Expressions	38	滑稽味が有る	こっけいみがある	tinged with humor (humour)	unmatched
 147	Common Expressions	134	栴檀は双葉より芳しい	せんだんはふたばよりかんばしい	expression meaning that genius shows from childhood	unmatched
 147	Common Expressions	248	産む機械	うむきかい	baby-making machine (famously used by Health, Labour and Welfare Minister Yanagisawa Hakuo to refer to women)	unmatched
-147	Common Expressions	305	為る様に為る	なるようになる	Let nature take its course	reading-only (legacy kanji form gone) (mapped to 成るように成る なるようになる)
+147	Common Expressions	305	為る様に為る	なるようになる	Let nature take its course	unmatched
 147	Common Expressions	493	元を切って売る	もとをきってうる	to sell under prime cost	unmatched
 147	Common Expressions	500	輪になって踊る	わになっておどる	to dance in a circle (ring)	unmatched
 147	Common Expressions	677	大変お世話になりありがとうございました	たいへんおせわになりありがとうございました	thank you for all your hard work	unmatched
@@ -2512,7 +2490,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	13591	胸が痛む様な出来事	むねがいたむようなできごと	painful incident	unmatched
 147	Common Expressions	13676	人間のデカさ	にんげんのデカさ	a man's worth	unmatched
 147	Common Expressions	13913	日本語に直す	にほんごになおす	to render into Japanese	unmatched
-147	Common Expressions	13959	逆になる	さかになる	to turn upside down	headword-only (mapped to 逆になる ぎゃくになる)
+147	Common Expressions	13959	逆になる	さかになる	to turn upside down	headword-only, different meaning (dropped)
 147	Common Expressions	13964	友達を伴って	ともだちをともなって	accompanied by a friend	unmatched
 147	Common Expressions	14523	米貨建て	べいかだて	denominated in American currency	unmatched
 147	Common Expressions	14669	愛国心を培う	あいこくしんをつちかう	to foster a patriotic spirit	unmatched
@@ -2675,7 +2653,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	34532	言う所	いうところ	what is called	unmatched
 147	Common Expressions	34860	寿司を握る	すしをにぎる	to make hand-rolled sushi	unmatched
 147	Common Expressions	35032	上の級に進む	うえのきゅうにすすむ	to move up to a higher grade	unmatched
-147	Common Expressions	35138	ブルータスお前もか	ブルータスおまえもか	Et tu, Brutus?	headword-only (mapped to ブルータス、お前もか ブルータス、おまえもか)
+147	Common Expressions	35138	ブルータスお前もか	ブルータスおまえもか	Et tu, Brutus?	headword-only, different meaning (dropped)
 147	Common Expressions	35257	年生まれ	ねんうまれ	born in ...	unmatched
 147	Common Expressions	35285	党勢を伸す	とうせいをのす	to extend the strength of a party	unmatched
 147	Common Expressions	35362	痛い目に遭わす	いたいめにあわす	to make a person sweat for it	unmatched
@@ -2728,7 +2706,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	43266	資源に富む	しげんにとむ	to abound in natural resources	unmatched
 147	Common Expressions	43271	返事を遅らす	へんじをおくらす	to defer one's reply	unmatched
 147	Common Expressions	43402	使用できる	しようできる	fit for use	unmatched
-147	Common Expressions	43657	嫌いが在る	きらいがある	to have a tendency to	reading-only (legacy kanji form gone) (mapped to 嫌いがある きらいがある)
+147	Common Expressions	43657	嫌いが在る	きらいがある	to have a tendency to	unmatched
 147	Common Expressions	43805	へまをやる	へまをやる	to commit a blunder	unmatched
 147	Common Expressions	43890	船に貨物を載せる	ふねにかもつをのせる	to load a ship with cargo	unmatched
 147	Common Expressions	43959	余命幾何もない	よめいいくばくもない	your days are numbered	unmatched
@@ -2763,7 +2741,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	48197	人気がない	ひとけがない	no sign of life	unmatched
 147	Common Expressions	48284	いようが	いようが	(from いるようが) (following te-form verb) regardless of	unmatched
 147	Common Expressions	48516	正しい言葉を遣う	ただしいことばをつかう	to use the correct word	unmatched
-147	Common Expressions	48555	井の中の蛙大海を知らず	いのなかのかわずたいかいをしらず	parochial	headword-only (mapped to 井の中の蛙、大海を知らず いのなかのかわず、たいかいをしらず)
+147	Common Expressions	48555	井の中の蛙大海を知らず	いのなかのかわずたいかいをしらず	parochial	headword-only, different meaning (dropped)
 147	Common Expressions	48564	名実共に備わる	めいじつともにそなわる	to live up to one's name	unmatched
 147	Common Expressions	48623	病んで後初めて健康の価値を知る	やんでのちはじめてけんこうのかちをしる	You don't appreciate the value of good health until you lose it	unmatched
 147	Common Expressions	48740	綴じて	とじて	in bound form	unmatched
@@ -2877,7 +2855,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	63847	異境に果てる	いきょうにはてる	to die in a strange land	unmatched
 147	Common Expressions	63900	女と交わる	おんなとまじわる	to sleep with a woman	unmatched
 147	Common Expressions	64186	図抜けている	ずぬけている	to be outstanding	unmatched
-147	Common Expressions	64216	就き	つき	concerning	reading-only (legacy kanji form gone) (mapped to 欅 けやき)
+147	Common Expressions	64216	就き	つき	concerning	unmatched
 147	Common Expressions	64252	経文の義を説く	きょうもんのぎをとく	to explain the meaning of a sutra	unmatched
 147	Common Expressions	64361	快楽に飽きる	かいらくにあきる	to be satiated with pleasures	unmatched
 147	Common Expressions	64446	重圧に耐える	じゅうあつにたえる	to withstand pressures	unmatched
@@ -3349,7 +3327,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	125575	関して	かんして	in relation to	unmatched
 147	Common Expressions	125649	辞書に拠れば	じしょによれば	based on (according to) the dictionary	unmatched
 147	Common Expressions	125684	目が点に成る	めがてんになる	to be stunned and utterly surprised (at something)	unmatched
-147	Common Expressions	125692	僧になる	そうになる	to become a monk	reading-only (legacy kanji form gone) (mapped to そうになる そうになる)
+147	Common Expressions	125692	僧になる	そうになる	to become a monk	unmatched
 147	Common Expressions	125726	時勢に伴って	じせいにともなって	in step with the times	unmatched
 147	Common Expressions	125774	順にいう	じゅんにいう	to state in order	unmatched
 147	Common Expressions	125998	芋を洗うような	いもをあらうような	to be jostling against each other	unmatched
@@ -3358,7 +3336,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	126408	鋭を取る	えいをとる	to take up a weapon	unmatched
 147	Common Expressions	126516	父親の威光を笠に着る	ちちおやのいこうをかさにきる	to shelter oneself under one's father's influence	unmatched
 147	Common Expressions	126522	光が透るカーテン	ひかりがとおるカーテン	curtain pervious to light	unmatched
-147	Common Expressions	126606	心を入れる	しんをいれる	to pad (a sash)	headword-only (mapped to 心を入れる こころをいれる)
+147	Common Expressions	126606	心を入れる	しんをいれる	to pad (a sash)	headword-only, different meaning (dropped)
 147	Common Expressions	126766	賞を授かる	しょうをさずかる	to be awarded a prize	unmatched
 147	Common Expressions	126811	席を設ける	せきをもうける	to give a banquet	unmatched
 147	Common Expressions	126890	聖ソフィア大聖堂	せいソフィアだいせいどう	St Sophia's Cathedral	unmatched
@@ -3378,7 +3356,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	129230	ウィンドウを最大表示する	ウィンドウをさいだいひょうじする	to maximize a window	unmatched
 147	Common Expressions	129397	と言う訳だ	というわけだ	this is why	unmatched
 147	Common Expressions	129803	悲しみに閉ざされる	かなしみにとざされる	to be buried in grief	unmatched
-147	Common Expressions	130142	何方も何方	どっちもどっち	They are both to blame	reading-only (legacy kanji form gone) (mapped to 何方もどっち どっちもどっち)
+147	Common Expressions	130142	何方も何方	どっちもどっち	They are both to blame	unmatched
 147	Common Expressions	130322	反省の色なし	はんせいのいろなし	showing no sign of remorse or regret	unmatched
 147	Common Expressions	130325	機嫌が取りにくい	きげんがとりにくい	hard to please	unmatched
 147	Common Expressions	130366	戸の桟を外す	とのさんをはずす	to unbolt the door	unmatched
@@ -3447,7 +3425,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	140433	人の成功を祝う	ひとのせいこうをいわう	to congratulate a person on his (her) success	unmatched
 147	Common Expressions	140948	剣の山を登る	つるぎのやまをのぼる	to perform a hazardous deed	unmatched
 147	Common Expressions	141007	術が尽きる	じゅつがつきる	to be at one's wits end	unmatched
-147	Common Expressions	141482	敵を討つ	てきをうつ	to quell the enemy	headword-only (mapped to 仇を討つ かたきをうつ; あだをうつ)
+147	Common Expressions	141482	敵を討つ	てきをうつ	to quell the enemy	headword-only, different meaning (dropped)
 147	Common Expressions	141582	人手を煩わす	ひとでをわずらわす	to trouble a person	unmatched
 147	Common Expressions	141601	固く自説を執る	かたくじせつをとる	to persist in one's views	unmatched
 147	Common Expressions	141949	家畜を殖やす	かちくをふやす	to breed cattle	unmatched
@@ -3471,15 +3449,12 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	144625	角の有る	かどのある	angled	unmatched
 147	Common Expressions	145004	時流に乗って泳ぐ	じりゅうにのっておよぐ	to swim with the current	unmatched
 147	Common Expressions	145124	民の声を聴く	たみのこえをきく	to listen to the voice of the people	unmatched
-147	Common Expressions	148696	使って表す	つかってひょうす	express ... in terms of ...	headword-only (mapped to 使って表す つかってあらわす)
-147	Common Expressions	149857	用いて表す	もちいいてひょうす	express ... in terms of ...	headword-only (mapped to 用いて表す もちいてあらわす)
 148	Physics	134655	微分断面	びぶんだんめん	differential cross-section	unmatched
 151	Polite Language	2689	時宣を得る	じせんをえる	suitable time	unmatched
 151	Polite Language	42267	於かれましては	おかれましては	in respect of	unmatched
 151	Polite Language	71730	教育に携わる者	きょういくにたずさわるもの	someone involved with education	unmatched
 151	Polite Language	125054	お草々様	おそうそうさま	neglectful (i.e. in the treatment of one's guests)	unmatched
 154	Pre-Noun Adjectival 	11356	偶の	たまの	occasional	unmatched
-154	Pre-Noun Adjectival 	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 156	Prefix Noun	1926	希	ぎ	Greece	ambiguous
 156	Prefix Noun	36200	協	きょう	cooperation	unmatched
 156	Prefix Noun	125432	准	じゅん	quasi-	unmatched
@@ -3527,19 +3502,17 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 158	Prenominal Noun/Verb	128560	廃止された	はいしされた	extinct	unmatched
 158	Prenominal Noun/Verb	130322	反省の色なし	はんせいのいろなし	showing no sign of remorse or regret	unmatched
 158	Prenominal Noun/Verb	133070	きりっとした	きりっとした	smart	unmatched
-159	Relative Time	145679	再来年	さいらいんねん	year after next	headword-only (mapped to 再来年 さらいねん)
 161	Rude or Impolite	49275	ふざけんなよ	ふざけんなよ	stop bullshitting me	unmatched
-161	Rude or Impolite	70228	万擦り	まんずり	masturbation (female)	reading-only (legacy kanji form gone) (mapped to マンズリ マンズリ; まんずり)
+161	Rude or Impolite	70228	万擦り	まんずり	masturbation (female)	unmatched
 161	Rude or Impolite	74208	ざけんなよ	ざけんなよ	fuck you!	unmatched
 161	Rude or Impolite	91323	クリト	クリト	clitoris	unmatched
 161	Rude or Impolite	102971	グイッと呷る	グイッとあおる	to down another drink	unmatched
-161	Rude or Impolite	103360	真婿	まんこ; マンコ	vagina	reading-only (legacy kanji form gone) (mapped to マンコ マンコ; まんこ)
-166	School Subjects	145843	生理学	生理学	psychology	headword-only (mapped to 生理学 せいりがく)
+161	Rude or Impolite	103360	真婿	まんこ; マンコ	vagina	unmatched
 168	Sensitive Words	4450	外人向き	がいじんむき	aimed at foreigners	unmatched
-168	Sensitive Words	20225	兎欠	いぐち; とけつ	harelip	reading-only (legacy kanji form gone) (mapped to 猪口 いぐち)
+168	Sensitive Words	20225	兎欠	いぐち; とけつ	harelip	unmatched
 168	Sensitive Words	25971	盲パス	めくらパス; もうパス	blind pass	unmatched
 168	Sensitive Words	46443	大童になって	おおわらわになって	very busy	unmatched
-168	Sensitive Words	72581	砂利子	じゃりんこ	student who can't keep up in school	reading-only (legacy kanji form gone) (mapped to じゃりん子 じゃりんこ)
+168	Sensitive Words	72581	砂利子	じゃりんこ	student who can't keep up in school	unmatched
 168	Sensitive Words	81000	混血の人	こんけつのひと	mixed race person	unmatched
 168	Sensitive Words	139591	外人像	がいじんぞう	one's image of foreigners	unmatched
 168	Sensitive Words	143162	気違い染みている	きちがいじみている	to be slightly crazy	unmatched
@@ -3547,7 +3520,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 170	Slang	23520	ばっくんちょ	ばっくんちょ	eating in one bite	unmatched
 170	Slang	31875	オバむ	オバむ	(pun on バラク・オバマ) (various meanings, including) to chant, "Yes we can, yes we can!"	unmatched
 170	Slang	33078	口内射精	こうないしゃせい	ejaculating into someone's mouth	unmatched
-170	Slang	66314	赤日	あかび	menstruation	headword-only (mapped to 赤日 せきじつ)
+170	Slang	66314	赤日	あかび	menstruation	headword-only, different meaning (dropped)
 170	Slang	67512	変な外人	へんながいじん	weird foreigner	unmatched
 170	Slang	67817	お婆はる	おばはる	to shamelessly demand one's rights	unmatched
 170	Slang	77053	貞はる	さだはる	to harp too long on a subject	unmatched
@@ -3558,7 +3531,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 170	Slang	115394	ガンガン食べる	ガンガンたべる	to pig out	unmatched
 170	Slang	126745	ネズミーシー	ネズミーシー	Disney Sea	unmatched
 170	Slang	128954	Ｇ様	ジーさま	euph. for cockroach	unmatched
-170	Slang	133603	ＮＵＬＬＰＯ	ぬるぽ; ヌルポ; なるぽ; ナルポ	null pointer exception (in the Java programming language)	reading-only (legacy kanji form gone) (mapped to ぬるぽ ぬるぽ; ヌルポ)
+170	Slang	133603	ＮＵＬＬＰＯ	ぬるぽ; ヌルポ; なるぽ; ナルポ	null pointer exception (in the Java programming language)	unmatched
 172	Special Verbs (~くる ending)	53431	向こうから来る	むこうからくる	to come from the opposite direction	unmatched
 173	Suffixes	979	人衆	にんしゅう	N-man team (after number N)	unmatched
 173	Suffixes	5011	人組み	にんぐみ	a ~-man group (after number ~)	unmatched
@@ -3575,10 +3548,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 173	Suffixes	139691	Ｍ走	メートルそう	-meter race (after number)	unmatched
 174	Sumo Wrestling	53179	八艘飛び	やそうとび	leap up from the initial charge in order to surprise the opponent	headword-only (mapped to 八艘飛び はっそうとび)
 174	Sumo Wrestling	59262	河津掛け	かわづかけ	hooking backward counter throw	headword-only (mapped to 河津掛け かわづがけ)
-178	Telephone At Home	145459	はい、そうです	はい、そうです	Yes, it is	reading-only (legacy kanji form gone) (mapped to はい はい; へい)
-179	Telephone At Work	145745	はい、おります	はい、おります	Yes, s	reading-only (legacy kanji form gone) (mapped to はい はい; へい)
-179	Telephone At Work	145782	いいえ、結構です	いいえ、けっこうです	No, that's OK, thank you	reading-only (legacy kanji form gone) (mapped to いいえ いいえ; いえ)
-180	Telephone General	145700	いいえ、違います	いいえ、ちがいます	That is incorrect (said in response to a caller confirming the number dialled)	reading-only (legacy kanji form gone) (mapped to いいえ いいえ; いえ)
 182	Temporal Nouns	10785	先頃	せんころ	recently	headword-only (mapped to 先ごろ さきごろ)
 182	Temporal Nouns	12441	一昨々月	いっさくさくげつ	three months ago	unmatched
 182	Temporal Nouns	48055	夜々中	よるよなか	midnight	unmatched
@@ -3587,7 +3556,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 182	Temporal Nouns	63262	完了後	かんりょうご	after completion	unmatched
 182	Temporal Nouns	69887	髭剃り後	ひげそりあと	after shaving	unmatched
 182	Temporal Nouns	88773	エラー補正後	エラーほせいご	after error correction	unmatched
-189	Trains	145518	待合所	まちあいしょ	waiting room	headword-only (mapped to 待合所 まちあいじょ)
 190	Transitive Verbs	6512	為せる	させる	to make (someone) do	reading-only (legacy kanji form gone) (mapped to させる させる)
 190	Transitive Verbs	7586	口号む	くちずさむ	to hum	unmatched
 190	Transitive Verbs	46812	堪へる	たへる	to bear	unmatched
@@ -3596,10 +3564,10 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 190	Transitive Verbs	91563	潤かす	ふやかす	to soak	headword-only (mapped to 潤かす うるかす)
 190	Transitive Verbs	102698	生き生きとする	いきいきとする	to scintillate	unmatched
 190	Transitive Verbs	108259	順序立てる	じゅんじょたてる	to put into order	headword-only (mapped to 順序だてる じゅんじょだてる)
-190	Transitive Verbs	111484	逸らかす	はぐらかす	to dodge	reading-only (legacy kanji form gone) (mapped to はぐらかす はぐらかす)
-190	Transitive Verbs	119213	時めかす	ときめかす	to beat fast (e.g. the heart)	reading-only (legacy kanji form gone) (mapped to ときめかす ときめかす)
+190	Transitive Verbs	111484	逸らかす	はぐらかす	to dodge	unmatched
+190	Transitive Verbs	119213	時めかす	ときめかす	to beat fast (e.g. the heart)	unmatched
 190	Transitive Verbs	126176	嘱する	ぞくする	to entrust	headword-only (mapped to 嘱する しょくする)
-190	Transitive Verbs	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
+190	Transitive Verbs	140270	滑らす	ずらす	to shift	headword-only, different meaning (dropped)
 190	Transitive Verbs	142696	にする	にする	to place, or raise, person A to a post or status B	unmatched
 195	Written with Kana Only	1374	事こそ	ことこそ	this for sure	unmatched
 195	Written with Kana Only	3742	就いて	ついて	about	unmatched
@@ -3613,20 +3581,20 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 195	Written with Kana Only	12738	タカ蓬	タカよもぎ; タカヨモギ	Artemisia selengensis	unmatched
 195	Written with Kana Only	13029	依ると	よると	according to	unmatched
 195	Written with Kana Only	16619	吃りながら	どもりながら	stuttering(ly)	unmatched
-195	Written with Kana Only	23929	御珍々	おちんちん	penis (child)	reading-only (legacy kanji form gone) (mapped to おちんちん おちんちん)
+195	Written with Kana Only	23929	御珍々	おちんちん	penis (child)	unmatched
 195	Written with Kana Only	25971	盲パス	めくらパス; もうパス	blind pass	unmatched
 195	Written with Kana Only	29627	頷いて	うなずいて	with a nod	unmatched
 195	Written with Kana Only	30542	怖っ	こわっ	scary!	unmatched
-195	Written with Kana Only	31123	畝ねり	うねり	wave motion	reading-only (legacy kanji form gone) (mapped to 畝り うねり)
+195	Written with Kana Only	31123	畝ねり	うねり	wave motion	unmatched
 195	Written with Kana Only	31841	膠も無い	にべもない	curt	unmatched
 195	Written with Kana Only	34532	言う所	いうところ	what is called	unmatched
 195	Written with Kana Only	39260	さっぱり分らない	さっぱりわからない	have no inkling of	unmatched
 195	Written with Kana Only	42267	於かれましては	おかれましては	in respect of	unmatched
-195	Written with Kana Only	43073	傾らか	なだらか	gently-sloping	reading-only (legacy kanji form gone) (mapped to なだらか なだらか)
-195	Written with Kana Only	43336	曇る	くぐもる	to mumble	headword-only (mapped to 曇る くもる)
-195	Written with Kana Only	43657	嫌いが在る	きらいがある	to have a tendency to	reading-only (legacy kanji form gone) (mapped to 嫌いがある きらいがある)
+195	Written with Kana Only	43073	傾らか	なだらか	gently-sloping	unmatched
+195	Written with Kana Only	43336	曇る	くぐもる	to mumble	headword-only, different meaning (dropped)
+195	Written with Kana Only	43657	嫌いが在る	きらいがある	to have a tendency to	unmatched
 195	Written with Kana Only	43849	卒なくこなす	そつなくこなす	to handle flawlessly	unmatched
-195	Written with Kana Only	44934	孰	いずれ	where	reading-only (legacy kanji form gone) (mapped to 何れ いずれ; いづれ)
+195	Written with Kana Only	44934	孰	いずれ	where	unmatched
 195	Written with Kana Only	45247	迚もじゃないが	とてもじゃないが	(before a negative form) simply (cannot)	unmatched
 195	Written with Kana Only	47158	箇	じ	counter for the hito-futa-mi counting system (forming hitotsu, futatsu, mitsu, and misoji, yasoji, etc.)	ambiguous
 195	Written with Kana Only	47472	ほんわかした	ほんわかした	warm and snug	unmatched
@@ -3635,13 +3603,13 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 195	Written with Kana Only	50717	摩ってしまう	すってしまう; スッてしまう	to squander one's money (through gambling, Pachinko, etc.)	unmatched
 195	Written with Kana Only	53367	捩って	もじって	parodying	unmatched
 195	Written with Kana Only	53951	にして置く	にしておく	maintain status-quo	unmatched
-195	Written with Kana Only	58724	あげ間	あげまん	woman purported to bring good luck to the man she is near	reading-only (legacy kanji form gone) (mapped to 上げまん あげまん)
-195	Written with Kana Only	59991	火燵掛布	こたつがけ	cover for kotatsu	reading-only (legacy kanji form gone) (mapped to 炬燵掛け こたつがけ)
-195	Written with Kana Only	61696	七星天道虫	ななほしてんとう; ナナホシテントウ	seven-spot ladybird	reading-only (legacy kanji form gone) (mapped to 七星瓢虫 ななほしてんとう)
+195	Written with Kana Only	58724	あげ間	あげまん	woman purported to bring good luck to the man she is near	unmatched
+195	Written with Kana Only	59991	火燵掛布	こたつがけ	cover for kotatsu	unmatched
+195	Written with Kana Only	61696	七星天道虫	ななほしてんとう; ナナホシテントウ	seven-spot ladybird	unmatched
 195	Written with Kana Only	62499	小っちゃ	ちっちゃ	tiny	unmatched
-195	Written with Kana Only	67476	吝嗇る	ケチる; けちる	to be stingy	reading-only (legacy kanji form gone) (mapped to ケチる ケチる; けちる)
-195	Written with Kana Only	70228	万擦り	まんずり	masturbation (female)	reading-only (legacy kanji form gone) (mapped to マンズリ マンズリ; まんずり)
-195	Written with Kana Only	72581	砂利子	じゃりんこ	student who can't keep up in school	reading-only (legacy kanji form gone) (mapped to じゃりん子 じゃりんこ)
+195	Written with Kana Only	67476	吝嗇る	ケチる; けちる	to be stingy	unmatched
+195	Written with Kana Only	70228	万擦り	まんずり	masturbation (female)	unmatched
+195	Written with Kana Only	72581	砂利子	じゃりんこ	student who can't keep up in school	unmatched
 195	Written with Kana Only	82629	真面目さ	まじめさ	earnestness	unmatched
 195	Written with Kana Only	84380	粁	きろめいとる	kilometer	headword-only (mapped to 粁 キロメートル)
 195	Written with Kana Only	84634	露に	あらわに	openly	unmatched
@@ -3652,14 +3620,14 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 195	Written with Kana Only	91563	潤かす	ふやかす	to soak	headword-only (mapped to 潤かす うるかす)
 195	Written with Kana Only	91736	腕弛るい	かったるい	listless	reading-only (legacy kanji form gone) (mapped to かったるい かったるい)
 195	Written with Kana Only	92295	矢鱈に	やたらに	randomly	unmatched
-195	Written with Kana Only	92898	一寸やそっと	ちょっとやそっと	(followed by a word in negative form) (not) merely	reading-only (legacy kanji form gone) (mapped to ちょっとやそっと ちょっとやそっと)
+195	Written with Kana Only	92898	一寸やそっと	ちょっとやそっと	(followed by a word in negative form) (not) merely	unmatched
 195	Written with Kana Only	96221	鴇	つき	Japanese crested ibis (Nipponia nippon)	ambiguous
 195	Written with Kana Only	101295	火燵布団	こたつぶとん	cover for kotatsu	unmatched
 195	Written with Kana Only	102693	よくある事だが	よくあることだが	as often is the case	unmatched
 195	Written with Kana Only	102971	グイッと呷る	グイッとあおる	to down another drink	unmatched
-195	Written with Kana Only	103360	真婿	まんこ; マンコ	vagina	reading-only (legacy kanji form gone) (mapped to マンコ マンコ; まんこ)
-195	Written with Kana Only	108634	え辛っぽい	えがらっぽい	acrid	reading-only (legacy kanji form gone) (mapped to 蘞辛っぽい いがらっぽい; えがらっぽい)
-195	Written with Kana Only	111484	逸らかす	はぐらかす	to dodge	reading-only (legacy kanji form gone) (mapped to はぐらかす はぐらかす)
+195	Written with Kana Only	103360	真婿	まんこ; マンコ	vagina	unmatched
+195	Written with Kana Only	108634	え辛っぽい	えがらっぽい	acrid	unmatched
+195	Written with Kana Only	111484	逸らかす	はぐらかす	to dodge	unmatched
 195	Written with Kana Only	112469	阿呆ちゃうか	あほちゃうか	(Is one) stupid or something?	unmatched
 195	Written with Kana Only	114053	御座居る	ございる	to be (very pol.)	unmatched
 195	Written with Kana Only	114216	何時もの	いつもの	usual	unmatched
@@ -3667,25 +3635,22 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 195	Written with Kana Only	115385	如何による	いかんによる	depending on the ...	unmatched
 195	Written with Kana Only	118300	切っ掛けに	きっかけに	with ... as a start	unmatched
 195	Written with Kana Only	118455	の辺りに	のほとりに; のあたりに	(esp. のほとりに) on the shores of	unmatched
-195	Written with Kana Only	119213	時めかす	ときめかす	to beat fast (e.g. the heart)	reading-only (legacy kanji form gone) (mapped to ときめかす ときめかす)
+195	Written with Kana Only	119213	時めかす	ときめかす	to beat fast (e.g. the heart)	unmatched
 195	Written with Kana Only	119451	艶艶した	つやつやした	bright	unmatched
 195	Written with Kana Only	120281	滑れる	ずれる	to slide	reading-only (legacy kanji form gone) (mapped to ずれる ずれる; ズレる)
-195	Written with Kana Only	120705	かんじき兎	かんじきうさぎ; カンジキウサギ	snowshoe hare	reading-only (legacy kanji form gone) (mapped to 樏兎 かんじきうさぎ)
+195	Written with Kana Only	120705	かんじき兎	かんじきうさぎ; カンジキウサギ	snowshoe hare	unmatched
 195	Written with Kana Only	122129	珍矛	ちんぽこ	penis	reading-only (legacy kanji form gone) (mapped to ちんぽこ ちんぽこ; チンポコ; ちんぼこ; チンボコ)
-195	Written with Kana Only	126491	真秀等	まほら	great and splendid land (Yamato word)	reading-only (legacy kanji form gone) (mapped to まほら まほら)
+195	Written with Kana Only	126491	真秀等	まほら	great and splendid land (Yamato word)	unmatched
 195	Written with Kana Only	132020	丁度良い時に	ちょうどよいときに	none too soon	unmatched
-195	Written with Kana Only	132222	打つかる	ぶつかる	to strike	reading-only (legacy kanji form gone) (mapped to ぶつかる ぶつかる; ぶっつかる)
+195	Written with Kana Only	132222	打つかる	ぶつかる	to strike	unmatched
 195	Written with Kana Only	132411	脊黄青鸚哥	せきせいいんこ	budgerigar (Melopsittacus undulatus)	reading-only (legacy kanji form gone) (mapped to 背黄青鸚哥 せきせいいんこ)
 195	Written with Kana Only	132870	潤ける	ふやける	to become sodden	headword-only (mapped to 潤ける うるける)
-195	Written with Kana Only	133603	ＮＵＬＬＰＯ	ぬるぽ; ヌルポ; なるぽ; ナルポ	null pointer exception (in the Java programming language)	reading-only (legacy kanji form gone) (mapped to ぬるぽ ぬるぽ; ヌルポ)
+195	Written with Kana Only	133603	ＮＵＬＬＰＯ	ぬるぽ; ヌルポ; なるぽ; ナルポ	null pointer exception (in the Java programming language)	unmatched
 195	Written with Kana Only	135514	置きなさい	おきなさい	put (imperative form)	unmatched
 195	Written with Kana Only	135898	所もある	ところもある	some	unmatched
 195	Written with Kana Only	135960	飽くことなく	あくことなく	insatiably	unmatched
 195	Written with Kana Only	138285	摘み捻子	つまみねじ	thumbscrew	reading-only (legacy kanji form gone) (mapped to つまみねじ つまみねじ; つまみネジ; ツマミネジ)
-195	Written with Kana Only	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
-195	Written with Kana Only	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-195	Written with Kana Only	148312	含羞	はにかみ	(showing) signs of embarrassment	headword-only (mapped to 含羞 がんしゅう)
-195	Written with Kana Only	148734	雌珍々	めちんちん	vulva (child)	reading-only (legacy kanji form gone) (mapped to めちんちん めちんちん)
+195	Written with Kana Only	140270	滑らす	ずらす	to shift	headword-only, different meaning (dropped)
 197	い Adjectives	3277	ホモっぽい	ホモっぽい	pretending to be gay	unmatched
 197	い Adjectives	3919	日の目を見ない	ひのめをみない	staying indoors	unmatched
 197	い Adjectives	6282	危険を厭わない	きけんをいとわない	do not mind running a risk	unmatched
@@ -3694,7 +3659,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 197	い Adjectives	15118	分の悪い	ぶんのわるい	disadvantageous	headword-only (mapped to 分の悪い ぶのわるい)
 197	い Adjectives	15729	点の打ち所がない	てんのうちどころがない	above reproach	unmatched
 197	い Adjectives	25219	普通でない	ふつうでない	abnormal	unmatched
-197	い Adjectives	25361	間だるっこしい	まだるっこしい	slow	reading-only (legacy kanji form gone) (mapped to 間怠っこしい まだるっこしい)
+197	い Adjectives	25361	間だるっこしい	まだるっこしい	slow	unmatched
 197	い Adjectives	29777	一顧もしない	いっこもしない	not give a damn	unmatched
 197	い Adjectives	29803	寄せ付けない	よせつけない	keep away	unmatched
 197	い Adjectives	31841	膠も無い	にべもない	curt	unmatched
@@ -3702,8 +3667,8 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 197	い Adjectives	39854	求められない	もとめられない	unsolicited	unmatched
 197	い Adjectives	41778	普通ではない	ふつうではない	abnormal	unmatched
 197	い Adjectives	43611	更々ない	さらさらない	not in the least	unmatched
-197	い Adjectives	44133	敏い	とい	nimble	headword-only (mapped to 聡い さとい)
-197	い Adjectives	45513	間だるい	まだるい	slow	reading-only (legacy kanji form gone) (mapped to 間怠い まだるい)
+197	い Adjectives	44133	敏い	とい	nimble	headword-only, different meaning (dropped)
+197	い Adjectives	45513	間だるい	まだるい	slow	unmatched
 197	い Adjectives	48197	人気がない	ひとけがない	no sign of life	unmatched
 197	い Adjectives	51396	本意ではない	ほんいではない	something (which) is not one's real intention	unmatched
 197	い Adjectives	53031	聞きたい	ききたい	wanting to hear	unmatched
@@ -3718,11 +3683,11 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 197	い Adjectives	96472	弁えの無い	わきまえのない	indiscreet	unmatched
 197	い Adjectives	101141	彫りの深い	ぼりのふかい	finely chiseled (features)	headword-only (mapped to 彫りの深い ほりのふかい)
 197	い Adjectives	103053	団結が固い	だんけつがかたい	strongly united	unmatched
-197	い Adjectives	108634	え辛っぽい	えがらっぽい	acrid	reading-only (legacy kanji form gone) (mapped to 蘞辛っぽい いがらっぽい; えがらっぽい)
+197	い Adjectives	108634	え辛っぽい	えがらっぽい	acrid	unmatched
 197	い Adjectives	108943	物の数に入らない	もののかずにはいらない	off the map	unmatched
 197	い Adjectives	112615	旨く行かない	うまくいかない	unsuccessful	unmatched
 197	い Adjectives	115055	通りのいい	とおりのいい	well able to pass (e.g. breezes)	unmatched
-197	い Adjectives	115503	厳い	いかつい	grim	headword-only (mapped to 厳い いかい)
+197	い Adjectives	115503	厳い	いかつい	grim	headword-only, different meaning (dropped)
 197	い Adjectives	119011	焦臭い	きなくさい	burning or scorched smell	headword-only (mapped to 焦げ臭い こげくさい)
 197	い Adjectives	123789	行きたく無い	いきたくない	do not want to go	unmatched
 197	い Adjectives	130594	少少足りない	しょうしょうたりない	somewhat lacking	unmatched
@@ -3734,16 +3699,16 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 198	な Adjectives	1074	事も無げ	こともなげ	careless	unmatched
 198	な Adjectives	4099	最も重要	もっともじゅうよう	most important	unmatched
 198	な Adjectives	23682	純一無雑	じゅんいちむざつ	pure and unadulterated	headword-only (mapped to 純一無雑 じゅんいつむざつ)
-198	な Adjectives	23929	御珍々	おちんちん	penis (child)	reading-only (legacy kanji form gone) (mapped to おちんちん おちんちん)
+198	な Adjectives	23929	御珍々	おちんちん	penis (child)	unmatched
 198	な Adjectives	29297	一番魅力的	いちばんみりょくてき	most attractive	unmatched
 198	な Adjectives	37669	仮名勝ち	かながち	using more kana than characters	unmatched
 198	な Adjectives	40973	重畳至極	ちょうじょうしごく	very pleasant	unmatched
 198	な Adjectives	42371	平たん	ひらたん	flat	headword-only (mapped to 平坦 へいたん)
-198	な Adjectives	43073	傾らか	なだらか	gently-sloping	reading-only (legacy kanji form gone) (mapped to なだらか なだらか)
+198	な Adjectives	43073	傾らか	なだらか	gently-sloping	unmatched
 198	な Adjectives	44055	愚純	ぐじゅん	stupid	unmatched
 198	な Adjectives	50694	馬鹿律儀	ばかりちぎ	honest and straightforward to a fault	unmatched
 198	な Adjectives	51967	大慶至極	たいけいしごく	great happiness	unmatched
-198	な Adjectives	55008	下品	かひん	inferior article	headword-only (mapped to 下品 げひん)
+198	な Adjectives	55008	下品	かひん	inferior article	headword-only, different meaning (dropped)
 198	な Adjectives	55221	蛇の様	へびのよう	snakelike	unmatched
 198	な Adjectives	62499	小っちゃ	ちっちゃ	tiny	unmatched
 198	な Adjectives	71952	ページング可能	ページングかのう	pageable	unmatched
@@ -3761,12 +3726,10 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 198	な Adjectives	112649	社製	しゃせい	company manufactured	unmatched
 198	な Adjectives	113768	不潔感	ふけつかん	filthiness	unmatched
 198	な Adjectives	114956	巾単	きんたん	unipotent	headword-only (mapped to 冪単 べきたん)
-198	な Adjectives	116075	真っ平	まったいら	perfectly level	headword-only (mapped to 真っ平 まっぴら)
+198	な Adjectives	116075	真っ平	まったいら	perfectly level	headword-only, different meaning (dropped)
 198	な Adjectives	125054	お草々様	おそうそうさま	neglectful (i.e. in the treatment of one's guests)	unmatched
 198	な Adjectives	128446	短慮性急	たんりょせいきゅう	short-tempered and impatient	unmatched
 198	な Adjectives	138320	ダブルハット	ダブルハット	double hat-trick	unmatched
-198	な Adjectives	148440	形態機能的	けいたいきのう	morphofunctional	headword-only (mapped to 形態機能的 けいたいきのうてき)
-198	な Adjectives	148734	雌珍々	めちんちん	vulva (child)	reading-only (legacy kanji form gone) (mapped to めちんちん めちんちん)
 199	の Adjectives	27	ディスクなし	ディスクなし	diskless	unmatched
 199	の Adjectives	973	イギリス製	イギリスせい	British made	unmatched
 199	の Adjectives	1074	事も無げ	こともなげ	careless	unmatched
@@ -3786,7 +3749,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 199	の Adjectives	38884	未復員	みふくいん	undemobilized	unmatched
 199	の Adjectives	42371	平たん	ひらたん	flat	headword-only (mapped to 平坦 へいたん)
 199	の Adjectives	44004	イタリア製	イタリアせい	Italian made	unmatched
-199	の Adjectives	44934	孰	いずれ	where	reading-only (legacy kanji form gone) (mapped to 何れ いずれ; いづれ)
+199	の Adjectives	44934	孰	いずれ	where	unmatched
 199	の Adjectives	57296	記録保管所	きろくほかんしょ	archive	headword-only (mapped to 記録保管所 きろくほかんじょ)
 199	の Adjectives	62536	クロスリファレンス形式	クロスリファレンスけいしき	cross-referenced	unmatched
 199	の Adjectives	67984	共生	ともいき	symbiosis	headword-only (mapped to 共生 きょうせい)
@@ -3811,9 +3774,8 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 199	の Adjectives	115111	パブロフ	パブロフ	Pavlov	unmatched
 199	の Adjectives	125305	始めのころ	はじめのころ	early	unmatched
 199	の Adjectives	126067	プロセッサ処理主体	プロセッサしょりしゅたい	processor bound	unmatched
-199	の Adjectives	127568	一極	いちごく	quindecillion (US)	headword-only (mapped to 一極 いっきょく)
+199	の Adjectives	127568	一極	いちごく	quindecillion (US)	headword-only, different meaning (dropped)
 199	の Adjectives	141880	貿易上	ぼうえきじょう	trade (foreign)	unmatched
-199	の Adjectives	148867	術後	じゅつぜん	preoperative (preparation, diagnosis, etc.)	headword-only (mapped to 術後 じゅつご)
 616	Aux ~する Reg. Verbs 02	131016	即金取引	そっきんとりひき	cash (spot) transaction	unmatched
 616	Aux ~する Reg. Verbs 02	131836	立志式	りっしんしき	coming-of-age ceremony for middle school students	headword-only (mapped to 立志式 りっししき)
 616	Aux ~する Reg. Verbs 02	131998	生死輪廻	せいしりんね	all things being in flux through the endless circle of birth, death, and rebirth	headword-only (mapped to 生死輪廻 しょうじりんね)
@@ -3840,7 +3802,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 617	Common Words 02	89441	ジョセフソン	ジョセフソン	Josephson	unmatched
 617	Common Words 02	92295	矢鱈に	やたらに	randomly	unmatched
 617	Common Words 02	93156	破り	やぶり	getting away from	unmatched
-617	Common Words 02	102290	上野	うえの	section of Tokyo	headword-only (mapped to 上野 こうずけ)
+617	Common Words 02	102290	上野	うえの	section of Tokyo	headword-only, different meaning (dropped)
 617	Common Words 02	102728	シンシナティ	シンシナティ	Cincinnatti (Ohio)	unmatched
 617	Common Words 02	103687	ハロップ	ハロップ	Harrop	unmatched
 617	Common Words 02	104154	ブラッドエリート	ブラッドエリート	blood elite	unmatched
@@ -3867,8 +3829,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 617	Common Words 02	128519	だと	だと	if it's the case	unmatched
 617	Common Words 02	129876	ちらりと	ちらりと	fleeting (glimpse, glance, etc.)	unmatched
 617	Common Words 02	132005	ハレー	ハレー	Halley	unmatched
-617	Common Words 02	132222	打つかる	ぶつかる	to strike	reading-only (legacy kanji form gone) (mapped to ぶつかる ぶつかる; ぶっつかる)
-617	Common Words 02	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
+617	Common Words 02	132222	打つかる	ぶつかる	to strike	unmatched
 618	Common Words 03	133072	オールドカード	オールドカード	old guard	unmatched
 618	Common Words 03	134938	セラ	セラ	sera	unmatched
 618	Common Words 03	137012	一段と	いちだんと	greater	unmatched
@@ -3879,32 +3840,11 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 618	Common Words 03	139574	南シナ海	みなみシナうみ	South China Sea	headword-only (mapped to 南シナ海 みなみシナかい)
 618	Common Words 03	139861	ツタンカーメン	ツタンカーメン	Tutankamen	unmatched
 618	Common Words 03	139879	惜しまない	おしまない	without sparing (effort, funds, etc.)	unmatched
-618	Common Words 03	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
+618	Common Words 03	140270	滑らす	ずらす	to shift	headword-only, different meaning (dropped)
 618	Common Words 03	141437	テューリング	テューリング	Turing	unmatched
 618	Common Words 03	144305	大文字小文字を区別	おおもじこもじをくべつ	case-sensitivity	unmatched
 618	Common Words 03	144501	干し草を付けた馬	ほしくさをつけたうま	horse loaded with hay	unmatched
 618	Common Words 03	144580	ラサール	ラサール	La Salle	unmatched
-618	Common Words 03	145457	子音	しいいん	consonant	headword-only (mapped to 子音 しいん; しおん)
-618	Common Words 03	145459	はい、そうです	はい、そうです	Yes, it is	reading-only (legacy kanji form gone) (mapped to はい はい; へい)
-618	Common Words 03	145507	四年生	よんねんせい	fourth year student	headword-only (mapped to 四年生 よねんせい)
-618	Common Words 03	145518	待合所	まちあいしょ	waiting room	headword-only (mapped to 待合所 まちあいじょ)
-618	Common Words 03	145534	黄緑色	きみどりいろ	yellow-green	headword-only (mapped to 黄緑色 おうりょくしょく)
-618	Common Words 03	145593	ああ、そうですか	ああ、そうですか	Is that so?	reading-only (legacy kanji form gone) (mapped to ああ ああ)
-618	Common Words 03	145606	無線技術	むせんぎじつ	wireless technology	headword-only (mapped to 無線技術 むせんぎじゅつ)
-618	Common Words 03	145631	通信網	ついいしんもう	communications network	headword-only (mapped to 通信網 つうしんもう)
-618	Common Words 03	145679	再来年	さいらいんねん	year after next	headword-only (mapped to 再来年 さらいねん)
-618	Common Words 03	145681	羊肉	ひつじにく	lamb	headword-only (mapped to 羊肉 ようにく)
-618	Common Words 03	145685	弟さん	おとうつさん	younger brother (polite)	headword-only (mapped to 弟さん おとうとさん)
-618	Common Words 03	145700	いいえ、違います	いいえ、ちがいます	That is incorrect (said in response to a caller confirming the number dialled)	reading-only (legacy kanji form gone) (mapped to いいえ いいえ; いえ)
-618	Common Words 03	145745	はい、おります	はい、おります	Yes, s	reading-only (legacy kanji form gone) (mapped to はい はい; へい)
-618	Common Words 03	145748	五千円札	ごまんえんさつ	5000 yen bill	headword-only (mapped to ５０００円札 ごせんえんさつ)
-618	Common Words 03	145782	いいえ、結構です	いいえ、けっこうです	No, that's OK, thank you	reading-only (legacy kanji form gone) (mapped to いいえ いいえ; いえ)
-618	Common Words 03	145843	生理学	生理学	psychology	headword-only (mapped to 生理学 せいりがく)
-618	Common Words 03	145863	同軸ケーブル	どうじきケーブル	coaxial cable	headword-only (mapped to 同軸ケーブル どうじくケーブル)
-618	Common Words 03	145891	ロゼ	ローゼ	blush wine	headword-only (mapped to ロゼ ロゼ)
-618	Common Words 03	145895	はい、元気です	はい、げんきです	I'm fine	reading-only (legacy kanji form gone) (mapped to はい はい; へい)
-618	Common Words 03	146200	兆	きざし	sign	headword-only (mapped to 兆 ちょう)
-618	Common Words 03	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 619	Computers 02	117338	ピートス	ピートス	PTOS	unmatched
 619	Computers 02	117447	ウォーサ	ウォーサ	WOSA	unmatched
 619	Computers 02	117487	ネットスケープコミュニケータ	ネットスケープコミュニケータ	Netscape Communicator	unmatched
@@ -4244,9 +4184,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 619	Computers 02	144801	レートをベースとしたフロー制御	レートをベースとしたフローせいぎょ	rate-based flow control	unmatched
 619	Computers 02	145260	圧伸器	あつしんき	compandor	headword-only (mapped to 圧伸器 あっしんき)
 619	Computers 02	145267	クイックドロー	クイックドロー	QuickDraw	unmatched
-619	Computers 02	145606	無線技術	むせんぎじつ	wireless technology	headword-only (mapped to 無線技術 むせんぎじゅつ)
-619	Computers 02	145631	通信網	ついいしんもう	communications network	headword-only (mapped to 通信網 つうしんもう)
-619	Computers 02	145863	同軸ケーブル	どうじきケーブル	coaxial cable	headword-only (mapped to 同軸ケーブル どうじくケーブル)
 620	Nouns 02	11611	プレシャットダウンタイムアウト	プレシャットダウンタイムアウト	preshutdown time-out	unmatched
 620	Nouns 02	11676	アポインテメントシステム	アポインテメントシステム	appointment system	unmatched
 620	Nouns 02	11691	地域型ＪＰドメイン名	ちいきかたジェーピードメインめい	geographical type JP domain names	unmatched
@@ -4314,7 +4251,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 620	Nouns 02	14162	ウィンジューロク	ウィンジューロク	Win16	unmatched
 620	Nouns 02	14220	ポイントオブプレザンス	ポイントオブプレザンス	point of presence	unmatched
 620	Nouns 02	14263	１次キャッシュ	いっしキャッシュ	level 1 cache	headword-only (mapped to 一次キャッシュ いちじキャッシュ)
-620	Nouns 02	14266	豌豆まめ	えんどうまめ	pea (Pisum sativum)	reading-only (legacy kanji form gone) (mapped to えんどう豆 えんどうまめ)
+620	Nouns 02	14266	豌豆まめ	えんどうまめ	pea (Pisum sativum)	unmatched
 620	Nouns 02	14331	めちゃぱい	めちゃぱい	big breasts	unmatched
 620	Nouns 02	14345	木板	もくいた	wooden board	headword-only (mapped to 木板 もくはん; きいた)
 620	Nouns 02	14389	良い出足	よいであし	good turnout of people	unmatched
@@ -4485,7 +4422,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 620	Nouns 02	20202	アプル	アプル	A Programming Language	unmatched
 620	Nouns 02	20216	美しい肌の材	うつくしいはだのざい	wood of fine grain	unmatched
 620	Nouns 02	20218	社会奉仕家	しゃかいほうしか	social worker	unmatched
-620	Nouns 02	20225	兎欠	いぐち; とけつ	harelip	reading-only (legacy kanji form gone) (mapped to 猪口 いぐち)
+620	Nouns 02	20225	兎欠	いぐち; とけつ	harelip	unmatched
 620	Nouns 02	20242	口付き煙草	くちづきたばこ	cigarette with a mouthpiece	unmatched
 620	Nouns 02	20252	川の面	かわのおも	river surface	unmatched
 620	Nouns 02	20330	ウィーンアピール	ウィーンアピール	Vienna Appeal	unmatched
@@ -4522,7 +4459,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 620	Nouns 02	21402	受諾側セションサービス利用者	じゅだくがわせしょんサービスりようしゃ	acceptor	unmatched
 620	Nouns 02	21585	リストプローカー	リストプローカー	list broker	unmatched
 620	Nouns 02	21591	狭い部屋	せまいへや	small room	unmatched
-620	Nouns 02	21676	衣蘭	イラン; いらん	Iran	headword-only (mapped to 絹蘭 きぬらん)
+620	Nouns 02	21676	衣蘭	イラン; いらん	Iran	headword-only, different meaning (dropped)
 620	Nouns 02	21707	旧彼女	きゅうかのじょ	ex-girlfriend	unmatched
 620	Nouns 02	21733	フリッカーフリーの	フリッカーフリーの	flicker-free	unmatched
 620	Nouns 02	21841	オリジネートモード	オリジネートモード	originate mode	unmatched
@@ -4554,9 +4491,8 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 620	Nouns 02	23019	摸牌	もうぱい	identifying a piece by touch in a mah-jongg game (mahjong)	headword-only (mapped to 摸牌 モーパイ; モーはい)
 620	Nouns 02	23027	アイモードサービス	アイモードサービス	i-mode service	unmatched
 620	Nouns 02	23028	学歴による差別	がくれきによるさべつ	discrimination on the basis of educational level (background)	unmatched
-620	Nouns 02	148114	下流域	しもりゅういき	lower reaches (e.g. of a valley)	headword-only (mapped to 下流域 かりゅういき)
 621	Nouns 03	23041	十進表記法	じっしんひょうきほう	decimal notation	unmatched
-621	Nouns 03	23109	妓女	ぎゅう; ぎふ	pimp	headword-only (mapped to 伎女 ぎじょ)
+621	Nouns 03	23109	妓女	ぎゅう; ぎふ	pimp	headword-only, different meaning (dropped)
 621	Nouns 03	23157	アナログＲＧＢ	アナログアージービー	analog RGB (red green blue)	headword-only (mapped to アナログＲＧＢ アナログアールジービー)
 621	Nouns 03	23234	油絵タッチ	あぶらえタッチ	oil painting look (on processed photographs, etc.)	unmatched
 621	Nouns 03	23379	ロシア軍隊	ロシアぐんたい	Russian army	unmatched
@@ -4565,7 +4501,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 621	Nouns 03	23682	純一無雑	じゅんいちむざつ	pure and unadulterated	headword-only (mapped to 純一無雑 じゅんいつむざつ)
 621	Nouns 03	23695	灰塵	はいじん	ashes and dust	headword-only (mapped to 灰塵 かいじん)
 621	Nouns 03	23914	出血性の人	しゅっけつせいのひと	bleeder	unmatched
-621	Nouns 03	23929	御珍々	おちんちん	penis (child)	reading-only (legacy kanji form gone) (mapped to おちんちん おちんちん)
+621	Nouns 03	23929	御珍々	おちんちん	penis (child)	unmatched
 621	Nouns 03	24084	三本立て映画	さんぼんたてえいが	triple feature (movie)	unmatched
 621	Nouns 03	24114	硬の芯	こうのしん	hard pencil lead	unmatched
 621	Nouns 03	24318	ブリュー	ブリュー	blue	unmatched
@@ -4612,7 +4548,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 621	Nouns 03	26041	ウェイズ	ウェイズ	WAIS	unmatched
 621	Nouns 03	26042	桟梯子	さんばしご	gangway ladder	unmatched
 621	Nouns 03	26054	ティックルティーケー	ティックルティーケー	Tcl-Tk	unmatched
-621	Nouns 03	26136	一身	いちみ	partisans	headword-only (mapped to 一身 いっしん)
+621	Nouns 03	26136	一身	いちみ	partisans	headword-only, different meaning (dropped)
 621	Nouns 03	26179	我勝ち	われがち	everybody for himself	unmatched
 621	Nouns 03	26183	問題の解決	もんだいのかいけつ	problem solution	unmatched
 621	Nouns 03	26292	刑余の人	けいよのひと	ex-convict	unmatched
@@ -4742,13 +4678,13 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 621	Nouns 03	30726	ビーエヌシーコネクタ	ビーエヌシーコネクタ	BNC connector	unmatched
 621	Nouns 03	30751	材器	ざいき	ability	headword-only (mapped to 才器 さいき)
 621	Nouns 03	30835	コンパイラ型言語	コンパイラかたげんご	compiler language	headword-only (mapped to コンパイラ型言語 コンパイラがたげんご)
-621	Nouns 03	30851	稼ぎ時	かせぎとき	winning steak	headword-only (mapped to 稼ぎ時 かせぎどき)
+621	Nouns 03	30851	稼ぎ時	かせぎとき	winning steak	headword-only, different meaning (dropped)
 621	Nouns 03	30977	あて先変更の発信者による禁止	あてさきへんこうのはっしんしゃによるきんし	redirection disallowed originator	unmatched
 621	Nouns 03	30986	先発明主義	せんぱつめいしゅぎ	first-to-invent system (e.g. in patent law)	headword-only (mapped to 先発明主義 せんはつめいしゅぎ)
 621	Nouns 03	31001	全域アドレス管理	ぜんいきアドレスかんり	universal address administration	unmatched
 621	Nouns 03	31003	柔らかい毛布	やわらかいもうふ	soft blanket	unmatched
 621	Nouns 03	31088	クパティーノ	クパティーノ	Cupertino	unmatched
-621	Nouns 03	31123	畝ねり	うねり	wave motion	reading-only (legacy kanji form gone) (mapped to 畝り うねり)
+621	Nouns 03	31123	畝ねり	うねり	wave motion	unmatched
 621	Nouns 03	31164	非標準拡張	ひひょうじゅんかくちょう	nonstandard extension	unmatched
 621	Nouns 03	31202	プレスルルース	プレスルルース	press release	unmatched
 621	Nouns 03	31277	皇帝の嗣	こうていのし	Emperor's heir	unmatched
@@ -4864,7 +4800,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 622	Nouns 04	35288	分別ゴミ	ふんべつゴミ	dividing up rubbish into burnable and non-burnable	headword-only (mapped to 分別ゴミ ぶんべつゴミ)
 622	Nouns 04	35293	合格者名	ごうかくしゃめい	names of successful candidates	unmatched
 622	Nouns 04	35309	資本市場	しほんいちば	capital market	headword-only (mapped to 資本市場 しほんしじょう)
-622	Nouns 04	35311	日間	ひあい	time	headword-only (mapped to 日間 にっかん)
+622	Nouns 04	35311	日間	ひあい	time	headword-only, different meaning (dropped)
 622	Nouns 04	35411	クレン	クレン	CREN	unmatched
 622	Nouns 04	35475	余白頁	よはくぺえじ	blank page	headword-only (mapped to 余白頁 よはくページ)
 622	Nouns 04	35522	切り得	きりどく	no retribution for a samurai killing a commoner	unmatched
@@ -4905,7 +4841,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 622	Nouns 04	36601	バーストモード転送	バーストモードてんそう	burst-mode transfer	unmatched
 622	Nouns 04	36621	実網	じつあみ	actual net (fishing)	unmatched
 622	Nouns 04	36649	不躾者	ぶしつけもの	rude person	unmatched
-622	Nouns 04	36650	難波	なんば	mountain Japanese apricot	headword-only (mapped to 難波 なにわ)
+622	Nouns 04	36650	難波	なんば	mountain Japanese apricot	headword-only, different meaning (dropped)
 622	Nouns 04	36671	オートチューニングデッキ	オートチューニングデッキ	automatic tuning deck	unmatched
 622	Nouns 04	36708	ハイレベルレンゲージ	ハイレベルレンゲージ	high-level language	unmatched
 622	Nouns 04	36711	正安息香酸	せいあんそくこうさん	orthobenzoic acid	unmatched
@@ -4919,7 +4855,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 622	Nouns 04	36931	コンシューマー向けポータブルモデル	コンシューマーむけポータブルモデル	consumer portable	unmatched
 622	Nouns 04	36941	ゴラン高原	ゴランこうげん	Golan Heights	unmatched
 622	Nouns 04	37029	会話モード	かいわモード	interactive mode	unmatched
-622	Nouns 04	37044	打つ借り	ぶつかり	stopping the opponent's charge (in training) and swinging him down	reading-only (legacy kanji form gone) (mapped to 打つかり ぶつかり)
+622	Nouns 04	37044	打つ借り	ぶつかり	stopping the opponent's charge (in training) and swinging him down	unmatched
 622	Nouns 04	37127	バイフュウエル車	バイフュウエルしゃ	dual-fuel vehicle	unmatched
 622	Nouns 04	37128	国立歴史民族博物館	こくりつれきしみんぞくはくぶつかん	National museum of Japanese history	unmatched
 622	Nouns 04	37137	公衆伝動	こうしゅうでんどう	public evangelism	unmatched
@@ -4978,7 +4914,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 622	Nouns 04	39087	エックスニーゴー	エックスニーゴー	X.25	unmatched
 622	Nouns 04	39089	切れるナイフ	きれるナイフ	sharp knife	unmatched
 622	Nouns 04	39096	オーディオカセットプレーヤ	オーディオカセットプレーヤ	tape player	unmatched
-622	Nouns 04	39105	中越	ちゅうごし	over center field (centre)	headword-only (mapped to 中越 ちゅうえつ)
+622	Nouns 04	39105	中越	ちゅうごし	over center field (centre)	headword-only, different meaning (dropped)
 622	Nouns 04	39110	滅多切り	めったきり	hack to pieces	headword-only (mapped to メッタ斬り めったぎり)
 622	Nouns 04	39137	ヒステリー性黒内障	ヒステリーせいこくないしょう	hysteric amaurosis	unmatched
 622	Nouns 04	39184	傷病捕虜	しょうびょうほりょ	sick and wounded prisoners	unmatched
@@ -5014,7 +4950,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 622	Nouns 04	40429	ピーエーリスク	ピーエーリスク	PA-RISC	unmatched
 622	Nouns 04	40459	ランダマイズルーチン	ランダマイズルーチン	randomizing routine	unmatched
 622	Nouns 04	40469	コンソールタイプ	コンソールタイプ	console type	unmatched
-622	Nouns 04	40512	垂領	ひたたれ	typical dress of the military class, usually worn together with a hakama	headword-only (mapped to 垂領 たりくび)
+622	Nouns 04	40512	垂領	ひたたれ	typical dress of the military class, usually worn together with a hakama	headword-only, different meaning (dropped)
 622	Nouns 04	40529	三囲	みつい	Mitsui (company)	unmatched
 622	Nouns 04	40532	信用買い	しんようかい	margin buying	headword-only (mapped to 信用買い しんようがい)
 622	Nouns 04	40676	ベルサイユ	ベルサイユ	Versailles	unmatched
@@ -5071,13 +5007,13 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 622	Nouns 04	42532	ピーシーヒャク	ピーシーヒャク	PC100	unmatched
 622	Nouns 04	42566	標題誌	ひょうだいし	title page	unmatched
 622	Nouns 04	42621	ナイトヅレス	ナイトヅレス	nightdress	unmatched
-622	Nouns 04	42651	胡麻磨り	ごますり	sycophant	reading-only (legacy kanji form gone) (mapped to 胡麻擂り ごますり)
+622	Nouns 04	42651	胡麻磨り	ごますり	sycophant	unmatched
 622	Nouns 04	42660	Ｗ杯	ワールドカップ; ダブルはい	World Cup (soccer)	headword-only (mapped to Ｗ杯 ダブリューはい)
 622	Nouns 04	42911	具の無いスープ	ぐのないスープ	soup with no ingredients	unmatched
 622	Nouns 04	42929	チャネル間アダプタ	チャネルかんアダプタ	channel-to-channel adapter	unmatched
 622	Nouns 04	42984	定まらない天気	さだまらないてんき	changeable weather	unmatched
 622	Nouns 04	43000	じゃぱゆき	じゃぱゆき	derog. term for Asian women working in Japan	unmatched
-622	Nouns 04	43073	傾らか	なだらか	gently-sloping	reading-only (legacy kanji form gone) (mapped to なだらか なだらか)
+622	Nouns 04	43073	傾らか	なだらか	gently-sloping	unmatched
 622	Nouns 04	43093	作家の卵	さっかのたまご	aspiring writer	unmatched
 622	Nouns 04	43112	アルティアハチハチゼロゼロ	アルティアハチハチゼロゼロ	Altair8800	unmatched
 622	Nouns 04	43196	コッパーマイン	コッパーマイン	Coppermine	unmatched
@@ -5153,11 +5089,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 622	Nouns 04	46102	ファイバツーザカーブ	ファイバツーザカーブ	fiber to the curb	unmatched
 622	Nouns 04	46132	動軸回転表示	どうじくかいてんひょうじ	tumbling	unmatched
 622	Nouns 04	46176	屠畜場従業員	とちくじょうじゅうぎょういん	slaughterhouse worker	unmatched
-622	Nouns 04	147027	ヽ	くりかえし	repetition mark in katakana	headword-only (mapped to ヽ ヽ)
-622	Nouns 04	147033	ＡＬＤ	エイエルディー	atomic layer deposition	headword-only (mapped to ＡＬＤ エー・エル・ディー)
-622	Nouns 04	147034	ＡＬＥ	エイエルイー	atomic layer epitaxy	headword-only (mapped to ＡＬＥ エー・エル・イー)
-622	Nouns 04	147043	ＶＰＥ	ヴイピーイー	vapor-phase epitaxy	headword-only (mapped to ＶＰＥ ブイ・ピー・イー)
-622	Nouns 04	147119	ふらつき感	ふるつきかん	lightheadedness	headword-only (mapped to ふらつき感 ふらつきかん)
 623	Nouns 05	46239	オンラインテストシステム	オンラインテストシステム	online test system	unmatched
 623	Nouns 05	46256	別の本	べつのほん	another (different) book	unmatched
 623	Nouns 05	46280	前述の通り	ぜんじゅつのとおり	as above	unmatched
@@ -5168,7 +5099,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 623	Nouns 05	46435	ハイゼンベルグ	ハイゼンベルグ	Heisenberg	unmatched
 623	Nouns 05	46468	エヌシーティービー	エヌシーティービー	NCTV	unmatched
 623	Nouns 05	46508	折りたたみ連続紙	おりたたみれんぞくし	fanfold paper	unmatched
-623	Nouns 05	46543	副木	ふくぎ	secondary	headword-only (mapped to 副木 ふくぼく)
+623	Nouns 05	46543	副木	ふくぎ	secondary	headword-only, different meaning (dropped)
 623	Nouns 05	46656	ジェット推進研究所	ジェットすいしんけんきゅうしょ	Jet Propulsion Laboratory	headword-only (mapped to ジェット推進研究所 ジェットすいしんけんきゅうじょ)
 623	Nouns 05	46707	内部監査人	ないぶかんさじん	internal auditor	headword-only (mapped to 内部監査人 ないぶかんさにん)
 623	Nouns 05	46727	トウィップ	トウィップ	twip	unmatched
@@ -5263,7 +5194,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 623	Nouns 05	50938	オンライン銀行業務設備	オンラインぎんこうぎょうむせつび	online banking facilities	unmatched
 623	Nouns 05	50963	同一環境	どういちかんきょう	unified environment	unmatched
 623	Nouns 05	51013	エムエムエックス	エムエムエックス	MMX	unmatched
-623	Nouns 05	51037	然斯	そうこう	meanwhile	reading-only (legacy kanji form gone) (mapped to 然う斯う そうこう)
+623	Nouns 05	51037	然斯	そうこう	meanwhile	unmatched
 623	Nouns 05	51038	一般化作画基本要素	いっぱんかさくがきほんようそ	generalized drawing primitive	unmatched
 623	Nouns 05	51042	英語字幕	えいごじまく	English subtitles	unmatched
 623	Nouns 05	51078	エムオーラップ	エムオーラップ	MOLAP	unmatched
@@ -5293,7 +5224,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 623	Nouns 05	52128	イルドフランス	イルドフランス	Ile de France (region around Paris)	unmatched
 623	Nouns 05	52138	重複保険	じゅうふくほけん	double insurance	headword-only (mapped to 重複保険 ちょうふくほけん)
 623	Nouns 05	52210	花車椿	はなぐるまつばき	hanakuruma camelia	unmatched
-623	Nouns 05	52270	存廃	ぞんぱい	(whether to) continue or eliminate	headword-only (mapped to 存廃 そんぱい)
+623	Nouns 05	52270	存廃	ぞんぱい	(whether to) continue or eliminate	headword-only, different meaning (dropped)
 623	Nouns 05	52363	必見の物	ひっけんのもの	a must	unmatched
 623	Nouns 05	52367	スペックマーク	スペックマーク	SPECmark	unmatched
 623	Nouns 05	52390	ピーゴ	ピーゴ	P5	unmatched
@@ -5354,7 +5285,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 623	Nouns 05	54127	モバイルギア	モバイルギア	Mobile Gear	unmatched
 623	Nouns 05	54172	空の文字列	そらのもじれつ	empty string (null string)	headword-only (mapped to 空の文字列 からのもじれつ)
 623	Nouns 05	54242	微妙な情勢	びみょうなじょうせい	subtle, delicate and complicated situation	unmatched
-623	Nouns 05	54286	金ぶん	かなぶん; カナブン	drone beetle (a scarabaeid beetle, Rhomborrhina japonica)	reading-only (legacy kanji form gone) (mapped to 金蚉 かなぶん)
+623	Nouns 05	54286	金ぶん	かなぶん; カナブン	drone beetle (a scarabaeid beetle, Rhomborrhina japonica)	unmatched
 623	Nouns 05	54316	局面一転	きょくめんいってん	sudden reversal in the tide of events	unmatched
 623	Nouns 05	54340	業務の外部委託	ぎょうむのがいぶいたく	outsourcing	unmatched
 623	Nouns 05	54348	アップグレードの準備	アップグレードのじゅんび	preparing to upgrade	unmatched
@@ -5379,14 +5310,14 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 623	Nouns 05	54821	サーチエンジンポジショニング	サーチエンジンポジショニング	search engine positioning	unmatched
 623	Nouns 05	54829	一昨年辺り	いっさくねんあたり	the year before last or thereabouts	unmatched
 623	Nouns 05	54845	化学上	かがくじょう	from the chemical point of view	unmatched
-623	Nouns 05	54850	魚料理	ぎょりょうり	seafood dinner	headword-only (mapped to 魚料理 さかなりょうり)
+623	Nouns 05	54850	魚料理	ぎょりょうり	seafood dinner	headword-only, different meaning (dropped)
 623	Nouns 05	54870	統計上の不突合	とうけいじょうのふとつごう	statistical discrepancy	unmatched
 623	Nouns 05	54886	木に絡まる植物	きにからまるしょくぶつ	creeping plant on trees	unmatched
 623	Nouns 05	54899	心は良い男	しんはよいおとこ	a good man at heart	unmatched
 623	Nouns 05	54929	テックワイヤー	テックワイヤー	TechWire	unmatched
 623	Nouns 05	54955	東歌	とうか	the old Kanto-area folk songs	headword-only (mapped to 東歌 あずまうた)
 623	Nouns 05	55005	縁神獣鏡	しんじゅうきょう	ancient mirror decorated with gods and animals	unmatched
-623	Nouns 05	55008	下品	かひん	inferior article	headword-only (mapped to 下品 げひん)
+623	Nouns 05	55008	下品	かひん	inferior article	headword-only, different meaning (dropped)
 623	Nouns 05	55087	飛空艇	ひくうてい	airship	unmatched
 623	Nouns 05	55110	李承晩	りしょうばん	Rhee Syngman, president of Korea 1948-1960	unmatched
 623	Nouns 05	55127	データ付き領域集合	データつきりょういきしゅうごう	fill area set with data	unmatched
@@ -5453,7 +5384,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 623	Nouns 05	57398	デジタルＶＴＲ	デジタルブイティーアー	digital Video Tape Recorder	headword-only (mapped to デジタルＶＴＲ デジタルブイティーアール)
 623	Nouns 05	57403	マイエスエーピードットコム	マイエスエーピードットコム	mySAP.com	unmatched
 623	Nouns 05	57447	痛恨のミス	つうこんのミス	cardinal mistake	unmatched
-623	Nouns 05	57545	春坊	はるぼう	nickname for such names as Haruo or Haruko	headword-only (mapped to 春坊 とうぼう)
+623	Nouns 05	57545	春坊	はるぼう	nickname for such names as Haruo or Haruko	headword-only, different meaning (dropped)
 623	Nouns 05	57559	サイオン	サイオン	PSION	unmatched
 623	Nouns 05	57583	妄弁	ぼうべん	incoherent talk	unmatched
 623	Nouns 05	57667	子供連れ	こどもずれ	accompanied by children	headword-only (mapped to 子供連れ こどもづれ)
@@ -5490,7 +5421,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	58623	世事に暗い	せじにくらい	know little of the world	unmatched
 624	Nouns 06	58694	固いカラー	かたいカラー	stiff collar	unmatched
 624	Nouns 06	58719	八郎潟	はちろうがた	Lagoon Hachiro	unmatched
-624	Nouns 06	58724	あげ間	あげまん	woman purported to bring good luck to the man she is near	reading-only (legacy kanji form gone) (mapped to 上げまん あげまん)
+624	Nouns 06	58724	あげ間	あげまん	woman purported to bring good luck to the man she is near	unmatched
 624	Nouns 06	58768	勧世縒	かんぜより	twisted paper	unmatched
 624	Nouns 06	58775	究極の浮力コントロール・ダイブ	きゅうきょくのふりょくコントロール・ダイブ	peak performance buoyancy dive	unmatched
 624	Nouns 06	58821	クライアント側アプリケーション	クライアントがわアプリケーシッン	client-side application	headword-only (mapped to クライアント側アプリケーション クライアントがわアプリケーション)
@@ -5518,7 +5449,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	59882	デジタルオーディオテープレコーダー	デジタルオーディオテープレコーダー	digital audio tape recorder	unmatched
 624	Nouns 06	59922	予讚本線	よさんほんせん	Yosan Main Line (Ehime-Kagawa Railway)	unmatched
 624	Nouns 06	59955	サイバーキャッシュ	サイバーキャッシュ	cybercash	unmatched
-624	Nouns 06	59991	火燵掛布	こたつがけ	cover for kotatsu	reading-only (legacy kanji form gone) (mapped to 炬燵掛け こたつがけ)
+624	Nouns 06	59991	火燵掛布	こたつがけ	cover for kotatsu	unmatched
 624	Nouns 06	60127	機嫌奉伺	きげんほうし	inquiring into the health (frame of mind) of someone	unmatched
 624	Nouns 06	60171	空取り引き	からとりひき; くうとりひき	fictitious or paper transaction	unmatched
 624	Nouns 06	60206	サイバースクワット	サイバースクワット	cyber squat	unmatched
@@ -5563,7 +5494,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	61627	分岐構成体	ぶんぎこうせいたい	branch construct	unmatched
 624	Nouns 06	61628	物理表現	ぶつりひょうげん	physical rendition	unmatched
 624	Nouns 06	61670	ニコラス	ニコラス	Nicholas	unmatched
-624	Nouns 06	61696	七星天道虫	ななほしてんとう; ナナホシテントウ	seven-spot ladybird	reading-only (legacy kanji form gone) (mapped to 七星瓢虫 ななほしてんとう)
+624	Nouns 06	61696	七星天道虫	ななほしてんとう; ナナホシテントウ	seven-spot ladybird	unmatched
 624	Nouns 06	61715	悪魔の詩	あくまのし	The Satanic Verses (novel by Salman Rushdie)	headword-only (mapped to 悪魔の詩 あくまのうた)
 624	Nouns 06	61717	草の根ＢＢＳ	くさのねビービーエス	grassroots bulletin board	unmatched
 624	Nouns 06	61731	列候	れっこう	many daimyo	unmatched
@@ -5584,7 +5515,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	61982	ブイテキスト	ブイテキスト	V-Text	unmatched
 624	Nouns 06	62022	Ｋ−Ｔ境界	ケイーティーきょうかい	K-T boundary (between the Cretaceous Period and the Tertiary Period)	unmatched
 624	Nouns 06	62077	アイソパルスシステム	アイソパルスシステム	isopulse system	unmatched
-624	Nouns 06	62091	斜交	はすかい	aslant	headword-only (mapped to 斜交 しゃこう)
+624	Nouns 06	62091	斜交	はすかい	aslant	headword-only, different meaning (dropped)
 624	Nouns 06	62103	住宅用	じたくよう	home, residential use	headword-only (mapped to 住宅用 じゅうたくよう)
 624	Nouns 06	62172	ＥＥＰＲＯＭ	イーイープロム	electrically erasable programmable read-only memory	headword-only (mapped to ＥＥＰＲＯＭ イー・イー・ピー・ロム)
 624	Nouns 06	62253	紙媒体	しばいたい	paper (as opposed to electronic)	headword-only (mapped to 紙媒体 かみばいたい)
@@ -5605,7 +5536,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	62692	トランザクション終了フェーズ	トランザクションしゅうりょうフェーズ	termination phase of a transaction	unmatched
 624	Nouns 06	62806	ワークパッド	ワークパッド	WorkPad	unmatched
 624	Nouns 06	62904	私用かぎ	しようかぎ	private key	unmatched
-624	Nouns 06	62912	編み包み	あみぐるみ	knitted or crocheted small stuffed animal or anthropomorphic creature (lit. knitted stuffed toy)	reading-only (legacy kanji form gone) (mapped to 編みぐるみ あみぐるみ)
+624	Nouns 06	62912	編み包み	あみぐるみ	knitted or crocheted small stuffed animal or anthropomorphic creature (lit. knitted stuffed toy)	unmatched
 624	Nouns 06	62920	ニューモノウルトラマイクロスコーピックシリコヴォルケーノコニオシス	ニューモノウルトラマイクロスコーピックシリコヴォルケーノコニオシス	pneumonoultramicroscopicsilicovolcanoconiosis	unmatched
 624	Nouns 06	62949	ロシス	ロシス	LOCIS	unmatched
 624	Nouns 06	62990	舎密学	せいみがく	chemistry (old term)	unmatched
@@ -5651,7 +5582,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	64355	アイアイオーピー	アイアイオーピー	IIOP	unmatched
 624	Nouns 06	64415	全封地	ぜんほうち	the whole fief	unmatched
 624	Nouns 06	64536	マイトーク	マイトーク	Mytalk	unmatched
-624	Nouns 06	64726	一役	いちやく	an office	headword-only (mapped to 一役 ひとやく)
+624	Nouns 06	64726	一役	いちやく	an office	headword-only, different meaning (dropped)
 624	Nouns 06	64822	微かな笑み	かすかなえみ	faint smile	unmatched
 624	Nouns 06	64881	長過ぎ	ながすぎ	too long	unmatched
 624	Nouns 06	64924	修整版	しゅうせいはん	revised version	unmatched
@@ -5679,7 +5610,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	65791	大弯	たいわん	greater curvature of stomach	headword-only (mapped to 大弯 だいわん)
 624	Nouns 06	65819	ゼロアドレス命令	ゼロアドレスめいれい	zero address instruction	unmatched
 624	Nouns 06	65971	最初の皿	さいしょのさら	first course	unmatched
-624	Nouns 06	65973	ｘｘ	ちょめちょめ	(sometimes also **, ○○, etc.) blankety-blank	reading-only (legacy kanji form gone) (mapped to チョメチョメ チョメチョメ; ちょめちょめ)
+624	Nouns 06	65973	ｘｘ	ちょめちょめ	(sometimes also **, ○○, etc.) blankety-blank	unmatched
 624	Nouns 06	66049	険しい路	けわしいみち	steep street	unmatched
 624	Nouns 06	66134	バルーンヘルプ	バルーンヘルプ	balloon help	unmatched
 624	Nouns 06	66147	投影ビューポート	とうえいビューポート	projection viewport	unmatched
@@ -5688,7 +5619,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 624	Nouns 06	66183	太い線	ふといせん	thick line	unmatched
 624	Nouns 06	66192	目指	もくし	aim at	headword-only (mapped to 目差し めざし)
 624	Nouns 06	66228	猫属	ねこぞく	the cat genus	unmatched
-624	Nouns 06	66314	赤日	あかび	menstruation	headword-only (mapped to 赤日 せきじつ)
+624	Nouns 06	66314	赤日	あかび	menstruation	headword-only, different meaning (dropped)
 624	Nouns 06	66428	要る物	いるもの	thing (someone) needs or wants	unmatched
 624	Nouns 06	66446	合わない答え	あわないこたえ	incorrect answer	unmatched
 624	Nouns 06	66575	セットアップメッセージ	セットアップメッセージ	SETUP message	unmatched
@@ -5774,7 +5705,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 625	Nouns 07	69696	レックス	レックス	REXX	unmatched
 625	Nouns 07	69749	銅の器	あかがねのうつわ	copper vessel	unmatched
 625	Nouns 07	69792	コンピュータグラフィクスのメタファイル	コンピュータグラフィクスのメタファイル	Computer Graphics Metafile	unmatched
-625	Nouns 07	69825	ノート型	ノートかた	note-type	headword-only (mapped to ノート型 ノートがた)
+625	Nouns 07	69825	ノート型	ノートかた	note-type	headword-only, different meaning (dropped)
 625	Nouns 07	69876	宅の子供	たくのこども	my (our) child	unmatched
 625	Nouns 07	69922	アノイボット	アノイボット	annoybot	unmatched
 625	Nouns 07	70005	完備した表	かんびしたひょう	complete table	unmatched
@@ -5788,7 +5719,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 625	Nouns 07	70178	ウェットストーン	ウェットストーン	Whetstone	unmatched
 625	Nouns 07	70213	全般ヘルプ	ぜんぱんヘルプ	extended help	unmatched
 625	Nouns 07	70217	ローカル事項	ローカルじこう	local matter	unmatched
-625	Nouns 07	70228	万擦り	まんずり	masturbation (female)	reading-only (legacy kanji form gone) (mapped to マンズリ マンズリ; まんずり)
+625	Nouns 07	70228	万擦り	まんずり	masturbation (female)	unmatched
 625	Nouns 07	70301	ビッグローブ	ビッグローブ	BIGLOBE	unmatched
 625	Nouns 07	70323	シッピングゾーン	シッピングゾーン	shipping zone	unmatched
 625	Nouns 07	70370	締まった体格	しまったたいかく	firm build	unmatched
@@ -5863,7 +5794,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 625	Nouns 07	72457	口の小さい	くちのちいさい	small mouthed	unmatched
 625	Nouns 07	72494	極右指導者	きょくうしどうしゃ	far-right leader	unmatched
 625	Nouns 07	72513	甚だしい誤解	はなはだしいごかい	serious misunderstanding	unmatched
-625	Nouns 07	72581	砂利子	じゃりんこ	student who can't keep up in school	reading-only (legacy kanji form gone) (mapped to じゃりん子 じゃりんこ)
+625	Nouns 07	72581	砂利子	じゃりんこ	student who can't keep up in school	unmatched
 625	Nouns 07	72589	乱編成ファイル	らんへんせいファイル	random file	unmatched
 625	Nouns 07	72672	馴染	なじ	intimacy	headword-only (mapped to 馴染み なじみ)
 625	Nouns 07	72774	段落の見出し	だんらくのみだし	paragraph header	unmatched
@@ -5969,7 +5900,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 625	Nouns 07	76255	チェックアウトタイム	チェックアウトタイム	check-out time	unmatched
 625	Nouns 07	76260	オートエグゼックバット	オートエグゼックバット	AUTOEXEC.BAT	unmatched
 625	Nouns 07	76441	スクロールバースライダ	スクロールバースライダ	scroll bar slider	unmatched
-625	Nouns 07	76482	馬番連勝	ばばんれんしょう	post (horse racing)	headword-only (mapped to 馬番連勝 うまばんれんしょう)
+625	Nouns 07	76482	馬番連勝	ばばんれんしょう	post (horse racing)	headword-only, different meaning (dropped)
 625	Nouns 07	76527	メチルアルコール中毒	メチルアルコールちゅうどく	methyl alcohol intoxication	unmatched
 625	Nouns 07	76575	ストローボート	ストローボート	straw vote	unmatched
 625	Nouns 07	76727	団十郎丈	だんじゅうろうじょう	Danjuro (kabuki actor)	unmatched
@@ -6233,7 +6164,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 626	Nouns 08	86815	ボイスメッセージング	ボイスメッセージング	voice messaging	unmatched
 626	Nouns 08	86841	お金本位	おかねほんい	money-centered way (of thinking)	unmatched
 626	Nouns 08	86864	クリスチャンギャングスタラップ	クリスチャンギャングスタラップ	Christian gangsta rap	unmatched
-626	Nouns 08	86896	落葉低木	うりのき; ウリノキ	alangium platanifolium var. trilobum	headword-only (mapped to 落葉低木 らくようていぼく)
+626	Nouns 08	86896	落葉低木	うりのき; ウリノキ	alangium platanifolium var. trilobum	headword-only, different meaning (dropped)
 626	Nouns 08	86975	火柴	かしば	match	unmatched
 626	Nouns 08	87009	安倍内閣	あべないかく	Abe Cabinet (inaugurated as the Japanese government, 2006-09-26)	unmatched
 626	Nouns 08	87022	移動不可データセット	いどうふかデータセット	unmovable data set	unmatched
@@ -6248,7 +6179,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 626	Nouns 08	87437	スペクトルバンド	スペクトルバンド	spectral band	unmatched
 626	Nouns 08	87466	異常の回復	いじょうのかいふく	fault (anomaly) recovery	unmatched
 626	Nouns 08	87501	経営基盤の充実	けいえいきばんのじゅうじつ	fulfillment of management base	unmatched
-626	Nouns 08	87505	単漢	たんかん	single kanji	reading-only (legacy kanji form gone) (mapped to 桶柑 たんかん)
+626	Nouns 08	87505	単漢	たんかん	single kanji	unmatched
 626	Nouns 08	87533	パラメタ識別子	パラメタしきべつし	parameter identifier	unmatched
 626	Nouns 08	87548	低く	ひくく	lowering	unmatched
 626	Nouns 08	87617	領収書の控え	りょうしゅうしょのひかえ	counterfoil of a receipt	unmatched
@@ -6302,7 +6233,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 626	Nouns 08	89231	交直両用式計算器	こうちょくりょうようしきけいさんき	mains	unmatched
 626	Nouns 08	89334	大胆至極	だいたんしごく	the height of daring	unmatched
 626	Nouns 08	89379	ミニター	ミニター	monitor	unmatched
-626	Nouns 08	89395	半濁音符	はんだくおんふ	maru mark	headword-only (mapped to 半濁音符 はんだくおんぷ)
+626	Nouns 08	89395	半濁音符	はんだくおんふ	maru mark	headword-only, different meaning (dropped)
 626	Nouns 08	89409	硬い表情	かたいひょうじょう	stiff expression	unmatched
 626	Nouns 08	89441	ジョセフソン	ジョセフソン	Josephson	unmatched
 626	Nouns 08	89513	固い結び目	かたいむすびめ	tight knot	unmatched
@@ -6392,7 +6323,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	92778	金拾万円	きんじゅうまんえん	100,000 Yen	unmatched
 627	Nouns 09	92802	エーエムーディー	エーエムーディー	AMD	unmatched
 627	Nouns 09	92870	石材店従業員	せきざいてんじゅうぎょういん	stone dealer	unmatched
-627	Nouns 09	92898	一寸やそっと	ちょっとやそっと	(followed by a word in negative form) (not) merely	reading-only (legacy kanji form gone) (mapped to ちょっとやそっと ちょっとやそっと)
+627	Nouns 09	92898	一寸やそっと	ちょっとやそっと	(followed by a word in negative form) (not) merely	unmatched
 627	Nouns 09	92908	古武士然	こぶしぜん	having something of the old-time samurai about one	unmatched
 627	Nouns 09	92942	定まった場所	さだまったばしょ	specified place	unmatched
 627	Nouns 09	92972	一括払い	いっかつはらい	lump-sum payment	headword-only (mapped to 一括払い いっかつばらい)
@@ -6401,10 +6332,10 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	93156	破り	やぶり	getting away from	unmatched
 627	Nouns 09	93160	支持杭	しじこう	bearing pile	headword-only (mapped to 支持杭 しじぐい; しじくい)
 627	Nouns 09	93178	海賊の髑髏	かいぞくのどくろ	skull and crossbones (pirate flag)	unmatched
-627	Nouns 09	93204	花房	はなふさ	bunch of flowers	headword-only (mapped to 花房 はなぶさ; かぼう)
+627	Nouns 09	93204	花房	はなふさ	bunch of flowers	headword-only, different meaning (dropped)
 627	Nouns 09	93308	リーズアンドラッグズ	リーズアンドラッグズ	leads and lags	unmatched
 627	Nouns 09	93344	セション生存期間	セションせいぞんきかん	session lifetime	unmatched
-627	Nouns 09	93420	狂拳	きょうけん	crazy fist (dragonball technique)	reading-only (legacy kanji form gone) (mapped to 恭謙 きょうけん)
+627	Nouns 09	93420	狂拳	きょうけん	crazy fist (dragonball technique)	unmatched
 627	Nouns 09	93422	イレーズ	イレーズ	erase	unmatched
 627	Nouns 09	93446	将棋倒れ	しょうぎだおれ	falling one after another	unmatched
 627	Nouns 09	93532	横座標	おうざひょう	abscissa	headword-only (mapped to 横座標 よこざひょう)
@@ -6422,7 +6353,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	93760	アイアンメイデン	アイアンメイデン	iron maiden	unmatched
 627	Nouns 09	93810	アクセス頻度の低いファイル	アクセスひんどのひくいファイル	infrequently accessed files	unmatched
 627	Nouns 09	94005	紛らわしい名前	まぎらわしいなまえ	confusing (misleading) name	unmatched
-627	Nouns 09	94007	剃刀触	かみそりかぶれ	razor rash	reading-only (legacy kanji form gone) (mapped to 剃刀気触れ かみそりかぶれ)
+627	Nouns 09	94007	剃刀触	かみそりかぶれ	razor rash	unmatched
 627	Nouns 09	94027	セル間の到着時間	セルあいだのとうちゃくじかん	cell inter-arrival time	headword-only (mapped to セル間の到着時間 セルかんのとうちゃくじかん)
 627	Nouns 09	94038	ネットスケープナビゲータ	ネットスケープナビゲータ	Netscape Navigator	unmatched
 627	Nouns 09	94161	一般実体参照	いっぱんじったいさんしょう	general entity reference	unmatched
@@ -6466,7 +6397,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	95507	名も無い人	なもないひと	nobody	unmatched
 627	Nouns 09	95520	選択パラメタ	せんたくパラメタ	selected parameter	unmatched
 627	Nouns 09	95531	ピーメイル	ピーメイル	p-mail	unmatched
-627	Nouns 09	95539	馬頭	ばとう	Hayagriva	headword-only (mapped to 馬頭 めず)
+627	Nouns 09	95539	馬頭	ばとう	Hayagriva	headword-only, different meaning (dropped)
 627	Nouns 09	95552	新世代コンピュータ開発機構	しんせだいコンピュータかいはつきこう	ICOT	unmatched
 627	Nouns 09	95561	オラクルアイエーエス	オラクルアイエーエス	Oracle iAS	unmatched
 627	Nouns 09	95585	豐田	とよた	Toyota (company)	unmatched
@@ -6477,7 +6408,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	95705	少ない時間	すくないじかん	limited time	unmatched
 627	Nouns 09	95742	キャリア検地多重アクセス衝突回避ネットワーク	キャリアけんちたじゅうアクセスしょうとつかいひネットワーク	carrier sense multiple access with collision avoidance network	unmatched
 627	Nouns 09	95748	仮パラメタ	かりパラメタ	(formal) parameter	headword-only (mapped to 仮パラメータ かりパラメータ)
-627	Nouns 09	95773	褻	せつ	informality	headword-only (mapped to 褻 け)
+627	Nouns 09	95773	褻	せつ	informality	headword-only, different meaning (dropped)
 627	Nouns 09	95810	アンカレジ	アンカレジ	Anchorage	unmatched
 627	Nouns 09	95831	申請人	しんせいじん	applicant	headword-only (mapped to 申請人 しんせいにん)
 627	Nouns 09	95880	オーアールビー	オーアールビー	ORB	unmatched
@@ -6506,7 +6437,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	96702	拡張版ＳｐｅｅｄＳｔｅｐテクノロジ	かくちょうはんスピードステップテクノロジ	enhanced speedstep technology	unmatched
 627	Nouns 09	96719	カスタムダイアログボックス	カスタムダイアログボックス	custom dialog box	unmatched
 627	Nouns 09	96732	深い霧	ふかいきり	thick (dense) fog	unmatched
-627	Nouns 09	96742	抜去	ばっきょう	removed	headword-only (mapped to 抜去 ばっきょ)
+627	Nouns 09	96742	抜去	ばっきょう	removed	headword-only, different meaning (dropped)
 627	Nouns 09	96815	ディスケットドライブランプ	ディスケットドライブランプ	diskette light	unmatched
 627	Nouns 09	96850	イースイート	イースイート	eSuite	unmatched
 627	Nouns 09	96890	エスエイピー	エスエイピー	SAP	unmatched
@@ -6579,7 +6510,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	99366	各団体	かくだんたい	each group	unmatched
 627	Nouns 09	99388	エルサップ	エルサップ	LSAP	unmatched
 627	Nouns 09	99434	大学院理学研究科	だいがくいんりがくけんきゅうか	graduate school of sciences	unmatched
-627	Nouns 09	99445	牟子	ぼうし	cap worn by masked dancer (cap covers hair and nape and reaches to the shoulders)	headword-only (mapped to 牟子 むし)
+627	Nouns 09	99445	牟子	ぼうし	cap worn by masked dancer (cap covers hair and nape and reaches to the shoulders)	headword-only, different meaning (dropped)
 627	Nouns 09	99450	原文語	げんぶんご	text word	unmatched
 627	Nouns 09	99487	由来書	ゆらいしょ	history	headword-only (mapped to 由来書 ゆらいがき)
 627	Nouns 09	99661	キャンパスウエア	キャンパスウエア	campus wear	unmatched
@@ -6644,7 +6575,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	101946	現在の実行で	げんざいのじっこうで	in the current implementation	unmatched
 627	Nouns 09	101957	ボルツマン	ボルツマン	Boltzmann	unmatched
 627	Nouns 09	101968	ネットファインド	ネットファインド	Netfind	unmatched
-627	Nouns 09	102004	ムール貝	ムールかい	moule	headword-only (mapped to ムール貝 ムールがい)
+627	Nouns 09	102004	ムール貝	ムールかい	moule	headword-only, different meaning (dropped)
 627	Nouns 09	102068	オラクルセブン	オラクルセブン	Oracle 7	unmatched
 627	Nouns 09	102081	鳥が棲む森	とりがすむもり	woods inhabited by birds	unmatched
 627	Nouns 09	102082	技術的な課題	ぎじゅつてきなかだい	technological task	unmatched
@@ -6654,7 +6585,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	102173	クラビアインキ	クラビアインキ	gravure ink	unmatched
 627	Nouns 09	102231	エフディーエイチディー	エフディーエイチディー	FDHD	unmatched
 627	Nouns 09	102239	アキュペイション	アキュペイション	occupation	unmatched
-627	Nouns 09	102290	上野	うえの	section of Tokyo	headword-only (mapped to 上野 こうずけ)
+627	Nouns 09	102290	上野	うえの	section of Tokyo	headword-only, different meaning (dropped)
 627	Nouns 09	102335	トランザクション処理サービス提供者	トランザクションしょりサービスていきょうしゃ	Transaction Processing Service Provider	unmatched
 627	Nouns 09	102391	公園デビユー	こうえんデビユー	bringing one's child to the local park to play for the first time (cf. park debut)	unmatched
 627	Nouns 09	102413	恐れていた通り	おそれていたとおり	as apprehended	unmatched
@@ -6673,7 +6604,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 627	Nouns 09	103049	ナローシレエット	ナローシレエット	narrow silhouette	unmatched
 627	Nouns 09	103109	イーテキスト	イーテキスト	e-text	unmatched
 627	Nouns 09	103255	センチュラ	センチュラ	Centura	unmatched
-627	Nouns 09	103360	真婿	まんこ; マンコ	vagina	reading-only (legacy kanji form gone) (mapped to マンコ マンコ; まんこ)
+627	Nouns 09	103360	真婿	まんこ; マンコ	vagina	unmatched
 627	Nouns 09	103404	明白な事	めいはくなこと	obvious fact	unmatched
 627	Nouns 09	103452	住所録代わり	じゅうしょろくがわり	substitute for an address book	unmatched
 627	Nouns 09	103524	エフジェイ	エフジェイ	fj	unmatched
@@ -6852,7 +6783,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 628	Nouns 10	110151	ウエットコア	ウエットコア	wet core	unmatched
 628	Nouns 10	110169	ダイダラボッチ	ダイダラボッチ	mythical giant	unmatched
 628	Nouns 10	110174	シーエスエムエーシーエー	シーエスエムエーシーエー	CSMA-CA	unmatched
-628	Nouns 10	110178	正札付き	しょうふだづき	plainly marked	headword-only (mapped to 正札付き しょうふだつき)
+628	Nouns 10	110178	正札付き	しょうふだづき	plainly marked	headword-only, different meaning (dropped)
 628	Nouns 10	110181	チャネルプロトコル機械	チャネルプロトコルきかい	channel protocol machine	unmatched
 628	Nouns 10	110189	カトマイ	カトマイ	Katmai	unmatched
 628	Nouns 10	110228	赤十字附	せきじゅうじふ	school attached to the Japan Red Cross Society	unmatched
@@ -6948,7 +6879,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 628	Nouns 10	113602	台湾国民党	たいわんこくみんとう	Kuomintang (Taiwanese Nationalist Party)	unmatched
 628	Nouns 10	113612	ラウター	ラウター	router	unmatched
 628	Nouns 10	113683	カランティンサービス	カランティンサービス	quarantine service	unmatched
-628	Nouns 10	113693	毛だに	けだに; ケダニ	trombiculid mite (any mite of family Trombiculidae)	reading-only (legacy kanji form gone) (mapped to 毛ダニ けダニ)
+628	Nouns 10	113693	毛だに	けだに; ケダニ	trombiculid mite (any mite of family Trombiculidae)	unmatched
 628	Nouns 10	113730	エスコートガール	エスコートガール	escort girl	unmatched
 628	Nouns 10	113751	文学博士	ぶんがくはかせ	a Doctor of Literature	headword-only (mapped to 文学博士 ぶんがくはくし)
 628	Nouns 10	113756	ノウテイション	ノウテイション	notation	unmatched
@@ -6974,7 +6905,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 628	Nouns 10	114636	悪擦	わるずれ	over-sophistication	unmatched
 628	Nouns 10	114694	関連情報速度	かんれんじょうほうそくど	connection information rate	unmatched
 628	Nouns 10	114695	テーマキャンペーン	テーマキャンペーン	Theme campaign	unmatched
-628	Nouns 10	114701	行者大蒜	ぎょうじゃにんにく	Alpine leek (edible plant, Allium victorialis var. platyphyllum)	reading-only (legacy kanji form gone) (mapped to 行者忍辱 ぎょうじゃにんにく)
+628	Nouns 10	114701	行者大蒜	ぎょうじゃにんにく	Alpine leek (edible plant, Allium victorialis var. platyphyllum)	unmatched
 628	Nouns 10	114729	仏頂尊勝	ぶちょうそんしょう	Usnisavijaya	headword-only (mapped to 仏頂尊勝 ぶっちょうそんしょう)
 628	Nouns 10	114740	衣し	かくし	pocket	unmatched
 628	Nouns 10	114784	Ｈな映画	エッチなえいが	pornographic film	unmatched
@@ -7021,7 +6952,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 629	Nouns 11	116352	千秋楽の日	せんしゅうらくのひ	closing day of a show	unmatched
 629	Nouns 11	116357	ライトウェイトディレクトリアクセスプロトコル	ライトウェイトディレクトリアクセスプロトコル	lightweight directory access protocol	unmatched
 629	Nouns 11	116367	ゲームコントロールアダプタ	ゲームコントロールアダプタ	game control adapter	unmatched
-629	Nouns 11	116405	苅萱	かるかや	Themeda japonica	reading-only (legacy kanji form gone) (mapped to 刈萱 かるかや)
+629	Nouns 11	116405	苅萱	かるかや	Themeda japonica	unmatched
 629	Nouns 11	116408	性の悪い犬	しょうのわるいいぬ	vicious dog	unmatched
 629	Nouns 11	116507	タイムパス	タイムパス	Tympass	unmatched
 629	Nouns 11	116573	物解りの良い	ものわかりのいい; ものわかりのよい	sensible	unmatched
@@ -7093,11 +7024,11 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 629	Nouns 11	119258	喧嘩の尻	けんかのしり	aftermath of a quarrel (failure)	unmatched
 629	Nouns 11	119269	チベット高原	チベットこうげん	Tibetan plateau	unmatched
 629	Nouns 11	119289	ハミルトン	ハミルトン	Hamilton	unmatched
-629	Nouns 11	119332	鞴韜	たたら; フクトウ	(pair of) bellows	reading-only (legacy kanji form gone) (mapped to 踏鞴 たたら)
+629	Nouns 11	119332	鞴韜	たたら; フクトウ	(pair of) bellows	unmatched
 629	Nouns 11	119381	ペンティアムオーディーピー	ペンティアムオーディーピー	Pentium ODP	unmatched
 629	Nouns 11	119397	配信ＥＩＴ	はいしんイーアイティー	delivered-EITs	unmatched
 629	Nouns 11	119421	狸饂飩	たぬきうどん	noodles with bits of deep-fried tempura batter	reading-only (legacy kanji form gone) (mapped to たぬきうどん たぬきうどん; タヌキうどん)
-629	Nouns 11	119457	真だに	まだに	tick (insect)	reading-only (legacy kanji form gone) (mapped to 真ダニ まダニ)
+629	Nouns 11	119457	真だに	まだに	tick (insect)	unmatched
 629	Nouns 11	119498	端役女優	はやくじょゆう	bit-part actress	unmatched
 629	Nouns 11	119528	お待ち	おまち	waiting	unmatched
 629	Nouns 11	119548	べき乗打切り待機法	べきのりうちきりたいきほう	truncated binary exponential back-off	unmatched
@@ -7131,7 +7062,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 629	Nouns 11	120659	部屋履き	べやばき	(house) slippers	headword-only (mapped to 部屋履き へやばき)
 629	Nouns 11	120683	トラフィックパラメータ	トラフィックパラメータ	traffic parameter	unmatched
 629	Nouns 11	120684	冴えた夜	さえたよる	crisp and cold night	unmatched
-629	Nouns 11	120705	かんじき兎	かんじきうさぎ; カンジキウサギ	snowshoe hare	reading-only (legacy kanji form gone) (mapped to 樏兎 かんじきうさぎ)
+629	Nouns 11	120705	かんじき兎	かんじきうさぎ; カンジキウサギ	snowshoe hare	unmatched
 629	Nouns 11	120710	不特定下位参照	ふとくていかいさんしょう	non-specific subordinate reference	unmatched
 629	Nouns 11	120732	同音異義性	どうおんいぎせい	homophony	unmatched
 629	Nouns 11	120776	十六音符	じゅうろくおんぷ	16th note	unmatched
@@ -7189,7 +7120,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 629	Nouns 11	123016	イーアイサ	イーアイサ	EISA	unmatched
 629	Nouns 11	123018	幾千と云う人	いくせんというひと	thousands of people	unmatched
 629	Nouns 11	123020	ラオコオン	ラオコオン	Laocoon (figure from Greek mythology)	unmatched
-629	Nouns 11	123104	曹司	そうし	cadet	headword-only (mapped to 曹司 ぞうし)
+629	Nouns 11	123104	曹司	そうし	cadet	headword-only, different meaning (dropped)
 629	Nouns 11	123107	肩代り信託証書	かたがわりしんたくしょうしょ	wrap-around deed of trust	unmatched
 629	Nouns 11	123111	選択された抽象的試験項目群	せんたくされたちゅうしょうてきしけんこうもくぐん	selected abstract test suite	unmatched
 629	Nouns 11	123147	売り越し	うりごし	selling on balance	headword-only (mapped to 売り越し うりこし)
@@ -7266,7 +7197,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 629	Nouns 11	126418	保持モード	ほじモード	hold mode	unmatched
 629	Nouns 11	126452	ビットマップフォントのこと	ビットマップフォントのこと	raster font	unmatched
 629	Nouns 11	126472	亭亭たる大木	ていていたるたいぼく	lofty tree	unmatched
-629	Nouns 11	126491	真秀等	まほら	great and splendid land (Yamato word)	reading-only (legacy kanji form gone) (mapped to まほら まほら)
+629	Nouns 11	126491	真秀等	まほら	great and splendid land (Yamato word)	unmatched
 629	Nouns 11	126522	光が透るカーテン	ひかりがとおるカーテン	curtain pervious to light	unmatched
 629	Nouns 11	126539	旨い仕事	うまいしごと	profitable business	unmatched
 629	Nouns 11	126550	悪い風邪	わるいかぜ	bad cold	unmatched
@@ -7295,9 +7226,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 629	Nouns 11	127181	散らかった紙屑	ちらかったかみくず	scattered (littered) paper scraps	unmatched
 629	Nouns 11	127197	宰相の器	さいしょうのき	person qualified for prime minister	unmatched
 629	Nouns 11	127201	名称領域	めいしょうりょういき	title-domain	unmatched
-629	Nouns 11	147918	リピーター客	りぴいたあきゃく	repeat customer	headword-only (mapped to リピーター客 リピーターきゃく)
-629	Nouns 11	147973	飴粕	あめかぜ	residue (e.g. from sugar cane or beets)	headword-only (mapped to 飴粕 あめかす)
-629	Nouns 11	147999	育児休業基本給付金	いくじきょうぎょうきほんきゅうふきん	basic allowance of child care leave benefits	headword-only (mapped to 育児休業基本給付金 いくじきゅうぎょうきほんきゅうふきん)
 630	Nouns 12	127219	公判調査	こうはんちょうさ	trial record	unmatched
 630	Nouns 12	127232	エスキューエルプラス	エスキューエルプラス	SQL*Plus	unmatched
 630	Nouns 12	127261	スバルバール	スバルバール	Svalbard	unmatched
@@ -7309,7 +7237,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 630	Nouns 12	127497	シーエスネット	シーエスネット	CSNET	unmatched
 630	Nouns 12	127517	ワイモデム	ワイモデム	YMODEM	unmatched
 630	Nouns 12	127560	アメリカプロフットボールリーグ	アメリカプロフットボールリーグ	National Football League	unmatched
-630	Nouns 12	127568	一極	いちごく	quindecillion (US)	headword-only (mapped to 一極 いっきょく)
+630	Nouns 12	127568	一極	いちごく	quindecillion (US)	headword-only, different meaning (dropped)
 630	Nouns 12	127641	穴だらけだ	あなだらけだ	hold no water	unmatched
 630	Nouns 12	127688	作者不知	さくしゃしらず	anonymous	unmatched
 630	Nouns 12	127701	在米中	ざいべいちゅう	while resident in America	unmatched
@@ -7318,7 +7246,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 630	Nouns 12	127994	升遷	しょうせん	rising up	unmatched
 630	Nouns 12	128002	イージーウェブ	イージーウェブ	Ezweb	unmatched
 630	Nouns 12	128110	不眠から起こる疲労	ふみんからおこるひろう	fatigue resulting from insomnia	unmatched
-630	Nouns 12	128171	桜んぼう	さくらんぼう	(edible) cherry	reading-only (legacy kanji form gone) (mapped to 桜ん坊 さくらんぼ; さくらんぼう)
+630	Nouns 12	128171	桜んぼう	さくらんぼう	(edible) cherry	unmatched
 630	Nouns 12	128176	滑走車輪	かっそうしゃりん	landing gear	unmatched
 630	Nouns 12	128206	時分割多重装置	じぶんかつたじゅうそうち	Time Division Multiplexer	unmatched
 630	Nouns 12	128310	エックスエー	エックスエー	XA	unmatched
@@ -7374,7 +7302,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 630	Nouns 12	130493	急制度	きゅうせいど	emergency braking procedure (e.g. during driver training and testing)	unmatched
 630	Nouns 12	130636	警報抽象操作	けいほうちゅうしょうそうさ	alert abstract-operation	unmatched
 630	Nouns 12	130648	カタログドプロシジャ	カタログドプロシジャ	cataloged procedure	unmatched
-630	Nouns 12	130692	曲々	くまぐま	nooks	headword-only (mapped to 曲々 きょくきょく)
+630	Nouns 12	130692	曲々	くまぐま	nooks	headword-only, different meaning (dropped)
 630	Nouns 12	130700	エーエヌエス	エーエヌエス	ANS	unmatched
 630	Nouns 12	130734	ミスプ	ミスプ	misprint	unmatched
 630	Nouns 12	130816	ディーティーイー	ディーティーイー	DTE	unmatched
@@ -7452,12 +7380,12 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 630	Nouns 12	133430	上手下手	じょうずへた	differences in skill	unmatched
 630	Nouns 12	133445	一般命令演算機構	いっぱんめいれいえんざんきこう	general instruction unit	unmatched
 630	Nouns 12	133460	証明された物	しょうめいされたもの	certified true copy (e.g. of document)	unmatched
-630	Nouns 12	133496	荒隠元	さやいんげん	French beans	reading-only (legacy kanji form gone) (mapped to 莢隠元 さやいんげん)
+630	Nouns 12	133496	荒隠元	さやいんげん	French beans	unmatched
 630	Nouns 12	133546	ファセットシソーラス	ファセットシソーラス	faceted thesaurus	unmatched
 630	Nouns 12	133556	ジャバツー	ジャバツー	Java2	unmatched
 630	Nouns 12	133575	イーエスシーピー	イーエスシーピー	ESC-P	unmatched
 630	Nouns 12	133597	カードケージの突出部	カードケージのとっしゅつぶ	card cage extrusion	unmatched
-630	Nouns 12	133603	ＮＵＬＬＰＯ	ぬるぽ; ヌルポ; なるぽ; ナルポ	null pointer exception (in the Java programming language)	reading-only (legacy kanji form gone) (mapped to ぬるぽ ぬるぽ; ヌルポ)
+630	Nouns 12	133603	ＮＵＬＬＰＯ	ぬるぽ; ヌルポ; なるぽ; ナルポ	null pointer exception (in the Java programming language)	unmatched
 630	Nouns 12	133613	ごみ焼き炉	ごみやきろ	incinerator	unmatched
 630	Nouns 12	133614	受諾側遠隔操作プロトコル機械	じゅだくがわえんかくそうさプロトコルきかい	accepting-remote-operation-protocol-machine	unmatched
 630	Nouns 12	133630	エキスパンションキャビネットパネル	エキスパンションキャビネットパネル	expansion cabinet panel	unmatched
@@ -7667,7 +7595,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 631	Nouns 13	140682	艶めかしい姿	なまめかしいすがた	bewitching figure	unmatched
 631	Nouns 13	140684	親分肌の人	おやぶんはだのひと	bossy	unmatched
 631	Nouns 13	140768	護府	ごふ	(a) charm	unmatched
-631	Nouns 13	140796	后宮	こうきゅう	harem	headword-only (mapped to 后宮 こうぐう)
+631	Nouns 13	140796	后宮	こうきゅう	harem	headword-only, different meaning (dropped)
 631	Nouns 13	140810	ライスケイク	ライスケイク	rice cake	unmatched
 631	Nouns 13	140886	補弦	ほげん	supplementary chord	unmatched
 631	Nouns 13	140928	立入禁止柵	たちいりきんしさく	no-entry barrier	unmatched
@@ -7676,7 +7604,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 631	Nouns 13	141075	ジェイイニシエータ	ジェイイニシエータ	Jinitiator	unmatched
 631	Nouns 13	141230	アナログ入力チャネル	アナログにゅうりょくチャネル	analog input channel (e.g. in process control)	unmatched
 631	Nouns 13	141281	地球の周り	ちきゅうのまわり	space around the earth	unmatched
-631	Nouns 13	141317	昇り降り	のぼりふり	rising and falling	headword-only (mapped to 上り下り のぼりくだり; のぼりおり)
+631	Nouns 13	141317	昇り降り	のぼりふり	rising and falling	headword-only, different meaning (dropped)
 631	Nouns 13	141326	自自公連立	じじこうれんりつ	three-party coalition: Jimintou, Jiyuutou and Koumeitou	unmatched
 631	Nouns 13	141413	高慢さ	こうまんさ	pride	unmatched
 631	Nouns 13	141437	テューリング	テューリング	Turing	unmatched
@@ -7717,7 +7645,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 631	Nouns 13	143101	２進化１０進表示法	にしんかじゅうしんひょうじほう	binary-coded decimal representation	headword-only (mapped to ２進化１０進表示法 にしんかじっしんひょうじほう)
 631	Nouns 13	143125	ポップアップ表示	ポップアップひょうじ	pop-up display	unmatched
 631	Nouns 13	143138	ブローニング	ブローニング	Browning	unmatched
-631	Nouns 13	143143	牝鳥	めんどり	female bird	headword-only (mapped to 牝鶏 ひんけい)
+631	Nouns 13	143143	牝鳥	めんどり	female bird	headword-only, different meaning (dropped)
 631	Nouns 13	143151	透けるブラウス	すけるブラウス	sheer blouse	unmatched
 631	Nouns 13	143165	孔雀妙王	くじゃくみょうおう	Mayuri Vidya-raja	unmatched
 631	Nouns 13	143254	完了コード	かんりょうコード	completion code	unmatched
@@ -7747,7 +7675,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 631	Nouns 13	144160	アクスィジェン	アクスィジェン	oxygen	unmatched
 631	Nouns 13	144170	ピークトラフィックコンディション	ピークトラフィックコンディション	peak traffic condition	unmatched
 631	Nouns 13	144202	硬い石	かたいいし	hard stone	unmatched
-631	Nouns 13	144215	削	さく	plane	reading-only (legacy kanji form gone) (mapped to さく さく; サク)
+631	Nouns 13	144215	削	さく	plane	unmatched
 631	Nouns 13	144253	スタッキングパーム	スタッキングパーム	stacking permanent wave	unmatched
 631	Nouns 13	144275	スコ法	スコほう	Scottish law	unmatched
 631	Nouns 13	144303	ジャドマ	ジャドマ	JADMA	unmatched
@@ -7767,7 +7695,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 631	Nouns 13	144658	システム管理応用プロセス	システムかんりおうようプロセス	systems management application process	unmatched
 631	Nouns 13	144670	窮極目的	きゅうきょくもくてき	extreme purpose	unmatched
 631	Nouns 13	144680	付加物理表現	ふかぶつりひょうげん	additional physical rendition	unmatched
-631	Nouns 13	144757	体造り	からだずくり	physical culture	headword-only (mapped to 体作り からだづくり)
+631	Nouns 13	144757	体造り	からだずくり	physical culture	headword-only, different meaning (dropped)
 631	Nouns 13	144758	プログラム制御式及びキーボード制御式のアドレス指定可能な記憶域をもつ計算器	プログラムせいぎょしきおよびキーボードせいぎょしきのアドレスしていかのうなきおくいきをもつけいさんき	calculator with program-controlled and keyboard controlled addressable storage	unmatched
 631	Nouns 13	144801	レートをベースとしたフロー制御	レートをベースとしたフローせいぎょ	rate-based flow control	unmatched
 631	Nouns 13	144942	イラク軍	イラクぐん	Iraq military	unmatched
@@ -7778,17 +7706,4 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 631	Nouns 13	145260	圧伸器	あつしんき	compandor	headword-only (mapped to 圧伸器 あっしんき)
 631	Nouns 13	145267	クイックドロー	クイックドロー	QuickDraw	unmatched
 631	Nouns 13	145275	麻雀牌	まあじゃんぱい	Mah Jong tile	headword-only (mapped to 麻雀牌 マージャンパイ)
-631	Nouns 13	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-631	Nouns 13	148312	含羞	はにかみ	(showing) signs of embarrassment	headword-only (mapped to 含羞 がんしゅう)
-631	Nouns 13	148346	鬼魅	きび	demon	headword-only (mapped to 鬼魅 きみ)
-631	Nouns 13	148359	急所	きゅうじょ	vital point (critical place to make a move in the game of Go)	headword-only (mapped to 急所 きゅうしょ)
-631	Nouns 13	148734	雌珍々	めちんちん	vulva (child)	reading-only (legacy kanji form gone) (mapped to めちんちん めちんちん)
-631	Nouns 13	148930	抄録	すぐき	regional pickle of Kyoto made from turnip-like vegetable	headword-only (mapped to 抄録 しょうろく)
-631	Nouns 13	149372	鉄工廠	てっこるしょう	iron works	headword-only (mapped to 鉄工廠 てっこうしょう)
-631	Nouns 13	149381	天平	てんびん	(balance) scales	headword-only (mapped to 天平 てんぴょう; てんびょう; てんへい)
-631	Nouns 13	149461	届出印	ととけでいん	seal used to open and associated with a bank account	headword-only (mapped to 届出印 とどけでいん)
-631	Nouns 13	149472	南アランド	みなみアランド	rand (currency of South Africa)	headword-only (mapped to 南アランド なんアランド)
-631	Nouns 13	149530	派遣切り	はけんきり	downsizing by laying off part-time and temp. workers	headword-only (mapped to 派遣切り はけんぎり)
-631	Nouns 13	149554	薄味	はくみ	thin taste	headword-only (mapped to 薄味 うすあじ)
-631	Nouns 13	149851	予約受付係	よやくうけつけけい	reservationist	headword-only (mapped to 予約受付係 よやくうけつけがかり)
-643	Pronouns	44934	孰	いずれ	where	reading-only (legacy kanji form gone) (mapped to 何れ いずれ; いづれ)
+643	Pronouns	44934	孰	いずれ	where	unmatched

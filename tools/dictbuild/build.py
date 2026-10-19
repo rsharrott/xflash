@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """Build the jFlash CARD, FTS and EX SQLite databases from current sources.
 
-  python3 fetch_sources.py            # -> sources/ (JMdict_e, Tatoeba exports)
+  python3 fetch_sources.py            # -> sources/ (JMdict_e, Tatoeba), checked against sources.lock.json
   python3 build.py                    # -> jFlash/sql/jFlash-CARD-2.0.db,
                                       #    jFlash/sql/plugins/jFlash-FTS-2.0.db,
                                       #    jFlash/sql/plugins/jFlash-EX-2.0.db
-                                      #    + refreshes tags.count in jFlash.db / jFlashJr.db
+                                      #    + refreshes tags.count in the user DB templates
+                                      #      (jFlash.db, and jFlashJr.db only if it exists)
 
 Inputs kept in the repo (see migrate_legacy.py for how they were made):
   data/curated_cards.jsonl  hand-made kana / word / phrase cards, copied verbatim
   data/system_sets.tsv      built-in study set membership (tag_id, card_id)
 
-Schemas are byte-for-byte the ones the 1.x app reads (see SCHEMA_* below).
+Schemas are the ones the 1.x app reads (see SCHEMA_* below).  The one change is
+the FTS table: FTS4 with card_id/ptag stored but not indexed (the app only
+MATCHes text and reads card_id/ptag back), which keeps the file under 50 MB.
 Dictionary card_id = JMdict ent_seq, so ids are stable across rebuilds.
 """
 
@@ -22,7 +25,9 @@ import os
 import sqlite3
 import sys
 import time
+from pathlib import Path
 
+import fetch_sources
 import jmdict
 import tatoeba
 from cards import build_card, is_kana, CARD_TYPE_DICTIONARY
@@ -45,7 +50,12 @@ INDEX_CARD = [
     "CREATE INDEX system_card_tag_link_tag_id ON system_card_tag_link (tag_id)",
 ]
 SCHEMA_FTS = [
-    "CREATE VIRTUAL TABLE cards_search_content using FTS3(card_id, content, ptag INTEGER NOT NULL DEFAULT 0)",
+    # Same columns as the 1.x FTS3 table.  FTS4 lets card_id and ptag be stored without
+    # being full-text indexed (in FTS3 every column is indexed: 220k one-off card_id
+    # terms plus 0/1 ptag doclists covering every row).  matchinfo=fts3 skips the
+    # %_docsize table, which only matchinfo()/ranking would need.
+    "CREATE VIRTUAL TABLE cards_search_content USING fts4(card_id, content, ptag INTEGER NOT NULL DEFAULT 0, "
+    "notindexed=card_id, notindexed=ptag, matchinfo=fts3)",
     "CREATE TABLE version (plugin_key TEXT PRIMARY KEY NOT NULL, version TEXT, plugin_name TEXT)",
 ]
 SCHEMA_EX = [
@@ -90,11 +100,11 @@ def main():
     card_path = os.path.join(a.sql_dir, 'jFlash-CARD-%s.db' % VERSION)
     fts_path = os.path.join(a.sql_dir, 'plugins', 'jFlash-FTS-%s.db' % VERSION)
     ex_path = os.path.join(a.sql_dir, 'plugins', 'jFlash-EX-%s.db' % VERSION)
-    user_dbs = [os.path.join(a.sql_dir, n) for n in ('jFlash.db', 'jFlashJr.db')]
+    # jFlashJr.db goes away with the jFlashJr target (PR #7); only touch templates that exist.
+    user_dbs = [p for p in (os.path.join(a.sql_dir, n) for n in ('jFlash.db', 'jFlashJr.db'))
+                if os.path.exists(p)]
     report = collections.OrderedDict()
-    manifest = {}
-    if os.path.exists(src('manifest.json')):
-        manifest = json.load(open(src('manifest.json')))
+    lock = fetch_sources.verify(a.sources)      # exits unless sources match sources.lock.json
 
     # ---- cards ------------------------------------------------------------
     created, _ = jmdict.read_header(src('JMdict_e.gz'))
@@ -148,8 +158,17 @@ def main():
     for s in SCHEMA_FTS:
         db.execute(s)
     db.execute("INSERT INTO version VALUES ('FTS_DB', ?, 'Full Text Search Database (READ ONLY)')", (VERSION,))
+    # Hand-made 1.x cards are kept verbatim for the built-in sets, but many are the same word as a
+    # JMdict entry (same headword and readings).  Those stay out of the search index so search
+    # doesn't list every such word twice; studying the set still shows the hand-made card.
+    def norm_readings(r):
+        return frozenset(x.strip() for x in (r or '').replace(',', ';').split(';') if x.strip())
+    jm_keys = {(c['headword'], norm_readings(c['reading'])) for i, c in cards.items() if i in entries}
+    search_dupes = {c['card_id'] for c in curated if int(c['card_type']) == CARD_TYPE_DICTIONARY and
+                    (c['headword'], norm_readings(c['reading'])) in jm_keys}
+    report['handmade_cards_hidden_from_search_as_jmdict_duplicates'] = len(search_dupes)
     db.executemany('INSERT INTO cards_search_content (card_id, content, ptag) VALUES (?,?,?)',
-                   ((i, cards[i]['content'], int(cards[i]['ptag'] or 0)) for i in ids))
+                   ((i, cards[i]['content'], int(cards[i]['ptag'] or 0)) for i in ids if i not in search_dupes))
     db.execute("INSERT INTO cards_search_content(cards_search_content) VALUES('optimize')")
     finish_db(db)
 
@@ -231,28 +250,34 @@ def main():
     report['unresolved_index_words'] = unresolved
 
     # ---- user DB templates: refresh cached set sizes, check card ids ----------
+    # Deterministic: a template is only written when a count actually changes, and never
+    # VACUUMed/ANALYZEd, so re-running the build leaves the committed files byte-identical.
     sys_counts = collections.Counter(t for t, _ in links)
+    report['user_db_templates'] = {}
     for path in user_dbs:
-        u = sqlite3.connect(path)
+        # mode=rw: fail rather than create an empty database if the file vanished meanwhile
+        u = sqlite3.connect(Path(path).resolve().as_uri() + '?mode=rw', uri=True)
         bad = [r for r in u.execute('SELECT tag_id, card_id FROM card_tag_link') if r[1] not in cards]
         bad += [('last_state', r[0]) for r in u.execute('SELECT card_id FROM last_state') if r[0] not in cards]
         assert not bad, '%s references cards that no longer exist: %s' % (path, bad[:10])
         user_counts = collections.Counter(t for (t,) in u.execute('SELECT tag_id FROM card_tag_link'))
-        for tag_id, editable in u.execute('SELECT tag_id, editable FROM tags').fetchall():
+        changed = 0
+        for tag_id, editable, count in u.execute('SELECT tag_id, editable, count FROM tags').fetchall():
             n = user_counts[tag_id] if (editable or tag_id == 0) else sys_counts[tag_id]
-            u.execute('UPDATE tags SET count = ? WHERE tag_id = ?', (n, tag_id))
-        u.commit()
-        u.execute('ANALYZE')
-        u.commit()
-        u.execute('VACUUM')
+            if n != count:
+                u.execute('UPDATE tags SET count = ? WHERE tag_id = ?', (n, tag_id))
+                changed += 1
+        if changed:
+            u.commit()
         u.close()
+        report['user_db_templates'][os.path.basename(path)] = '%d tag counts updated' % changed
 
     # ---- report --------------------------------------------------------------
     for p in (card_path, fts_path, ex_path):
         report['bytes ' + os.path.relpath(p, REPO)] = os.path.getsize(p)
     report['card_types'] = collections.Counter(str(c['card_type']) for c in cards.values())
     report['common (ptag)'] = sum(1 for c in cards.values() if c['ptag'])
-    report['sources'] = manifest
+    report['sources'] = lock
     out = os.path.join(HERE, 'reports', 'build_report.json')
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, 'w') as f:

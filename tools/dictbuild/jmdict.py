@@ -12,6 +12,23 @@ import xml.etree.ElementTree as ET
 
 _ENTITY_RE = re.compile(r'<!ENTITY\s+(\S+)\s+"([^"]*)">')
 COMMON_PRI = {'news1', 'ichi1', 'spec1', 'spec2', 'gai1'}  # = EDICT "(P)"
+METADATA_SEQ = 9999999   # JMdict's pseudo-entry carrying the release date, not a word
+
+
+def _safe_dtd(dtd):
+    """Rewrite every entity to expand to its own name, and refuse anything else.
+
+    The only declarations JMdict has are plain internal general entities
+    (<!ENTITY v1 "Ichidan verb">).  External (SYSTEM/PUBLIC) or parameter (%)
+    entities, or any declaration the simple pattern doesn't cover, abort the
+    build instead of being handed to the XML parser.  After the rewrite each
+    entity expands to its own short name, so nothing can expand recursively
+    (no billion-laughs)."""
+    declared = len(re.findall(r'<!ENTITY', dtd))
+    if declared != len(_ENTITY_RE.findall(dtd)) or re.search(r'<!ENTITY\s+%|SYSTEM|PUBLIC', dtd):
+        raise ValueError('JMdict DTD has entity declarations other than simple internal ones; refusing to parse')
+    # Every value (including any '&other;' references) is replaced by the bare name.
+    return _ENTITY_RE.sub(lambda m: '<!ENTITY %s "%s">' % (m.group(1), m.group(1)), dtd)
 
 
 def read_header(path):
@@ -33,14 +50,16 @@ def iter_entries(path):
     with gzip.open(path, 'rb') as f:
         raw = f.read()
     split = raw.index(b']>') + 2
-    dtd = _ENTITY_RE.sub(lambda m: '<!ENTITY %s "%s">' % (m.group(1), m.group(1)),
-                         raw[:split].decode('utf-8')).encode('utf-8')
+    dtd = _safe_dtd(raw[:split].decode('utf-8')).encode('utf-8')
     data = io.BytesIO(dtd + raw[split:])
     del raw
     for event, el in ET.iterparse(data, events=('end',)):
         if el.tag != 'entry':
             continue
         e = {'seq': int(el.findtext('ent_seq')), 'k': [], 'r': [], 's': []}
+        if e['seq'] == METADATA_SEQ:
+            el.clear()
+            continue
         for k in el.findall('k_ele'):
             e['k'].append({
                 'text': k.findtext('keb'),
