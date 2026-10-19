@@ -166,6 +166,21 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
         [[NSUserDefaults standardUserDefaults] setObject:midSessionTheme forKey:APP_THEME];
       });
     }
+#if defined (LWE_CFLASH)
+    //   simctl launch <udid> <bundle> -LWEDebugTapReadingThenPinyinColor OFF
+    //     -> tap the reading toggle, then change Pinyin Coloring mid-session (store the start value with
+    //        `defaults write`, not a launch argument, which would override the change).
+    NSString *midSessionPinyinColor = [settings stringForKey:@"LWEDebugTapReadingThenPinyinColor"];
+    if ([midSessionPinyinColor length] > 0)
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [(CardViewController *)self.cardViewController doToggleReadingBtn];
+      });
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [[NSUserDefaults standardUserDefaults] setObject:midSessionPinyinColor forKey:APP_PINYIN_COLOR];
+      });
+    }
+#endif
     //   simctl launch <udid> <bundle> -LWEDebugShowReading YES  -> force the reading row visible (cFlash pinyin shots)
     if ([settings boolForKey:@"LWEDebugShowReading"])
     {

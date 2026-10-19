@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import "Card.h"
 
 @interface ChineseCard : Card
@@ -20,7 +21,11 @@ typedef enum
   toneIsFourth = 4,
 } ToneStates;
 
+//! Tone 1-4 colours for a theme (AA on its card): Kimono, light cards (Paper) or dark cards (Fire/Water/Kutani)
++ (NSDictionary *) toneColorsForThemeKey:(NSString *)themeKey cardFill:(UIColor *)cardFill;
+//! Per-syllable {pinyin, color}: tone colours when the Pinyin Coloring setting is ON, else readingInk
 - (NSArray *) readingComponents;
+- (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors;
 - (NSString *) pinyinReading;
 - (NSString *) sandhiReading;
 
