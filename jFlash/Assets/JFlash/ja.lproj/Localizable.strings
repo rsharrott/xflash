@@ -149,6 +149,9 @@
 /* CardViewController.ShowReading  (CardViewController.m) */
 "Show Reading" = "読みを表示";
 
+/* CardViewController.HideReadingAccessibilityHint  (CardViewController.m) */
+"Hides the reading" = "読みを隠します";
+
 /* SettingsViewController.Practice  (ChineseSettingsDataSource.m, HelpViewController.m, JapaneseSettingsDataSource.m) */
 "Practice" = "練習";
 

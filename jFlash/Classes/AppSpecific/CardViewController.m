@@ -83,6 +83,8 @@ static const CGFloat kLWEPillHitInset = 7.0;
 - (void) _injectMeaningHTML:(NSString*)html;
 - (void) _prepareView:(Card*)card;
 - (void) _updateReadingContainer;
+//! Hides the toggle when the card has no reading to show, and keeps its VoiceOver label in step
+- (void) _updateReadingToggle;
 
 //! Returns YES if the contents of theLabel fit in scrollViewContainer w/o scrolling
 - (BOOL) _shouldHideMoreIconForLabel:(UIView *)theLabel forScrollView:(UIScrollView *)scrollViewContainer;
@@ -108,6 +110,7 @@ static const CGFloat kLWEPillHitInset = 7.0;
 {
   BOOL _modernCard;
   BOOL _readingsExpanded;
+  BOOL _toggleHiddenForNoReading;
   CGFloat _lastLayoutWidth;
   CGFloat _lastLayoutHeight;
 }
@@ -264,7 +267,13 @@ static const CGFloat kLWEPillHitInset = 7.0;
     self.headwordLabel.shadowColor = nil;
     self.readingLabel.shadowColor = nil;
     [self.toggleReadingBtn setTitleColor:[tm colorForSlot:@"toggleInk"] forState:UIControlStateNormal];
+    // cFlash NIB bakes "Show Reading" into practice-btn-showreading.png. The toggle now stays over the
+    // visible reading as its tap-to-hide target (as in the original app), so the image has to go.
+    [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateNormal];
+    [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateHighlighted];
   }
+  // The toggle speaks for the reading row (see -_updateReadingToggle)
+  self.readingScrollContainer.accessibilityElementsHidden = YES;
 }
 
 #if defined(LWE_JFLASH)
@@ -407,6 +416,11 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   {
     kanaText = [kana count] > 0 ? [kana objectAtIndex:0] : nil;
     romajiText = [romaji count] > 0 ? [romaji objectAtIndex:0] : nil;
+  }
+  // Kana-only headword (e.g. これ): the kana reading would just repeat it, so only romaji (if on) shows
+  if (_readingsExpanded == NO && [kana count] <= 1 && [kanaText isEqualToString:self.headwordLabel.text])
+  {
+    kanaText = nil;
   }
 
   // A short card (small phone, or a tall answer bar at large text sizes) keeps the reading at
@@ -747,9 +761,9 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
 - (void) turnReadingOn
 {
-  // Change state
+  // Change state.  As in the original app, the (now blank) toggle stays over the reading row, so
+  // tapping the reading hides it again (#13 had hidden the toggle here, which removed that).
   self.readingScrollContainer.hidden = NO;
-  self.toggleReadingBtn.hidden = YES;
   [self.toggleReadingBtn setTitle:@"" forState:UIControlStateNormal];
   // Relayout so the reading row (sized while hidden) gets a real frame on screen.
   [self layoutCardSubviews];
@@ -759,6 +773,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 #if defined(LWE_JFLASH)
   if (_modernCard) [self _updateMoreReadingsBtn];
 #endif
+  [self _updateReadingToggle];
 }
 
 - (void) turnReadingOff
@@ -775,6 +790,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 #if defined(LWE_JFLASH)
   if (_modernCard) [self _updateMoreReadingsBtn];
 #endif
+  [self _updateReadingToggle];
 }
 
 //! shows or hides the reading label and toggleButton according to the readingVisible bool
@@ -791,6 +807,39 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 }
 
 #pragma mark - Private Methods
+
+- (void) _updateReadingToggle
+{
+  NSString *reading = self.readingLabel.attributedText.string ?: self.readingLabel.text;
+  reading = [reading stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  if ([reading length] == 0)
+  {
+    // Nothing to show (e.g. a kana-only word in kana mode): no "Show Reading" button either.
+    // Only undo this hide ourselves, so the E-to-J delegate's own hide is left alone.
+    if (self.toggleReadingBtn.hidden == NO) _toggleHiddenForNoReading = YES;
+    self.toggleReadingBtn.hidden = YES;
+    return;
+  }
+  if (_toggleHiddenForNoReading)
+  {
+    _toggleHiddenForNoReading = NO;
+    self.toggleReadingBtn.hidden = NO;
+  }
+
+  if (self.readingScrollContainer.hidden)
+  {
+    self.toggleReadingBtn.accessibilityLabel = NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading");
+    self.toggleReadingBtn.accessibilityHint = nil;
+  }
+  else
+  {
+    // Reading visible: the button over it reads the reading, and says what a double-tap does
+    self.toggleReadingBtn.accessibilityLabel = [reading stringByReplacingOccurrencesOfString:@"\n" withString:@", "];
+    self.toggleReadingBtn.accessibilityHint = NSLocalizedString(@"Hides the reading", @"CardViewController.HideReadingAccessibilityHint");
+  }
+  // When the toggle is off screen (E-to-J after reveal), VoiceOver reads the reading row itself
+  self.readingScrollContainer.accessibilityElementsHidden = (self.toggleReadingBtn.hidden == NO);
+}
 
 // Toggle "more" icon to indicate the user can scroll meaning down
 - (BOOL) _shouldHideMoreIconForLabel:(UILabel *)theLabel forScrollView:(UIScrollView *)scrollViewContainer 
@@ -821,6 +870,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     _lastLayoutHeight = self.view.bounds.size.height;
     [self _applyReadingText];
     [self _layoutModernCard];
+    [self _updateReadingToggle];
     return;
   }
   self.readingLabel.text = card.reading;
@@ -844,6 +894,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 #if defined(LWE_JFLASH)
   [self _updateSpeakBtnPosition];
 #endif
+  [self _updateReadingToggle];
 }
 
 - (void) _updateReadingContainer

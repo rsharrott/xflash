@@ -91,8 +91,9 @@
 - (void)cardViewDidReveal:(CardViewController*)cardViewController
 {
   cardViewController.meaningWebViewContainer.hidden = NO;
+  // Show this card's reading with its answer, but keep the user's show/hide choice for the next
+  // card (readingVisible), as the original app did; tapping the reading still changes the choice.
   [cardViewController turnReadingOn];
-  cardViewController.readingVisible = YES;
 }
 
 
