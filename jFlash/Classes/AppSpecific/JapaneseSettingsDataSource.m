@@ -51,7 +51,7 @@
   // Source theme information from the ThemeManager
   ThemeManager *tm = [ThemeManager sharedThemeManager];
   // Theme names are display-only here (the keys are what get saved), so translate them for the table.
-  // Keys: NSLocalizedString(@"Paper",@"Theme name"), NSLocalizedString(@"Fire",@"Theme name"), NSLocalizedString(@"Water",@"Theme name")
+  // Keys: NSLocalizedString(@"Paper",@"Theme name"), NSLocalizedString(@"Fire",@"Theme name"), NSLocalizedString(@"Water",@"Theme name"), NSLocalizedString(@"Kimono",@"Theme name"), NSLocalizedString(@"Kutani",@"Theme name")
   NSMutableArray *themeNames = [NSMutableArray array];
   for (NSString *themeName in [tm themeNameList])
   {

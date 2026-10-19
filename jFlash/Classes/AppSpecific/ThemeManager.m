@@ -7,12 +7,19 @@
 
 #import "ThemeManager.h"
 #import "SynthesizeSingleton.h"
+#import <QuartzCore/QuartzCore.h>
+#import <math.h>
 
 // Theme configuration names (stored in NSUserDefaults under APP_THEME)
 NSString * const SET_THEME_PAPER     = @"PAPER";
 NSString * const SET_THEME_FIRE      = @"FIRE";
 NSString * const SET_THEME_WATER     = @"WATER";
+NSString * const SET_THEME_KIMONO    = @"KIMONO";
+NSString * const SET_THEME_KUTANI    = @"KUTANI";
 NSString * const DEFAULT_THEME       = @"PAPER";
+
+static const NSInteger kLWECardDecorationHostTag = 9002;
+static const CGFloat kLWESeigaihaBandHeight = 44.0;
 
 // Keys inside each theme dictionary
 static NSString * const kLWEThemeSlotsKey = @"slots";
@@ -74,8 +81,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
 
 /**
  * Initialize theme manager (defines all themes as well).
- * Themes v2 (design-review/themes/v2): Paper, Fire and Water all share one paper screen;
- * a theme changes only the study card and the accent.  Values are generated from themes.json.
+ * Themes: Paper, Fire, Water, Kimono (B), Kutani share one paper screen;
+ * a theme changes only the study card, accent, and optional card decorations.
  */
 - (id) init
 {
@@ -192,12 +199,78 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
     NSDictionary *paperCard = @{ @"cardShadow": @"rgba(40,30,20,0.08)", @"cardShadowY": @10, @"cardShadowBlur": @24, @"cardRing": @"rgba(60,40,20,0.08)" };
     NSDictionary *fireCard  = @{ @"cardShadow": @"rgba(120,20,0,0.22)", @"cardShadowY": @24, @"cardShadowBlur": @60 };
     NSDictionary *waterCard = @{ @"cardShadow": @"rgba(40,30,20,0.16)", @"cardShadowY": @18, @"cardShadowBlur": @40, @"cardRing": @"rgba(60,40,20,0.08)" };
+    // Kimono B uses Paper's shadow-ring + e2; Kutani uses Water's ring + e3.
+    NSDictionary *kimonoCard = @{ @"cardShadow": @"rgba(40,30,20,0.08)", @"cardShadowY": @10, @"cardShadowBlur": @24, @"cardRing": @"rgba(60,40,20,0.08)",
+                                  @"cardPattern": @"seigaiha", @"cardPatternInk": @"rgba(255,253,249,0.45)" };
+    NSDictionary *kutaniCard = @{ @"cardShadow": @"rgba(40,30,20,0.16)", @"cardShadowY": @18, @"cardShadowBlur": @40, @"cardRing": @"rgba(60,40,20,0.08)",
+                                  @"cardRimColor": @"#E2B13A", @"cardRimOpacity": @0.7,
+                                  @"cardRimOuterInset": @3, @"cardRimOuterWidth": @1.25,
+                                  @"cardRimInnerInset": @6, @"cardRimInnerWidth": @0.75,
+                                  @"cardRimBubbleNudge": @4 };
+
+    // KIMONO B (ai × kaki): washed-persimmon card, indigo ink/accent, seigaiha band
+    NSDictionary *kimonoSlots = @{
+      @"tint": @"#1F3558",
+      @"cardFill": @"#EEA57A",
+      @"headwordInk": @"#1F3558",
+      @"readingInk": @"#1F3558",
+      @"romajiInk": @"#1F3558",
+      @"meaningInk": @"#1F3558",
+      @"meaningRule": @"#8A3B1C",
+      @"toggleInk": @"#1F3558",
+      @"speakerFill": @"#FFFDF9",
+      @"speakerInk": @"#1F3558",
+      @"moreReadingsFill": @"#FFFDF9",
+      @"moreReadingsInk": @"#1F3558",
+      @"stripBarFill": @"#1F3558",
+      @"stripBarTrack": @"#CFC6B8",
+      @"showAnswerBorder": @"#1F3558",
+      @"showAnswerInk": @"#1F3558",
+      @"showAnswerSubInk": @"#6F665B",
+      @"progressBarFill": @"#1F3558",
+      @"progressAccentInk": @"#1F3558",
+      @"selectedCellFill": @"#1F3558",
+      @"moodBubbleFill": @"#FBF8F3",
+    };
+    NSString *kimonoCSS = @"body{color:#1F3558;} #container:before{background:#8A3B1C;} ol,li{color:#1F3558;} dfn{background-color:#FFD60A;border-color:#FFD60A;color:#3A2A00;}";
+    // Light-card sentences: kakishibu underline (README hl color + v2 quiet-underline pattern)
+    NSString *kimonoSentencesCSS = @"body{color:#1D1A16;} .headwordLabel{color:#1F3558;} .readingLabel{color:#1F3558;} .romaji,.exTitle{color:#1F3558;} li{background:#FBF8F3;} .ja{color:#1D1A16;} .hl{color:#8A3B1C;background:transparent;text-decoration-line:underline;text-decoration-color:#8A3B1C;text-decoration-thickness:2px;} .en,.ContentCell{color:#3A352E;} .button{color:#1F3558;background:#FFFDF9;} .ExpandedSentencesTable td{border-top-color:rgba(60,40,20,0.08);} .HeadwordCell{color:#8A3B1C;} dfn{background-color:#FFD60A;color:#3A2A00;}";
+
+    // KUTANI: deep green glaze, ochre ink, aubergine accent, double rim
+    NSDictionary *kutaniSlots = @{
+      @"tint": @"#553366",
+      @"cardFill": @"#1E4A3A",
+      @"headwordInk": @"#E2B13A",
+      @"readingInk": @"#FBF8F3",
+      @"romajiInk": @"rgba(255,255,255,0.88)",
+      @"meaningInk": @"#FBF8F3",
+      @"meaningRule": @"#E2B13A",
+      @"toggleInk": @"rgba(255,255,255,0.88)",
+      @"speakerFill": @"rgba(255,255,255,0.16)",
+      @"speakerInk": @"#FBF8F3",
+      @"moreReadingsFill": @"rgba(255,255,255,0.14)",
+      @"moreReadingsInk": @"#FBF8F3",
+      @"stripBarFill": @"#553366",
+      @"stripBarTrack": @"#CFC6B8",
+      @"showAnswerBorder": @"#553366",
+      @"showAnswerInk": @"#553366",
+      @"showAnswerSubInk": @"#6F665B",
+      @"progressBarFill": @"#553366",
+      @"progressAccentInk": @"#553366",
+      @"selectedCellFill": @"#553366",
+      @"moodBubbleFill": @"#FBF8F3",
+    };
+    NSString *kutaniCSS = @"body{color:#FBF8F3;} #container:before{background:#E2B13A;} ol,li{color:#FBF8F3;} dfn{background-color:#E2B13A;border-color:#E2B13A;color:#3A2A00;}";
+    // Dark-card sentences: ochre marker (task dark-card pattern; README had color-only hl)
+    NSString *kutaniSentencesCSS = @"body{color:#FBF8F3;} .headwordLabel{color:#E2B13A;} .readingLabel{color:#FBF8F3;} .romaji,.exTitle{color:rgba(255,255,255,0.88);} li{background:#1E4A3A;} .ja{color:#FBF8F3;} .hl{color:#3A2A00;background:#E2B13A;text-decoration-line:none;} .en,.ContentCell{color:rgba(255,255,255,0.88);} .button{color:#FBF8F3;background:rgba(255,255,255,0.16);} .ExpandedSentencesTable td{border-top-color:rgba(255,255,255,0.30);} .HeadwordCell{color:#E2B13A;} dfn{background-color:#E2B13A;color:#3A2A00;}";
 
 #if !defined(LWE_JFLASH)
     // Chinese Flash keeps its own noun-pill colours; the meaning ink still follows the card.
     paperCSS = @"body{color:#1D1A16;} ol,li{color:#1D1A16;} dfn, button { background-color:orange; border-color:yellow; }";
     fireCSS  = @"body{color:#FFFFFF;} ol,li{color:#FFFFFF;} dfn, button { background-color:orange; border-color:yellow; }";
     waterCSS = @"body{color:#FFFFFF;} ol,li{color:#FFFFFF;} dfn { background-color:lightsteelblue; border-color:white; }";
+    kimonoCSS = @"body{color:#1F3558;} ol,li{color:#1F3558;} dfn, button { background-color:orange; border-color:yellow; }";
+    kutaniCSS = @"body{color:#FBF8F3;} ol,li{color:#FBF8F3;} dfn { background-color:#E2B13A; border-color:#E2B13A; color:#3A2A00; }";
 #endif
 
     NSDictionary *paper = LWEThemeDictionary(SET_THEME_PAPER, @"Paper", @"red", 0.557, 0.078, 0.000, @"f6e7e1",
@@ -206,11 +279,15 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
                                             fireCSS, fireSentencesCSS, sharedSlots, fireSlots, fireCard);
     NSDictionary *water = LWEThemeDictionary(SET_THEME_WATER, @"Water", @"blue", 0.075, 0.337, 0.655, @"ede6da",
                                              waterCSS, waterSentencesCSS, sharedSlots, waterSlots, waterCard);
+    NSDictionary *kimono = LWEThemeDictionary(SET_THEME_KIMONO, @"Kimono", @"blue", 0.122, 0.208, 0.345, @"ede6da",
+                                              kimonoCSS, kimonoSentencesCSS, sharedSlots, kimonoSlots, kimonoCard);
+    NSDictionary *kutani = LWEThemeDictionary(SET_THEME_KUTANI, @"Kutani", @"red", 0.333, 0.200, 0.400, @"ede6da",
+                                              kutaniCSS, kutaniSentencesCSS, sharedSlots, kutaniSlots, kutaniCard);
 
-    // Display order (Settings cycle, themeNameList / themeKeysList): Paper, Fire, Water.
-    // An NSDictionary alone would give hash order.
-    [self setOrderedThemes:@[paper, fire, water]];
-    [self setThemes:@{ SET_THEME_PAPER: paper, SET_THEME_FIRE: fire, SET_THEME_WATER: water }];
+    // Display order: Paper, Fire, Water, Kimono, Kutani.  Default stays Paper.
+    [self setOrderedThemes:@[paper, fire, water, kimono, kutani]];
+    [self setThemes:@{ SET_THEME_PAPER: paper, SET_THEME_FIRE: fire, SET_THEME_WATER: water,
+                       SET_THEME_KIMONO: kimono, SET_THEME_KUTANI: kutani }];
   }
   return self;  
 }
@@ -257,6 +334,131 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
   layer.shadowOffset = CGSizeMake(0, [[slots objectForKey:@"cardShadowY"] floatValue]);
   layer.shadowRadius = [[slots objectForKey:@"cardShadowBlur"] floatValue] / 2.0;
   layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:layer.bounds cornerRadius:kLWECardCornerRadius].CGPath;
+}
+
+//! Renders the Kimono seigaiha band (top 44pt) as a single bitmap; geometry matches design-review build_kimono.py
+static UIImage *LWESeigaihaImage(CGFloat width, CGFloat scale, UIColor *cardFill, UIColor *stroke)
+{
+  if (width <= 0 || scale <= 0) return nil;
+  CGSize size = CGSizeMake(width, kLWESeigaihaBandHeight);
+  UIGraphicsImageRendererFormat *fmt = [UIGraphicsImageRendererFormat defaultFormat];
+  fmt.scale = scale;
+  fmt.opaque = NO;
+  UIGraphicsImageRenderer *renderer = [[[UIGraphicsImageRenderer alloc] initWithSize:size format:fmt] autorelease];
+  return [renderer imageWithActions:^(UIGraphicsImageRendererContext *rendererContext) {
+    CGContextRef ctx = rendererContext.CGContext;
+    CGContextSetLineWidth(ctx, 1.0);
+    [stroke setStroke];
+    [cardFill setFill];
+    // Rows every 6pt; odd rows shifted 12pt.  Draw top row first so lower rows overlap.
+    for (CGFloat y = 0; y <= kLWESeigaihaBandHeight + 12.0; y += 6.0)
+    {
+      NSInteger row = (NSInteger)lround(y / 6.0);
+      CGFloat xOff = (row % 2 == 0) ? 0.0 : 12.0;
+      for (CGFloat x = -24.0 + xOff; x <= width + 24.0; x += 24.0)
+      {
+        CGContextAddEllipseInRect(ctx, CGRectMake(x - 12.0, y - 12.0, 24.0, 24.0));
+        CGContextFillPath(ctx);
+        CGFloat radii[3] = { 11.0, 7.5, 4.0 };
+        for (int i = 0; i < 3; i++)
+        {
+          CGFloat r = radii[i];
+          CGContextAddEllipseInRect(ctx, CGRectMake(x - r, y - r, r * 2.0, r * 2.0));
+          CGContextStrokePath(ctx);
+        }
+      }
+    }
+  }];
+}
+
+- (CGFloat) cardRimBubbleNudge
+{
+  NSDictionary *slots = [[self _currentTheme] objectForKey:kLWEThemeSlotsKey];
+  return [[slots objectForKey:@"cardRimBubbleNudge"] floatValue];
+}
+
+- (void) applyCardDecorationsToView:(UIView*)view includePattern:(BOOL)includePattern
+{
+  if (view == nil) return;
+  NSDictionary *slots = [[self _currentTheme] objectForKey:kLWEThemeSlotsKey];
+  NSString *pattern = [slots objectForKey:@"cardPattern"];
+  UIColor *rimColor = [self colorForSlot:@"cardRimColor"];
+  CGFloat rimOpacity = [[slots objectForKey:@"cardRimOpacity"] floatValue];
+  BOOL wantPattern = includePattern && [pattern isEqualToString:@"seigaiha"];
+  BOOL wantRim = (rimColor != nil);
+
+  UIView *host = [view viewWithTag:kLWECardDecorationHostTag];
+  if (wantPattern == NO && wantRim == NO)
+  {
+    [host removeFromSuperview];
+    return;
+  }
+  if (host == nil)
+  {
+    host = [[[UIView alloc] initWithFrame:view.bounds] autorelease];
+    host.tag = kLWECardDecorationHostTag;
+    host.userInteractionEnabled = NO;
+    host.backgroundColor = [UIColor clearColor];
+    host.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [view insertSubview:host atIndex:0];
+  }
+  host.frame = view.bounds;
+  host.layer.cornerRadius = kLWECardCornerRadius;
+  host.clipsToBounds = YES;
+  // Drop prior decoration layers
+  NSArray *sub = [NSArray arrayWithArray:host.layer.sublayers];
+  for (CALayer *layer in sub)
+  {
+    if ([layer.name hasPrefix:@"lwe.cardDecor."])
+      [layer removeFromSuperlayer];
+  }
+
+  if (wantPattern)
+  {
+    UIColor *fill = [self colorForSlot:@"cardFill"];
+    UIColor *ink = [self colorForSlot:@"cardPatternInk"] ?: LWEThemeColorFromString(@"rgba(255,253,249,0.45)");
+    CGFloat scale = view.window.screen.scale;
+    if (scale <= 0) scale = [UIScreen mainScreen].scale;
+    UIImage *img = LWESeigaihaImage(view.bounds.size.width, scale, fill, ink);
+    CALayer *band = [CALayer layer];
+    band.name = @"lwe.cardDecor.seigaiha";
+    band.frame = CGRectMake(0, 0, view.bounds.size.width, kLWESeigaihaBandHeight);
+    band.contents = (id)img.CGImage;
+    band.contentsGravity = kCAGravityResize;
+    CAGradientLayer *fade = [CAGradientLayer layer];
+    fade.frame = band.bounds;
+    fade.colors = [NSArray arrayWithObjects:
+                   (id)[UIColor whiteColor].CGColor,
+                   (id)[UIColor whiteColor].CGColor,
+                   (id)[UIColor clearColor].CGColor, nil];
+    fade.locations = [NSArray arrayWithObjects:@0, @0.55, @1, nil];
+    band.mask = fade;
+    [host.layer addSublayer:band];
+  }
+
+  if (wantRim)
+  {
+    CGFloat outerInset = [[slots objectForKey:@"cardRimOuterInset"] floatValue];
+    CGFloat outerWidth = [[slots objectForKey:@"cardRimOuterWidth"] floatValue];
+    CGFloat innerInset = [[slots objectForKey:@"cardRimInnerInset"] floatValue];
+    CGFloat innerWidth = [[slots objectForKey:@"cardRimInnerWidth"] floatValue];
+    UIColor *stroke = [rimColor colorWithAlphaComponent:(rimOpacity > 0 ? rimOpacity : 0.7)];
+    CGFloat pairs[2][2] = { { outerInset, outerWidth }, { innerInset, innerWidth } };
+    for (int i = 0; i < 2; i++)
+    {
+      CGFloat inset = pairs[i][0];
+      CGFloat width = pairs[i][1];
+      CAShapeLayer *rim = [CAShapeLayer layer];
+      rim.name = (i == 0) ? @"lwe.cardDecor.rimOuter" : @"lwe.cardDecor.rimInner";
+      rim.fillColor = [UIColor clearColor].CGColor;
+      rim.strokeColor = stroke.CGColor;
+      rim.lineWidth = width;
+      CGRect r = CGRectInset(view.bounds, inset, inset);
+      CGFloat radius = MAX(0, kLWECardCornerRadius - inset);
+      rim.path = [UIBezierPath bezierPathWithRoundedRect:r cornerRadius:radius].CGPath;
+      [host.layer addSublayer:rim];
+    }
+  }
 }
 
 /**

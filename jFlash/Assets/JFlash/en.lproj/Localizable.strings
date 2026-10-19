@@ -344,6 +344,12 @@
 /* Theme name  (JapaneseSettingsDataSource.m) */
 "Water" = "Water";
 
+
+/* Theme name: Kimono */
+"Kimono" = "Kimono";
+
+/* Theme name: Kutani */
+"Kutani" = "Kutani";
 /* SettingsViewController.DisplayReading_Romaji  (JapaneseSettingsDataSource.m) */
 "Romaji" = "Romaji";
 

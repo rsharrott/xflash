@@ -9,6 +9,8 @@
 extern NSString * const SET_THEME_PAPER;
 extern NSString * const SET_THEME_FIRE;
 extern NSString * const SET_THEME_WATER;
+extern NSString * const SET_THEME_KIMONO;
+extern NSString * const SET_THEME_KUTANI;
 extern NSString * const DEFAULT_THEME;
 
 //! Study card shape, shared by every theme (themes v2: inset 12pt, radius-3xl 28)
@@ -43,10 +45,18 @@ extern const CGFloat kLWECardCornerRadius;
 //! Paints `layer` as the current theme's study card: cardFill, radius 28, ring and shadow (cardStyle)
 - (void) applyCardStyleToLayer:(CALayer*)layer;
 
+//! Optional card face decorations (Kimono seigaiha band, Kutani double rim).  `includePattern`
+//! is YES only for the study card face — example-sentence web views never get the pattern.
+//! Pass the card view; a tagged host subview holds the layers so the card's shadow stays unclipped.
+- (void) applyCardDecorationsToView:(UIView*)view includePattern:(BOOL)includePattern;
+
+//! Points to nudge the 67% mood bubble up+left when a cardRim is present (0 otherwise)
+- (CGFloat) cardRimBubbleNudge;
+
 //! Same as colorForSlot: for a given theme key (e.g. a Settings swatch); unknown keys use DEFAULT_THEME
 - (UIColor*) colorForSlot:(NSString*)slot themeKey:(NSString*)themeKey;
 
-//! Provide list of names of all available themes, in display order (Paper, Fire, Water)
+//! Provide list of names of all available themes, in display order (Paper, Fire, Water, Kimono, Kutani)
 - (NSArray*) themeNameList;
 
 //! Provide dictionary-safe key reference names for all available themes, in display order
