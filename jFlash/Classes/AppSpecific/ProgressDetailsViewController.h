@@ -5,53 +5,36 @@
 //  Created by Ross Sharrott on 11/23/09.
 //  Copyright 2009 LONG WEEKEND LLC. All rights reserved.
 //
+//  The study progress sheet (2026 "paper bottom sheet", design option A).
+//  Built in code and presented as a UISheetPresentationController page sheet whose first
+//  detent is sized to the content (iOS 16+; large only on iOS 15), plus large. It replaced
+//  the fixed 320x480 ProgressView.xib overlay.
+//
 
 #import <UIKit/UIKit.h>
 #import "Tag.h"
-#import "CloseButtonView.h"
 
-@interface ProgressDetailsViewController : UIViewController <CloseButtonViewDelegate>
-
-- (IBAction) dismiss;
-- (IBAction)switchToSettings:(id)sender;
-- (void) drawProgressBars;
-- (void) setStreakLabel;
+@interface ProgressDetailsViewController : UIViewController
 
 /**
- Call this to tell the progress detail VC to update all its data.
+ Designated initializer.  All the data the sheet shows is passed in here (and kept in
+ properties), so nothing is written to views before -viewDidLoad.
+ \param rightCount  answers marked Right (or buried) this session
+ \param wrongCount  answers marked Wrong this session
  */
-- (void)updateView;
+- (id) initWithTag:(Tag *)tag rightCount:(NSInteger)rightCount wrongCount:(NSInteger)wrongCount
+       rightStreak:(NSInteger)rightStreak wrongStreak:(NSInteger)wrongStreak;
+
+//! Re-reads the properties and rebuilds the sheet's content (no-op until the view has loaded).
+- (void) updateView;
+
+- (IBAction) dismiss;
+- (IBAction) switchToSettings:(id)sender;
 
 @property (nonatomic, retain) Tag *tag;
-
-@property (nonatomic, retain) IBOutlet UIView *bgView;
-@property (nonatomic,retain) IBOutlet UILabel *currentNumberOfWords;
-@property (nonatomic,retain) IBOutlet UILabel *totalNumberOfWords;
-@property (nonatomic,retain) IBOutlet UIButton *closeBtn;
-@property (nonatomic,retain) IBOutlet UILabel *currentStudySet; 
-@property (nonatomic,retain) IBOutlet UILabel *motivationLabel;
-@property (nonatomic,retain) IBOutlet UILabel *streakLabel;
-@property (nonatomic,retain) IBOutlet UILabel *cardsViewedNow;
-@property (nonatomic,retain) IBOutlet UILabel *cardsViewedAllTime;
-@property (nonatomic,retain) IBOutlet UILabel *cardsRightNow;
-@property (nonatomic,retain) IBOutlet UILabel *cardsWrongNow;
-@property NSInteger wrongStreak;
-@property NSInteger rightStreak;
-
-@property (nonatomic, retain) IBOutlet UILabel *cardSetProgressLabel0;
-@property (nonatomic, retain) IBOutlet UILabel *cardSetProgressLabel1;
-@property (nonatomic, retain) IBOutlet UILabel *cardSetProgressLabel2;
-@property (nonatomic, retain) IBOutlet UILabel *cardSetProgressLabel3;
-@property (nonatomic, retain) IBOutlet UILabel *cardSetProgressLabel4;
-@property (nonatomic, retain) IBOutlet UILabel *cardSetProgressLabel5;
-@property (nonatomic, retain) IBOutlet UILabel *progressViewTitle;
-
-@property (retain, nonatomic) IBOutlet UIProgressView *progressViewLevel0;
-@property (retain, nonatomic) IBOutlet UIProgressView *progressViewLevel1;
-@property (retain, nonatomic) IBOutlet UIProgressView *progressViewLevel2;
-@property (retain, nonatomic) IBOutlet UIProgressView *progressViewLevel3;
-@property (retain, nonatomic) IBOutlet UIProgressView *progressViewLevel4;
-@property (retain, nonatomic) IBOutlet UIProgressView *progressViewLevel5;
-
+@property (nonatomic) NSInteger rightCount;
+@property (nonatomic) NSInteger wrongCount;
+@property (nonatomic) NSInteger rightStreak;
+@property (nonatomic) NSInteger wrongStreak;
 
 @end

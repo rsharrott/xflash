@@ -28,6 +28,10 @@ static inline UIColor *LWEDesignPaper2(void)    { return LWEDesignColorHex(0xE7E
 static inline UIColor *LWEDesignPaperButton(void) { return LWEDesignColorHex(0xEDE6DA, 1.0); }
 //! Primary ink, #1D1A16
 static inline UIColor *LWEDesignInk(void)       { return LWEDesignColorHex(0x1D1A16, 1.0); }
+//! Secondary ink (body text on paper), #3A352E
+static inline UIColor *LWEDesignInk2(void)      { return LWEDesignColorHex(0x3A352E, 1.0); }
+//! Hairline rule on paper, rgba(60,40,20,0.08)
+static inline UIColor *LWEDesignHairline(void)  { return [UIColor colorWithRed:60/255.0 green:40/255.0 blue:20/255.0 alpha:0.08]; }
 //! Muted ink, #6F665B
 static inline UIColor *LWEDesignMuted(void)     { return LWEDesignColorHex(0x6F665B, 1.0); }
 //! Wrong button, #F9DCD5 on #7E1400

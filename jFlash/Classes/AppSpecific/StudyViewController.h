@@ -83,8 +83,8 @@
 @property (nonatomic, retain) IBOutlet UIView *progressBarView;
 @property (nonatomic, retain) IBOutlet UIButton *showProgressModalBtn;
 
-// Progress modal overlay
-@property (nonatomic, retain) ProgressDetailsViewController *progressDetailsViewController;
+// The progress sheet while it's presented, otherwise nil (not retained: the presentation owns it)
+@property (nonatomic, readonly) ProgressDetailsViewController *progressDetailsViewController;
 
 // Plugin related
 @property (nonatomic, retain) IBOutlet PluginManager *pluginManager;
