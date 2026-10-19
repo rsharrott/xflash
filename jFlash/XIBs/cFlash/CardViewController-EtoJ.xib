@@ -520,7 +520,7 @@
 					<string>UIResponder</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>TTTAttributedLabel</string>
+					<string>UILabel</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>MoodIcon</string>
@@ -587,7 +587,7 @@
 							<string>UIScrollView</string>
 							<string>UIWebView</string>
 							<string>MoodIcon</string>
-							<string>TTTAttributedLabel</string>
+							<string>UILabel</string>
 							<string>UIImageView</string>
 							<string>UIScrollView</string>
 							<string>UIButton</string>
@@ -636,7 +636,7 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">readingLabel</string>
-								<string key="candidateClassName">TTTAttributedLabel</string>
+								<string key="candidateClassName">UILabel</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">readingMoreIcon</string>
@@ -722,14 +722,7 @@
 						<string key="minorKey">./Classes/MoodIcon.h</string>
 					</object>
 				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">TTTAttributedLabel</string>
-					<string key="superclassName">UILabel</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/TTTAttributedLabel.h</string>
-					</object>
-				</object>
+								</object>
 			</object>
 		</object>
 		<int key="IBDocument.localizationMode">0</int>

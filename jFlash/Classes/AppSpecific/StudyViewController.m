@@ -988,9 +988,13 @@
 
 - (BOOL) hasExampleSentences
 {
-  // When EX_DB is missing, page 2 is ExamplesUnavailable (download prompt) for both apps.
-  // cFlash has no EX_DB in the store today, but still ships that installer page.
+#if defined (LWE_JFLASH)
+  // When EX_DB is missing, page 2 is ExamplesUnavailable (download prompt).
   return [self _shouldShowExampleViewForCard:self.currentCard];
+#else
+  // cFlash has no EX plugin and remote plugins are off — do not show the dead download page.
+  return NO;
+#endif
 }
 
 /**
