@@ -5,6 +5,8 @@
 //  Copyright LONG WEEKEND INC 2009. All rights reserved.
 
 #import "jFlashAppDelegate.h"
+#import <UserNotifications/UserNotifications.h>
+#import "ReminderSettingsViewController.h"
 #import "LWELocalization.h"
 #import <objc/runtime.h>
 
@@ -79,6 +81,27 @@
       [appDelegate handleIncomingURL:urlContext.URL sourceApplication:urlContext.options.sourceApplication];
     }
   }
+}
+
+// With a scene manifest UIKit sends the lifecycle callbacks to the scene delegate instead of the
+// app delegate, so forward them: the app delegate schedules the study reminder when we go to the
+// background and clears it when we come back.
+- (void)sceneDidBecomeActive:(UIScene *)scene
+{
+  jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+  [appDelegate applicationDidBecomeActive:[UIApplication sharedApplication]];
+}
+
+- (void)sceneWillEnterForeground:(UIScene *)scene
+{
+  jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+  [appDelegate applicationWillEnterForeground:[UIApplication sharedApplication]];
+}
+
+- (void)sceneDidEnterBackground:(UIScene *)scene
+{
+  jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+  [appDelegate applicationDidEnterBackground:[UIApplication sharedApplication]];
 }
 
 // Warm launch: the app is already running (foreground or background) and receives jflash://WORD
@@ -425,21 +448,33 @@
   {
     return;
   }
-  
-  // create a notification to study again
-  UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-  NSTimeInterval secondsToNextReminder = 24 * 60 * 60 * [reminderSetting intValue];
-  localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:secondsToNextReminder];
-  localNotification.timeZone = [NSTimeZone localTimeZone];
-  localNotification.alertBody = NSLocalizedString(@"You're Awesome!  It's time to learn some more words!",@"StudyNotification.Body");
-  localNotification.alertAction = NSLocalizedString(@"Study",@"StudyNotification.Action");
-  localNotification.soundName = UILocalNotificationDefaultSoundName;
 
-  // schedule it
-  [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
-  
-  // the application retains the notification
-  [localNotification release];
+  // One reminder, N days after this session ends. It is removed again whenever the app
+  // becomes active, so a regular studier never sees it.
+  NSTimeInterval secondsToNextReminder = 24 * 60 * 60 * [reminderSetting intValue];
+  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+  [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *notificationSettings) {
+    UNAuthorizationStatus status = notificationSettings.authorizationStatus;
+    if (status != UNAuthorizationStatusAuthorized && status != UNAuthorizationStatusProvisional)
+    {
+      return;
+    }
+    UNMutableNotificationContent *content = [[[UNMutableNotificationContent alloc] init] autorelease];
+    content.body = NSLocalizedString(@"You're Awesome!  It's time to learn some more words!",@"StudyNotification.Body");
+    content.sound = [UNNotificationSound defaultSound];
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:secondsToNextReminder repeats:NO];
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:LWEStudyReminderRequestIdentifier content:content trigger:trigger];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError *error) {
+      if (error)
+      {
+        LWE_LOG(@"Could not schedule the study reminder: %@", error);
+      }
+      else
+      {
+        LWE_LOG(@"Scheduled the study reminder in %.0f seconds", secondsToNextReminder);
+      }
+    }];
+  }];
 }
 
 #pragma mark - UIApplication Delegate methods
@@ -459,7 +494,9 @@
 {
   // get rid of old notifications -- we use "did become active" because it is called both on 
   // first launch AND on resume from background/SMS/just about anything
-  [[UIApplication sharedApplication] cancelAllLocalNotifications];
+  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+  [center removePendingNotificationRequestsWithIdentifiers:@[LWEStudyReminderRequestIdentifier]];
+  [center removeDeliveredNotificationsWithIdentifiers:@[LWEStudyReminderRequestIdentifier]];
 }
 
 /**

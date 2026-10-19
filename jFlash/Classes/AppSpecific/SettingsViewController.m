@@ -77,6 +77,11 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   // (e.g. after they change users, et al)
   self.sectionArray = [self.dataSource settingsArrayWithPluginManager:self.pluginManager];
   [self.tableView reloadData];
+
+  // Show Study Reminders as Off if notifications aren't allowed for the app
+  [ReminderSettingsViewController syncReminderSettingWithNotificationPermission:^{
+    [self.tableView reloadData];
+  }];
 }
 
 #pragma mark - Badge

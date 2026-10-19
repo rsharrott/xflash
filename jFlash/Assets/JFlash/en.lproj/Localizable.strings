@@ -506,9 +506,6 @@
 /* StudyNotification.Body  (jFlashAppDelegate.m) */
 "You're Awesome!  It's time to learn some more words!" = "You're Awesome!  It's time to learn some more words!";
 
-/* StudyNotification.Action  (jFlashAppDelegate.m) */
-"Study" = "Study";
-
 /* Default DSActivtyView label text  (DSActivityView.m) */
 "Loading..." = "Loading...";
 
@@ -559,3 +556,12 @@
 "My Best Friend" = "My Best Friend";
 "Mom" = "Mom";
 "Horiemon" = "Horiemon";
+
+/* ReminderVC.NotificationsDenied.Title  (ReminderSettingsViewController.m) */
+"Notifications Are Off" = "Notifications Are Off";
+
+/* ReminderVC.NotificationsDenied.Message  (ReminderSettingsViewController.m) */
+"To get study reminders, allow notifications for this app in the Settings app." = "To get study reminders, allow notifications for this app in the Settings app.";
+
+/* ReminderVC.NotificationsDenied.OpenSettings  (ReminderSettingsViewController.m) */
+"Open Settings" = "Open Settings";

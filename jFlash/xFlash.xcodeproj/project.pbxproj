@@ -18,6 +18,10 @@
 		AA2B001119000020000000AA /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
 		AA2B001019000020000000AA /* DisplaySearchedSentenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */; };
 		AA2B000519000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA3C000219000020000000AA /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3C000019000010000000AA /* UserNotifications.framework */; };
+		AA3C000319000020000000AA /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3C000019000010000000AA /* UserNotifications.framework */; };
+		AA3C000419000020000000AA /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3C000019000010000000AA /* UserNotifications.framework */; };
+		AA3C000519000020000000AA /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3C000019000010000000AA /* UserNotifications.framework */; };
 		AA2B000419000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
 		AA2B000319000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
 		AA2B000219000020000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
@@ -929,6 +933,7 @@
 		AA1A507E19000001000000AA /* jFlash-FTS-1.1.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507E144F9E7900DB81F7 /* jFlash-FTS-1.1.db */; };
 		AA1A507F19000002000000AA /* jFlash-EX-1.2.db in Resources */ = {isa = PBXBuildFile; fileRef = 4919507F144F9E7900DB81F7 /* jFlash-EX-1.2.db */; };
 		AA1A600119000010000000AA /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA1A600019000010000000AA /* WebKit.framework */; };
+		AA3C000119000020000000AA /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3C000019000010000000AA /* UserNotifications.framework */; };
 		D322368611D370B900B1AF15 /* plugin-resources in Resources */ = {isa = PBXBuildFile; fileRef = D322367A11D370B900B1AF15 /* plugin-resources */; };
 		D32DC3D0116D82C9005D3852 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32DC3CF116D82C9005D3852 /* Security.framework */; };
 		D35B077B1116456D00DB5E02 /* overlay-btn-close.png in Resources */ = {isa = PBXBuildFile; fileRef = D35B073D1116456D00DB5E02 /* overlay-btn-close.png */; };
@@ -1409,6 +1414,7 @@
 		A34F45C3184B22AA00FA137C /* starred-tag.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "starred-tag.png"; path = "Assets/starred-tag.png"; sourceTree = "<group>"; };
 		A34F45C4184B22AA00FA137C /* starred-tag@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "starred-tag@2x.png"; path = "Assets/starred-tag@2x.png"; sourceTree = "<group>"; };
 		AA1A600019000010000000AA /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
+		AA3C000019000010000000AA /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		D322367A11D370B900B1AF15 /* plugin-resources */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "plugin-resources"; path = "Assets/plugin-resources"; sourceTree = "<group>"; };
 		D32DC3CF116D82C9005D3852 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		D35B073D1116456D00DB5E02 /* overlay-btn-close.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "overlay-btn-close.png"; path = "Assets/overlay-btn-close.png"; sourceTree = "<group>"; };
@@ -1455,6 +1461,7 @@
 				2424116511F7E1BC00D535D7 /* SystemConfiguration.framework in Frameworks */,
 				91E93B0E133AD450007E5F83 /* MessageUI.framework in Frameworks */,
 				AA1A600119000010000000AA /* WebKit.framework in Frameworks */,
+				AA3C000119000020000000AA /* UserNotifications.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1464,6 +1471,7 @@
 			files = (
 				AA2E001319000050000000AA /* libsqlite3.tbd in Frameworks */,
 				AA2B000319000020000000AA /* WebKit.framework in Frameworks */,
+				AA3C000319000020000000AA /* UserNotifications.framework in Frameworks */,
 				49A465EB14FD069400CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C814FD05C700CF5C44 /* CoreData.framework in Frameworks */,
 				49A3EC1514DB99C800621183 /* CoreText.framework in Frameworks */,
@@ -1488,6 +1496,7 @@
 			files = (
 				AA2E001419000050000000AA /* libsqlite3.tbd in Frameworks */,
 				AA2B000519000020000000AA /* WebKit.framework in Frameworks */,
+				AA3C000519000020000000AA /* UserNotifications.framework in Frameworks */,
 				49A465EA14FD068D00CF5C44 /* QuartzCore.framework in Frameworks */,
 				49A465C914FD05CF00CF5C44 /* CoreData.framework in Frameworks */,
 				496C670214728BDC009F04D4 /* Security.framework in Frameworks */,
@@ -1512,6 +1521,7 @@
 			files = (
 				AA2E001119000050000000AA /* libsqlite3.tbd in Frameworks */,
 				AA2B000419000020000000AA /* WebKit.framework in Frameworks */,
+				AA3C000419000020000000AA /* UserNotifications.framework in Frameworks */,
 				242A174814628AF4002977E6 /* AudioToolbox.framework in Frameworks */,
 				242A17401461AB60002977E6 /* AVFoundation.framework in Frameworks */,
 				24A9F5681461334800C9D46F /* libz.tbd in Frameworks */,
@@ -1535,6 +1545,7 @@
 			files = (
 				AA2E001219000050000000AA /* libsqlite3.tbd in Frameworks */,
 				AA2B000219000020000000AA /* WebKit.framework in Frameworks */,
+				AA3C000219000020000000AA /* UserNotifications.framework in Frameworks */,
 				919FBDBD16230000001FD77B /* Social.framework in Frameworks */,
 				91D3FA5D1580294F00CB8F1E /* AudioToolbox.framework in Frameworks */,
 				91D3FA5E1580294F00CB8F1E /* AVFoundation.framework in Frameworks */,
@@ -1584,6 +1595,7 @@
 			isa = PBXGroup;
 			children = (
 				AA1A600019000010000000AA /* WebKit.framework */,
+				AA3C000019000010000000AA /* UserNotifications.framework */,
 				AA2E000119000050000000AA /* libsqlite3.tbd */,
 			);
 			name = "Recovered References";
