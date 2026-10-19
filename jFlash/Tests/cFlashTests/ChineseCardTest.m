@@ -10,6 +10,8 @@
 #import "ChineseCard.h"
 #import "CardPeer.h"
 #import "SetupDatabaseHelper.h"
+#import "ThemeManager.h"
+#import "Constants.h"
 
 @interface ChineseCardTest ()
 - (ChineseCard *) _cardForKeyword:(NSString *)keyword;
@@ -248,5 +250,64 @@
   XCTAssertTrue(result, @"Test database cannot be removed for some reason.\nError: %@", [error localizedDescription]);
 }
 
+
+#pragma mark - Pinyin ink (furigana spec, DD review of PR #21)
+
+static BOOL LWESameRGBA(UIColor *a, UIColor *b)
+{
+  CGFloat r1 = 0, g1 = 0, b1 = 0, a1 = 0, r2 = 0, g2 = 0, b2 = 0, a2 = 0;
+  if (![a getRed:&r1 green:&g1 blue:&b1 alpha:&a1] || ![b getRed:&r2 green:&g2 blue:&b2 alpha:&a2]) return NO;
+  return fabs(r1 - r2) < 0.002 && fabs(g1 - g2) < 0.002 && fabs(b1 - b2) < 0.002 && fabs(a1 - a2) < 0.002;
+}
+
+//! Writes a setting for this test.  The host app's StudyViewController observes these keys and rebuilds
+//! its card view; in cFlash that can throw from the stale English-first nib (a pre-existing bug, see
+//! PR #21), which isn't what this test checks.
+static void LWESetTestSetting(id value, NSString *key)
+{
+  @try
+  {
+    if (value) [[NSUserDefaults standardUserDefaults] setObject:value forKey:key];
+    else [[NSUserDefaults standardUserDefaults] removeObjectForKey:key];
+  }
+  @catch (NSException *exception)
+  {
+    NSLog(@"Host app threw while observing %@: %@", key, exception);
+  }
+}
+
+- (void) testRevealedPinyinUsesReadingInkOnEveryTheme
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  id savedTheme = [[settings objectForKey:APP_THEME] retain];
+  id savedColor = [[settings objectForKey:APP_PINYIN_COLOR] retain];
+  LWESetTestSetting(SET_PINYIN_COLOR_ON, APP_PINYIN_COLOR);
+
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  card.hw_reading = @"xue2 xi2";
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  NSArray *themeKeys = [tm themeKeysList];
+  XCTAssertTrue([themeKeys count] >= 5, @"All five themes");
+  for (NSString *themeKey in themeKeys)
+  {
+    LWESetTestSetting(themeKey, APP_THEME);
+    UIColor *ink = [tm colorForSlot:@"readingInk"];
+    NSAttributedString *pinyin = [card attributedReading];
+    XCTAssertEqualObjects([pinyin string], @"xué xí");
+    [pinyin enumerateAttribute:NSForegroundColorAttributeName inRange:NSMakeRange(0, [pinyin length]) options:0
+                    usingBlock:^(id value, NSRange range, BOOL *stop) {
+      XCTAssertTrue(LWESameRGBA(value, ink), @"%@: '%@' should be readingInk %@, not %@", themeKey,
+                    [[pinyin string] substringWithRange:range], ink, value);
+    }];
+  }
+  // Paper's readingInk is ink-2 #3A352E (not the old tone-2 amber #9A4E00)
+  LWESetTestSetting(SET_THEME_PAPER, APP_THEME);
+  XCTAssertTrue(LWESameRGBA([tm colorForSlot:@"readingInk"], [UIColor colorWithRed:0x3A/255.0 green:0x35/255.0 blue:0x2E/255.0 alpha:1.0]));
+
+  LWESetTestSetting(savedTheme, APP_THEME);
+  LWESetTestSetting(savedColor, APP_PINYIN_COLOR);
+  [savedTheme release];
+  [savedColor release];
+}
 
 @end

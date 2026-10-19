@@ -157,70 +157,17 @@
 - (NSArray *) readingComponents
 {
   NSMutableArray *components = [NSMutableArray array];
-  // Tone colours are theme-aware so they stay AA on light (Paper) and dark (Fire/Water) cards.
-  // Light: fire-deep / dark amber / right-ink / water.  Dark: soft red / yellow / mint / sky.
-  ThemeManager *tm = [ThemeManager sharedThemeManager];
-  UIColor *cardFill = [tm colorForSlot:@"cardFill"];
-  CGFloat r = 0, g = 0, b = 0, a = 0;
-  [cardFill getRed:&r green:&g blue:&b alpha:&a];
-  // Relative luminance (sRGB approx). Paper/Kimono are light; Fire/Water/Kutani are dark.
-  CGFloat lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  BOOL lightCard = (lum > 0.45);
-  NSString *themeKey = [[tm _currentTheme] objectForKey:@"key"];
-  BOOL kimonoCard = [themeKey isEqualToString:SET_THEME_KIMONO];
-  UIColor *tone1, *tone2, *tone3, *tone4, *toneDefault;
-  if (kimonoCard)
-  {
-    // Mid kaki #EEA57A: darker tones so all four pass 4.5 at normal size.
-    tone1 = [UIColor colorWithRed:0.478 green:0.067 blue:0.000 alpha:1.0]; // #7A1100
-    tone2 = [UIColor colorWithRed:0.420 green:0.212 blue:0.000 alpha:1.0]; // #6B3600
-    tone3 = [UIColor colorWithRed:0.031 green:0.271 blue:0.122 alpha:1.0]; // #08451F
-    tone4 = [UIColor colorWithRed:0.055 green:0.247 blue:0.490 alpha:1.0]; // #0E3F7D
-    toneDefault = [tm colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.122 green:0.208 blue:0.345 alpha:1.0]; // kimono-ai
-  }
-  else if (lightCard)
-  {
-    tone1 = [UIColor colorWithRed:0.557 green:0.078 blue:0.000 alpha:1.0]; // #8E1400 fire-deep
-    tone2 = [UIColor colorWithRed:0.604 green:0.306 blue:0.000 alpha:1.0]; // #9A4E00 dark amber
-    tone3 = [UIColor colorWithRed:0.043 green:0.353 blue:0.173 alpha:1.0]; // #0B5A2C right-ink
-    tone4 = [UIColor colorWithRed:0.075 green:0.337 blue:0.655 alpha:1.0]; // #1356A7 water
-    toneDefault = [tm colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.114 green:0.102 blue:0.086 alpha:1.0]; // ink
-  }
-  else
-  {
-    tone1 = [UIColor colorWithRed:1.000 green:0.635 blue:0.580 alpha:1.0]; // #FFA294 (AA at normal size on dark cards)
-    tone2 = [UIColor colorWithRed:1.000 green:0.839 blue:0.039 alpha:1.0]; // #FFD60A yellow
-    tone3 = [UIColor colorWithRed:0.490 green:0.871 blue:0.627 alpha:1.0]; // #7DDEA0
-    tone4 = [UIColor colorWithRed:0.557 green:0.784 blue:1.000 alpha:1.0]; // #8EC8FF
-    toneDefault = [tm colorForSlot:@"readingInk"] ?: [UIColor whiteColor];
-  }
-  NSDictionary *colorDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                             tone1,@"1", tone2,@"2", tone3,@"3", tone4,@"4", nil];
+  // Furigana spec (DD review of PR #21): the revealed pinyin is drawn in the theme's readingInk on
+  // every theme, the same ink as jFlash's kana.  The old per-tone colours (fire-deep / dark amber /
+  // green / blue) are no longer applied on the card, so 'xué xí' no longer reads orange-brown.
+  UIColor *ink = [[ThemeManager sharedThemeManager] colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.227 green:0.208 blue:0.180 alpha:1.0]; // ink-2 #3A352E
 
   NSArray *pinyinSegments = [self.reading componentsSeparatedByString:@" "];
   for (NSString *pinyinSegment in pinyinSegments)
   {
-    UIColor *theColor = toneDefault;
-    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-    BOOL useColor = [[settings objectForKey:APP_PINYIN_COLOR] isEqualToString:SET_PINYIN_COLOR_ON];
-
-    if (useColor)
-    {
-      for (NSString *toneNumber in colorDict)
-      {
-        NSRange range = [pinyinSegment rangeOfString:toneNumber];
-        if (range.location != NSNotFound)
-        {
-          theColor = (UIColor*)[colorDict objectForKey:toneNumber];
-          break;
-        }
-      }
-    }
-    
     // Now pinyin-ify the string
     pinyinSegment = [self _pinyinForNumberedPinyin:pinyinSegment];
-    
-    NSDictionary *pinyinHash = [NSDictionary dictionaryWithObjectsAndKeys:theColor,@"color",pinyinSegment,@"pinyin",nil];
+    NSDictionary *pinyinHash = [NSDictionary dictionaryWithObjectsAndKeys:ink,@"color",pinyinSegment,@"pinyin",nil];
     [components addObject:pinyinHash];
   }
   return components;
