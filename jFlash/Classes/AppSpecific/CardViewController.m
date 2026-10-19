@@ -942,10 +942,12 @@ NSString * const LWECardHTMLTemplate = @""
 "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 #if defined(LWE_JFLASH)
 // 2026 card: large, upright meaning; no maximum-scale, so pinch zoom stays available.
+// POS pills (dfn) contain hiragana — Hiragino first there. Body keeps Helvetica Neue
+// for Latin glosses, with Hiragino as fallback so any kana in glosses still draw.
 "<meta name='viewport' content='width=device-width, initial-scale=1' />"
 "<style>"
-"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:calc(##TEXTSIZE## * 1.5); font-weight:600; font-style:normal; font-family:-apple-system,'Helvetica Neue',Helvetica,sans-serif; line-height:1.25; letter-spacing:-0.4px; -webkit-text-size-adjust:none; } "
-"dfn{ text-shadow:none; font-style:normal; font-weight:600; color:#3a2a00; position:relative; top:-3px; font-family:-apple-system,sans-serif; font-size:13px; letter-spacing:0.1px; background-color:#FFD60A; line-height:1; margin:0 0 0 8px; padding:5px 9px 6px; -webkit-border-radius:8px; border:0; display:inline-block; vertical-align:middle; } "
+"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:calc(##TEXTSIZE## * 1.5); font-weight:600; font-style:normal; font-family:'Helvetica Neue','Hiragino Sans','Hiragino Kaku Gothic ProN',-apple-system,Helvetica,sans-serif; line-height:1.25; letter-spacing:-0.4px; -webkit-text-size-adjust:none; } "
+"dfn{ text-shadow:none; font-style:normal; font-weight:600; color:#3a2a00; position:relative; top:-3px; font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',-apple-system,sans-serif; font-size:13px; letter-spacing:0.1px; background-color:#FFD60A; line-height:1; margin:0 0 0 8px; padding:5px 9px 6px; -webkit-border-radius:8px; border:0; display:inline-block; vertical-align:middle; } "
 "#container{ width:100%; text-align:center; padding-top:0; } "
 // Meaning ink, the rule colour and the noun pill come from the theme CSS (meaningInk, meaningRule).
 "#container:before{ content:''; display:block; width:40px; height:2px; border-radius:1px; margin:0 auto 22px auto; } "
