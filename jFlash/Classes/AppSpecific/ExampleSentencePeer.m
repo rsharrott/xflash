@@ -19,16 +19,35 @@
 + (BOOL) isNewVersion
 {
 #if defined (LWE_JFLASH)
-  // Get plugin version
-  BOOL isNewVersion = NO;
-  // MMA TODO: 12/11/2011 -- this is a total hack, but it's no better than the [CurrentState..] static code
-  // that was here before.  Point is, we need a way to just stop all this plugin versioning ridiculousness altogether.
+  // "New" example databases (EX 1.2 and later, including the 2.0 Tatoeba refresh) have
+  // card_sentence_link.should_show; EX 1.1 didn't.  Ask the attached database for the column
+  // instead of guessing from its version string, and only re-check when the loaded version changes.
+  static NSString *checkedVersion = nil;
+  static BOOL hasShouldShow = NO;
   jFlashAppDelegate *appDelegate = (jFlashAppDelegate*)[[UIApplication sharedApplication] delegate];
-  if ([[appDelegate.pluginManager versionForLoadedPlugin:EXAMPLE_DB_KEY] isEqualToString:@"1.2"])
+  NSString *exVersion = [appDelegate.pluginManager versionForLoadedPlugin:EXAMPLE_DB_KEY];
+  if (exVersion == nil)
   {
-    isNewVersion = YES;
+    return NO;
   }
-  return isNewVersion;
+  if (checkedVersion == nil || [checkedVersion isEqualToString:exVersion] == NO)
+  {
+    hasShouldShow = NO;
+    // The plugin is attached under its pluginId (EX_DB), one of our own constants.
+    NSString *sql = [NSString stringWithFormat:@"PRAGMA %@.table_info(card_sentence_link)", EXAMPLE_DB_KEY];
+    FMResultSet *rs = [[[LWEDatabase sharedLWEDatabase] dao] executeQuery:sql];
+    while ([rs next])
+    {
+      if ([[rs stringForColumn:@"name"] isEqualToString:@"should_show"])
+      {
+        hasShouldShow = YES;
+      }
+    }
+    [rs close];
+    [checkedVersion release];
+    checkedVersion = [exVersion copy];
+  }
+  return hasShouldShow;
 #else
   return YES;
 #endif
