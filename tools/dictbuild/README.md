@@ -120,7 +120,8 @@ Anything that fails these checks is **dropped rather than mis-mapped**.
 Readings are split on `;`/`,` only, never on `、`, which is punctuation inside
 phrase readings. A kana headword that only reaches kanji entries through
 their readings (くも → 蜘蛛 / 雲) has to share meaning with them, and so does
-tier 3 (瑞 みず "youth" is not 瑞 ずい "Sweden").
+tier 3 (瑞 みず "youth" is not 瑞 ずい "Sweden"). Two-letter words count as meaning
+(ある "to be" is 有る "to be; to exist").
 
 Legacy ids from 145383 up are not all hand-made: most are ordinary 2010 EDICT
 entries imported late (骨, アーチリュート, JLPT re-matches) and are matched like

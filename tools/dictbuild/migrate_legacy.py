@@ -161,7 +161,8 @@ class Matcher:
 
 
 _STOP = {'the', 'and', 'for', 'with', 'from', 'that', 'this', 'one', 'etc', 'something', 'someone',
-         'thing', 'being', 'into', 'out', 'off', 'not', 'very', 'make', 'have', 'take', 'get'}
+         'thing', 'being', 'into', 'out', 'off', 'not', 'very', 'make', 'have', 'take', 'get',
+         'to', 'of', 'in', 'on', 'at', 'by', 'as', 'or', 'an', 'is', 'it', 'up', 'eg', 'ie', 'usu'}
 
 
 def strip_html(html):
@@ -171,7 +172,8 @@ def strip_html(html):
 
 def gloss_words(text):
     # crude stemming: compare the first 5 letters (polymorphisms ~ polymorphism)
-    return {w[:5] for w in re.findall(r'[a-z]{3,}', (text or '').lower()) if w not in _STOP}
+    # (2-letter words count, so "to be" can match 有る "to be; to exist")
+    return {w[:5] for w in re.findall(r'[a-z]{2,}', (text or '').lower()) if w not in _STOP}
 
 
 REVIEW_TIERS = ('headword-only', 'reading-only (legacy kanji form gone)')   # mapped, but worth a look

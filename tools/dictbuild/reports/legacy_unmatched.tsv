@@ -392,7 +392,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 46	Computers	3170	情報ベース種別	じょうほうベースしゅべつ	information-base-type	unmatched
 46	Computers	3288	書式付き処理可能形式	しょしきつきしょりかのうけいしき	formatted processable form	unmatched
 46	Computers	3290	アイエスオーシー	アイエスオーシー	ISOC	unmatched
-46	Computers	3443	シーエー	シーエー	CA	kana spelling, homophones with other meanings (dropped)
 46	Computers	3506	定期的に	ていきてきに	at fixed intervals	unmatched
 46	Computers	3569	エヌエフエスネット	エヌエフエスネット	NFSNET	unmatched
 46	Computers	3615	シースリップ	シースリップ	CSLIP	unmatched
@@ -1882,7 +1881,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 92	JLPT Level N1	146200	兆	きざし	sign	headword-only (mapped to 兆 ちょう)
 92	JLPT Level N1	146332	煌々と	こうこうと	brilliantly	unmatched
 92	JLPT Level N1	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-92	JLPT Level N1	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
 92	JLPT Level N1	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 93	JLPT Level N2	11155	×	ばつ; ぺけ; ペケ	x-mark (used to indicate an incorrect answer in a test, etc.)	unmatched
 93	JLPT Level N2	13029	依ると	よると	according to	unmatched
@@ -1896,13 +1894,8 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 93	JLPT Level N2	137012	一段と	いちだんと	greater	unmatched
 93	JLPT Level N2	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
 93	JLPT Level N2	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-93	JLPT Level N2	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
 93	JLPT Level N2	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 94	JLPT Level N3	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-94	JLPT Level N3	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
-94	JLPT Level N3 [jFlashJr.db card_tag_link]	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
-95	JLPT Level N4	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
-95	JLPT Level N4 [jFlashJr.db card_tag_link]	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
 97	Kansai Dialect	18641	本真に	ほんまに	really	unmatched
 97	Kansai Dialect	27754	ちょう待って	ちょうまって	Wait a minute	unmatched
 97	Kansai Dialect	75376	エーコッコシー	エーコッコシー	someone who is overly concerned with status. Can be used enviously with reference to someone of real accomplishment	unmatched
@@ -2179,13 +2172,11 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 133	Nouns	3170	情報ベース種別	じょうほうベースしゅべつ	information-base-type	unmatched
 133	Nouns	3178	正経	せいきょう	canon of Scripture	headword-only (mapped to 正経 せいけい)
 133	Nouns	3240	嘆かわしい事態	なげかわしいじたい	deplorable situation	unmatched
-133	Nouns	3280	シーエフ	シーエフ	cf	kana spelling, homophones with other meanings (dropped)
 133	Nouns	3286	ユーモアの感覚	ユーモアのかんかく	sense of humor	unmatched
 133	Nouns	3288	書式付き処理可能形式	しょしきつきしょりかのうけいしき	formatted processable form	unmatched
 133	Nouns	3290	アイエスオーシー	アイエスオーシー	ISOC	unmatched
 133	Nouns	3298	冴えた色	さえたいろ	bright color	unmatched
 133	Nouns	3371	シーンタフネス性	シーンタフネスせい	ability of a video camera to hold a scene steady (cf. scene toughness)	unmatched
-133	Nouns	3443	シーエー	シーエー	CA	kana spelling, homophones with other meanings (dropped)
 133	Nouns	3506	定期的に	ていきてきに	at fixed intervals	unmatched
 133	Nouns	3569	エヌエフエスネット	エヌエフエスネット	NFSNET	unmatched
 133	Nouns	3615	シースリップ	シースリップ	CSLIP	unmatched
@@ -2725,7 +2716,7 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 147	Common Expressions	34532	言う所	いうところ	what is called	unmatched
 147	Common Expressions	34860	寿司を握る	すしをにぎる	to make hand-rolled sushi	unmatched
 147	Common Expressions	35032	上の級に進む	うえのきゅうにすすむ	to move up to a higher grade	unmatched
-147	Common Expressions	35138	ブルータスお前もか	ブルータスおまえもか	Et tu, Brutus?	headword-only, different meaning (dropped)
+147	Common Expressions	35138	ブルータスお前もか	ブルータスおまえもか	Et tu, Brutus?	headword-only (mapped to ブルータス、お前もか ブルータス、おまえもか)
 147	Common Expressions	35257	年生まれ	ねんうまれ	born in ...	unmatched
 147	Common Expressions	35285	党勢を伸す	とうせいをのす	to extend the strength of a party	unmatched
 147	Common Expressions	35362	痛い目に遭わす	いたいめにあわす	to make a person sweat for it	unmatched
@@ -3553,7 +3544,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 151	Polite Language	42267	於かれましては	おかれましては	in respect of	unmatched
 151	Polite Language	71730	教育に携わる者	きょういくにたずさわるもの	someone involved with education	unmatched
 151	Polite Language	125054	お草々様	おそうそうさま	neglectful (i.e. in the treatment of one's guests)	unmatched
-151	Polite Language	146451	どの	どの	person	kana spelling, homophones with other meanings (dropped)
 154	Pre-Noun Adjectival 	11356	偶の	たまの	occasional	unmatched
 154	Pre-Noun Adjectival 	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 156	Prefix Noun	1926	希	ぎ	Greece	ambiguous
@@ -3759,7 +3749,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 195	Written with Kana Only	138285	摘み捻子	つまみねじ	thumbscrew	reading-only (legacy kanji form gone) (mapped to つまみねじ つまみねじ; つまみネジ; ツマミネジ)
 195	Written with Kana Only	140270	滑らす	ずらす	to shift	headword-only (mapped to 滑らす すべらす)
 195	Written with Kana Only	146804	塵芥	ごみ	rubbish	headword-only (mapped to 塵芥 じんかい; ちりあくた; ごみあくた)
-195	Written with Kana Only	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
 195	Written with Kana Only	148248	確	しか	certainly (for certain) (used in negative sense)	ambiguous
 195	Written with Kana Only	148312	含羞	はにかみ	(showing) signs of embarrassment	headword-only, different meaning (dropped)
 195	Written with Kana Only	148665	擦る	なぞる	to trace (drawing)	ambiguous
@@ -3983,8 +3972,6 @@ tag_id	tag_name	old_card_id	headword	reading	headword_en	result
 618	Common Words 03	145863	同軸ケーブル	どうじきケーブル	coaxial cable	headword-only [hand-made] (mapped to 同軸ケーブル どうじくケーブル)
 618	Common Words 03	145891	ロゼ	ローゼ	blush wine	headword-only [hand-made] (mapped to ロゼ ロゼ)
 618	Common Words 03	146200	兆	きざし	sign	headword-only (mapped to 兆 ちょう)
-618	Common Words 03	146451	どの	どの	person	kana spelling, homophones with other meanings (dropped)
-618	Common Words 03	146985	ある	ある	to be	kana spelling, homophones with other meanings (dropped)
 618	Common Words 03	150195	唯	たった	free of charge	headword-only (mapped to 只 ただ)
 619	Computers 02	117338	ピートス	ピートス	PTOS	unmatched
 619	Computers 02	117447	ウォーサ	ウォーサ	WOSA	unmatched

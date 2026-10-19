@@ -5,23 +5,23 @@ Legacy cards referenced by built-in sets or user DB templates: 149255
 | match tier | cards |
 |---|---|
 | exact | 117070 |
-| headword+reading | 25786 |
+| headword+reading | 25790 |
 | unmatched | 4884 |
 | curated kana/word (kept) | 557 |
-| headword-only | 514 |
+| headword-only | 515 |
 | hand-made, no JMdict match: kept verbatim | 173 |
 | headword+reading [hand-made] | 71 |
 | headword+other-reading | 68 |
-| headword-only, different meaning (dropped) | 38 |
+| headword-only, different meaning (dropped) | 37 |
 | exact [hand-made] | 35 |
-| kana spelling, homophones with other meanings (dropped) | 19 |
+| kana spelling, homophones with other meanings (dropped) | 15 |
 | reading-only (legacy kanji form gone) | 14 |
 | headword-only [hand-made] | 12 |
 | ambiguous | 10 |
 | headword+other-reading, different meaning (dropped) | 3 |
 | headword+other-reading [hand-made] | 1 |
 
-System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175 memberships dropped (no match)
+System set links: 243038 legacy -> 234917 re-mapped (after de-duplication), 7163 memberships dropped (no match)
 
 | tag_id | set | legacy | new | dropped |
 |---|---|---|---|---|
@@ -60,7 +60,7 @@ System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175
 | 42 | Common Words | 9852 | 9804 | 44 |
 | 43 | Common Verbs | 54 | 54 | 0 |
 | 44 | Common い Adjectives | 28 | 28 | 0 |
-| 46 | Computers | 10000 | 8576 | 1306 |
+| 46 | Computers | 10000 | 8577 | 1305 |
 | 47 | Conjunctions | 181 | 173 | 2 |
 | 48 | Constellations | 62 | 62 | 0 |
 | 49 | Counter Kanji | 111 | 108 | 1 |
@@ -90,14 +90,14 @@ System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175
 | 80 | Idiomatic Expressions | 413 | 374 | 39 |
 | 81 | Illness | 26 | 26 | 0 |
 | 82 | Insects | 15 | 15 | 0 |
-| 83 | Interjections | 255 | 237 | 10 |
+| 83 | Interjections | 255 | 236 | 10 |
 | 84 | Intransitive Verbs | 1873 | 1857 | 8 |
 | 90 | Italian Words | 208 | 199 | 2 |
 | 91 | Japanglish (Wasei Eigo) | 676 | 664 | 11 |
-| 92 | JLPT Level N1 | 7615 | 7546 | 10 |
-| 93 | JLPT Level N2 | 4750 | 4689 | 8 |
-| 94 | JLPT Level N3 | 1222 | 1210 | 1 |
-| 95 | JLPT Level N4 | 630 | 625 | 1 |
+| 92 | JLPT Level N1 | 7615 | 7546 | 9 |
+| 93 | JLPT Level N2 | 4750 | 4689 | 7 |
+| 94 | JLPT Level N3 | 1222 | 1211 | 0 |
+| 95 | JLPT Level N4 | 630 | 626 | 0 |
 | 97 | Kansai Dialect | 77 | 71 | 6 |
 | 101 | Korean Words | 29 | 28 | 1 |
 | 103 | Latin Words | 187 | 186 | 0 |
@@ -122,7 +122,7 @@ System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175
 | 129 | Mathematical | 262 | 259 | 3 |
 | 130 | Military | 33 | 33 | 0 |
 | 132 | Noun Suffixes | 357 | 347 | 6 |
-| 133 | Nouns | 10000 | 9705 | 285 |
+| 133 | Nouns | 10000 | 9707 | 283 |
 | 134 | Numeric | 32 | 19 | 0 |
 | 135 | Obscure | 1146 | 1119 | 25 |
 | 136 | Obsolete | 185 | 183 | 2 |
@@ -131,10 +131,10 @@ System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175
 | 141 | Parts of Speech | 66 | 66 | 0 |
 | 142 | Parts of the Body | 38 | 38 | 0 |
 | 144 | People at School | 18 | 17 | 1 |
-| 147 | Common Expressions | 7126 | 6043 | 1043 |
+| 147 | Common Expressions | 7126 | 6044 | 1042 |
 | 148 | Physics | 81 | 80 | 1 |
 | 149 | Plant Families | 89 | 89 | 0 |
-| 151 | Polite Language | 124 | 119 | 5 |
+| 151 | Polite Language | 124 | 119 | 4 |
 | 152 | Political Language | 16 | 16 | 0 |
 | 153 | Portuguese Words | 68 | 64 | 0 |
 | 154 | Pre-Noun Adjectival  | 112 | 110 | 1 |
@@ -167,7 +167,7 @@ System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175
 | 189 | Trains | 31 | 31 | 0 |
 | 190 | Transitive Verbs | 2659 | 2634 | 9 |
 | 193 | Weather | 22 | 22 | 0 |
-| 195 | Written with Kana Only | 3798 | 3689 | 74 |
+| 195 | Written with Kana Only | 3798 | 3689 | 73 |
 | 197 | い Adjectives | 1275 | 1232 | 37 |
 | 198 | な Adjectives | 4403 | 4320 | 29 |
 | 199 | の Adjectives | 6646 | 6598 | 41 |
@@ -193,7 +193,7 @@ System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175
 | 220 | Floors of Building | 11 | 11 | 0 |
 | 616 | Aux ~する Reg. Verbs 02 | 1237 | 1227 | 8 |
 | 617 | Common Words 02 | 9999 | 9949 | 44 |
-| 618 | Common Words 03 | 2782 | 2727 | 15 |
+| 618 | Common Words 03 | 2782 | 2727 | 13 |
 | 619 | Computers 02 | 2365 | 2043 | 314 |
 | 620 | Nouns 02 | 10000 | 9714 | 268 |
 | 621 | Nouns 03 | 9908 | 9640 | 254 |
@@ -211,7 +211,7 @@ System set links: 243038 legacy -> 234912 re-mapped (after de-duplication), 7175
 
 jFlash.db card_tag_link: 14 rows, 0 dropped
 
-jFlashJr.db card_tag_link: 2504 rows, 2 dropped
+jFlashJr.db card_tag_link: 2504 rows, 0 dropped
 
-Unmatched memberships (dropped): 7177; headword-only / reading-only matches (kept, review): 794.
+Unmatched memberships (dropped): 7163; headword-only / reading-only matches (kept, review): 795.
 Details: reports/legacy_unmatched.tsv
