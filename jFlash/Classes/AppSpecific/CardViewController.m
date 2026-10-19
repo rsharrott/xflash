@@ -280,6 +280,10 @@ static const CGFloat kLWEPillHitInset = 7.0;
 
   self.toggleReadingBtn.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
   [self.toggleReadingBtn setTitleColor:[tm colorForSlot:@"toggleInk"] forState:UIControlStateNormal];
+  // cFlash NIB bakes "Show Reading" into practice-btn-showreading.png; drop it so the
+  // title (and hide-when-reading-on) actually control what's on screen.
+  [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateNormal];
+  [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateHighlighted];
   self.toggleReadingBtn.autoresizingMask = UIViewAutoresizingNone;
 
   // Speaker: 44pt circle next to the headword (speakerFill / speakerInk)
@@ -732,6 +736,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 {
   // Change state
   self.readingScrollContainer.hidden = NO;
+  self.toggleReadingBtn.hidden = YES;
   [self.toggleReadingBtn setTitle:@"" forState:UIControlStateNormal];
   
   // This will handle the "more" icon after the state change
@@ -747,6 +752,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [self _updateReadingContainer];
   
   self.readingScrollContainer.hidden = YES;
+  self.toggleReadingBtn.hidden = NO;
   [self.toggleReadingBtn setTitle:NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading") forState:UIControlStateNormal];
 
   // This will handle the "more" icon after the state change
