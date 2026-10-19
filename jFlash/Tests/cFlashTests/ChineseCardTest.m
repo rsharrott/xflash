@@ -28,6 +28,37 @@
   ChineseCard *card = [[ChineseCard alloc] init];
   card.hw_reading = @"hui2";
   XCTAssertEqualObjects(card.pinyinReading,@"huí",@"Card reading should be the same");
+  [card release];
+}
+
+- (void) testToneMarkPlacement
+{
+  // a / e take the mark; in "ou" the o; otherwise the last vowel (ui -> i, iu -> u, uo -> o)
+  NSDictionary *expected = @{
+    @"hao3": @"hǎo", @"xie4": @"xiè", @"lüe4": @"lüè", @"lu:e4": @"lüè", @"xue2": @"xué",
+    @"gou3": @"gǒu", @"zhou1": @"zhōu", @"ou1": @"ōu",
+    @"hui4": @"huì", @"gui4": @"guì", @"dui4": @"duì", @"shui3": @"shuǐ",
+    @"liu2": @"liú", @"jiu3": @"jiǔ", @"cuo4": @"cuò", @"guo2": @"guó", @"zuo4": @"zuò",
+    @"nü3": @"nǚ", @"nu:3": @"nǚ", @"lü4": @"lǜ", @"zhong1": @"zhōng", @"er2": @"ér", @"yi1": @"yī",
+    @"Zhong1": @"Zhōng", @"An1": @"Ān", @"Ou1": @"Ōu",
+    @"ng2": @"ńg", @"m2": @"ḿ",
+    @"ma5": @"ma", @"r5": @"r", @"de5": @"de",
+  };
+  for (NSString *numbered in expected)
+  {
+    ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+    card.hw_reading = numbered;
+    XCTAssertEqualObjects(card.pinyinReading, expected[numbered], @"%@", numbered);
+  }
+  // A whole reading, syllable by syllable
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  card.hw_reading = @"dui4 bu5 qi3";
+  XCTAssertEqualObjects(card.pinyinReading, @"duì bu qǐ");
+  // Not numbered pinyin: unchanged
+  card.hw_reading = @"ma";
+  XCTAssertEqualObjects(card.pinyinReading, @"ma");
+  card.hw_reading = @"ni3,";
+  XCTAssertEqualObjects(card.pinyinReading, @"ni3,", @"Trailing punctuation is left alone (pre-existing)");
 }
 
 #pragma mark - Tone Change Tests
@@ -174,39 +205,48 @@
 
 #pragma mark Rules for 2nd Tone
 
-- (void) test2Becomes1WhenPrecededBy1Or2AndFollowedByOther
+- (void) testSecondToneBetweenTonesIsNotChanged
 {
   /**
    6. A 2nd tone preceded by a 1st or 2nd tone and followed by another tone becomes a 1st tone
-   This one will probably start to feel natural after a lot of listening practice and exposure.
-   Written down, however, it looks fairly crazy.
-   
-   As symbols:
-   [1 | 2] [2] [*] ⇒ [1 | 2] [1] [*]
-   (here the | represents ‘or’, and the * represents any tone)
-   
-   Examples:
-   三年级 (third grade): sān niánjí ⇒ ‘sān niānjí’
-   谁来吃？ (who’s coming to eat?): shéi lái chī? ⇒ shéi lāi chī?
-   特别难看 (especially ugly): tèbié nánkàn ⇒ tèbié nānkàn
+   [1 | 2] [2] [*] => [1 | 2] [1] [*]
+   三年级 (third grade): sān niánjí => 'sān niānjí'
+
+   This is a fast-speech tendency, not a rule dictionaries or textbooks write, so sandhiReading
+   deliberately doesn't apply it.  (This test used to be a copy of testBu4BecomesBu2WhenFollowedByTone4
+   under this name; it now pins the intended behaviour instead.)
    */
-//  ChineseCard *card = [self _cardForKeyword:@"三年级"];
-//  XCTAssertNotNil(card, @"Card could not be found: 三年级");
-//  XCTAssertEqualObjects(@"bu4 shi4", card.reading, @"Regular reading should not change"); 
-//  XCTAssertEqualObjects(@"bù shì", card.attributedReading.string, @"Regular reading should not change"); 
-//  XCTAssertEqualObjects(@"bú shì", card.sandhiReading, @"Tone sandhi reading should change");
-  
-  ChineseCard *card = [self _cardForKeyword:@"不会"];
-  XCTAssertNotNil(card, @"Card could not be found: 不会");
-  XCTAssertEqualObjects(@"bu4 hui4", card.reading, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bù huì", card.attributedReading.string, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bú huì", card.sandhiReading, @"Tone sandhi reading should change"); 
-  
-  card = [self _cardForKeyword:@"不错"];
-  XCTAssertNotNil(card, @"Card could not be found: 不错");
-  XCTAssertEqualObjects(@"bu4 cuo4", card.reading, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bù cuò", card.attributedReading.string, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bú cuò", card.sandhiReading, @"Tone sandhi reading should change");
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  card._headword = @"三年级";
+  card.hw_reading = @"san1 nian2 ji2";
+  XCTAssertEqualObjects(card.sandhiReading, @"sān nián jí", @"Rule 6 is not applied");
+  card._headword = @"谁来吃";
+  card.hw_reading = @"shei2 lai2 chi1";
+  XCTAssertEqualObjects(card.sandhiReading, @"shéi lái chī", @"Rule 6 is not applied");
+}
+
+- (void) testYiAndBuEdgeCases
+{
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  // 一 at the end of a word (第一) and before a neutral tone keeps tone 1
+  card._headword = @"第一";
+  card.hw_reading = @"di4 yi1";
+  XCTAssertEqualObjects(card.sandhiReading, @"dì yī");
+  card._headword = @"一个";
+  card.hw_reading = @"yi1 ge5";
+  XCTAssertEqualObjects(card.sandhiReading, @"yī ge");
+  // 不一定: 一 changes before the 4th tone; 不 is followed by 一's dictionary tone 1, so it stays bù
+  card._headword = @"不一定";
+  card.hw_reading = @"bu4 yi1 ding4";
+  XCTAssertEqualObjects(card.sandhiReading, @"bù yí dìng");
+  // A run of 3rd tones: 3 3 3 -> 2 2 3
+  card._headword = @"我很好";
+  card.hw_reading = @"wo3 hen3 hao3";
+  XCTAssertEqualObjects(card.sandhiReading, @"wó hén hǎo");
+  // Other characters before a 4th tone don't change
+  card._headword = @"他是";
+  card.hw_reading = @"ta1 shi4";
+  XCTAssertEqualObjects(card.sandhiReading, @"tā shì");
 }
 
 #pragma mark - Helpers

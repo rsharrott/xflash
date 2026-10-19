@@ -8,6 +8,7 @@
 
 #import "JFlashPluginMigrationTest.h"
 #import "Plugin.h"
+#import "Constants.h"
 
 /**
  * THIS CLASS TESTS THE 1.5=>1.6 JFLASH MIGRATION
@@ -38,8 +39,15 @@
   XCTAssertEqualObjects([legacyPluginHash objectForKey:@"plugin_target_url"], newPlugin.targetURL, @"Should be equal");
   XCTAssertEqualObjects([legacyPluginHash objectForKey:@"plugin_target_path"], newPlugin.filePath, @"Should be equal");
   
-  // Default to "Documents" for file location (this is a new feature)
-  XCTAssertEqual(kLWEFileLocationDocuments, newPlugin.fileLocation, @"Should be equal");
+  // Default to "Documents" for file location (this is a new feature).  Plugin uses its own
+  // LWEPluginLocation enum (Documents = 2); the test used to compare with LWEFile's kLWEFileLocationDocuments (1).
+  XCTAssertEqual(LWEPluginLocationDocuments, newPlugin.fileLocation, @"Should be equal");
+
+  // The cards DB is the one exception: it ships in the bundle
+  NSMutableDictionary *cardsHash = [[legacyPluginHash mutableCopy] autorelease];
+  [cardsHash setObject:CARD_DB_KEY forKey:@"plugin_key"];
+  Plugin *cardsPlugin = [Plugin pluginWithLegacyDictionary:cardsHash];
+  XCTAssertEqual(LWEPluginLocationBundle, cardsPlugin.fileLocation, @"CARD_DB stays in the bundle");
   
   // Default to "database" type, this is a new feature
   XCTAssertEqualObjects(@"database", newPlugin.pluginType, @"Should be equal");

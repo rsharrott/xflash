@@ -157,9 +157,13 @@
     column = @"cards_search_content";
   }
 
-  // Only the column name (one of our own constants) and the integer limit are formatted into the SQL.
+  // Shortest match first, measured on the column that was searched: for a reading (pinyin) or headword
+  // search that puts the exact entry (gong1 -> 公, 工, ...) ahead of long compounds that merely contain it,
+  // instead of whichever card has the shortest meaning.  A whole-table search ranks by content, as before.
+  NSString *rankColumn = columnName ?: @"content";
+  // Only the column names (our own constants) and the integer limit are formatted into the SQL.
   NSString *sql = [NSString stringWithFormat:@"SELECT card_id FROM cards_search_content WHERE "
-                   "%@ MATCH ? ORDER BY LENGTH(content) ASC, ptag DESC LIMIT %ld", column, (long)limit];
+                   "%@ MATCH ? ORDER BY LENGTH(%@) ASC, ptag DESC LIMIT %ld", column, rankColumn, (long)limit];
   return [[LWEDatabase sharedLWEDatabase].dao executeQuery:sql withArgumentsInArray:[NSArray arrayWithObject:searchString]];
 }
 

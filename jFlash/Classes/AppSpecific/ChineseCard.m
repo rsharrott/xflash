@@ -35,7 +35,10 @@
 }
 
 /**
- * Takes something like "gao4" and converts it to "gáo"
+ * Takes something like "hao3" and converts it to "hǎo".
+ * Standard placement: a or e takes the mark; in "ou" the o does; otherwise the last vowel
+ * (hui4 -> huì, jiu3 -> jiǔ, cuo4 -> cuò, lüe4 -> lüè).  Syllabic m / n (m2, ng2) take it on the m or n.
+ * Tone 5 (neutral) drops the digit.  Strings that don't end in a tone digit 1-5 are returned unchanged.
  */
 - (NSString*) _pinyinForNumberedPinyin:(NSString*)numberedPinyin
 {
@@ -45,79 +48,48 @@
     return nil;
   }
 
-  // Another quick return if we don't have a valid tone number - we will use toneNumber later too
+  // Another quick return if we don't have a valid tone number
   NSInteger toneNumber = [[numberedPinyin substringFromIndex:([numberedPinyin length]-1)] integerValue];
   if (toneNumber == 0 || toneNumber > 5)
   {
     return numberedPinyin;
   }
-  
-  //Replace the u: with ü (u umlaud)
+
+  // Replace the u: with ü (u umlaut)
   numberedPinyin = [numberedPinyin stringByReplacingOccurrencesOfString:@"u:" withString:@"ü"];
-  
-  // Define some regexes that are going to help us
-  NSError *error = NULL;
-  NSRegularExpression *vocalRegex = [NSRegularExpression regularExpressionWithPattern:@"[aeiouü]" options:NSRegularExpressionCaseInsensitive error:&error];
-  NSRegularExpression *diacriticRegex1 = [NSRegularExpression regularExpressionWithPattern:@"[ae]" options:NSRegularExpressionCaseInsensitive error:&error];
-  NSRegularExpression *diacriticRegex2 = [NSRegularExpression regularExpressionWithPattern:@"[ou]" options:NSRegularExpressionCaseInsensitive error:&error];
-  
-  // Now get the number of vowels in the reading to determine where the diacritic mark goes
+  numberedPinyin = [numberedPinyin stringByReplacingOccurrencesOfString:@"U:" withString:@"Ü"];
   NSString *reading = [numberedPinyin substringToIndex:([numberedPinyin length]-1)];
-  NSRange readingRange = NSMakeRange(0,[reading length]);
-  NSString *vowel = nil;
-  NSArray *vowels = [vocalRegex matchesInString:reading options:0 range:readingRange];
-  if ([vowels count] == 1)
+  if (toneNumber == 5)
   {
-    vowel = [reading substringWithRange:[[vowels objectAtIndex:0] range]];
+    return reading;
   }
-  else if ([vowels count] > 1)
+
+  // Find the letter that carries the mark (case-insensitively; ü is one UTF-16 unit, so indexes match)
+  NSString *lower = [reading lowercaseString];
+  NSRange mark = [lower rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"ae"]];
+  if (mark.location == NSNotFound)
   {
-    // OK, so there is more than one vowel, so we need to figure out which one to add the diacritic
-    NSArray *patternVowels = [diacriticRegex1 matchesInString:reading options:0 range:readingRange];
-    if ([patternVowels count] > 0)
-    {
-      // OK, we matched the first diacritic Regex
-      vowel = [reading substringWithRange:[[patternVowels objectAtIndex:0] range]];
-    }
-    else
-    {
-      // Nope, let's try the second one.
-      patternVowels = [diacriticRegex2 matchesInString:reading options:0 range:readingRange];
-      if ([patternVowels count] > 0)
-      {
-        vowel = [reading substringWithRange:[[patternVowels objectAtIndex:0] range]];
-      }
-    }
-    
-    // Assuming we have a vowel now, get the first letter.
-    if (vowel)
-    {
-      vowel = [vowel substringToIndex:1];
-    }
-    else
-    {
-      vowel = [vowels objectAtIndex:1];
-    }
+    NSRange ou = [lower rangeOfString:@"ou"];
+    if (ou.location != NSNotFound) mark = NSMakeRange(ou.location, 1);
   }
-  
-  // OK, now swap the vowel if we have one.
-  if (vowel)
+  if (mark.location == NSNotFound)
   {
-    // TODO: consider caching this dictionary, it's probably expensive.
-    NSDictionary *diacriticDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                   @"ā",@"a1",@"ē",@"e1",@"ī",@"i1",@"ō",@"o1",@"ū",@"u1",@"ǖ",@"ü1",
-                                   @"á",@"a2",@"é",@"e2",@"í",@"i2",@"ó",@"o2",@"ú",@"u2",@"ǘ",@"ü2",
-                                   @"ǎ",@"a3",@"ě",@"e3",@"ǐ",@"i3",@"ǒ",@"o3",@"ǔ",@"u3",@"ǚ",@"ü3",
-                                   @"à",@"a4",@"è",@"e4",@"ì",@"i4",@"ò",@"o4",@"ù",@"u4",@"ǜ",@"ü4",
-                                   nil];
-    if (toneNumber < 5)
-    {
-      NSString *key = [NSString stringWithFormat:@"%@%d",[vowel lowercaseString],toneNumber];
-      NSString *newVowel = [diacriticDict objectForKey:key];
-      reading = [reading stringByReplacingOccurrencesOfString:vowel withString:newVowel];
-    }
+    mark = [lower rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"iouü"] options:NSBackwardsSearch];
   }
-  return reading;
+  if (mark.location == NSNotFound)
+  {
+    mark = [lower rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:@"mn"]];
+  }
+  if (mark.location == NSNotFound || [lower length] != [reading length])
+  {
+    return reading;
+  }
+
+  // Combining macron / acute / caron / grave after that letter, then compose (u + U+030C -> ǔ, ü + U+0301 -> ǘ)
+  static const unichar kToneMarks[4] = {0x0304, 0x0301, 0x030C, 0x0300};
+  NSMutableString *marked = [[reading mutableCopy] autorelease];
+  [marked insertString:[NSString stringWithCharacters:&kToneMarks[toneNumber - 1] length:1] atIndex:NSMaxRange(mark)];
+  return [marked precomposedStringWithCanonicalMapping];
 }
 
 - (NSAttributedString *) attributedReading
@@ -279,120 +251,61 @@
   return result;
 }
 
+//! The tone digit 1-5 at the end of one numbered-pinyin syllable ("hao3" -> 3); 0 when there is none
+static NSInteger LWENumberedPinyinTone(NSString *pinyin)
+{
+  if ([pinyin length] == 0) return 0;
+  NSInteger tone = [[pinyin substringFromIndex:([pinyin length] - 1)] integerValue];
+  return (tone >= 1 && tone <= 5) ? tone : 0;
+}
+
+/**
+ * The reading with Mandarin tone sandhi applied, one syllable per hanzi.  Each rule looks at the
+ * dictionary tone of the syllable that follows:
+ *  [3] [3]       -> [2] [3]   你好 nǐ hǎo -> ní hǎo (along a run of 3rd tones: 3 3 3 -> 2 2 3)
+ *  不/一 [4]     -> [2] [4]   不是 bù shì -> bú shì, 一半 yī bàn -> yí bàn
+ *  一 [1|2|3]    -> [4]       一般 yī bān -> yì bān, 一直 yī zhí -> yì zhí, 一起 yī qǐ -> yì qǐ
+ * 一 before a neutral tone or at the end of the word (第一) keeps its 1st tone.
+ */
 - (NSString *) sandhiReading
 {
-  // Tone state variable - we'll soon assign to last pinyin #
-  ToneStates lastState = noToneState;
-  
-  // Hold the temp reading string
-  NSMutableString *sandhiString = [NSMutableString stringWithCapacity:self.reading.length];
-  NSMutableArray *sandhiArray = [NSMutableArray arrayWithCapacity:self._headword.length];
-  
-  // Create headword array - each character in a separate element.  Use _headword because we *always* want
-  // the Chinese character version, no funny stuff
-  NSInteger numChars = [self._headword length];
-  NSMutableArray *headwordPieces = [NSMutableArray arrayWithCapacity:numChars];
-  for (NSInteger i = 0; i < numChars; i++)
-  {
-    unichar headwordPiece = [self._headword characterAtIndex:i];
-    [headwordPieces addObject:[NSString stringWithFormat:@"%C",headwordPiece]];
-  }
-  
   NSArray *pinyinSegments = [self.reading componentsSeparatedByString:@" "];
-  LWE_ASSERT_EXC([headwordPieces count] == [pinyinSegments count], @"do i have a bold assumption wrong here?");
-  for (NSInteger i = ([pinyinSegments count]-1); i >= 0; i--)
+  // Use _headword because we *always* want the Chinese character version, no funny stuff
+  NSString *headword = self._headword;
+  LWE_ASSERT_EXC([headword length] == [pinyinSegments count], @"do i have a bold assumption wrong here?");
+
+  NSMutableArray *sandhiPieces = [NSMutableArray arrayWithCapacity:[pinyinSegments count]];
+  NSUInteger count = [pinyinSegments count];
+  for (NSUInteger i = 0; i < count; i++)
   {
     NSString *pinyin = [pinyinSegments objectAtIndex:i];
-    NSString *hanzi = [headwordPieces objectAtIndex:i];
-    NSInteger toneNumber = [[pinyin substringFromIndex:([pinyin length]-1)] integerValue];
-    
-    // By default, mark that no rules have been triggered with this pass.
-    BOOL ruleTriggered = NO;
-    
-    // If we have no state, this is the first (er, last) pinyin.
-    if (lastState == noToneState)
-    {
-      // In this case, we note if it is 3rd or 4th tone, otherwise just change the state to "other".
-      if (toneNumber == toneIsThird || toneNumber == toneIsFourth)
-      {
-        lastState = toneNumber;
-      }
-      else
-      {
-        // Note we always assign "other" -- even if it is tone 2 (for starting state)
-        lastState = toneIsOther;
-      }
-    }
-    else if (lastState == toneIsThird)
-    {
-      // Just change the state to the current tone number
-      lastState = toneNumber;
+    NSString *hanzi = (i < [headword length]) ? [headword substringWithRange:NSMakeRange(i, 1)] : nil;
+    NSInteger tone = LWENumberedPinyinTone(pinyin);
+    NSInteger nextTone = (i + 1 < count) ? LWENumberedPinyinTone([pinyinSegments objectAtIndex:(i + 1)]) : 0;
+    BOOL isYiOrBu = ([hanzi isEqualToString:@"一"] || [hanzi isEqualToString:@"不"]);
 
-      // 2 thirds in a row triggers the rule
-      if (toneNumber == toneIsThird)
-      {
-        ruleTriggered = YES;
-        toneNumber = 2;
-      }
-    }
-    else if (lastState == toneIsFourth)
+    NSInteger newTone = tone;
+    if (tone == 3 && nextTone == 3)
     {
-      // Just remember the state
-      lastState = toneNumber;
-
-      // The 2 special headwords trigger the rule
-      if ([hanzi isEqualToString:@"一"] || [hanzi isEqualToString:@"不"])
-      {
-        ruleTriggered = YES;
-        toneNumber = 2;
-      }
+      newTone = 2;
     }
-    // Previously the state was other, now see if will catch any rules
-    else if (lastState == toneIsOther)
+    else if (tone != 0 && nextTone == 4 && isYiOrBu)
     {
-      lastState = toneNumber;
+      newTone = 2;
     }
-    // If the state matched this pattern, we have a hit if the tone is 
-    else if (lastState == toneIsSecondAfterOther)
+    else if (tone == 1 && nextTone >= 1 && nextTone <= 3 && [hanzi isEqualToString:@"一"])
     {
-      lastState = toneNumber;
+      newTone = 4;
     }
 
-    // Now, if we triggered a rule, replace it
-    if (ruleTriggered)
+    if (newTone != tone)
     {
-      pinyin = [NSString stringWithFormat:@"%@%d",[pinyin substringToIndex:(pinyin.length-1)],toneNumber];
+      pinyin = [NSString stringWithFormat:@"%@%ld", [pinyin substringToIndex:([pinyin length] - 1)], (long)newTone];
     }
-    [sandhiArray addObject:pinyin];
+    NSString *marked = [self _pinyinForNumberedPinyin:pinyin];
+    if (marked) [sandhiPieces addObject:marked];
   }
-  
-  // Now reverse the sandhi array to get it back normal again
-  NSArray *finalArray = [[sandhiArray reverseObjectEnumerator] allObjects];
-  for (NSString *sandhiPiece in finalArray)
-  {
-    sandhiPiece = [self _pinyinForNumberedPinyin:sandhiPiece];
-    [sandhiString appendFormat:@"%@ ",sandhiPiece];
-  }
-  return [sandhiString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-
-  
-  /*  noToneState,
-  toneIsSecondAfterOther,
-  toneIsThird,
-  toneIsFourth,*/
-  
-  
-  // Reset the state machine to the last tone value
-  
-  // Iterate backwards to the next-to-last tone.  
-  
-  // Run state transition logic
-  
-  // Set current state to next-to-last tone and iterate until finished
-  
-  // Then update the numbers and run it through the normal processor
-  //return [self _pinyinForNumberedPinyin:finalString];
-  //  return [self pinyinReading];
+  return [[sandhiPieces componentsJoinedByString:@" "] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 }
 
 #pragma mark - Audio Related

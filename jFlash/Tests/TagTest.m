@@ -11,6 +11,7 @@
 #import "TagPeer.h"
 #import "Tag.h"
 #import "GroupPeer.h"
+#import "Constants.h"
 
 #import <UIKit/UIKit.h>
 
@@ -29,9 +30,18 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
 
 - (void)testFavoritesTagIsNotEditable
 {
-  Tag *tag = [TagPeer retrieveTagByName:kLWEFavoriteTagName];
-  XCTAssertNotNil(tag, @"Should retrieve favorites tag");
-  XCTAssertFalse([tag isEditable], @"System tags must not be editable");
+  // The system "favorites" set is My Starred Words (STARRED_TAG_ID).  This test used to look up
+  // "Long Weekend Favorites", which is an ordinary curated set (editable = 1 in both bundled user DBs),
+  // so it could never pass.
+  Tag *starred = [TagPeer retrieveTagById:STARRED_TAG_ID];
+  XCTAssertEqual(starred.tagId, STARRED_TAG_ID, @"Should retrieve the Starred tag");
+  XCTAssertTrue([starred.tagName length] > 0, @"Starred tag should exist");
+  XCTAssertFalse([starred isEditable], @"System tags must not be editable (cFlash.db marks Starred editable; Tag overrides it)");
+  XCTAssertFalse([[Tag starredWordsTag] isEditable], @"Same through the convenience accessor");
+
+  Tag *lwFavorites = [TagPeer retrieveTagByName:kLWEFavoriteTagName];
+  XCTAssertNotNil(lwFavorites, @"Should retrieve the Long Weekend Favorites set");
+  XCTAssertTrue([lwFavorites isEditable], @"Long Weekend Favorites is an ordinary, editable set");
 }
 
 - (void)testCreateUserTagIsEditable
@@ -80,6 +90,13 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
 
   Tag *shouldBeGone = [TagPeer retrieveTagByName:name];
   XCTAssertNil(shouldBeGone, @"Deleted tag should not be retrievable by name");
+}
+
+- (void)testRetrieveTagByNameReturnsNilForAnUnknownName
+{
+  // It used to return an empty Tag (tag_id 0, the Starred id) instead of nil
+  XCTAssertNil([TagPeer retrieveTagByName:@"No Such Tag 9f3a"], @"Unknown name gives nil");
+  XCTAssertNotNil([TagPeer retrieveTagByName:[kLWEFavoriteTagName uppercaseString]], @"Lookup is case-insensitive (LIKE)");
 }
 
 - (void)testRetrieveTagListByGroupIdReturnsNonEmpty

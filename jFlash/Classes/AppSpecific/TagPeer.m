@@ -322,7 +322,16 @@ NSString * const LWETagContentCardRemoved = @"LWETagContentCardRemoved";
 {
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
   FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags WHERE tag_name LIKE ? LIMIT 1",tagName];
-  return [TagPeer _tagWithResultSet:rs];
+  // Unlike -retrieveTagById: (whose callers expect an object), a name that isn't there gives nil,
+  // not an empty Tag (tag_id 0 would look like My Starred Words).  Only tests call this today.
+  Tag *tag = nil;
+  if ([rs next])
+  {
+    tag = [[[Tag alloc] init] autorelease];
+    [tag hydrateWithResultSet:rs];
+  }
+  [rs close];
+  return tag;
 }
 
 #pragma mark - Create & Delete
