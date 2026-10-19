@@ -101,7 +101,7 @@
     <string name="lwe_facebook_url">http://m.facebook.com/pages/Japanese-Flash/111141367918</string>
 
     <string name="settings_acknowledgement_title">Acknowledgements</string>
-    <string name="settings_acknowledgement_content">Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write an simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group\'s liscense. Some icons by Joseph Wain / glyphish.com. The Japanese Flash Logo and Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental.</string>
+    <string name="settings_acknowledgement_content">Japanese Flash was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write an simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group\'s liscense. The Japanese Flash Logo and Product Name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental.</string>
     <string name="difficulty_title">Change Difficulty</string>
     <string name="difficulty_radio_title">Difficulty</string>
     <string name="difficulty_studypool_title">Number of Cards in Study Pool</string>

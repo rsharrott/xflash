@@ -84,9 +84,43 @@
 
 - (void) startTabAnimation
 {
+  // Starting twice must not orphan the first (repeating) timer
+  LWE_STOP_TIMER(self.tabIconTimer);
   self.tabIconTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(tabIconTimerDidFire:) userInfo:nil repeats:YES];
-  self.tabIconImages = [NSArray arrayWithObjects:[UIImage imageNamed:@"00-turning-gear.png"],[UIImage imageNamed:@"01-turning-gear.png"], [UIImage imageNamed:@"02-turning-gear.png"], nil];
+  self.tabIconImages = [DownloadManager _turningGearImages];
   self.tabIconIndex = 0;
+}
+
+/**
+ * Frames for the Settings tab while a download runs: the gearshape SF Symbol (the same symbol as the
+ * tab's normal icon) drawn at 0, 15 and 30 degrees, so the gear appears to turn.  Template images,
+ * so the tab bar tints them like any other tab icon.
+ */
++ (NSArray *) _turningGearImages
+{
+  UIImageSymbolConfiguration *cfg = [UIImageSymbolConfiguration configurationWithPointSize:22 weight:UIImageSymbolWeightMedium];
+  UIImage *gear = [UIImage systemImageNamed:@"gearshape" withConfiguration:cfg];
+  if (gear == nil)
+  {
+    return [NSArray array];
+  }
+  CGSize gearSize = gear.size;
+  CGFloat side = ceilf(MAX(gearSize.width, gearSize.height));
+  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(side, side)];
+  NSMutableArray *frames = [NSMutableArray arrayWithCapacity:3];
+  for (NSInteger step = 0; step < 3; step++)
+  {
+    CGFloat angle = (CGFloat)(step * 15.0 * M_PI / 180.0);
+    UIImage *frame = [renderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
+      CGContextRef context = ctx.CGContext;
+      CGContextTranslateCTM(context, side / 2.0, side / 2.0);
+      CGContextRotateCTM(context, angle);
+      [gear drawInRect:CGRectMake(-gearSize.width / 2.0, -gearSize.height / 2.0, gearSize.width, gearSize.height)];
+    }];
+    [frames addObject:[frame imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate]];
+  }
+  [renderer release];
+  return frames;
 }
 
 - (void) stopTabAnimation
@@ -96,14 +130,22 @@
   // Return the icon back to the way it was.
   jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[[UIApplication sharedApplication] delegate];
   UIViewController *vc = [appDelegate.tabBarController.viewControllers objectAtIndex:SETTINGS_VIEW_CONTROLLER_TAB_INDEX];
-  vc.tabBarItem.image = [UIImage imageNamed:@"20-gear2.png"];
+  vc.tabBarItem.image = [UIImage systemImageNamed:@"gearshape"];
+  vc.tabBarItem.selectedImage = [UIImage systemImageNamed:@"gearshape.fill"];
 }
 
 - (void) tabIconTimerDidFire:(NSTimer *)timer
 {
   jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[[UIApplication sharedApplication] delegate];
   UIViewController *vc = [appDelegate.tabBarController.viewControllers objectAtIndex:SETTINGS_VIEW_CONTROLLER_TAB_INDEX];
-  vc.tabBarItem.image = [self.tabIconImages objectAtIndex:self.tabIconIndex];
+  if ([self.tabIconImages count] == 0)
+  {
+    return;
+  }
+  UIImage *frame = [self.tabIconImages objectAtIndex:self.tabIconIndex];
+  // Same frame when the Settings tab is selected, so the animation also shows there
+  vc.tabBarItem.image = frame;
+  vc.tabBarItem.selectedImage = frame;
   
   self.tabIconIndex++;
   if (self.tabIconIndex == [self.tabIconImages count])

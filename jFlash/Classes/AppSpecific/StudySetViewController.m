@@ -24,6 +24,58 @@ enum Sections {
 - (void) _commonInit;
 @end
 
+//! Row icons are SF Symbols; ~28pt like the old art
+static UIImage *LWEStudySetRowSymbol(NSString *name)
+{
+  UIImageSymbolConfiguration *cfg = [UIImageSymbolConfiguration configurationWithPointSize:20 weight:UIImageSymbolWeightRegular];
+  return [[UIImage systemImageNamed:name withConfiguration:cfg] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+}
+
+/**
+ * The Starred Words set and recommended groups show the tag / folder symbol with a small star on it
+ * (there is no starred tag or folder SF Symbol).  starCenter is where the star goes, as a fraction of
+ * the symbol's size; a bold filled star is drawn on top of the outline so it reads at small sizes.
+ * The badge is also announced to VoiceOver (accessibilityValue "Starred" / "Recommended"), unless
+ * the row's title already says it (see LWEStudySetBadgeAccessibilityValue).
+ */
+/**
+ * VoiceOver value for a drawn badge: nil when the row's title already contains the badge word
+ * (localized or English, case-insensitive), so "My Starred Words" isn't read as "..., Starred".
+ */
+static NSString *LWEStudySetBadgeAccessibilityValue(NSString *title, NSString *englishWord, NSString *localizedWord)
+{
+  NSStringCompareOptions opts = NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch;
+  if (title && ([title rangeOfString:englishWord options:opts].location != NSNotFound ||
+                [title rangeOfString:localizedWord options:opts].location != NSNotFound))
+  {
+    return nil;
+  }
+  return localizedWord;
+}
+
+static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
+{
+  UIImage *base = LWEStudySetRowSymbol(name);
+  UIImageSymbolConfiguration *starCfg = [UIImageSymbolConfiguration configurationWithPointSize:9 weight:UIImageSymbolWeightBold];
+  UIImage *star = [UIImage systemImageNamed:@"star.fill" withConfiguration:starCfg];
+  if (base == nil || star == nil)
+  {
+    return base;
+  }
+  CGSize size = base.size;
+  UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:size];
+  UIImage *composite = [renderer imageWithActions:^(UIGraphicsImageRendererContext *ctx) {
+    [base drawInRect:CGRectMake(0, 0, size.width, size.height)];
+    CGSize starSize = star.size;
+    CGRect starRect = CGRectMake(roundf(size.width * starCenter.x - starSize.width / 2.0),
+                                 roundf(size.height * starCenter.y - starSize.height / 2.0),
+                                 starSize.width, starSize.height);
+    [star drawInRect:starRect];
+  }];
+  [renderer release];
+  return [composite imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+}
+
 @implementation StudySetViewController
 @synthesize subgroupArray,tagArray,selectedTagId,group,activityIndicator,searchBar;
 /** 
@@ -299,15 +351,15 @@ enum Sections {
       tmpView.tintColor = [tm currentThemeTintColor];
       if (tmpTag.tagId == STARRED_TAG_ID)
       {
-        UIImage *tagImage = [UIImage imageNamed:@"starred-tag.png"];
-        tagImage = [tagImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-        tmpView.image = tagImage;
+        tmpView.image = LWEStudySetStarredRowSymbol(@"tag", CGPointMake(0.43f, 0.57f));
+        // VoiceOver: the star badge is only drawn, so say it too
+        cell.accessibilityValue = LWEStudySetBadgeAccessibilityValue(tmpTag.tagName, @"Starred",
+                                    NSLocalizedString(@"Starred", @"StudySetViewController.StarredBadgeAccessibility"));
       }
       else
       {
-        UIImage *tagImage = [UIImage imageNamed:@"tag.png"];
-        tagImage = [tagImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-        tmpView.image = tagImage;
+        tmpView.image = LWEStudySetRowSymbol(@"tag");
+        cell.accessibilityValue = nil;
       }
       
       cell.textLabel.numberOfLines = 0;
@@ -369,18 +421,17 @@ enum Sections {
     // TODO: iPad customization?
     if(tmpGroup.recommended)
     {
-      // IOS7 TODO: put a star on the folder for special icons
-      UIImage *image = [UIImage imageNamed:@"starred-folder.png"];
-      image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
       tmpView.tintColor = [tm currentThemeTintColor];
-      tmpView.image = image;
+      tmpView.image = LWEStudySetStarredRowSymbol(@"folder", CGPointMake(0.5f, 0.58f));
+      // VoiceOver: the star badge is only drawn, so say it too
+      cell.accessibilityValue = LWEStudySetBadgeAccessibilityValue(tmpGroup.groupName, @"Recommended",
+                                  NSLocalizedString(@"Recommended", @"StudySetViewController.RecommendedBadgeAccessibility"));
     }
     else
     {
-      UIImage *image = [UIImage imageNamed:@"folder.png"];
-      image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
       tmpView.tintColor = [tm currentThemeTintColor];
-      tmpView.image = image;
+      tmpView.image = LWEStudySetRowSymbol(@"folder");
+      cell.accessibilityValue = nil;
     }
     
     cell.accessoryType = UITableViewCellAccessoryNone;
