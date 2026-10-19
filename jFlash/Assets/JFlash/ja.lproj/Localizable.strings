@@ -30,7 +30,7 @@
 "Learned" = "もう覚えた";
 
 /* ActionBar.MarkAsLearned  (ActionBarViewController.m) */
-"Mark as learned" = "覚えたにする";
+"Mark as learned" = "「覚えた」にする";
 
 /* ActionBar.Wrong  (ActionBarViewController.m) */
 "Wrong" = "不正解";
