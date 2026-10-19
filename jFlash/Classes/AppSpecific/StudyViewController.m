@@ -13,6 +13,7 @@
 #import "AddTagViewController.h"
 #import "UpdateManager.h"
 #import "CardViewController.h"
+#import "TTTAttributedLabel.h"
 #import "ActionBarViewController.h"
 #import "FirstRunViewController.h"
 #import "LWEDesignTokens.h"
@@ -151,8 +152,13 @@
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         CardViewController *cvc = (CardViewController *)self.cardViewController;
-        [cvc turnReadingOn];
+        if ([self.currentCard respondsToSelector:@selector(attributedReading)])
+        {
+          [(TTTAttributedLabel *)cvc.readingLabel setText:[self.currentCard attributedReading]];
+        }
         cvc.readingVisible = YES;
+        [cvc turnReadingOn];
+        [cvc layoutCardSubviews];
       });
     }
     //   simctl launch --console <udid> <bundle> -LWEDebugCheckRevealTapGuard YES
