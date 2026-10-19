@@ -42,13 +42,17 @@
     I think the expected behavior from the search is that it would prioritize results that match the
     beginning of a headword, reading, or meaning.
  */
+  // -reading is "kana - romaji" in the default reading setting (see testChokinFix), so check the romaji,
+  // which is what "teru" matches.  (This test used to check -reading, which starts with てる.)
   NSArray *results = [self _resultsForSearchKeyword:@"teru"];
   if ([results count] > 0)
   {
-    Card *card = [results objectAtIndex:0];
-    [card hydrate];
-    
-    XCTAssertTrue([card.reading hasPrefix:@"teru"], @"Card reading should start with search term");
+    for (NSUInteger i = 0; i < MIN((NSUInteger)3, [results count]); i++)
+    {
+      JapaneseCard *card = [results objectAtIndex:i];
+      [card hydrate];
+      XCTAssertTrue([[card.romaji lowercaseString] hasPrefix:@"teru"], @"Result %lu's romaji (%@) should start with the search term", (unsigned long)i, card.romaji);
+    }
   }
   else
   {
@@ -94,14 +98,29 @@
   XCTAssertEqual((NSInteger)[results count], (NSInteger)0, @"Nonsense keyword should return no results");
 }
 
+// jFlash's FTS table has a single content column (headword, kana, romaji and meaning together), so jFlash
+// never narrows a search to a column: keywordIsReading / keywordIsHeadword are NO by design (they are for
+// cFlash's headword / reading columns).  These tests used to expect cFlash's classification in jFlash.
 - (void)testKeywordIsReadingWithHiragana
 {
-  XCTAssertTrue([CardPeer keywordIsReading:@"ちょきん"], @"Hiragana input should be classified as a reading");
+  XCTAssertFalse([CardPeer keywordIsReading:@"ちょきん"], @"jFlash searches all columns, so no keyword is column-classified");
+  NSArray *results = [self _resultsForSearchKeyword:@"ちょきん"];
+  BOOL found = NO;
+  for (JapaneseCard *card in results)
+  {
+    [card hydrate];
+    if ([card.headword isEqualToString:@"貯金"]) found = YES;
+  }
+  XCTAssertTrue(found, @"A kana search still finds the card by its reading (貯金)");
 }
 
 - (void)testKeywordIsHeadwordWithKanji
 {
-  XCTAssertTrue([CardPeer keywordIsHeadword:@"日本語"], @"Kanji input should be classified as a headword");
+  XCTAssertFalse([CardPeer keywordIsHeadword:@"日本語"], @"jFlash searches all columns, so no keyword is column-classified");
+  NSArray *results = [self _resultsForSearchKeyword:@"日本語"];
+  Card *first = [results firstObject];
+  [first hydrate];
+  XCTAssertEqualObjects(first.headword, @"日本語", @"A kanji search still finds the headword first");
 }
 
 #pragma mark - Setup & Teardown

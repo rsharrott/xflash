@@ -35,6 +35,7 @@ extern NSUInteger const kRemoveLastCardOnATagError;
 + (NSArray*) retrieveTagListByGroupId: (NSInteger)groupId;
 + (NSArray*) retrieveTagListLike: (NSString*)string;
 + (Tag*) retrieveTagById: (NSInteger) tagId;
+//! nil if there is no tag with that name (case-insensitive)
 + (Tag*) retrieveTagByName: (NSString*) tagName;
 + (BOOL) deleteTag:(Tag*)tag;
 
