@@ -716,10 +716,6 @@
 		D35B07851116456D00DB5E02 /* practice-btns-bg.png in Resources */ = {isa = PBXBuildFile; fileRef = D35B07471116456D00DB5E02 /* practice-btns-bg.png */; };
 		D35B07881116456D00DB5E02 /* scroll-more.png in Resources */ = {isa = PBXBuildFile; fileRef = D35B07711116456D00DB5E02 /* scroll-more.png */; };
 		D35B07891116456D00DB5E02 /* talkbubble-ft.png in Resources */ = {isa = PBXBuildFile; fileRef = D35B07721116456D00DB5E02 /* talkbubble-ft.png */; };
-		D3C180011488864600834EAC /* glyphish-style-listen-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = D3C17FFF1488864600834EAC /* glyphish-style-listen-icon.png */; };
-		D3C180021488864600834EAC /* glyphish-style-listen-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = D3C17FFF1488864600834EAC /* glyphish-style-listen-icon.png */; };
-		D3C180031488864600834EAC /* glyphish-style-listen-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D3C180001488864600834EAC /* glyphish-style-listen-icon@2x.png */; };
-		D3C180041488864600834EAC /* glyphish-style-listen-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D3C180001488864600834EAC /* glyphish-style-listen-icon@2x.png */; };
 		D3CD3DA411D3021200F7A62C /* jFlash.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E2811D1A2F600CFCACD /* jFlash.db */; };
 		D3CD3DA511D3021300F7A62C /* jFlash-CARD-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */; };
 		3699AD28DD324B5EB79FA3C7 /* UserHistoryPeer.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BF911AB7CD700016BD2 /* UserHistoryPeer.m */; };
@@ -1186,8 +1182,6 @@
 		D35B07471116456D00DB5E02 /* practice-btns-bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "practice-btns-bg.png"; path = "Assets/practice-btns-bg.png"; sourceTree = "<group>"; };
 		D35B07711116456D00DB5E02 /* scroll-more.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "scroll-more.png"; path = "Assets/scroll-more.png"; sourceTree = "<group>"; };
 		D35B07721116456D00DB5E02 /* talkbubble-ft.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "talkbubble-ft.png"; path = "Assets/talkbubble-ft.png"; sourceTree = "<group>"; };
-		D3C17FFF1488864600834EAC /* glyphish-style-listen-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "glyphish-style-listen-icon.png"; path = "Assets/glyphish-style-listen-icon.png"; sourceTree = "<group>"; };
-		D3C180001488864600834EAC /* glyphish-style-listen-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "glyphish-style-listen-icon@2x.png"; path = "Assets/glyphish-style-listen-icon@2x.png"; sourceTree = "<group>"; };
 		0F34B486AE674934B36413A2 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Assets/JFlash/en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		67023D53229EA7CEDC5F1E18 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Assets/JFlash/ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		254625CA077AD06EE65C8F2D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Assets/JFlash/en.lproj/Interface.strings; sourceTree = "<group>"; };
@@ -1895,8 +1889,6 @@
 				A34F45A4184B1D5E00FA137C /* tag@2x.png */,
 				A34F4597184B162300FA137C /* folder.png */,
 				A34F4598184B162300FA137C /* folder@2x.png */,
-				D3C17FFF1488864600834EAC /* glyphish-style-listen-icon.png */,
-				D3C180001488864600834EAC /* glyphish-style-listen-icon@2x.png */,
 				9179E44C1385021E00A7739B /* table-background.jpg */,
 				9179E4251384FFB000A7739B /* form-background.jpg */,
 				49B527B8127680F000EE64D3 /* Stars */,
@@ -2435,8 +2427,6 @@
 				493A4792146A89BB00F1E718 /* SettingsView.xib in Resources */,
 				49377B1F1485259D00BD80C5 /* GroupDescriptionView.xib in Resources */,
 				497125241487300A00D4D150 /* MoodIcon.xib in Resources */,
-				D3C180011488864600834EAC /* glyphish-style-listen-icon.png in Resources */,
-				D3C180031488864600834EAC /* glyphish-style-listen-icon@2x.png in Resources */,
 				498EBDB81489031A00BA6DE7 /* cFlash-available.plist in Resources */,
 				498EBDBD148909CF00BA6DE7 /* jFlash-installed.plist in Resources */,
 				4982292D1490A0BE009EC2CD /* SearchingTableCell.xib in Resources */,
@@ -2576,8 +2566,6 @@
 				49377B201485259D00BD80C5 /* GroupDescriptionView.xib in Resources */,
 				A34F45B8184B20EC00FA137C /* question@2x.png in Resources */,
 				497125251487300A00D4D150 /* MoodIcon.xib in Resources */,
-				D3C180021488864600834EAC /* glyphish-style-listen-icon.png in Resources */,
-				D3C180041488864600834EAC /* glyphish-style-listen-icon@2x.png in Resources */,
 				498EBDB91489031A00BA6DE7 /* cFlash-available.plist in Resources */,
 				498EBDC014890AAD00BA6DE7 /* cFlash-installed.plist in Resources */,
 				4982292E1490A0BE009EC2CD /* SearchingTableCell.xib in Resources */,

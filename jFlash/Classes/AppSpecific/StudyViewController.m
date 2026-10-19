@@ -511,6 +511,12 @@
   // Initialize the scroll view
   [self _setupScrollView];
   
+  // Sample-audio play button: SF Symbol instead of a bundled image (same 32x29 frame from the NIB).
+  // Its tint follows the theme's speakerInk in -setBackgroundColor_, like CardViewController's speaker.
+  UIImageSymbolConfiguration *playCfg = [UIImageSymbolConfiguration configurationWithPointSize:19 weight:UIImageSymbolWeightMedium];
+  [self.pronounceBtn setImage:[UIImage systemImageNamed:@"speaker.wave.2" withConfiguration:playCfg] forState:UIControlStateNormal];
+  self.pronounceBtn.accessibilityLabel = NSLocalizedString(@"Speak word", @"CardViewController.SpeakWordAccessibility");
+
   [self setBackgroundColor_];
   
   // Load the active study set and be done!!
@@ -1154,6 +1160,8 @@
   // practiceBgImage used to be the full-bleed theme colour; it is now the paper screen behind the card.
   self.practiceBgImage.image = nil;
   self.practiceBgImage.backgroundColor = screen;
+  // Play button (sample audio) sits on the card, so it takes the card's speaker ink
+  self.pronounceBtn.tintColor = [tm colorForSlot:@"speakerInk"];
   [self _applyCardChrome];
 }
 
