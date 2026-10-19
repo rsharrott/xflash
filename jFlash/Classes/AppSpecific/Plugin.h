@@ -32,6 +32,10 @@ typedef enum
 - (BOOL) isDirectoryPlugin;
 - (BOOL) isDatabasePlugin;
 
+//! Name to show in Settings > Installed Data: a localized, version-free name for the
+//! plugins that ship with the app (keyed on pluginId), otherwise the plist "name".
+- (NSString *) displayName;
+
 @property LWEPluginLocation fileLocation;
 @property (retain) NSString *filePath;
 @property (retain) NSString *name;

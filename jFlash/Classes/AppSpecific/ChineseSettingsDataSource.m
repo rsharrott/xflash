@@ -55,14 +55,10 @@
   NSArray *hwTypeKeys = [NSArray arrayWithObjects:SET_HEADWORD_TYPE_TRAD,SET_HEADWORD_TYPE_SIMP,nil];
   NSDictionary *hwTypeDict = [NSDictionary dictionaryWithObjects:hwTypeObjects forKeys:hwTypeKeys];
   
-  NSArray *sandhiObjects = [NSArray arrayWithObjects:NSLocalizedString(@"On",@"SettingsViewController.On"),
-                           NSLocalizedString(@"Off",@"SettingsViewController.Off"),nil];
-  NSArray *sandhiKeys = [NSArray arrayWithObjects:SET_PINYIN_CHANGE_TONE_OFF, SET_PINYIN_CHANGE_TONE_ON, nil];
-  NSDictionary *sandhiDict = [NSDictionary dictionaryWithObjects:sandhiObjects forKeys:sandhiKeys];
 
   // Create a complete dictionary of all settings display names & their setting constants
-  NSArray *dictObjects = [NSArray arrayWithObjects:headwordDict,themeDict,colorDict,sandhiDict,hwTypeDict,modeDict,nil];
-  NSArray *dictKeys = [NSArray arrayWithObjects:APP_HEADWORD,APP_THEME,APP_PINYIN_COLOR,APP_PINYIN_CHANGE_TONE,APP_HEADWORD_TYPE,APP_MODE,nil];
+  NSArray *dictObjects = [NSArray arrayWithObjects:headwordDict,themeDict,colorDict,hwTypeDict,modeDict,nil];
+  NSArray *dictKeys = [NSArray arrayWithObjects:APP_HEADWORD,APP_THEME,APP_PINYIN_COLOR,APP_HEADWORD_TYPE,APP_MODE,nil];
   self.settingsHash = [NSDictionary dictionaryWithObjects:dictObjects forKeys:dictKeys];
   
   //======================================
@@ -73,20 +69,19 @@
   NSArray *cardSettingNames = [NSArray arrayWithObjects:NSLocalizedString(@"Study Mode",@"SettingsViewController.SettingNames_StudyMode"),
                                NSLocalizedString(@"Study Language",@"SettingsViewController.SettingNames_StudyLanguage"),
                                NSLocalizedString(@"Pinyin Coloring",@"SettingsViewController.SettingNames_PinyinColoring"),
-                               NSLocalizedString(@"Tone Sandhi",@"SettingsViewController.SettingNames_PinyinSandhi"),
                                NSLocalizedString(@"Character Style",@"SettingsViewController.SettingNames_HW_Type"),
                                NSLocalizedString(@"Difficulty",@"SettingsViewController.SettingNames_ChangeDifficulty"),nil];
-  NSArray *cardSettingKeys = [NSArray arrayWithObjects:APP_MODE,APP_HEADWORD,APP_PINYIN_COLOR,APP_PINYIN_CHANGE_TONE,APP_HEADWORD_TYPE,APP_ALGORITHM,nil];
+  NSArray *cardSettingKeys = [NSArray arrayWithObjects:APP_MODE,APP_HEADWORD,APP_PINYIN_COLOR,APP_HEADWORD_TYPE,APP_ALGORITHM,nil];
   NSArray *cardSettingArray = [NSArray arrayWithObjects:cardSettingNames,cardSettingKeys,NSLocalizedString(@"Studying",@"SettingsViewController.TableHeader_Studying"),nil]; // Puts single section together, 3rd index is header name
   
   NSMutableArray *userSettingNames = [NSMutableArray arrayWithObjects:NSLocalizedString(@"Theme",@"SettingsViewController.SettingNames_Theme"),
                                       NSLocalizedString(@"Study Reminders",@"SettingsViewController.SettingNames_StudyReminders"),
                                       NSLocalizedString(@"Active User",@"SettingsViewController.SettingNames_ActiveUser"),
-                                      NSLocalizedString(@"Updates",@"SettingsViewController.SettingNames_DownloadExtras"),nil];
+                                      NSLocalizedString(@"Installed Data",@"SettingsViewController.SettingNames_DownloadExtras"),nil];
   NSMutableArray *userSettingKeys = [NSMutableArray arrayWithObjects:APP_THEME,APP_REMINDER,APP_USER,APP_PLUGIN,nil];
   NSMutableArray *userSettingArray = [NSMutableArray arrayWithObjects:userSettingNames,userSettingKeys,NSLocalizedString(@"Application",@"SettingsViewController.TableHeader_Application"),nil];
   
-  NSArray *aboutNames = [NSArray arrayWithObjects:NSLocalizedString(@"Special thanks goes to Teja for helping us write and simulate the frequency algorithm.\n\nThis application uses data from CC-CEDICT, a public domain Chinese language dictionary, which is licensed under the Creative Commons Attribution-Share Alike 3.0 License.\n\nWord frequency lists are courtesy of Jun Da and Patrick Hassel Zein.\n\nTextbook names & content in the Study Sets are copyright of their respective owners.  Their inclusion neither constitutes an endorsement of Chinese Flash by those owners, or vice-versa.  Users on http://zdt.sourceforge.net/ provided these lists; Long Weekend offers no warranty regarding their accuracy.\n\nPhew, I hate legal stuff.  Shouldn't you be studying instead of reading the fine print?\n\nIf you want a break, you could write us a great review (up there on the left!).",@"SettingsViewController.Acknowledgements"),nil];
+  NSArray *aboutNames = [NSArray arrayWithObjects:NSLocalizedString(@"Special thanks goes to Teja for helping us write and simulate the frequency algorithm.\n\nThis application uses data from CC-CEDICT, a public domain Chinese language dictionary, which is licensed under the Creative Commons Attribution-Share Alike 3.0 License.\n\nWord frequency lists are courtesy of Jun Da and Patrick Hassel Zein.\n\nTextbook names & content in the Study Sets are copyright of their respective owners.  Their inclusion neither constitutes an endorsement of Chinese Flash by those owners, or vice-versa.  Users on http://zdt.sourceforge.net/ provided these lists; Long Weekend offers no warranty regarding their accuracy.\n\nPhew, I hate legal stuff.  Shouldn't you be studying instead of reading the fine print?",@"SettingsViewController.Acknowledgements"),nil];
   NSArray *aboutKeys = [NSArray arrayWithObjects:APP_ABOUT,nil];
   NSArray *aboutArray = [NSArray arrayWithObjects:aboutNames,aboutKeys,NSLocalizedString(@"Acknowledgements",@"SettingsViewController.TableHeader_Acknowledgements"),nil];
   

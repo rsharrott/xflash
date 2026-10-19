@@ -58,6 +58,7 @@
 /** Sets the nav bar tint to the current theme and sets the background to our standard */
 - (void)viewWillAppear: (BOOL)animated
 {
+  [super viewWillAppear:animated];
   self.navigationController.navigationBar.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
   self.view.backgroundColor = [[ThemeManager sharedThemeManager] backgroundColor];
 }

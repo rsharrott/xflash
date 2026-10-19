@@ -217,4 +217,26 @@
   [super dealloc];
 }
 
+#pragma mark - Display
+
+- (NSString *) displayName
+{
+  // The plist names ("Japanese Flash Cards", "Fifty Thousand Examples v1.2", ...) predate the
+  // current app name and carry stale versions/counts, and they get archived into user settings,
+  // so map the known plugin ids to current names here instead of trusting the stored string.
+  if ([self.pluginId isEqualToString:CARD_DB_KEY])
+  {
+    return NSLocalizedString(@"Dictionary & Flash Cards", @"Plugin.DisplayName.CardDB");
+  }
+  else if ([self.pluginId isEqualToString:FTS_DB_KEY])
+  {
+    return NSLocalizedString(@"Fast Dictionary Search", @"Plugin.DisplayName.FTSDB");
+  }
+  else if ([self.pluginId isEqualToString:EXAMPLE_DB_KEY])
+  {
+    return NSLocalizedString(@"Example Sentences", @"Plugin.DisplayName.ExampleDB");
+  }
+  return self.name;
+}
+
 @end

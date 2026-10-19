@@ -84,7 +84,7 @@
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  self.navigationItem.title = NSLocalizedString(@"Get Updates",@"PluginSettingsViewController.NavBarTitle");
+  self.navigationItem.title = NSLocalizedString(@"Installed Data",@"PluginSettingsViewController.NavBarTitle");
   // Swap the English XIB text for the current language (Interface.strings)
   LWELocalizeInterface(self.view);
 	
@@ -94,23 +94,26 @@
   [self _reloadTableData];
 	[self _changeLastUpdateLabel];
 
-  CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
-  UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 96)];
-  headerView.backgroundColor = [UIColor clearColor];
-  headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+  // The "Check For Updates" button + "Last update" label only make sense while there is a
+  // plugin server to check. With remote plugins off, show no header at all (no empty gap).
+  if ([PluginManager remotePluginsEnabled])
+  {
+    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
+    UIView *headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, 96)];
+    headerView.backgroundColor = [UIColor clearColor];
+    headerView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 
-  self.btnCheckUpdate.frame = CGRectMake(16, 12, screenWidth - 32, 44);
-  self.btnCheckUpdate.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-  [headerView addSubview:self.btnCheckUpdate];
-  // Nothing to check against while remote plugins are off
-  self.btnCheckUpdate.hidden = ([PluginManager remotePluginsEnabled] == NO);
+    self.btnCheckUpdate.frame = CGRectMake(16, 12, screenWidth - 32, 44);
+    self.btnCheckUpdate.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [headerView addSubview:self.btnCheckUpdate];
 
-  self.lblLastUpdate.frame = CGRectMake(16, 64, screenWidth - 32, 21);
-  self.lblLastUpdate.autoresizingMask = UIViewAutoresizingFlexibleWidth;
-  [headerView addSubview:self.lblLastUpdate];
+    self.lblLastUpdate.frame = CGRectMake(16, 64, screenWidth - 32, 21);
+    self.lblLastUpdate.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+    [headerView addSubview:self.lblLastUpdate];
 
-  self.tableView.tableHeaderView = headerView;
-  [headerView release];
+    self.tableView.tableHeaderView = headerView;
+    [headerView release];
+  }
 
   self.tableView.rowHeight = UITableViewAutomaticDimension;
   self.tableView.estimatedRowHeight = 52;
@@ -220,7 +223,7 @@
     cell.accessoryType = UITableViewCellAccessoryCheckmark;
     Plugin *thePlugin = [self.installedPlugins objectAtIndex:indexPath.row];
     cell.textLabel.numberOfLines = 0;
-    cell.textLabel.text = thePlugin.name;
+    cell.textLabel.text = [thePlugin displayName];
   }
   else
   {
@@ -295,10 +298,6 @@
 	}
 	
   self.lblLastUpdate.text = [NSString stringWithFormat:NSLocalizedString(@"Last update : %@",@"LastUpdate"), str];
-  if ([PluginManager remotePluginsEnabled] == NO)
-  {
-    self.lblLastUpdate.text = NSLocalizedString(@"Online updates are not available right now.",@"PluginSettings.UpdatesUnavailable");
-  }
 }
 
 @end

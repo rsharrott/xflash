@@ -34,7 +34,7 @@
                     NSLocalizedString(@"Search",@"HelpViewController.Table_WordSearch"),
                     NSLocalizedString(@"Corrections",@"HelpViewController.Table_Corrections"),
                     NSLocalizedString(@"Learning Algorithm",@"HelpViewController.Table_LearningAlgorithm"),
-                    NSLocalizedString(@"Sharing",@"HelpViewController.Table_Sharing"),                                               
+                    NSLocalizedString(@"Multiple Users",@"HelpViewController.Table_Sharing"),
                     NSLocalizedString(@"Integration",@"HelpViewController.Table_Integration"),
 #if defined (LWE_JFLASH)
                     // The tag glossary is only in JFlash

@@ -210,7 +210,10 @@
     if (indexPath.row == 0)
     {
       cell.textLabel.text = NSLocalizedString(@"Days After Last Session",@"RemindersVC.DaysAfterLastSesssionLabel");
-      cell.detailTextLabel.text = [NSString stringWithFormat:@"%d",_numDays];
+      // Same "%@ day(s)" wording as the picker rows
+      NSString *daysFormat = (_numDays == 1) ? NSLocalizedString(@"%@ day",@"ReminderVC.pickerFormatSingle")
+                                             : NSLocalizedString(@"%@ days",@"ReminderVC.pickerFormatPlural");
+      cell.detailTextLabel.text = [NSString stringWithFormat:daysFormat,[NSString stringWithFormat:@"%ld",(long)_numDays]];
       cell.selectionStyle = UITableViewCellSelectionStyleGray;
     }
   }
