@@ -24,7 +24,7 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.ross.jflash</string>
+			<string>com.japaneseinaflash.jflash</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>jflash</string>
