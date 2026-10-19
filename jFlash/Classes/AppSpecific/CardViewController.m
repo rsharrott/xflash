@@ -952,13 +952,16 @@ NSString * const LWECardHTMLTemplate = @""
 "ol{text-align:left; font-size:0.75em; line-height:1.35; width:auto; margin:0 12px; padding-left:22px;} "
 "li{margin:0px; margin-bottom:8px;} "
 #else
-// Chinese Flash keeps the original card styling.
+// Chinese Flash: same readable meaning size as jFlash. Without a viewport meta, WKWebView
+// laid the page out at ~980px and scaled it down to ~5–6pt on phone. Match jFlash's
+// viewport + ~1.5× body, with list items at 0.75em (~18pt at default Dynamic Type).
+"<meta name='viewport' content='width=device-width, initial-scale=1' />"
 "<style>"
-"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:##TEXTSIZE##; font-weight:bold; font-family:Helvetica,sanserif; color:#fff; line-height:1.4; } "
-"dfn{ text-shadow:none; font-weight:normal; color:#000; position:relative; top:-1px; font-family:verdana; font-size:10.5px; background-color:#C79810; line-height:1.4; margin:4px 4px 0px 0px; height:14px; padding:2px 3px; -webkit-border-radius:4px; border:1px solid #F9F7ED; display:inline-block;} "
-"#container{ width:100%; text-align:center; padding-top:12px; } "
-"ol{color:white; text-align:left; width:240px; margin:0px; margin-left:24px; padding-left:10px;} "
-"li{color:white; margin:0px; margin-bottom:7px;} "
+"body{ background-color:transparent; margin:0; padding:0; text-align:center; font-size:calc(##TEXTSIZE## * 1.5); font-weight:600; font-style:normal; font-family:-apple-system,'Helvetica Neue',Helvetica,sans-serif; line-height:1.35; letter-spacing:-0.2px; -webkit-text-size-adjust:none; } "
+"dfn{ text-shadow:none; font-style:normal; font-weight:600; color:#3a2a00; position:relative; top:-2px; font-family:-apple-system,sans-serif; font-size:13px; letter-spacing:0.1px; background-color:#FFD60A; line-height:1; margin:0 0 0 8px; padding:4px 8px 5px; -webkit-border-radius:8px; border:0; display:inline-block; vertical-align:middle; } "
+"#container{ width:100%; text-align:center; padding-top:8px; box-sizing:border-box; } "
+"ol{ text-align:left; font-size:0.75em; line-height:1.4; width:auto; margin:0 12px; padding-left:22px; } "
+"li{ margin:0 0 8px 0; } "
 #endif
 "##THEMECSS##"
 "</style></head>"
