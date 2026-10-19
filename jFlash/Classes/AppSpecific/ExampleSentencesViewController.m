@@ -213,12 +213,8 @@ static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *hea
   }
 
   // Replace the CSS & the sentences to create the full HTML string
-#if defined(LWE_JFLASH)
-  // The sentences page sits on the theme card: its inks come from SENTENCES_CSS
+  // The sentences page sits on the theme card: inks come from SENTENCES_CSS (jFlash and cFlash)
   NSString *cssHeader = [[ThemeManager sharedThemeManager] sentencesCSS];
-#else
-  NSString *cssHeader = [[ThemeManager sharedThemeManager] currentThemeCSS];
-#endif
   NSString *html = [LWESentencesHTML stringByReplacingOccurrencesOfString:@"##THEMECSS##" withString:cssHeader];
   html = [html stringByReplacingOccurrencesOfString:@"##EXAMPLES##" withString:sentencesHTML];
   [self.sentencesWebView loadHTMLString:html baseURL:nil];

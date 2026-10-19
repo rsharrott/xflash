@@ -6,7 +6,7 @@
 #define BURY_BTN 600
 
 #define DEFAULT_USER_ID 1
-// Matches the Medium preset (DEFAULT_DIFFICULTY) in AlgorithmSettingsViewController -setDifficulty:
+// Must match the Medium preset (DEFAULT_DIFFICULTY): kPresetMaxCards / kPresetFrequency in AlgorithmSettingsViewController.m
 #define DEFAULT_FREQUENCY_MULTIPLIER 2
 #define DEFAULT_MAX_STUDYING 30
 #define DEFAULT_DIFFICULTY 1
@@ -62,6 +62,9 @@ extern NSString * const APP_REMINDER;
 extern NSString * const APP_FREQUENCY_MULTIPLIER;
 extern NSString * const APP_MAX_STUDYING;
 extern NSString * const APP_DIFFICULTY;
+extern NSString * const APP_CUSTOM_MAX_STUDYING;
+extern NSString * const APP_CUSTOM_FREQUENCY_MULTIPLIER;
+extern NSString * const APP_REMINDER_DAYS_CHOICE;
 extern NSString * const APP_DATA_VERSION;
 extern NSString * const APP_SETTINGS_VERSION;
 extern NSString * const APP_HIDE_BURIED_CARDS;

@@ -39,6 +39,11 @@ NSString * const APP_REMINDER             = @"reminder";
 NSString * const APP_MAX_STUDYING         = @"maxStudying";
 NSString * const APP_FREQUENCY_MULTIPLIER = @"frequency_multiplier";
 NSString * const APP_DIFFICULTY           = @"app_difficulty";
+// The Custom difficulty's own values, kept separately so choosing a preset never overwrites them
+NSString * const APP_CUSTOM_MAX_STUDYING         = @"custom_maxStudying";
+NSString * const APP_CUSTOM_FREQUENCY_MULTIPLIER = @"custom_frequency_multiplier";
+// The last "Days After Last Session" choice, kept while reminders are off so turning them back on restores it
+NSString * const APP_REMINDER_DAYS_CHOICE       = @"reminder_days_choice";
 NSString * const APP_DATA_VERSION         = @"data_version";
 NSString * const APP_SETTINGS_VERSION     = @"settings_version";
 NSString * const APP_HIDE_BURIED_CARDS    = @"app_hide_buried_cards";

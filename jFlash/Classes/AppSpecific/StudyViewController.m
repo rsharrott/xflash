@@ -373,10 +373,8 @@
     }
   }
 
-#if defined (LWE_JFLASH)
-  // Keep the inset card + footer colours in sync with the live scroll bounds
+  // Keep the inset card + footer colours / shadowPath in sync with the live scroll bounds (jFlash and cFlash)
   [self _applyCardChrome];
-#endif
 
   // Lay out the card content to fill its container vertically.
   // Reading/headword sit near the top; webview fills remaining space to the mood icon.
@@ -1173,11 +1171,8 @@
   UIColor *foot = [tm colorForSlot:@"footInk"];
   self.cardSetLabel.textColor = foot;
   self.remainingCardsLabel.textColor = foot;
-  if (@available(iOS 14.0, *))
-  {
-    self.pageControl.currentPageIndicatorTintColor = [tm colorForSlot:@"pageDotOn"];
-    self.pageControl.pageIndicatorTintColor = [tm colorForSlot:@"pageDotOff"];
-  }
+  self.pageControl.currentPageIndicatorTintColor = [tm colorForSlot:@"pageDotOn"];
+  self.pageControl.pageIndicatorTintColor = [tm colorForSlot:@"pageDotOff"];
 }
 
 #pragma mark - Class plumbing

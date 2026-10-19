@@ -11,11 +11,12 @@
 
 @implementation ChineseSettingsDataSource
 
-@synthesize settingsHash;
+@synthesize settingsHash, settingsOrder;
 
 - (void) dealloc
 {
   [settingsHash release];
+  [settingsOrder release];
   [super dealloc];
 }
 
@@ -60,6 +61,12 @@
   NSArray *dictObjects = [NSArray arrayWithObjects:headwordDict,themeDict,colorDict,hwTypeDict,modeDict,nil];
   NSArray *dictKeys = [NSArray arrayWithObjects:APP_HEADWORD,APP_THEME,APP_PINYIN_COLOR,APP_HEADWORD_TYPE,APP_MODE,nil];
   self.settingsHash = [NSDictionary dictionaryWithObjects:dictObjects forKeys:dictKeys];
+
+  // The order the options appear in each row's pop-up menu (dictionaries have no order)
+  // Theme menu order follows ThemeManager (Paper, Fire, Water, …) — never hard-code removed keys
+  NSArray *themeOrder = [tm themeKeysList];
+  NSArray *orderObjects = [NSArray arrayWithObjects:headwordKeys,themeOrder,colorKeys,hwTypeKeys,modeKeys,nil];
+  self.settingsOrder = [NSDictionary dictionaryWithObjects:orderObjects forKeys:dictKeys];
   
   //======================================
   // This controls what the user actually sees in the table

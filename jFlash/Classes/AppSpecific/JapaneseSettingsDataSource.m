@@ -12,13 +12,14 @@
 
 @implementation JapaneseSettingsDataSource
 
-@synthesize settingsHash;
+@synthesize settingsHash, settingsOrder;
 
 #pragma mark - Class Plumbing
 
 - (void) dealloc
 {
   [settingsHash release];
+  [settingsOrder release];
   [super dealloc];
 }
 
@@ -74,6 +75,12 @@
   NSArray *dictObjects = [NSArray arrayWithObjects:headwordDict,themeDict,readingDict,kanaDict,modeDict,nil];
   NSArray *dictKeys = [NSArray arrayWithObjects:APP_HEADWORD,APP_THEME,APP_READING,APP_KANA_ONLY,APP_MODE,nil];
   self.settingsHash = [NSDictionary dictionaryWithObjects:dictObjects forKeys:dictKeys];
+
+  // The order the options appear in each row's pop-up menu (dictionaries have no order)
+  // Theme menu order follows ThemeManager (Paper, Fire, Water, …) — never hard-code removed keys
+  NSArray *themeOrder = [tm themeKeysList];
+  NSArray *orderObjects = [NSArray arrayWithObjects:headwordKeys,themeOrder,readingKeys,kanaKeys,modeKeys,nil];
+  self.settingsOrder = [NSDictionary dictionaryWithObjects:orderObjects forKeys:dictKeys];
 
   //======================================
   // This controls what the user actually sees in the table
