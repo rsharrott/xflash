@@ -591,7 +591,9 @@ const NSInteger KSegmentedTableHeader = 100;
   CGFloat btnY = floorf((rowH - btnH) / 2.0f);
   starButton.frame = CGRectMake(7, btnY, floorf(29 * scale), btnH);
 
-  UIImage *image = [UIImage imageNamed:@"star.png"];
+  // SF Symbol star, about the old 28pt art at body size
+  UIImageSymbolConfiguration *starCfg = [UIImageSymbolConfiguration configurationWithPointSize:floorf(20 * scale) weight:UIImageSymbolWeightRegular];
+  UIImage *image = [UIImage systemImageNamed:@"star" withConfiguration:starCfg];
   image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
   [starButton setImage:image forState:UIControlStateNormal];
   // Now set its state

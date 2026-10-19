@@ -28,6 +28,7 @@
 #define STUDY_SET_VIEW_CONTROLLER_TAB_INDEX 1
 #define SEARCH_VIEW_CONTROLLER_TAB_INDEX    2
 #define SETTINGS_VIEW_CONTROLLER_TAB_INDEX  3
+#define HELP_VIEW_CONTROLLER_TAB_INDEX      4
 
 #define BUNDLE_APP_NAME [[[NSBundle mainBundle] infoDictionary] objectForKey:(NSString*)kCFBundleNameKey]
 

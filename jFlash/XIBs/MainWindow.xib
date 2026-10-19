@@ -51,14 +51,14 @@
             <viewControllers>
                 <viewController title="StudyViewController" nibName="StudyView" id="174" userLabel="Study View" customClass="StudyViewController">
                     <extendedEdge key="edgesForExtendedLayout"/>
-                    <tabBarItem key="tabBarItem" title="Practice" image="target.png" id="177"/>
+                    <tabBarItem key="tabBarItem" title="Practice" id="177"/>
                     <connections>
                         <outlet property="pluginManager" destination="211" id="218"/>
                     </connections>
                 </viewController>
                 <navigationController id="184" userLabel="Study Sets Nav">
                     <extendedEdge key="edgesForExtendedLayout"/>
-                    <tabBarItem key="tabBarItem" title="Study Sets" image="tag.png" id="188"/>
+                    <tabBarItem key="tabBarItem" title="Study Sets" id="188"/>
                     <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="185">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -91,7 +91,7 @@
                 </navigationController>
                 <navigationController id="194" userLabel="Settings Nav">
                     <extendedEdge key="edgesForExtendedLayout"/>
-                    <tabBarItem key="tabBarItem" title="Settings" image="gear.png" id="198"/>
+                    <tabBarItem key="tabBarItem" title="Settings" id="198"/>
                     <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="195">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -108,7 +108,7 @@
                 </navigationController>
                 <navigationController id="199" userLabel="Help Nav">
                     <extendedEdge key="edgesForExtendedLayout"/>
-                    <tabBarItem key="tabBarItem" title="Help" image="question.png" id="203"/>
+                    <tabBarItem key="tabBarItem" title="Help" id="203"/>
                     <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="200">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -126,10 +126,4 @@
             </connections>
         </tabBarController>
     </objects>
-    <resources>
-        <image name="gear.png" width="28" height="28"/>
-        <image name="question.png" width="28" height="28"/>
-        <image name="tag.png" width="28" height="28"/>
-        <image name="target.png" width="28" height="28"/>
-    </resources>
 </document>
