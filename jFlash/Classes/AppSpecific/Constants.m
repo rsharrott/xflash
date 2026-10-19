@@ -66,19 +66,31 @@ NSString * const LWE_SUPPORT_EMAIL        = @"help@japaneseinaflash.com";
 NSString * const LWE_SUPPORT_URL          = @"https://japaneseinaflash.com/support";
 NSString * const LWE_PRIVACY_URL          = @"https://japaneseinaflash.com/privacy";
 
-// App Store ID of the current app, used to build the share link.
-// TODO(Ross): set this once App Store Connect assigns the new app an ID.
-// While it is empty, the "Tell a Friend" / share-app UI stays hidden so users
-// never get a dead link. (The old Japanese Flash ID, 367216357, now 404s.)
-NSString * const kAppStoreID              = @"";
-
-NSString * LWEAppStoreURLString(void)
+// App Store links (rate / share) are built from kAppStoreID, which is set per app
+// below. While it is empty, the "Rate Us" / share-app UI stays hidden so users
+// never get a dead link.
+NSString * LWEAppStoreURLStringForID(NSString *appStoreID)
 {
-  if ([kAppStoreID length] == 0)
+  if ([appStoreID length] == 0)
   {
     return nil;
   }
-  return [NSString stringWithFormat:@"https://apps.apple.com/app/id%@", kAppStoreID];
+  return [NSString stringWithFormat:@"https://apps.apple.com/app/id%@", appStoreID];
+}
+
+NSString * LWEAppStoreURLString(void)
+{
+  return LWEAppStoreURLStringForID(kAppStoreID);
+}
+
+NSString * LWEAppStoreWriteReviewURLString(void)
+{
+  NSString *appURL = LWEAppStoreURLString();
+  if (appURL == nil)
+  {
+    return nil;
+  }
+  return [appURL stringByAppendingString:@"?action=write-review"];
 }
 
 #if defined(LWE_JFLASH)
@@ -95,6 +107,9 @@ NSString * LWEAppStoreURLString(void)
       NSString * const SET_KANA_ONLY_OFF   = @"OFF";
 
       NSString * const LWE_XFLASH_HOMEPAGE       = @"https://japaneseinaflash.com";
+
+      // App Store ID (Apple ID) of Japanese in a Flash! (com.ross.jflash, SKU jflash)
+      NSString * const kAppStoreID               = @"6817409240";
 
       // These constants are general to the flashes
       NSString * const LWE_CURRENT_VERSION       = @"2.0";
@@ -155,6 +170,9 @@ NSString * LWEAppStoreURLString(void)
 
 
       NSString * const LWE_XFLASH_HOMEPAGE       = @"http://www.chineseflashapp.com";
+
+      // cFlash is not on the App Store yet: leave empty so rate/share stays hidden
+      NSString * const kAppStoreID               = @"";
 
       // These constants are general to the flashes
       NSString * const LWE_CURRENT_VERSION          = @"1.2";

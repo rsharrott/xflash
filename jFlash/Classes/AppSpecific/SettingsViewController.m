@@ -128,12 +128,12 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 //! nothing, and its ObjC API is deprecated in iOS 18).
 - (void) _requestReview
 {
-  NSString *appURL = LWEAppStoreURLString();
-  if (appURL == nil)
+  NSString *reviewURLString = LWEAppStoreWriteReviewURLString();
+  if (reviewURLString == nil)
   {
     return;
   }
-  NSURL *reviewURL = [NSURL URLWithString:[appURL stringByAppendingString:@"?action=write-review"]];
+  NSURL *reviewURL = [NSURL URLWithString:reviewURLString];
   [[UIApplication sharedApplication] openURL:reviewURL options:@{} completionHandler:nil];
 }
 
