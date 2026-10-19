@@ -213,6 +213,10 @@ static const CGFloat kLWEPillHitInset = 7.0;
   _meaningWebView.backgroundColor = [UIColor clearColor];
   _meaningWebView.scrollView.backgroundColor = [UIColor clearColor];
   _meaningWebView.scrollView.bounces = NO;
+  // cFlash's XIB paints this container ~98% white (master did too). On themed cards that
+  // reads as a big opaque slab under the headword; jFlash's XIB is already clear.
+  self.meaningWebViewContainer.backgroundColor = [UIColor clearColor];
+  self.meaningWebViewContainer.opaque = NO;
   [self.meaningWebViewContainer addSubview:_meaningWebView];
   [_meaningWebView loadHTMLString:self.baseHtml baseURL:nil];
 
