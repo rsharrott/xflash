@@ -7,7 +7,6 @@
 //
 
 #import "ChineseCard.h"
-#import <CoreText/CoreText.h>
 #import "Plugin.h"
 #import "PluginManager.h"
 #import "ThemeManager.h"
@@ -141,16 +140,12 @@
     }
     NSMutableAttributedString *tmpAttrString = [[[[NSAttributedString alloc] initWithString:stringToAppend] autorelease] mutableCopy];
     NSRange allRange = NSMakeRange(0, [stringToAppend length]);
-    // TTTAttributedLabel draws via Core Text — use kCTForegroundColorAttributeName (CGColor).
+    // UILabel-compatible attrs (cFlash reading label is a plain UILabel as of themes v2).
     UIColor *toneColor = (UIColor *)[readingHash objectForKey:@"color"];
-    [tmpAttrString addAttribute:(NSString *)kCTForegroundColorAttributeName
-                          value:(id)[toneColor CGColor]
+    [tmpAttrString addAttribute:NSForegroundColorAttributeName value:toneColor range:allRange];
+    [tmpAttrString addAttribute:NSFontAttributeName
+                          value:[UIFont systemFontOfSize:20 weight:UIFontWeightBold]
                           range:allRange];
-    CTFontRef font = CTFontCreateWithName(CFSTR("Helvetica-Bold"), 20.0, NULL);
-    if (font) {
-      [tmpAttrString addAttribute:(NSString *)kCTFontAttributeName value:(id)font range:allRange];
-      CFRelease(font);
-    }
     [attrString appendAttributedString:tmpAttrString];
     [tmpAttrString release];
   }
