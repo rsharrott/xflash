@@ -55,9 +55,11 @@
     return numberedPinyin;
   }
 
-  // Replace the u: with ü (u umlaut)
+  // Replace u: and v (the keyboard spelling, lv4 / nv3) with ü (u umlaut); no pinyin syllable has a real v
   numberedPinyin = [numberedPinyin stringByReplacingOccurrencesOfString:@"u:" withString:@"ü"];
   numberedPinyin = [numberedPinyin stringByReplacingOccurrencesOfString:@"U:" withString:@"Ü"];
+  numberedPinyin = [numberedPinyin stringByReplacingOccurrencesOfString:@"v" withString:@"ü"];
+  numberedPinyin = [numberedPinyin stringByReplacingOccurrencesOfString:@"V" withString:@"Ü"];
   NSString *reading = [numberedPinyin substringToIndex:([numberedPinyin length]-1)];
   if (toneNumber == 5)
   {
@@ -265,7 +267,9 @@ static NSInteger LWENumberedPinyinTone(NSString *pinyin)
  *  [3] [3]       -> [2] [3]   你好 nǐ hǎo -> ní hǎo (along a run of 3rd tones: 3 3 3 -> 2 2 3)
  *  不/一 [4]     -> [2] [4]   不是 bù shì -> bú shì, 一半 yī bàn -> yí bàn
  *  一 [1|2|3]    -> [4]       一般 yī bān -> yì bān, 一直 yī zhí -> yì zhí, 一起 yī qǐ -> yì qǐ
- * 一 before a neutral tone or at the end of the word (第一) keeps its 1st tone.
+ * Only a dictionary-tone 不 (bu4) or 一 (yi1) changes: a neutral-tone one (看不见 kan4 bu5 jian4,
+ * 看一看 kan4 yi5 kan4) stays neutral.  一 also keeps its 1st tone before a neutral tone, at the end of
+ * the word, and when it is a number in a date or ordinal: before 月 (一月 yī yuè) or after 第 (第一天).
  */
 - (NSString *) sandhiReading
 {
@@ -282,18 +286,23 @@ static NSInteger LWENumberedPinyinTone(NSString *pinyin)
     NSString *hanzi = (i < [headword length]) ? [headword substringWithRange:NSMakeRange(i, 1)] : nil;
     NSInteger tone = LWENumberedPinyinTone(pinyin);
     NSInteger nextTone = (i + 1 < count) ? LWENumberedPinyinTone([pinyinSegments objectAtIndex:(i + 1)]) : 0;
-    BOOL isYiOrBu = ([hanzi isEqualToString:@"一"] || [hanzi isEqualToString:@"不"]);
+    NSString *prevHanzi = (i > 0 && i - 1 < [headword length]) ? [headword substringWithRange:NSMakeRange(i - 1, 1)] : nil;
+    NSString *nextHanzi = (i + 1 < [headword length]) ? [headword substringWithRange:NSMakeRange(i + 1, 1)] : nil;
+    BOOL isBu = ([hanzi isEqualToString:@"不"] && tone == 4);
+    // 一 as a plain number (一月, 第一天) is read yī whatever follows
+    BOOL isYi = ([hanzi isEqualToString:@"一"] && tone == 1 &&
+                 ![nextHanzi isEqualToString:@"月"] && ![prevHanzi isEqualToString:@"第"]);
 
     NSInteger newTone = tone;
     if (tone == 3 && nextTone == 3)
     {
       newTone = 2;
     }
-    else if (tone != 0 && nextTone == 4 && isYiOrBu)
+    else if ((isBu || isYi) && nextTone == 4)
     {
       newTone = 2;
     }
-    else if (tone == 1 && nextTone >= 1 && nextTone <= 3 && [hanzi isEqualToString:@"一"])
+    else if (isYi && nextTone >= 1 && nextTone <= 3)
     {
       newTone = 4;
     }

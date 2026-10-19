@@ -12,6 +12,12 @@
 
 #import "SetupDatabaseHelper.h"
 #import "CardPeer.h"
+#import "LWEDatabase.h"
+
+// The private FTS query, so the test can look at the ranked card_ids of one column on their own
+@interface CardPeer (CFlashSearchTestPrivate)
++ (FMResultSet *) _FTSResultSetForKeyword:(NSString *)keyword column:(NSString *)columnName queryLimit:(NSInteger)limit;
+@end
 
 @implementation CFlashSearchTest
 
@@ -71,6 +77,35 @@
 {
   NSArray *results = [self _searchKeywordExpectingResults:@"nang4"];
   XCTAssertTrue(([results count] == 1), @"There should only be 1 card reading with 'nang4'");
+}
+
+// Results that tie on match length and ptag come back in card_id order, so the list is the same every run
+- (void) testTiedResultsAreOrderedByCardId
+{
+  FMDatabase *dao = [LWEDatabase sharedLWEDatabase].dao;
+  FMResultSet *rs = [CardPeer _FTSResultSetForKeyword:@"gong1" column:@"reading" queryLimit:100];
+  NSMutableArray *cardIds = [NSMutableArray array];
+  while ([rs next]) [cardIds addObject:[NSNumber numberWithInt:[rs intForColumn:@"card_id"]]];
+  [rs close];
+  XCTAssertTrue([cardIds count] > 1, @"Expected several 'gong1' reading matches");
+
+  NSInteger prevLength = -1, prevPtag = 0, prevCardId = 0, ties = 0;
+  for (NSNumber *cardId in cardIds)
+  {
+    FMResultSet *keys = [dao executeQuery:@"SELECT LENGTH(reading) AS len, ptag FROM cards_search_content WHERE card_id = ?", cardId];
+    XCTAssertTrue([keys next], @"No search row for card %@", cardId);
+    NSInteger length = [keys intForColumn:@"len"];
+    NSInteger ptag = [keys intForColumn:@"ptag"];
+    [keys close];
+    XCTAssertGreaterThanOrEqual(length, prevLength, @"Shortest reading first");
+    if (length == prevLength && ptag == prevPtag)
+    {
+      ties++;
+      XCTAssertLessThan(prevCardId, [cardId integerValue], @"Tied results should be in card_id order");
+    }
+    prevLength = length; prevPtag = ptag; prevCardId = [cardId integerValue];
+  }
+  XCTAssertGreaterThan(ties, 0, @"The fixture should have tied results for 'gong1'");
 }
 
 #pragma mark - Setup & Teardown

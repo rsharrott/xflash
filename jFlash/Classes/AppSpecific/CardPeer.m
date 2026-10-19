@@ -161,9 +161,10 @@
   // search that puts the exact entry (gong1 -> 公, 工, ...) ahead of long compounds that merely contain it,
   // instead of whichever card has the shortest meaning.  A whole-table search ranks by content, as before.
   NSString *rankColumn = columnName ?: @"content";
+  // card_id breaks the remaining ties so the order is the same on every run and device.
   // Only the column names (our own constants) and the integer limit are formatted into the SQL.
   NSString *sql = [NSString stringWithFormat:@"SELECT card_id FROM cards_search_content WHERE "
-                   "%@ MATCH ? ORDER BY LENGTH(%@) ASC, ptag DESC LIMIT %ld", column, rankColumn, (long)limit];
+                   "%@ MATCH ? ORDER BY LENGTH(%@) ASC, ptag DESC, card_id ASC LIMIT %ld", column, rankColumn, (long)limit];
   return [[LWEDatabase sharedLWEDatabase].dao executeQuery:sql withArgumentsInArray:[NSArray arrayWithObject:searchString]];
 }
 

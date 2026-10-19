@@ -42,6 +42,8 @@
     @"nü3": @"nǚ", @"nu:3": @"nǚ", @"lü4": @"lǜ", @"zhong1": @"zhōng", @"er2": @"ér", @"yi1": @"yī",
     @"Zhong1": @"Zhōng", @"An1": @"Ān", @"Ou1": @"Ōu",
     @"ng2": @"ńg", @"m2": @"ḿ",
+    // v is the keyboard spelling of ü
+    @"lv4": @"lǜ", @"nv3": @"nǚ", @"lve4": @"lüè", @"nve4": @"nüè", @"Lv3": @"Lǚ",
     @"ma5": @"ma", @"r5": @"r", @"de5": @"de",
   };
   for (NSString *numbered in expected)
@@ -247,6 +249,48 @@
   card._headword = @"他是";
   card.hw_reading = @"ta1 shi4";
   XCTAssertEqualObjects(card.sandhiReading, @"tā shì");
+}
+
+- (void) testNeutralToneBuAndYiAreNotChanged
+{
+  // Only a dictionary-tone 不 (bu4) / 一 (yi1) changes; a neutral-tone one stays neutral
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  card._headword = @"看不见";
+  card.hw_reading = @"kan4 bu5 jian4";
+  XCTAssertEqualObjects(card.sandhiReading, @"kàn bu jiàn");
+  card._headword = @"看一看";
+  card.hw_reading = @"kan4 yi5 kan4";
+  XCTAssertEqualObjects(card.sandhiReading, @"kàn yi kàn");
+  card._headword = @"想一想";
+  card.hw_reading = @"xiang3 yi5 xiang3";
+  XCTAssertEqualObjects(card.sandhiReading, @"xiǎng yi xiǎng");
+  // Some dictionaries write the reduplication with yi1; sandhi then applies as usual
+  card._headword = @"看一看";
+  card.hw_reading = @"kan4 yi1 kan4";
+  XCTAssertEqualObjects(card.sandhiReading, @"kàn yí kàn");
+}
+
+- (void) testYiAsANumberInDatesAndOrdinalsKeepsTone1
+{
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  // Before 月 (a month name)
+  card._headword = @"一月";
+  card.hw_reading = @"yi1 yue4";
+  XCTAssertEqualObjects(card.sandhiReading, @"yī yuè");
+  card._headword = @"十一月";
+  card.hw_reading = @"shi2 yi1 yue4";
+  XCTAssertEqualObjects(card.sandhiReading, @"shí yī yuè");
+  // After 第 (an ordinal)
+  card._headword = @"第一天";
+  card.hw_reading = @"di4 yi1 tian1";
+  XCTAssertEqualObjects(card.sandhiReading, @"dì yī tiān");
+  card._headword = @"第一次";
+  card.hw_reading = @"di4 yi1 ci4";
+  XCTAssertEqualObjects(card.sandhiReading, @"dì yī cì");
+  // Other 一 still change
+  card._headword = @"一样";
+  card.hw_reading = @"yi1 yang4";
+  XCTAssertEqualObjects(card.sandhiReading, @"yí yàng");
 }
 
 #pragma mark - Helpers
