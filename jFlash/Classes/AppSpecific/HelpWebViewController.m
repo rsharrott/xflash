@@ -64,15 +64,30 @@
 }
 
 
-/** Loads the filename into the WKWebView - there should be no extension on the filename (but the actual file should be .html) */
+/**
+ * Loads the filename into the WKWebView - there should be no extension on the filename (but the actual file should be .html).
+ * When the app is running in Japanese, help/ja/<name>.html is used if it exists; otherwise help/<name>.html (English).
+ * Pages in help/ja link ../help.css and ../img/, so read access is granted to the whole help folder.
+ */
 - (void) _loadPageWithBundleFilename:(NSString*)fname
 {
-  NSString *urlAddress = [[NSBundle mainBundle] pathForResource:fname ofType:@"html" inDirectory:@"help"];
+  NSBundle *bundle = [NSBundle mainBundle];
+  NSString *language = [[bundle preferredLocalizations] firstObject];
+  NSString *urlAddress = nil;
+  if ([language hasPrefix:@"ja"])
+  {
+    urlAddress = [bundle pathForResource:fname ofType:@"html" inDirectory:@"help/ja"];
+  }
+  if (urlAddress == nil)
+  {
+    urlAddress = [bundle pathForResource:fname ofType:@"html" inDirectory:@"help"];
+  }
   if (urlAddress == nil) return;
 
   NSURL *url = [NSURL fileURLWithPath:urlAddress];
+  NSURL *helpFolder = [NSURL fileURLWithPath:[[bundle resourcePath] stringByAppendingPathComponent:@"help"] isDirectory:YES];
   // WKWebView requires a readAccessURL for file:// loads to grant directory access.
-  [_webView loadFileURL:url allowingReadAccessToURL:[url URLByDeletingLastPathComponent]];
+  [_webView loadFileURL:url allowingReadAccessToURL:helpFolder];
 }
 
 

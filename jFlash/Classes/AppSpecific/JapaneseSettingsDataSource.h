@@ -12,5 +12,6 @@
 @interface JapaneseSettingsDataSource : NSObject <LWESettingsDataSource>
 
 @property (retain) NSDictionary *settingsHash;
+@property (retain) NSDictionary *settingsOrder;
 
 @end

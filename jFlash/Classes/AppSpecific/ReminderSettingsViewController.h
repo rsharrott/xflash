@@ -11,12 +11,12 @@
 //! Identifier of the single pending "time to study" notification request
 extern NSString * const LWEStudyReminderRequestIdentifier;
 
-@interface ReminderSettingsViewController : UITableViewController <UIPickerViewDelegate>
+@interface ReminderSettingsViewController : UITableViewController
 {
   NSInteger _numDays;
 }
 
-- (IBAction) switchValueChanged:(UISwitch*)sender;
+- (void) switchValueChanged:(UISwitch*)sender;
 
 /**
  * Turns the reminder setting off if the app isn't allowed to post notifications
@@ -26,7 +26,6 @@ extern NSString * const LWEStudyReminderRequestIdentifier;
 + (void) syncReminderSettingWithNotificationPermission:(void (^)(void))completion;
 
 @property BOOL remindersOn;
-@property (nonatomic,retain) IBOutlet UISwitch *onOffSwitch;
-@property (nonatomic,retain) IBOutlet UIPickerView *picker;
+@property (nonatomic,retain) UISwitch *onOffSwitch;
 
 @end

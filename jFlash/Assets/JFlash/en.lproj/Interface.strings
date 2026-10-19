@@ -41,18 +41,6 @@
 /* New study set prompt */
 "Name your study set!" = "Name your study set!";
 
-/* Difficulty segment */
-"Easy" = "Easy";
-
-/* Difficulty segment */
-"Medium" = "Medium";
-
-/* Difficulty segment */
-"Hard" = "Hard";
-
-/* Difficulty segment */
-"Custom" = "Custom";
-
 /* Download dialog button */
 "Start Download >" = "Start Download >";
 
