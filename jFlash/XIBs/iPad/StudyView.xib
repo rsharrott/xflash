@@ -81,7 +81,6 @@
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						<object class="NSCustomResource" key="IBUIImage">
 							<string key="NSClassName">NSImage</string>
-							<string key="NSResourceName">redtheme-cookie-cutters/practice-bg.png</string>
 						</object>
 					</object>
 					<object class="IBUIScrollView" id="37275877">
@@ -1418,7 +1417,6 @@
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<string>practice-btn-unrevealed-mini.png</string>
 				<string>progressbar-bg.png</string>
-				<string>redtheme-cookie-cutters/practice-bg.png</string>
 				<string>talkbubble-ft.png</string>
 			</object>
 			<object class="NSMutableArray" key="dict.values">

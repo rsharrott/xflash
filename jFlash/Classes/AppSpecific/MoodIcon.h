@@ -13,6 +13,7 @@
 
 //! Update the mood icon depending on the current percentage correct
 - (void) updateMoodIcon:(CGFloat)percentCorrect;
+- (void) applyTheme;
 
 - (IBAction) doTogglePercentCorrectBtn;
 

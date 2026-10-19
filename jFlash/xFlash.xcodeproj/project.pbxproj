@@ -361,7 +361,6 @@
 		496C670314728BE2009F04D4 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24AEAE9E13D5E1EB008ADA45 /* Security.framework */; };
 		496C6704147294D9009F04D4 /* cFlash-FTS-1.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4904661C147276E3004C44E2 /* cFlash-FTS-1.0.db */; };
 		496C7AB01263270B004B6B90 /* plugin-resources in Resources */ = {isa = PBXBuildFile; fileRef = D322367A11D370B900B1AF15 /* plugin-resources */; };
-		496C7AB21263270B004B6B90 /* tametheme-cookie-cutters in Resources */ = {isa = PBXBuildFile; fileRef = 49FE152B11B2B168007607D9 /* tametheme-cookie-cutters */; };
 		496C7AB81263270B004B6B90 /* practice-btn-actions.png in Resources */ = {isa = PBXBuildFile; fileRef = 91D3CDE911D0C03F008565F8 /* practice-btn-actions.png */; };
 		496C7AB91263270B004B6B90 /* dropped-text-box.png in Resources */ = {isa = PBXBuildFile; fileRef = 917728E011C0CA9600A90071 /* dropped-text-box.png */; };
 		496C7AC11263270B004B6B90 /* overlay-btn-close.png in Resources */ = {isa = PBXBuildFile; fileRef = D35B073D1116456D00DB5E02 /* overlay-btn-close.png */; };
@@ -586,7 +585,6 @@
 		49F9686911AF604900DFC3C9 /* ModalTaskView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49F9686811AF604900DFC3C9 /* ModalTaskView.xib */; };
 		49F968E211AF64D400DFC3C9 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49F968E111AF64D400DFC3C9 /* CFNetwork.framework */; };
 		49F9692711AF680700DFC3C9 /* jFlashAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 49F9692611AF680700DFC3C9 /* jFlashAppDelegate.m */; };
-		49FE152C11B2B168007607D9 /* tametheme-cookie-cutters in Resources */ = {isa = PBXBuildFile; fileRef = 49FE152B11B2B168007607D9 /* tametheme-cookie-cutters */; };
 		49FE8C7114A9B82300579716 /* CardViewController-EtoJ.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49FE8C6F14A9B82300579716 /* CardViewController-EtoJ.xib */; };
 		49FE8C7214A9B82300579716 /* CardViewController-EtoJ.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49FE8C6F14A9B82300579716 /* CardViewController-EtoJ.xib */; };
 		49FE8C7314A9B82300579716 /* CardViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49FE8C7014A9B82300579716 /* CardViewController.xib */; };
@@ -1042,7 +1040,6 @@
 		49F968E111AF64D400DFC3C9 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		49F9692511AF680700DFC3C9 /* jFlashAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = jFlashAppDelegate.h; path = AppSpecific/jFlashAppDelegate.h; sourceTree = "<group>"; };
 		49F9692611AF680700DFC3C9 /* jFlashAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = jFlashAppDelegate.m; path = AppSpecific/jFlashAppDelegate.m; sourceTree = "<group>"; };
-		49FE152B11B2B168007607D9 /* tametheme-cookie-cutters */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "tametheme-cookie-cutters"; path = "Assets/tametheme-cookie-cutters"; sourceTree = "<group>"; };
 		49FE8C6F14A9B82300579716 /* CardViewController-EtoJ.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = "CardViewController-EtoJ.xib"; path = "XIBs/cFlash/CardViewController-EtoJ.xib"; sourceTree = "<group>"; };
 		49FE8C7014A9B82300579716 /* CardViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = CardViewController.xib; path = XIBs/cFlash/CardViewController.xib; sourceTree = "<group>"; };
 		49FE8C7514A9B83200579716 /* CardViewController-EtoJ.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = "CardViewController-EtoJ.xib"; path = "XIBs/jFlash/CardViewController-EtoJ.xib"; sourceTree = "<group>"; };
@@ -2045,7 +2042,6 @@
 				D322367A11D370B900B1AF15 /* plugin-resources */,
 				4965FD80126F6FCF000AC280 /* bluetheme-cookie-cutters */,
 				4965FD83126F7002000AC280 /* redtheme-cookie-cutters */,
-				49FE152B11B2B168007607D9 /* tametheme-cookie-cutters */,
 			);
 			name = Assets;
 			sourceTree = "<group>";
@@ -2377,7 +2373,6 @@
 				917A5C7911AB844300016BD2 /* UserDetailsView.xib in Resources */,
 				91E1B0E911AE11E1003CCDC2 /* ProgressBarViewController.xib in Resources */,
 				49F9686911AF604900DFC3C9 /* ModalTaskView.xib in Resources */,
-				49FE152C11B2B168007607D9 /* tametheme-cookie-cutters in Resources */,
 				490820A511B7959500150499 /* PluginSettingsView.xib in Resources */,
 				91CBA67811BB496C004BD0D0 /* ExampleSentencesView.xib in Resources */,
 				917728E111C0CA9600A90071 /* dropped-text-box.png in Resources */,
@@ -2504,7 +2499,6 @@
 			files = (
 				AA2C001119000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
 				496C7AB01263270B004B6B90 /* plugin-resources in Resources */,
-				496C7AB21263270B004B6B90 /* tametheme-cookie-cutters in Resources */,
 				496C7AB81263270B004B6B90 /* practice-btn-actions.png in Resources */,
 				496C7AB91263270B004B6B90 /* dropped-text-box.png in Resources */,
 				496C7AC11263270B004B6B90 /* overlay-btn-close.png in Resources */,

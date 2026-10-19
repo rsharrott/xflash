@@ -41,6 +41,9 @@
 //! Practice mode uses the two-row paper panel; browse mode keeps its NIB height.
 - (CGFloat)preferredBarHeight;
 
+//! Re-colours the theme-dependent parts (Show answer) after the theme changes
+- (void)applyTheme;
+
 @property (assign) IBOutlet id<ActionBarViewControllerDelegate> delegate;
 
 @property (nonatomic, retain) Card *currentCard;

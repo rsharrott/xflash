@@ -17,6 +17,26 @@
 - (void) awakeFromNib
 {
   [[NSBundle mainBundle] loadNibNamed:@"MoodIcon" owner:self options:nil];
+  [self applyTheme];
+}
+
+//! Themes v2: the 67% bubble fill follows the card (fire-wash on Paper/Fire, paper on Water)
+- (void) applyTheme
+{
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  UIColor *fill = [tm colorForSlot:@"moodBubbleFill"];
+  UIColor *ink = [tm colorForSlot:@"moodBubbleInk"];
+  if (self.talkBubble && fill)
+  {
+    // talkbubble-ft.png is a white bubble; template+tint paints moodBubbleFill
+    UIImage *base = self.talkBubble.image ?: [UIImage imageNamed:@"talkbubble-ft.png"];
+    self.talkBubble.image = [base imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    self.talkBubble.tintColor = fill;
+  }
+  if (self.percentCorrectLabel && ink)
+  {
+    self.percentCorrectLabel.textColor = ink;
+  }
 }
 
 - (void) setButtonEnabled:(BOOL)enable
@@ -91,6 +111,7 @@
   
   [self.moodIconBtn setBackgroundImage:[UIImage imageNamed:hotheadName] forState:UIControlStateNormal];
   [hotHeadsArray release];
+  [self applyTheme];
 }
 
 - (void)dealloc

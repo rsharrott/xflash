@@ -166,7 +166,7 @@ static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *hea
     NSString *sentenceIdStr = [NSString stringWithFormat:@"%d", sentence.sentenceId];
     [_sentenceTexts setObject:sentence.sentenceJa forKey:sentenceIdStr];
 
-    NSString *speakSVG = @"<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='white' style='vertical-align:middle'><path d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z'/></svg>";
+    NSString *speakSVG = @"<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:middle'><path d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z'/></svg>";
     NSString *speakLink = [NSString stringWithFormat:@"<a href='http://xflash.com/%@?id=%d'><span class='button'>%@</span></a>",
       SPEAK_SENTENCE, sentence.sentenceId, speakSVG];
 
@@ -213,7 +213,8 @@ static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *hea
   }
 
   // Replace the CSS & the sentences to create the full HTML string
-  NSString *cssHeader = [[ThemeManager sharedThemeManager] currentThemeCSS];
+  // The sentences page sits on the theme card: inks come from SENTENCES_CSS (jFlash and cFlash)
+  NSString *cssHeader = [[ThemeManager sharedThemeManager] sentencesCSS];
   NSString *html = [LWESentencesHTML stringByReplacingOccurrencesOfString:@"##THEMECSS##" withString:cssHeader];
   html = [html stringByReplacingOccurrencesOfString:@"##EXAMPLES##" withString:sentencesHTML];
   [self.sentencesWebView loadHTMLString:html baseURL:nil];
@@ -394,7 +395,8 @@ NSString * const LWESentencesHTML = @""
 "<meta name='viewport' content='width=device-width, initial-scale=1.0' />"
 "<style>"
 #if defined(LWE_JFLASH)
-// 2026 design (Japanese in a Flash).  Text colours keep at least 4.5:1 on the card red / dark panels.
+// 2026 design (Japanese in a Flash).  The colours below are overridden per theme by SENTENCES_CSS
+// (ThemeManager -sentencesCSS, appended at ##THEMECSS##), which keeps every pair at 4.5:1 on the card.
 "body{ background-color:transparent; margin:0; padding:22px 20px 28px 20px; box-sizing:border-box; width:100%; text-align:left; font-size:17px; font-family:'Helvetica Neue','Hiragino Sans',Helvetica,sans-serif; color:#fff; -webkit-text-size-adjust:none; } "
 ".exHeader{ margin:0 4px 22px 4px; } "
 ".headwordLabel{ font-size:2.35em; font-weight:800; line-height:1.1; letter-spacing:-0.5px; color:#FFD60A; margin:0 0 6px 0; } "
@@ -404,7 +406,7 @@ NSString * const LWESentencesHTML = @""
 "ol{ list-style:none; margin:0; padding:0; } "
 "li{ background:rgba(0,0,0,0.14); border-radius:20px; padding:16px 18px 14px 18px; margin:0 0 12px 0; overflow:hidden; } "
 ".ja{ font-size:1.06em; font-weight:600; line-height:1.5; color:#fff; } "
-".hl{ color:#FFD60A; } "
+".hl{ font-weight:700; border-radius:4px; padding:1px 2px; margin:0 -2px; -webkit-box-decoration-break:clone; box-decoration-break:clone; } "
 ".en{ font-size:0.92em; font-weight:400; line-height:1.4; color:rgba(255,255,255,0.88); margin-top:6px; } "
 ".showWordsDiv{ margin-top:12px; } "
 ".button{ display:inline-block; font-size:0.8em; font-weight:600; line-height:1; color:#fff; background:rgba(0,0,0,0.2); border-radius:14px; padding:7px 13px; margin-right:6px; vertical-align:middle; } "

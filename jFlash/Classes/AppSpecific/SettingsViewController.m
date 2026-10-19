@@ -66,6 +66,11 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 
   self.tableView.rowHeight = UITableViewAutomaticDimension;
   self.tableView.estimatedRowHeight = 60;
+
+  // Shared paper screen (same in every theme): paper-2 behind paper cells, hairline separators
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  self.tableView.backgroundColor = [tm colorForSlot:@"groupedBackground"];
+  self.tableView.separatorColor = [tm colorForSlot:@"separator"];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -151,12 +156,24 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 {
   [[NSUserDefaults standardUserDefaults] setValue:value forKey:setting];
 
-  // One special case, theme: re-tint the window and this page's nav bar
+  // Theme change: retint window + nav bar, refresh tab bar fill, reload rows
   if ([setting isEqualToString:APP_THEME])
   {
+    ThemeManager *tm = [ThemeManager sharedThemeManager];
     UIWindow *window = self.view.window;
-    window.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
-    self.navigationController.navigationBar.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
+    window.tintColor = [tm currentThemeTintColor];
+    self.navigationController.navigationBar.tintColor = [tm currentThemeTintColor];
+    // Re-colour the cream tab bar's selected state (tint); unselected stays paper/ink-2
+    UITabBar *tabBar = self.tabBarController.tabBar;
+    UITabBarAppearance *app = [[tabBar.standardAppearance copy] autorelease];
+    if (app == nil)
+    {
+      app = [[[UITabBarAppearance alloc] init] autorelease];
+      [app configureWithOpaqueBackground];
+    }
+    app.backgroundColor = [tm colorForSlot:@"tabBarFill"];
+    tabBar.standardAppearance = app;
+    tabBar.scrollEdgeAppearance = app;
     [self.tableView reloadData];
   }
 }
@@ -256,12 +273,20 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     {
       [titles addObject:[names objectForKey:value]];
     }
+    ThemeManager *tm = [ThemeManager sharedThemeManager];
+    id currentValue = [settings objectForKey:key];
+    // Unknown/legacy theme keys (e.g. TAME) resolve to the default theme so the menu shows Paper
+    if ([key isEqualToString:APP_THEME])
+    {
+      currentValue = [[tm _currentTheme] objectForKey:@"key"];
+    }
     __block SettingsViewController *blockSelf = self;   // MRC: don't retain self from the cell
+    // Design: every Settings row value uses muted cellValueInk, never the accent
     [menuCell configureWithTitle:displayName
                     optionTitles:titles
                     optionValues:values
-                    currentValue:[settings objectForKey:key]
-                       tintColor:[[ThemeManager sharedThemeManager] currentThemeTintColor]
+                    currentValue:currentValue
+                       tintColor:[tm colorForSlot:@"cellValueInk"]
                          handler:^(id value) {
       [blockSelf _setValue:value forSetting:key];
     }];
@@ -277,6 +302,30 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 #pragma mark - UITableViewDelegate Methods
 
 
+
+//! Paper cells: paper fill, ink label, muted value (shared by every theme)
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  cell.backgroundColor = [tm colorForSlot:@"cellFill"];
+  cell.textLabel.textColor = [tm colorForSlot:@"cellLabelInk"];
+  cell.detailTextLabel.textColor = [tm colorForSlot:@"cellValueInk"];
+  // #12's menu rows use a custom titleLabel, not textLabel
+  if ([cell isKindOfClass:[LWEMenuSettingCell class]])
+  {
+    ((LWEMenuSettingCell *)cell).titleLabel.textColor = [tm colorForSlot:@"cellLabelInk"];
+  }
+}
+
+//! Section headers in ink-2 on paper-2
+- (void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section
+{
+  if ([view isKindOfClass:[UITableViewHeaderFooterView class]])
+  {
+    UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
+    header.textLabel.textColor = [[ThemeManager sharedThemeManager] colorForSlot:@"sectionHeaderInk"];
+  }
+}
 
 //! Make selection for a table cell
 - (void)tableView:(UITableView *)lclTableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
