@@ -17,13 +17,31 @@ extern NSString * const APP_NEW_UPDATE;
 @required
 - (NSArray*) settingsArrayWithPluginManager:(PluginManager *)pluginManager;
 - (NSDictionary*) settingsHash;
+//! Setting key -> the value keys in the order the row's pop-up menu lists them
+- (NSDictionary*) settingsOrder;
+@end
+
+/**
+ * A settings row whose value is a pop-up menu button: "Title        Value ⌃⌄".
+ * The button shows the current value; tapping it opens a menu with a checkmark on the current choice.
+ * At accessibility text sizes the value moves under the title.
+ */
+@interface LWEMenuSettingCell : UITableViewCell
+@property (nonatomic, readonly) UILabel *titleLabel;
+@property (nonatomic, readonly) UIButton *menuButton;
+//! titles/values are parallel arrays; handler is called with the chosen value (not called for the current one)
+- (void) configureWithTitle:(NSString *)title
+                optionTitles:(NSArray *)optionTitles
+                optionValues:(NSArray *)optionValues
+                currentValue:(id)currentValue
+                   tintColor:(UIColor *)tintColor
+                     handler:(void (^)(id value))handler;
 @end
 
 @class SettingsViewController;
 
 @interface SettingsViewController : UITableViewController
 - (void) updateBadgeValue;
-- (void) iterateSetting: (NSString*) setting;
 
 //! This data source is not quite a model in the traditional sense; it is retained - 100% used by this VC
 @property (retain) id<LWESettingsDataSource> dataSource;

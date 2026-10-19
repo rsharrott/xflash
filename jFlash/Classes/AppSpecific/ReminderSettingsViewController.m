@@ -8,7 +8,7 @@
 
 #import "ReminderSettingsViewController.h"
 #import <UserNotifications/UserNotifications.h>
-#import "LWEViewAnimationUtils.h"
+#import "SettingsViewController.h"   // LWEMenuSettingCell
 
 NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
 
@@ -16,6 +16,8 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
 - (void) _writeNumDaysSetting:(NSInteger)numDays;
 - (void) _setRemindersOn:(BOOL)on;
 - (void) _showNotificationsDeniedAlert;
++ (NSInteger) _rememberedNumDays;
+- (NSString *) _titleForNumDays:(NSInteger)days;
 @property (retain) NSArray *numDaysArray;
 @end
 
@@ -24,22 +26,34 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
 
 @implementation ReminderSettingsViewController
 
-@synthesize remindersOn, onOffSwitch, numDaysArray, picker;
+@synthesize remindersOn, onOffSwitch, numDaysArray;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+- (id) init
 {
-  self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+  self = [super initWithStyle:UITableViewStyleGrouped];
   if (self)
   {
     NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-    NSNumber *reminderSetting = [settings objectForKey:APP_REMINDER];
-    self.remindersOn = ([reminderSetting integerValue] > 0);
-    _numDays = [reminderSetting integerValue];
-    
-    // Implementation is naive: using the same dataset for values & display, DO NOT put non-integer strings in here
-    self.numDaysArray = [NSArray arrayWithObjects:@"1",@"2",@"3",@"4",@"5",@"7",@"10",@"14",@"21",@"30",nil];
+    NSInteger reminderDays = [[settings objectForKey:APP_REMINDER] integerValue];
+    self.remindersOn = (reminderDays > 0);
+    _numDays = (reminderDays > 0) ? reminderDays : [[self class] _rememberedNumDays];
+    self.numDaysArray = [NSArray arrayWithObjects:@1,@2,@3,@4,@5,@7,@10,@14,@21,@30,nil];
   }
   return self;
+}
+
+//! The last "Days After Last Session" choice (kept while reminders are off), or the default
++ (NSInteger) _rememberedNumDays
+{
+  NSInteger days = [[NSUserDefaults standardUserDefaults] integerForKey:APP_REMINDER_DAYS_CHOICE];
+  return (days > 0) ? days : DEFAULT_REMINDER_DAYS;
+}
+
+- (NSString *) _titleForNumDays:(NSInteger)days
+{
+  NSString *daysFormat = (days == 1) ? NSLocalizedString(@"%@ day",@"ReminderVC.pickerFormatSingle")
+                                     : NSLocalizedString(@"%@ days",@"ReminderVC.pickerFormatPlural");
+  return [NSString stringWithFormat:daysFormat,[NSString stringWithFormat:@"%ld",(long)days]];
 }
 
 #pragma mark - View lifecycle
@@ -47,18 +61,15 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
 - (void) viewDidLoad
 {
   [super viewDidLoad];
-
-  self.onOffSwitch.on = self.remindersOn;
   self.navigationItem.title = NSLocalizedString(@"Study Reminders",@"ReminderVC.Title");
-  
-  // Render the picker just below the visible screen, we will animate it in.
-  CGRect viewFrame = [UIScreen mainScreen].bounds;
-  CGRect pickerFrame = CGRectZero;
-  int tabBarHeight = 113;
-  pickerFrame.origin = CGPointMake(0, viewFrame.origin.y + viewFrame.size.height - tabBarHeight);
-  pickerFrame.size = self.picker.frame.size;
-  self.picker.frame = pickerFrame;
-  [self.view addSubview:self.picker];
+  self.tableView.rowHeight = UITableViewAutomaticDimension;
+  self.tableView.estimatedRowHeight = 50;
+
+  UISwitch *reminderSwitch = [[[UISwitch alloc] initWithFrame:CGRectZero] autorelease];
+  [reminderSwitch addTarget:self action:@selector(switchValueChanged:) forControlEvents:UIControlEventValueChanged];
+  reminderSwitch.accessibilityLabel = NSLocalizedString(@"Study Reminders", @"RemindersVC.StudyRemindersSwitchLabel");
+  self.onOffSwitch = reminderSwitch;
+  self.onOffSwitch.on = self.remindersOn;
 }
 
 - (void) viewWillAppear:(BOOL)animated
@@ -76,16 +87,9 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
   }];
 }
 
-- (void) viewDidUnload
-{
-  [super viewDidUnload];
-  self.onOffSwitch = nil;
-  self.picker = nil;
-}
+#pragma mark - Actions
 
-#pragma mark - IBActions
-
-- (IBAction) switchValueChanged:(UISwitch*)sender
+- (void) switchValueChanged:(UISwitch*)sender
 {
   if (sender.on == NO)
   {
@@ -127,8 +131,9 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
   [self.tableView beginUpdates];
   if (on)
   {
+    // Bring back the last choice instead of resetting to the default
     [self.tableView insertSections:settingsSection withRowAnimation:UITableViewRowAnimationFade];
-    [self _writeNumDaysSetting:DEFAULT_REMINDER_DAYS];
+    [self _writeNumDaysSetting:[[self class] _rememberedNumDays]];
   }
   else
   {
@@ -169,8 +174,11 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
     }
     dispatch_async(dispatch_get_main_queue(), ^{
       NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-      if (allowed == NO && [[settings objectForKey:APP_REMINDER] integerValue] > 0)
+      NSInteger days = [[settings objectForKey:APP_REMINDER] integerValue];
+      if (allowed == NO && days > 0)
       {
+        // Keep the user's choice so turning reminders back on restores it
+        [settings setInteger:days forKey:APP_REMINDER_DAYS_CHOICE];
         [settings removeObjectForKey:APP_REMINDER];
       }
       if (finish) finish();
@@ -178,60 +186,7 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
   }];
 }
 
-#pragma mark - UIPickerViewDataSource Methods
-
-- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
-{
-  return 1;
-}
-
-- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
-{
-  return [self.numDaysArray count];
-}
-
-#pragma mark - UIPickerViewDelegate Methods
-
-- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
-{
-  NSString *value = [self.numDaysArray objectAtIndex:row];
-  NSString *formatString = NSLocalizedString(@"%@ days",@"ReminderVC.pickerFormatPlural");
-  if ([value isEqualToString:@"1"])
-  {
-    formatString = NSLocalizedString(@"%@ day",@"ReminderVC.pickerFormatSingle");
-  }
-  return [NSString stringWithFormat:formatString,value];
-}
-
-- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
-{
-  NSString *value = [self.numDaysArray objectAtIndex:row];
-  [self _writeNumDaysSetting:[value integerValue]];
-  
-  // Dismiss the picker
-  [LWEViewAnimationUtils translateView:self.picker byPoint:CGPointMake(0, 0) withInterval:0.5f];
-  
-  // If our value changed, update the section
-  [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationNone];
-}
-
 #pragma mark - UITableViewDelegate Methods
-
-- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-  [tableView deselectRowAtIndexPath:indexPath animated:NO];
-  
-  if (indexPath.section == REMINDER_SETTINGS_TABLE_DAYS_SECTION)
-  {
-    // Select the active row first
-    NSInteger index = [self.numDaysArray indexOfObject:[NSString stringWithFormat:@"%d",_numDays]];
-    [self.picker selectRow:index inComponent:0 animated:NO];
-    
-    // Bring up a picker to let the user choose how many days
-    CGSize pickerSize = self.picker.frame.size;
-    [LWEViewAnimationUtils translateView:self.picker byPoint:CGPointMake(0, -(pickerSize.height)) withInterval:0.5f];
-  }
-}
 
 - (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
 {
@@ -249,7 +204,7 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
 {
   if (section == 1)
   {
-    return NSLocalizedString(@"Reminders are reset each time the app is opened.  If you're diligent about studying, you may never see one!", @"ReminderVC.SettingsSectionFooter");
+    return NSLocalizedString(@"Reminders are reset each time the app is opened. If you're diligent about studying, you may never see one!", @"ReminderVC.SettingsSectionFooter");
   }
   else
   {
@@ -294,21 +249,35 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
   {
     cell = [LWEUITableUtils reuseCellForIdentifier:@"reminder" onTable:lclTableView usingStyle:UITableViewCellStyleDefault];
     cell.textLabel.text = NSLocalizedString(@"Study Reminders", @"RemindersVC.StudyRemindersSwitchLabel");
+    cell.textLabel.numberOfLines = 0;
+    cell.textLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    cell.textLabel.adjustsFontForContentSizeCategory = YES;
+    self.onOffSwitch.onTintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
     cell.accessoryView = self.onOffSwitch;
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
   }
   else if (indexPath.section == 1)
   {
-    cell = [LWEUITableUtils reuseCellForIdentifier:@"settings" onTable:lclTableView usingStyle:UITableViewCellStyleValue1];
-    if (indexPath.row == 0)
+    LWEMenuSettingCell *menuCell = [lclTableView dequeueReusableCellWithIdentifier:@"days"];
+    if (menuCell == nil)
     {
-      cell.textLabel.text = NSLocalizedString(@"Days After Last Session",@"RemindersVC.DaysAfterLastSesssionLabel");
-      // Same "%@ day(s)" wording as the picker rows
-      NSString *daysFormat = (_numDays == 1) ? NSLocalizedString(@"%@ day",@"ReminderVC.pickerFormatSingle")
-                                             : NSLocalizedString(@"%@ days",@"ReminderVC.pickerFormatPlural");
-      cell.detailTextLabel.text = [NSString stringWithFormat:daysFormat,[NSString stringWithFormat:@"%ld",(long)_numDays]];
-      cell.selectionStyle = UITableViewCellSelectionStyleGray;
+      menuCell = [[[LWEMenuSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"days"] autorelease];
     }
+    NSMutableArray *titles = [NSMutableArray arrayWithCapacity:[self.numDaysArray count]];
+    for (NSNumber *days in self.numDaysArray)
+    {
+      [titles addObject:[self _titleForNumDays:[days integerValue]]];
+    }
+    __block ReminderSettingsViewController *blockSelf = self;
+    [menuCell configureWithTitle:NSLocalizedString(@"Days After Last Session",@"RemindersVC.DaysAfterLastSesssionLabel")
+                    optionTitles:titles
+                    optionValues:self.numDaysArray
+                    currentValue:[NSNumber numberWithInteger:_numDays]
+                       tintColor:[[ThemeManager sharedThemeManager] currentThemeTintColor]
+                         handler:^(id value) {
+      [blockSelf _writeNumDaysSetting:[value integerValue]];
+    }];
+    cell = menuCell;
   }
   return cell;
 }
@@ -326,6 +295,7 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
   else
   {
     [settings setInteger:numDays forKey:APP_REMINDER];
+    [settings setInteger:numDays forKey:APP_REMINDER_DAYS_CHOICE];
   }
 }
 
@@ -333,7 +303,6 @@ NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
 
 - (void) dealloc
 {
-  [picker release];
   [numDaysArray release];
   [onOffSwitch release];
   [super dealloc];

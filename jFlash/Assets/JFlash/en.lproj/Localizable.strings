@@ -402,7 +402,7 @@
 "Reminder Settings" = "Reminder Settings";
 
 /* ReminderVC.SettingsSectionFooter  (ReminderSettingsViewController.m) */
-"Reminders are reset each time the app is opened.  If you're diligent about studying, you may never see one!" = "Reminders are reset each time the app is opened.  If you're diligent about studying, you may never see one!";
+"Reminders are reset each time the app is opened. If you're diligent about studying, you may never see one!" = "Reminders are reset each time the app is opened. If you're diligent about studying, you may never see one!";
 
 /* RemindersVC.DaysAfterLastSesssionLabel  (ReminderSettingsViewController.m) */
 "Days After Last Session" = "Days After Last Session";
@@ -615,3 +615,21 @@
 
 /* Progress sheet footnote marker after the capped study-pool number; must match the start of "*You can change this in" */
 "StudyPoolCapMarker" = "*";
+
+/* AlgorithmVC.Preset_Easy  (AlgorithmSettingsViewController.m) */
+"Easy" = "Easy";
+
+/* AlgorithmVC.Preset_Medium  (AlgorithmSettingsViewController.m) */
+"Medium" = "Medium";
+
+/* AlgorithmVC.Preset_Hard  (AlgorithmSettingsViewController.m) */
+"Hard" = "Hard";
+
+/* AlgorithmVC.Preset_Custom  (AlgorithmSettingsViewController.m) */
+"Custom" = "Custom";
+
+/* AlgorithmVC.PresetDetail: study pool size, then new-card frequency (1-4)  (AlgorithmSettingsViewController.m) */
+"%ld cards · new cards %ld of 4" = "%ld cards · new cards %ld of 4";
+
+/* AlgorithmVC.NewCardFrequency_LessOften  (AlgorithmSettingsViewController.m) */
+"Less Often" = "Less Often";

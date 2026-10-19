@@ -297,7 +297,6 @@
 		4965FD85126F7002000AC280 /* redtheme-cookie-cutters in Resources */ = {isa = PBXBuildFile; fileRef = 4965FD83126F7002000AC280 /* redtheme-cookie-cutters */; };
 		4966C30112686DCE00F34E24 /* jflash_12_to_13.sql in Resources */ = {isa = PBXBuildFile; fileRef = 49AF3CF51265E2B900CEAA52 /* jflash_12_to_13.sql */; };
 		496BE55211EC5320003AB713 /* ActionBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE54F11EC5320003AB713 /* ActionBarViewController.xib */; };
-		496BE55311EC5320003AB713 /* AlgorithmSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */; };
 		496BE55411EC5320003AB713 /* SearchView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55111EC5320003AB713 /* SearchView.xib */; };
 		496C66891472885C009F04D4 /* Card.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BEB11AB7CD700016BD2 /* Card.m */; };
 		496C668A1472885C009F04D4 /* Card.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5BEB11AB7CD700016BD2 /* Card.m */; };
@@ -386,7 +385,6 @@
 		496C7AD31263270B004B6B90 /* talkbubble-ft.png in Resources */ = {isa = PBXBuildFile; fileRef = D35B07721116456D00DB5E02 /* talkbubble-ft.png */; };
 		496C7AD512632725004B6B90 /* CustomCellBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C3811AB826000016BD2 /* CustomCellBackgroundView.m */; };
 		496C7AD812632730004B6B90 /* ActionBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE54F11EC5320003AB713 /* ActionBarViewController.xib */; };
-		496C7AD912632730004B6B90 /* AlgorithmSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */; };
 		496C7ADA12632730004B6B90 /* SearchView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55111EC5320003AB713 /* SearchView.xib */; };
 		496C7ADB12632730004B6B90 /* AddTagView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 917A5C6611AB844300016BD2 /* AddTagView.xib */; };
 		496C7ADD12632730004B6B90 /* ExampleSentencesView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CBA67711BB496C004BD0D0 /* ExampleSentencesView.xib */; };
@@ -460,8 +458,6 @@
 		4971252D14873B0000D4D150 /* MoodIcon.m in Sources */ = {isa = PBXBuildFile; fileRef = 4971252914873B0000D4D150 /* MoodIcon.m */; };
 		49716142144EC74E006BBEB4 /* ReminderSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49716140144EC74D006BBEB4 /* ReminderSettingsViewController.m */; };
 		49716143144EC74E006BBEB4 /* ReminderSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49716140144EC74D006BBEB4 /* ReminderSettingsViewController.m */; };
-		49716145144EC74E006BBEB4 /* ReminderSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49716141144EC74D006BBEB4 /* ReminderSettingsViewController.xib */; };
-		49716146144EC74E006BBEB4 /* ReminderSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49716141144EC74D006BBEB4 /* ReminderSettingsViewController.xib */; };
 		497607E3147A6570000A9FC5 /* chinese-flash-icon-ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 497607DE147A6570000A9FC5 /* chinese-flash-icon-ipad.png */; };
 		497607E5147A6570000A9FC5 /* chinese-flash-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 497607DF147A6570000A9FC5 /* chinese-flash-icon.png */; };
 		497607E7147A6570000A9FC5 /* chinese-flash-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 497607E0147A6570000A9FC5 /* chinese-flash-icon@2x.png */; };
@@ -704,7 +700,6 @@
 		91D3F9481580294F00CB8F1E /* jFlash-CARD-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */; };
 		91D3F9491580294F00CB8F1E /* plugin-resources in Resources */ = {isa = PBXBuildFile; fileRef = D322367A11D370B900B1AF15 /* plugin-resources */; };
 		91D3F94C1580294F00CB8F1E /* ActionBarViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE54F11EC5320003AB713 /* ActionBarViewController.xib */; };
-		91D3F94D1580294F00CB8F1E /* AlgorithmSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */; };
 		91D3F94E1580294F00CB8F1E /* SearchView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 496BE55111EC5320003AB713 /* SearchView.xib */; };
 		91D3F94F1580294F00CB8F1E /* twitter-bird.png in Resources */ = {isa = PBXBuildFile; fileRef = 499006A8120FBBF400601CD2 /* twitter-bird.png */; };
 		91D3F9501580294F00CB8F1E /* speech_bubble.png in Resources */ = {isa = PBXBuildFile; fileRef = 499006D1120FC44600601CD2 /* speech_bubble.png */; };
@@ -731,7 +726,6 @@
 		91D3F9AF1580294F00CB8F1E /* form-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 9179E4251384FFB000A7739B /* form-background.jpg */; };
 		91D3F9B01580294F00CB8F1E /* table-background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 9179E44C1385021E00A7739B /* table-background.jpg */; };
 		91D3F9B21580294F00CB8F1E /* help in Resources */ = {isa = PBXBuildFile; fileRef = 49BBA499144D4BBF00E6A9AE /* help */; };
-		91D3F9B31580294F00CB8F1E /* ReminderSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49716141144EC74D006BBEB4 /* ReminderSettingsViewController.xib */; };
 		91D3F9B41580294F00CB8F1E /* jFlash-available.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4919507A144F1BFE00DB81F7 /* jFlash-available.plist */; };
 		91D3F9B51580294F00CB8F1E /* ActionBarViewController-Browse.xib in Resources */ = {isa = PBXBuildFile; fileRef = 493A478D146A829900F1E718 /* ActionBarViewController-Browse.xib */; };
 		91D3F9B61580294F00CB8F1E /* SettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 493A4791146A89BB00F1E718 /* SettingsView.xib */; };
@@ -1147,7 +1141,6 @@
 		496BE54B11EC5303003AB713 /* ActionBarViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ActionBarViewController.h; path = AppSpecific/ActionBarViewController.h; sourceTree = "<group>"; };
 		496BE54C11EC5303003AB713 /* ActionBarViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ActionBarViewController.m; path = AppSpecific/ActionBarViewController.m; sourceTree = "<group>"; };
 		496BE54F11EC5320003AB713 /* ActionBarViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ActionBarViewController.xib; path = XIBs/ActionBarViewController.xib; sourceTree = "<group>"; };
-		496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = AlgorithmSettingsView.xib; path = XIBs/AlgorithmSettingsView.xib; sourceTree = "<group>"; };
 		496BE55111EC5320003AB713 /* SearchView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = SearchView.xib; path = XIBs/SearchView.xib; sourceTree = "<group>"; };
 		496C66AB14728901009F04D4 /* cFlashTest-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "cFlashTest-Prefix.pch"; path = "Tests/cFlashTests/cFlashTest-Prefix.pch"; sourceTree = SOURCE_ROOT; };
 		496C7A6C126325FD004B6B90 /* cFlash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cFlash.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1159,7 +1152,6 @@
 		4971252914873B0000D4D150 /* MoodIcon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MoodIcon.m; path = AppSpecific/MoodIcon.m; sourceTree = "<group>"; };
 		4971613F144EC74C006BBEB4 /* ReminderSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReminderSettingsViewController.h; path = AppSpecific/ReminderSettingsViewController.h; sourceTree = "<group>"; };
 		49716140144EC74D006BBEB4 /* ReminderSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReminderSettingsViewController.m; path = AppSpecific/ReminderSettingsViewController.m; sourceTree = "<group>"; };
-		49716141144EC74D006BBEB4 /* ReminderSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ReminderSettingsViewController.xib; path = Classes/AppSpecific/ReminderSettingsViewController.xib; sourceTree = "<group>"; };
 		497607DE147A6570000A9FC5 /* chinese-flash-icon-ipad.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = "chinese-flash-icon-ipad.png"; path = "Assets/CFlash/chinese-flash-icon-ipad.png"; sourceTree = "<group>"; };
 		497607DF147A6570000A9FC5 /* chinese-flash-icon.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = "chinese-flash-icon.png"; path = "Assets/CFlash/chinese-flash-icon.png"; sourceTree = "<group>"; };
 		497607E0147A6570000A9FC5 /* chinese-flash-icon@2x.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = "chinese-flash-icon@2x.png"; path = "Assets/CFlash/chinese-flash-icon@2x.png"; sourceTree = "<group>"; };
@@ -2414,7 +2406,6 @@
 				49FE8C6D14A9B80900579716 /* Japanese Flash */,
 				496BE54F11EC5320003AB713 /* ActionBarViewController.xib */,
 				493A478D146A829900F1E718 /* ActionBarViewController-Browse.xib */,
-				496BE55011EC5320003AB713 /* AlgorithmSettingsView.xib */,
 				917A5C6611AB844300016BD2 /* AddTagView.xib */,
 				91CBA67711BB496C004BD0D0 /* ExampleSentencesView.xib */,
 				49B4ABC311C1D03600CFC308 /* ExamplesUnavailable.xib */,
@@ -2426,7 +2417,6 @@
 				49F9686811AF604900DFC3C9 /* ModalTaskView.xib */,
 				490820A411B7959500150499 /* PluginSettingsView.xib */,
 				91E1B0E711AE11E1003CCDC2 /* ProgressBarViewController.xib */,
-				49716141144EC74D006BBEB4 /* ReminderSettingsViewController.xib */,
 				496BE55111EC5320003AB713 /* SearchView.xib */,
 				4982292C1490A0BD009EC2CD /* SearchingTableCell.xib */,
 				491D7D0611C4EFFE00BF8323 /* SentenceView.xib */,
@@ -2679,7 +2669,6 @@
 				AA1A507F19000002000000AA /* jFlash-EX-2.0.db in Resources */,
 				D322368611D370B900B1AF15 /* plugin-resources in Resources */,
 				496BE55211EC5320003AB713 /* ActionBarViewController.xib in Resources */,
-				496BE55311EC5320003AB713 /* AlgorithmSettingsView.xib in Resources */,
 				496BE55411EC5320003AB713 /* SearchView.xib in Resources */,
 				499006A9120FBBF400601CD2 /* twitter-bird.png in Resources */,
 				A34F45C9184B22AA00FA137C /* starred-tag.png in Resources */,
@@ -2725,7 +2714,6 @@
 				9179E44D1385021E00A7739B /* table-background.jpg in Resources */,
 				A34F45B7184B20EC00FA137C /* question@2x.png in Resources */,
 				49BBA49A144D4BBF00E6A9AE /* help in Resources */,
-				49716145144EC74E006BBEB4 /* ReminderSettingsViewController.xib in Resources */,
 				4919507C144F1BFE00DB81F7 /* jFlash-available.plist in Resources */,
 				493A478E146A829900F1E718 /* ActionBarViewController-Browse.xib in Resources */,
 				493A4792146A89BB00F1E718 /* SettingsView.xib in Resources */,
@@ -2814,7 +2802,6 @@
 				496C7AD31263270B004B6B90 /* talkbubble-ft.png in Resources */,
 				A34F45B4184B20EC00FA137C /* gear@2x.png in Resources */,
 				496C7AD812632730004B6B90 /* ActionBarViewController.xib in Resources */,
-				496C7AD912632730004B6B90 /* AlgorithmSettingsView.xib in Resources */,
 				496C7ADA12632730004B6B90 /* SearchView.xib in Resources */,
 				A34F45A8184B1D5E00FA137C /* tag@2x.png in Resources */,
 				496C7ADB12632730004B6B90 /* AddTagView.xib in Resources */,
@@ -2862,7 +2849,6 @@
 				49BBA49C144D4BCE00E6A9AE /* help in Resources */,
 				49BBA4C5144D5D3D00E6A9AE /* LWEChineseSearchBarInput.xib in Resources */,
 				A34F459A184B162300FA137C /* folder.png in Resources */,
-				49716146144EC74E006BBEB4 /* ReminderSettingsViewController.xib in Resources */,
 				496C6704147294D9009F04D4 /* cFlash-FTS-1.0.db in Resources */,
 				A34F45A0184B18B600FA137C /* star.png in Resources */,
 				493A478F146A829900F1E718 /* ActionBarViewController-Browse.xib in Resources */,
@@ -2927,7 +2913,6 @@
 				91D3F9481580294F00CB8F1E /* jFlash-CARD-2.0.db in Resources */,
 				91D3F9491580294F00CB8F1E /* plugin-resources in Resources */,
 				91D3F94C1580294F00CB8F1E /* ActionBarViewController.xib in Resources */,
-				91D3F94D1580294F00CB8F1E /* AlgorithmSettingsView.xib in Resources */,
 				91D3F94E1580294F00CB8F1E /* SearchView.xib in Resources */,
 				91D3F94F1580294F00CB8F1E /* twitter-bird.png in Resources */,
 				91D3F9501580294F00CB8F1E /* speech_bubble.png in Resources */,
@@ -2954,7 +2939,6 @@
 				91D3F9AF1580294F00CB8F1E /* form-background.jpg in Resources */,
 				91D3F9B01580294F00CB8F1E /* table-background.jpg in Resources */,
 				91D3F9B21580294F00CB8F1E /* help in Resources */,
-				91D3F9B31580294F00CB8F1E /* ReminderSettingsViewController.xib in Resources */,
 				91D3F9B41580294F00CB8F1E /* jFlash-available.plist in Resources */,
 				91D3F9B51580294F00CB8F1E /* ActionBarViewController-Browse.xib in Resources */,
 				91D3F9B61580294F00CB8F1E /* SettingsView.xib in Resources */,
