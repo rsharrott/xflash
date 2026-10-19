@@ -1056,9 +1056,33 @@
   CGFloat cardH = MAX(0, self.scrollView.frame.size.height - footerReserve - inset);
 	CGRect rect = CGRectMake(cx + inset, inset, MAX(0, cx - 2.0 * inset), cardH);
 	vc.view.frame = rect;
-  [[ThemeManager sharedThemeManager] applyCardStyleToLayer:vc.view.layer];
+  ThemeManager *tmEx = [ThemeManager sharedThemeManager];
+  [tmEx applyCardStyleToLayer:vc.view.layer];
   vc.view.layer.masksToBounds = NO;
   // Keep layer.backgroundColor (cardFill); UIView.backgroundColor would clear it.
+  // ExamplesUnavailable.xib hard-codes near-white label + dark emboss shadow for the old
+  // dark Fire cards. On Paper (cream) that reads as faint embossed white — theme the
+  // labels to meaningInk / white by card luminance and drop the shadow.
+  if (vc.view.tag == LWE_EX_SENTENCE_INSTALLER_VIEW_TAG)
+  {
+    UIColor *cardFill = [tmEx colorForSlot:@"cardFill"];
+    CGFloat rr = 0, gg = 0, bb = 0, aa = 0;
+    [cardFill getRed:&rr green:&gg blue:&bb alpha:&aa];
+    CGFloat lum = 0.2126 * rr + 0.7152 * gg + 0.0722 * bb;
+    UIColor *promptInk = (lum > 0.45)
+      ? ([tmEx colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.227 green:0.208 blue:0.180 alpha:1.0])
+      : [UIColor whiteColor];
+    for (UIView *sub in vc.view.subviews)
+    {
+      if ([sub isKindOfClass:[UILabel class]])
+      {
+        UILabel *lab = (UILabel *)sub;
+        lab.textColor = promptInk;
+        lab.shadowColor = nil;
+        lab.shadowOffset = CGSizeZero;
+      }
+    }
+  }
   
   // Set the content size for the width * the number of views
 	NSInteger numViews = 2;
