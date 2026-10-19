@@ -418,9 +418,11 @@
       if (moodView) {
         CGFloat iconW = moodView.bounds.size.width;
         CGFloat iconH = moodView.bounds.size.height;
+        // Kutani cardRim: nudge 4pt up+left so the bubble tail clears the ochre rim corner.
+        CGFloat nudge = [[ThemeManager sharedThemeManager] cardRimBubbleNudge];
         moodView.frame = CGRectMake(
-          containerW - iconW + 20.0,
-          containerH - iconH - 8.0,
+          containerW - iconW + 20.0 - nudge,
+          containerH - iconH - 8.0 - nudge,
           iconW, iconH
         );
       }
@@ -1075,9 +1077,10 @@
   [tmEx applyCardStyleToLayer:vc.view.layer];
   vc.view.layer.masksToBounds = NO;
   // Keep layer.backgroundColor (cardFill); UIView.backgroundColor would clear it.
+  [tmEx applyCardDecorationsToView:vc.view includePattern:NO];
   // ExamplesUnavailable.xib hard-codes near-white label + dark emboss shadow for the old
   // dark Fire cards. On Paper (cream) that reads as faint embossed white — theme the
-  // labels to meaningInk / white by card luminance and drop the shadow.
+  // labels to readingInk / white by card luminance and drop the shadow.
   if (vc.view.tag == LWE_EX_SENTENCE_INSTALLER_VIEW_TAG)
   {
     UIColor *cardFill = [tmEx colorForSlot:@"cardFill"];
@@ -1180,6 +1183,8 @@
     card.layer.masksToBounds = NO;
     // Bounds are final here (frame was just set); keep the shadow cheap and matching the rounded card
     card.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:card.bounds cornerRadius:kLWECardCornerRadius].CGPath;
+    // Kimono seigaiha / Kutani rim sit in a clipped host so the card shadow stays visible.
+    [tm applyCardDecorationsToView:card includePattern:YES];
     if (self.cardViewController)
     {
       self.cardViewController.view.backgroundColor = [UIColor clearColor];
@@ -1197,6 +1202,8 @@
     [tm applyCardStyleToLayer:ex.layer];
     ex.layer.masksToBounds = NO;
     ex.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:ex.bounds cornerRadius:kLWECardCornerRadius].CGPath;
+    // Rim may show on the sentences card; seigaiha never goes on web views (Kimono README §7).
+    [tm applyCardDecorationsToView:ex includePattern:NO];
     // Do not set backgroundColor here: UIView.backgroundColor overwrites layer.backgroundColor (cardFill).
   }
 

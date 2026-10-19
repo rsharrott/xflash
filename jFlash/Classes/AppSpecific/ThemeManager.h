@@ -9,6 +9,8 @@
 extern NSString * const SET_THEME_PAPER;
 extern NSString * const SET_THEME_FIRE;
 extern NSString * const SET_THEME_WATER;
+extern NSString * const SET_THEME_KIMONO;
+extern NSString * const SET_THEME_KUTANI;
 extern NSString * const DEFAULT_THEME;
 
 //! Study card shape, shared by every theme (themes v2: inset 12pt, radius-3xl 28)
@@ -36,14 +38,23 @@ extern const CGFloat kLWECardCornerRadius;
 /**
  * Colour for a named slot of the current theme (themes v2 slot table), e.g. @"cardFill",
  * @"headwordInk", @"showAnswerBorder".  Shared paper-screen slots (cellFill, tabBarFill, ...)
- * resolve to the same value in every theme.  Unknown slots return nil.
+ * resolve to the same value in every theme.  Absent optional slots return nil; a present but
+ * unparseable value asserts in debug and falls back to a grey.
  */
 - (UIColor*) colorForSlot:(NSString*)slot;
 
 //! Paints `layer` as the current theme's study card: cardFill, radius 28, ring and shadow (cardStyle)
 - (void) applyCardStyleToLayer:(CALayer*)layer;
 
-//! Provide list of names of all available themes, in display order (Paper, Fire, Water)
+//! Optional card face decorations (Kimono seigaiha band, Kutani double rim).  `includePattern`
+//! is YES only for the study card face — example-sentence web views never get the pattern.
+//! Pass the card view; a tagged host subview holds the layers so the card's shadow stays unclipped.
+- (void) applyCardDecorationsToView:(UIView*)view includePattern:(BOOL)includePattern;
+
+//! Points to nudge the 67% mood bubble up+left when a cardRim is present (0 otherwise)
+- (CGFloat) cardRimBubbleNudge;
+
+//! Provide list of names of all available themes, in display order (Paper, Fire, Water, Kimono, Kutani)
 - (NSArray*) themeNameList;
 
 //! Provide dictionary-safe key reference names for all available themes, in display order

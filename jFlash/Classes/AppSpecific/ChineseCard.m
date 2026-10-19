@@ -165,8 +165,19 @@
   // Relative luminance (sRGB approx). Paper/Kimono are light; Fire/Water/Kutani are dark.
   CGFloat lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   BOOL lightCard = (lum > 0.45);
+  NSString *themeKey = [[tm _currentTheme] objectForKey:@"key"];
+  BOOL kimonoCard = [themeKey isEqualToString:SET_THEME_KIMONO];
   UIColor *tone1, *tone2, *tone3, *tone4, *toneDefault;
-  if (lightCard)
+  if (kimonoCard)
+  {
+    // Mid kaki #EEA57A: darker tones so all four pass 4.5 at normal size.
+    tone1 = [UIColor colorWithRed:0.478 green:0.067 blue:0.000 alpha:1.0]; // #7A1100
+    tone2 = [UIColor colorWithRed:0.420 green:0.212 blue:0.000 alpha:1.0]; // #6B3600
+    tone3 = [UIColor colorWithRed:0.031 green:0.271 blue:0.122 alpha:1.0]; // #08451F
+    tone4 = [UIColor colorWithRed:0.055 green:0.247 blue:0.490 alpha:1.0]; // #0E3F7D
+    toneDefault = [tm colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.122 green:0.208 blue:0.345 alpha:1.0]; // kimono-ai
+  }
+  else if (lightCard)
   {
     tone1 = [UIColor colorWithRed:0.557 green:0.078 blue:0.000 alpha:1.0]; // #8E1400 fire-deep
     tone2 = [UIColor colorWithRed:0.604 green:0.306 blue:0.000 alpha:1.0]; // #9A4E00 dark amber
