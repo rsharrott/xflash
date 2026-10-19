@@ -143,8 +143,9 @@
     // UILabel-compatible attrs (cFlash reading label is a plain UILabel as of themes v2).
     UIColor *toneColor = (UIColor *)[readingHash objectForKey:@"color"];
     [tmpAttrString addAttribute:NSForegroundColorAttributeName value:toneColor range:allRange];
+    // 20pt regular (furigana spec §8); CardViewController shrinks or wraps long pinyin to fit the row.
     [tmpAttrString addAttribute:NSFontAttributeName
-                          value:[UIFont systemFontOfSize:20 weight:UIFontWeightBold]
+                          value:[UIFont systemFontOfSize:20 weight:UIFontWeightRegular]
                           range:allRange];
     [attrString appendAttributedString:tmpAttrString];
     [tmpAttrString release];
