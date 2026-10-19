@@ -60,7 +60,9 @@
 {
 	LWE_LOG(@"Program runs, and creating the default settings");
 	NSArray *keys = [[NSArray alloc] initWithObjects:APP_THEME,APP_HEADWORD,APP_READING,APP_MODE,APP_PLUGIN,APP_DATA_VERSION,nil];
-  // Write this manually w/o any constants as this is how it was in v1.1
+  // Write this manually w/o any constants as this is how it was in v1.1.  jFlash-CARD-1.1.db is
+  // deliberately the old name: it no longer ships, and simulating a 1.1 install exercises the 2.0
+  // path that replaces it (_updateSettingsTo20 and -[PluginManager bundledPluginsNeedRegistering:]).
   NSDictionary *preinstalledPlugins = [NSDictionary dictionaryWithObjectsAndKeys:@"jFlash-CARD-1.1.db",CARD_DB_KEY,nil];
 	NSArray *objects = [[NSArray alloc] initWithObjects:DEFAULT_THEME,SET_J_TO_E,SET_READING_BOTH,SET_MODE_QUIZ,preinstalledPlugins,LWE_JF_VERSION_1_1,nil];
 	for (int i = 0; i < [keys count]; i++)

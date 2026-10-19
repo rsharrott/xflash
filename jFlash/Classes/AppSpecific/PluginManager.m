@@ -309,7 +309,7 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
     Plugin *registered = [self _registeredPluginForKey:bundled.pluginId];
     if (registered == nil ||
         [LWEFile fileExists:[registered fullPath]] == NO ||
-        [registered.version doubleValue] < [bundled.version doubleValue])
+        [bundled isNewVersionOfPlugin:registered])
     {
       LWE_LOG(@"Bundled plugin %@ %@ needs registering (registered: %@ %@)", bundled.pluginId, bundled.version,
               registered.filePath, registered.version);
