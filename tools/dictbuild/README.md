@@ -64,8 +64,9 @@ and licence links.
 ## Design notes
 
 * **card_id = JMdict `ent_seq`** for dictionary cards (card_type 3), so ids stay
-  stable across future JMdict releases. Hand-made cards keep their 1.x ids
-  (< 1,000,000), which never collide with ent_seq values. JMdict's metadata
+  stable across future JMdict releases. The curated kana/word cards and LWE's
+  hand-made phrase cards keep their 1.x ids (< 1,000,000), which never collide
+  with ent_seq values. JMdict's metadata
   pseudo-entry 9999999 is skipped.
 * **XML safety**: the JMdict DTD may only contain simple internal entities
   (POS/misc codes). Each is rewritten to expand to its own name. Anything else
@@ -84,9 +85,10 @@ and licence links.
     `matchinfo=fts3` drops the unused docsize table. The app's queries
     (`… MATCH ? ORDER BY LENGTH(…), ptag DESC`) are unchanged. This took the file
     from 51.7 MB to under 45 MB, below GitHub's 50 MB warning.
-  * Hand-made cards that duplicate a JMdict entry (same headword and readings)
-    stay out of the search index, so search doesn't list such words twice.
-    Studying their sets still shows them.
+  * Hand-made phrase cards are searchable like JMdict cards. As a guard, a
+    curated dictionary card with the same headword and readings as a JMdict
+    entry is left out of the index so search can't list a word twice (none do
+    now: the migration maps such cards to JMdict).
 * **Example sentences**:
   * Each `jpn_indices` B-line word is resolved to a card by kanji or kana form,
     filtered by the given reading (or the `#ent_seq` disambiguator), preferring the
@@ -96,8 +98,10 @@ and licence links.
   * `sentence_id` = Tatoeba Japanese sentence id.
 * **Curated inputs** in `data/` hold what JMdict doesn't provide, and they are
   the source of truth for it. Edit them to change built-in sets.
-  * `curated_cards.jsonl`: 343 word + 214 kana cards, plus every hand-made
-    1.x card (id ≥ 145383) used by a set, copied verbatim from CARD 1.1.
+  * `curated_cards.jsonl`: 343 word + 214 kana cards, plus the 173 hand-made
+    phrase cards (Survival Japanese phrases, masu-forms, `静か(な)` …; legacy ids
+    145383–145912 and 150029–150039) that a set uses and JMdict can't identify,
+    copied verbatim from CARD 1.1.
   * `system_sets.tsv`: built-in study set membership.
 
 ## One-off 1.x → 2.0 migration
@@ -114,7 +118,16 @@ matched each legacy card to JMdict in this order:
 
 Anything that fails these checks is **dropped rather than mis-mapped**.
 Readings are split on `;`/`,` only, never on `、`, which is punctuation inside
-phrase readings. Hand-made cards (id ≥ 145383) are never re-mapped.
+phrase readings. A kana headword that only reaches kanji entries through
+their readings (くも → 蜘蛛 / 雲) has to share meaning with them, and so does
+tier 3 (瑞 みず "youth" is not 瑞 ずい "Sweden").
+
+Legacy ids from 145383 up are not all hand-made: most are ordinary 2010 EDICT
+entries imported late (骨, アーチリュート, JLPT re-matches) and are matched like
+everything else. Only LWE's hand-made dictionary cards (`LWE_HANDMADE_RANGES`
+in the script) that JMdict can't identify are kept verbatim; those are never
+dropped. The hand-made cards that JMdict does identify (ピンク, 林檎 …) map to
+the JMdict card.
 
 The script also re-maps `card_tag_link`/`last_state` in the user DB templates
 you pass with `--user-db`. A missing path is skipped, so you can leave out

@@ -5,7 +5,8 @@ Reads the legacy jFlash-CARD-1.1.db / jFlash-FTS-1.1.db (e.g. extracted from git
 history) and the current JMdict_e, and writes the hand-curated inputs that
 build.py needs from then on:
 
-  data/curated_cards.jsonl  - the hand-made kana (type 1) and word (type 0) cards,
+  data/curated_cards.jsonl  - the curated kana (type 1) and word (type 0) cards and
+                              the hand-made phrase cards (LWE_HANDMADE_RANGES),
                               copied verbatim with their 1.x card_ids
   data/system_sets.tsv      - built-in study set membership (tag_id, card_id),
                               re-mapped to JMdict ent_seq card_ids by headword+reading
@@ -45,12 +46,20 @@ def ro_uri(path):
     """Read-only SQLite URI for path (percent-quoted, so any file name is safe)."""
     return Path(path).resolve().as_uri() + '?mode=ro'
 
-# Legacy card_ids from 145383 up were added by Long Weekend by hand (the
-# ManuallyCompiledWords*/KanaLists imports and later additions: phrases such as
-# はい、そうです or masu-form verbs for the Survival Japanese sets).  They are
-# never re-mapped: every one of them that a set uses is carried over verbatim,
-# with its 1.x card_id, like the kana/word cards.
-LWE_HANDMADE_MIN_ID = 145383
+# Long Weekend's hand-made dictionary-type cards, by legacy card_id.  The 1.x
+# importer loaded them right after the 2010 EDICT (ManuallyCompiledWordsEdictFormat:
+# Survival Japanese phrases and masu-forms such as はい、そうです, 食べます, 十二時半),
+# and a few more at the very end (静か(な), 音声(学)).  The ids in between and after
+# (145913-150028, 150040-) are the KanaLists/word cards (curated, type 0/1) and
+# later imports of ordinary EDICT entries (骨, アーチリュート, JLPT re-matches): those
+# are matched to JMdict like any other legacy card, and dropped if they can't be.
+# A hand-made card that JMdict does identify is mapped to the JMdict card too; the
+# rest are carried over verbatim with their 1.x card_id and never dropped.
+LWE_HANDMADE_RANGES = ((145383, 145912), (150029, 150039))
+
+
+def is_handmade(cid):
+    return any(lo <= cid <= hi for lo, hi in LWE_HANDMADE_RANGES)
 
 
 def split_readings(s):
@@ -72,6 +81,7 @@ class Matcher:
         self.kebs = {}
         self.rebs = {}
         self.gloss_words = {}
+        self.kebs_any = set()   # every kanji spelling in JMdict
         for e in entries:
             c = build_card(e)
             self.cards[e['seq']] = c
@@ -80,6 +90,7 @@ class Matcher:
             rebs = [r['text'] for r in e['r']]
             self.kebs[e['seq']] = set(kebs)
             self.rebs[e['seq']] = set(rebs)
+            self.kebs_any.update(kebs)
             for f in kebs + rebs:
                 self.forms[f].add(e['seq'])
                 self.hira_forms[kata_to_hira(f)].add(e['seq'])
@@ -88,9 +99,10 @@ class Matcher:
         return sorted(seqs, key=lambda s: (self.cards[s]['headword'] != hw,
                                            -self.cards[s]['ptag'], s))
 
-    def match(self, hw, reading, en=None):
-        """Return (seq or None, tier)."""
+    def match(self, hw, reading, en=None, meaning=None):
+        """Return (seq or None, tier).  meaning = the legacy card's full meaning text."""
         olds = split_readings(reading)
+        legacy_words = gloss_words(strip_html(meaning) if meaning else en)
         cands = self.forms.get(hw, set())
         if not cands and is_kana_text(hw):
             # hiragana/katakana spelling variants
@@ -112,6 +124,18 @@ class Matcher:
               split_readings(self.cards[s]['reading']) == olds]
         if t1:
             return self._rank(t1, hw)[0], 'exact'
+        if olds and hw not in self.kebs_any:
+            # A kana headword reaches kanji entries through their readings, which also
+            # finds homophones (くも "spider": 蜘蛛 and 雲 "cloud"; いちご: 苺 and 一期).
+            # Entries written in that same kana (フェイル) are the word itself; among
+            # the others prefer the ones whose meaning overlaps.  If several are left
+            # and none overlap, it can't be told which one was meant: drop it.
+            direct = {s for s in cands if self.cards[s]['headword'] == hw}
+            same = {s for s in cands - direct if legacy_words & self.gloss_words[s]}
+            if direct or same:
+                cands = direct | same
+            elif len(cands) > 1:
+                return None, 'kana spelling, homophones with other meanings (dropped)'
         if olds:
             t2 = [s for s in cands if olds[0] in self.rebs[s] or
                   kata_to_hira(olds[0]) in {kata_to_hira(r) for r in self.rebs[s]}]
@@ -119,13 +143,18 @@ class Matcher:
                 return self._rank(t2, hw)[0], 'headword+reading'
             t3 = [s for s in cands if any(r in self.rebs[s] for r in olds)]
             if t3:
-                return self._rank(t3, hw)[0], 'headword+other-reading'
+                # Only a secondary legacy reading is shared: make sure it's the same word
+                # (瑞 みず "freshness" must not become 瑞 ずい "Sweden").
+                t3 = [s for s in t3 if legacy_words & self.gloss_words[s]]
+                if t3:
+                    return self._rank(t3, hw)[0], 'headword+other-reading'
+                return None, 'headword+other-reading, different meaning (dropped)'
         if len(cands) == 1:
             # Same spelling, different reading: usually a corrected reading (偏波 へんは -> へんぱ),
             # but sometimes a different word that kept the spelling (中越 ちゅうごし "over center
             # field" vs ちゅうえつ, the region).  Only accept it when the meanings overlap.
             seq = next(iter(cands))
-            if gloss_words(en) & self.gloss_words[seq]:
+            if legacy_words & self.gloss_words[seq]:
                 return seq, 'headword-only'
             return None, 'headword-only, different meaning (dropped)'
         return None, 'ambiguous'
@@ -133,6 +162,11 @@ class Matcher:
 
 _STOP = {'the', 'and', 'for', 'with', 'from', 'that', 'this', 'one', 'etc', 'something', 'someone',
          'thing', 'being', 'into', 'out', 'off', 'not', 'very', 'make', 'have', 'take', 'get'}
+
+
+def strip_html(html):
+    # drop the POS labels (<dfn>noun</dfn>) so they don't count as shared meaning
+    return re.sub(r'<[^>]+>', ' ', re.sub(r'<dfn>.*?</dfn>', ' ', html or ''))
 
 
 def gloss_words(text):
@@ -204,25 +238,28 @@ def main():
 
     mapping, tiers, unmatched = {}, collections.Counter(), {}
     keep_verbatim = set()
-    oldcards = {r[0]: r[1:] for r in old.execute('SELECT card_id, card_type, headword, reading, headword_en FROM cards')}
+    oldcards = {r[0]: r[1:] for r in old.execute('SELECT c.card_id, c.card_type, c.headword, c.reading, c.headword_en, '
+                                                  'h.meaning FROM cards c JOIN cards_html h USING(card_id)')}
     for cid in sorted(used):
         if cid in curated_ids:
             mapping[cid] = cid
             tiers['curated kana/word (kept)'] += 1
             continue
-        if cid >= LWE_HANDMADE_MIN_ID:
-            keep_verbatim.add(cid)
-            mapping[cid] = cid
-            tiers['hand-made, id >= %d (kept verbatim)' % LWE_HANDMADE_MIN_ID] += 1
-            continue
-        ctype, hw, reading, en = oldcards[cid]
-        seq, tier = m.match(hw, reading, en)
+        ctype, hw, reading, en, meaning = oldcards[cid]
+        seq, tier = m.match(hw, reading, en, meaning)
+        if is_handmade(cid) and ctype == '3':
+            if seq is None:
+                keep_verbatim.add(cid)
+                mapping[cid] = cid
+                tiers['hand-made, no JMdict match: kept verbatim'] += 1
+                continue
+            tier = tier + ' [hand-made]'
         tiers[tier] += 1
         if seq is None:
             unmatched[cid] = (hw, reading, en, tier)
         else:
             mapping[cid] = seq
-            if tier in REVIEW_TIERS:
+            if tier.split(' [')[0] in REVIEW_TIERS:
                 unmatched[cid] = (hw, reading, en, tier + ' (mapped to %s %s)' % (
                     m.cards[seq]['headword'], m.cards[seq]['reading']))
 
