@@ -361,6 +361,29 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 
 #pragma mark - LWEMenuSettingCell
 
+//! The cell's pop-up button. It takes touches anywhere inside touchTargetView (its cell), so
+//! UIKit treats a tap on the row title as a tap inside the button and opens the menu.
+@interface LWEMenuRowButton : UIButton
+@property (nonatomic, assign) UIView *touchTargetView;
+@end
+
+@implementation LWEMenuRowButton
+@synthesize touchTargetView;
+
+- (BOOL) pointInside:(CGPoint)point withEvent:(UIEvent *)event
+{
+  if (self.touchTargetView != nil)
+  {
+    CGPoint targetPoint = [self convertPoint:point toView:self.touchTargetView];
+    if ([self.touchTargetView pointInside:targetPoint withEvent:event])
+    {
+      return YES;
+    }
+  }
+  return [super pointInside:point withEvent:event];
+}
+@end
+
 @interface LWEMenuSettingCell ()
 {
   UIStackView *_stack;
@@ -403,7 +426,8 @@ NSString * const APP_NEW_UPDATE = @"new_update";
       [outgoing setObject:[UIFont fontWithDescriptor:semibold size:0] forKey:NSFontAttributeName];
       return outgoing;
     };
-    _menuButton = [[UIButton buttonWithConfiguration:config primaryAction:nil] retain];
+    _menuButton = [[LWEMenuRowButton buttonWithConfiguration:config primaryAction:nil] retain];
+    ((LWEMenuRowButton *)_menuButton).touchTargetView = self;
     _menuButton.showsMenuAsPrimaryAction = YES;
     _menuButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentTrailing;
     [_menuButton setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
@@ -524,6 +548,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 {
   [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
   [_titleLabel release];
+  ((LWEMenuRowButton *)_menuButton).touchTargetView = nil;   // the button can outlive the cell (e.g. while its menu is up)
   [_menuButton release];
   [_stack release];
   [_optionTitles release];
