@@ -111,22 +111,22 @@
 "Other Sets with this Card" = "このカードを含むほかのセット";
 
 /* AlgorithmSettingsViewController.NavBarTitle  (AlgorithmSettingsViewController.m) */
-"Change Difficulty" = "難⁠易⁠度⁠の変⁠更";
+"Change Difficulty" = "難易度の変更";
 
 /* AlgorithmVC.Difficulty  (AlgorithmSettingsViewController.m, ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
 "Difficulty" = "難易度";
 
 /* AlgorithmVC.NewCardFrequency_MoreOften  (AlgorithmSettingsViewController.m) */
-"More Often" = "多⁠め⁠に";
+"More Often" = "多め";
 
 /* AlgorithmVC.HideLearnedCards  (AlgorithmSettingsViewController.m) */
-"Hide Learned Cards" = "覚⁠え⁠たカ⁠ー⁠ド⁠を隠⁠す";
+"Hide Learned Cards" = "覚えたカードを隠す";
 
 /* AlgorithmVC.NumberCards  (AlgorithmSettingsViewController.m) */
-"Number of Cards in Study Pool" = "同⁠時⁠に学⁠習⁠す⁠るカ⁠ー⁠ド⁠の枚⁠数";
+"Number of Cards in Study Pool" = "同時に学習するカードの枚数";
 
 /* AlgorithmVC.NewCardFrequency  (AlgorithmSettingsViewController.m) */
-"Frequency of New Cards" = "新⁠し⁠いカ⁠ー⁠ド⁠の出⁠題⁠頻⁠度";
+"Frequency of New Cards" = "新しいカードの出題頻度";
 
 /* CardViewController.SpeakWordAccessibility  (CardViewController.m) */
 "Speak word" = "発音を聞く";
@@ -177,10 +177,10 @@
 "Theme" = "テーマ";
 
 /* SettingsViewController.SettingNames_StudyReminders  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m, ReminderSettingsViewController.m) */
-"Study Reminders" = "学⁠習リ⁠マ⁠イ⁠ン⁠ダ⁠ー";
+"Study Reminders" = "学習リマインダー";
 
 /* SettingsViewController.SettingNames_ActiveUser  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
-"Active User" = "使⁠用⁠中⁠のユ⁠ー⁠ザ⁠ー";
+"Active User" = "使用中のユーザー";
 
 /* SettingsViewController.SettingNames_DownloadExtras, PluginSettingsViewController.NavBarTitle  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m, PluginSettingsViewController.m) */
 "Installed Data" = "インストール済みデータ";
@@ -351,16 +351,16 @@
 "Both" = "両方";
 
 /* SettingsViewController.On  (JapaneseSettingsDataSource.m) */
-"Prefer Kana" = "か⁠な⁠を優⁠先";
+"Prefer Kana" = "かなを優先";
 
 /* SettingsViewController.Off  (JapaneseSettingsDataSource.m) */
-"Prefer Kanji" = "漢⁠字⁠を優⁠先";
+"Prefer Kanji" = "漢字を優先";
 
 /* SettingsViewController.SettingNames_DisplayFuriganaReading  (JapaneseSettingsDataSource.m) */
-"Furigana / Reading" = "ふ⁠り⁠が⁠な⁠・読⁠み";
+"Furigana / Reading" = "ふりがな・読み";
 
 /* SettingsViewController.SettingNames_KanaOnlyWords  (JapaneseSettingsDataSource.m) */
-"Common Kana Words" = "か⁠な⁠書⁠き⁠が多⁠い⁠語";
+"Common Kana Words" = "かな書きが多い語";
 
 /* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
 "Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application includes material from the JMdict (EDICT, etc.) dictionary files in accordance with the licence provisions of the Electronic Dictionary Research and Development Group (EDRDG). The files are the property of the EDRDG and are used, converted and modified here under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0); the modified dictionary data is shared under the same licence at https://github.com/rsharrott/xflash. EDRDG licence: https://www.edrdg.org/edrdg/licence.html  JMdict project: https://www.edrdg.org/jmdict/j_jmdict.html  Example sentences are from the Tatoeba Project (https://tatoeba.org, originally the Tanaka Corpus) and are used under the Creative Commons Attribution 2.0 France licence (CC BY 2.0 FR): https://creativecommons.org/licenses/by/2.0/fr/. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash!（旧Japanese Flash）は、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリには、Electronic Dictionary Research and Development Group（EDRDG）のライセンス規定に従い、JMdict（EDICTなど）辞書ファイルの内容が含まれています。これらのファイルはEDRDGの所有物であり、クリエイティブ・コモンズ 表示-継承 4.0（CC BY-SA 4.0）ライセンスの下で使用・変換・改変しています。改変した辞書データも同じライセンスでhttps://github.com/rsharrott/xflash にて提供しています。EDRDGライセンス：https://www.edrdg.org/edrdg/licence.html　JMdictプロジェクト：https://www.edrdg.org/jmdict/j_jmdict.html　例文はTatoebaプロジェクト（https://tatoeba.org、旧Tanaka Corpus／田中コーパス）のもので、クリエイティブ・コモンズ 表示 2.0 フランス（CC BY 2.0 FR）ライセンスの下で使用しています：https://creativecommons.org/licenses/by/2.0/fr/。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese in a Flash!のロゴと製品名はオリジナルの創作物であり、ほかの商標との類似は意図したものではなく、まったくの偶然です。";
@@ -399,13 +399,13 @@
 "%@ day" = "%@日";
 
 /* ReminderVC.SettingsSectionHeader  (ReminderSettingsViewController.m) */
-"Reminder Settings" = "リ⁠マ⁠イ⁠ン⁠ダ⁠ー⁠の設⁠定";
+"Reminder Settings" = "リマインダーの設定";
 
 /* ReminderVC.SettingsSectionFooter  (ReminderSettingsViewController.m) */
-"Reminders are reset each time the app is opened. If you're diligent about studying, you may never see one!" = "リマインダーはアプリを開くたびにリセットされます。こまめに学習していれば、一度も届かないかもし⁠れ⁠ま⁠せ⁠ん⁠！";
+"Reminders are reset each time the app is opened. If you're diligent about studying, you may never see one!" = "リマインダーはアプリを開くたびにリセットされます。こまめに学習していれば、一度も届かないかもしれません！";
 
 /* RemindersVC.DaysAfterLastSesssionLabel  (ReminderSettingsViewController.m) */
-"Days After Last Session" = "前⁠回⁠の学⁠習⁠か⁠ら⁠の日⁠数";
+"Days After Last Session" = "前回の学習からの日数";
 
 /* SearchViewController.SearchBarPlaceholder_InstallPlugin  (SearchViewController.m) */
 "Tap here to install search" = "タップして検索をインストール";
@@ -629,7 +629,7 @@
 "Custom" = "カスタム";
 
 /* AlgorithmVC.PresetDetail: study pool size, then new-card frequency (1-4)  (AlgorithmSettingsViewController.m) */
-"%ld cards · new cards %ld of 4" = "%ld枚・新しいカード %ld/4";
+"%ld cards · new cards %ld of 4" = "%ld枚・新出頻度 %ld/4";
 
 /* AlgorithmVC.NewCardFrequency_LessOften  (AlgorithmSettingsViewController.m) */
-"Less Often" = "少⁠な⁠め⁠に";
+"Less Often" = "少なめ";

@@ -44,18 +44,6 @@
 /* New study set prompt */
 "Name your study set!" = "学習セットに名前をつけましょう";
 
-/* Difficulty segment */
-"Easy" = "やさしい";
-
-/* Difficulty segment */
-"Medium" = "ふつう";
-
-/* Difficulty segment */
-"Hard" = "むずかしい";
-
-/* Difficulty segment */
-"Custom" = "カスタム";
-
 /* Download dialog button */
 "Start Download >" = "ダウンロード開始";
 

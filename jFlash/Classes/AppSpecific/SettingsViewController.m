@@ -487,11 +487,28 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     action.state = isCurrent ? UIMenuElementStateOn : UIMenuElementStateOff;
     [actions addObject:action];
   }
+  // A stored value that isn't one of the options (old or hand-edited defaults): show the first
+  // option rather than an empty button. Nothing is checkmarked, so picking any option fixes it.
+  if ([currentTitle length] == 0 && [_optionTitles count] > 0)
+  {
+    currentTitle = [_optionTitles objectAtIndex:0];
+  }
   UIButtonConfiguration *config = [[_menuButton.configuration copy] autorelease];
   config.title = currentTitle;
   _menuButton.configuration = config;
   _menuButton.accessibilityValue = currentTitle;
   _menuButton.menu = [UIMenu menuWithTitle:@"" children:actions];
+}
+
+//! The whole row is the pop-up button's target: a tap anywhere on the row (title included) opens the menu
+- (UIView *) hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+  UIView *hit = [super hitTest:point withEvent:event];
+  if (hit != nil && _menuButton.enabled && _menuButton.hidden == NO && [self pointInside:point withEvent:event])
+  {
+    return _menuButton;
+  }
+  return hit;
 }
 
 - (void) _choose:(id)value

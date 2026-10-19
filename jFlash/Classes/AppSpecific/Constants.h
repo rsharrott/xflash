@@ -6,7 +6,7 @@
 #define BURY_BTN 600
 
 #define DEFAULT_USER_ID 1
-// Matches the Medium preset (DEFAULT_DIFFICULTY) in AlgorithmSettingsViewController -setDifficulty:
+// Must match the Medium preset (DEFAULT_DIFFICULTY): kPresetMaxCards / kPresetFrequency in AlgorithmSettingsViewController.m
 #define DEFAULT_FREQUENCY_MULTIPLIER 2
 #define DEFAULT_MAX_STUDYING 30
 #define DEFAULT_DIFFICULTY 1

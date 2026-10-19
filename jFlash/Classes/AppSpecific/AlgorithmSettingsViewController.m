@@ -216,7 +216,9 @@ static UILabel *LWESettingLabel(UIFontTextStyle style)
     case 0: return NSLocalizedString(@"Easy", @"AlgorithmVC.Preset_Easy");
     case 1: return NSLocalizedString(@"Medium", @"AlgorithmVC.Preset_Medium");
     case 2: return NSLocalizedString(@"Hard", @"AlgorithmVC.Preset_Hard");
-    default: return NSLocalizedString(@"Custom", @"AlgorithmVC.Preset_Custom");
+    case LWE_CUSTOM_DIFFICULTY: return NSLocalizedString(@"Custom", @"AlgorithmVC.Preset_Custom");
+    // Out of range: -_difficulty treats it as DEFAULT_DIFFICULTY, so show that (Medium)
+    default: return NSLocalizedString(@"Medium", @"AlgorithmVC.Preset_Medium");
   }
 }
 
