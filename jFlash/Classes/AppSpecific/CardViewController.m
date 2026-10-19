@@ -738,6 +738,8 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   self.readingScrollContainer.hidden = NO;
   self.toggleReadingBtn.hidden = YES;
   [self.toggleReadingBtn setTitle:@"" forState:UIControlStateNormal];
+  // Relayout so the reading row (sized while hidden) gets a real frame on screen.
+  [self layoutCardSubviews];
   
   // This will handle the "more" icon after the state change
   [self _updateReadingContainer];
