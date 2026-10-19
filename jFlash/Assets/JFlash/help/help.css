@@ -1,0 +1,131 @@
+/* help.css: the help pages (jFlash/Assets/JFlash/help/, and help/ja/ via ../help.css).
+   Shared by every page. Needs <meta name="viewport" content="width=device-width, initial-scale=1">
+   in every page. Colours are design tokens (system/tokens.json); the hex values are repeated here because the
+   app bundle can't load tokens.css. No dark mode: the tokens don't define one yet. */
+:root {
+  --fire: #C01B00;        /* color-fire */
+  --ink: #1D1A16;         /* color-ink */
+  --ink-2: #3A352E;       /* color-ink-2 */
+  --line: #CFC6B8;        /* color-line */
+  --paper: #FBF8F3;       /* color-paper */
+  --paper-2: #E7E1D6;     /* color-paper-2 */
+  --fire-tint: #FDF1EE;   /* color-fire-tint */
+  --yellow: #FFD60A;      /* color-yellow */
+  --yellow-ink: #3A2A00;  /* color-yellow-ink */
+  --font-text: -apple-system, "SF Pro Text", system-ui, sans-serif;
+  /* tokens --font-ja. Never put -apple-system in front of it: WKWebView then draws Japanese as missing-glyph
+     boxes (see xflash cef3020d, CardViewController.m LWE_ETOJ_FONT_STACK). */
+  --font-ja: "Noto Sans CJK JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+
+/* Dynamic Type: -apple-system-body is the user's Body size (17pt at Large, 53pt at AX5). Everything below is in
+   em/rem, so the whole page follows Settings > Accessibility > Larger Text. The 17px line is the fallback for
+   browsers that don't know the keyword (they drop the whole font shorthand). */
+html {
+  font-size: 17px;
+  font: -apple-system-body;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--paper);
+}
+body {
+  margin: 0;
+  padding: 0.5rem 20px calc(96px + env(safe-area-inset-bottom));   /* 20pt sides (space-5) at every text size; clears the floating tab bar */
+  font-family: var(--font-text);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+main, body > div { max-width: 34em; margin: 0 auto; }   /* about 65 characters a line on iPad */
+
+/* The banner images become real headings. */
+h1, h2, h3 {
+  color: var(--ink);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  -webkit-hyphens: manual;
+  hyphens: manual;
+  text-wrap: balance;
+}
+h2 {
+  font-size: max(1.15em, min(1.4em, calc(1em + 8px)));   /* 23.8pt at Large, 61pt at AX5: bigger than body, never giant */
+  margin: 1.6em 0 0.45em;
+}
+h2::before {                                              /* small fire rule: the brand accent instead of a comic banner */
+  content: "";
+  display: block;
+  width: 1.4em;
+  height: 0.16em;
+  min-height: 3px;
+  border-radius: 0.08em;
+  background: var(--fire);
+  margin-bottom: 0.45em;
+}
+main > h2:first-child, body > div > h2:first-child { margin-top: 0.6em; }
+h3 { font-size: 1.1em; margin: 1.4em 0 0.35em; }
+
+p, ul, ol { margin: 0 0 0.85em; }
+ul, ol { padding-left: 1.3em; }
+li + li { margin-top: 0.3em; }
+strong, b { font-weight: 650; color: var(--ink); }
+small { font-size: 0.82em; color: var(--ink-2); }
+a, a:visited { color: var(--fire); font-weight: 600; text-decoration: underline; text-underline-offset: 0.15em; text-decoration-thickness: 0.06em; }
+code { font-family: var(--font-mono); font-size: 0.92em; background: var(--paper-2); color: var(--ink); border-radius: 0.3em; padding: 0.05em 0.3em; overflow-wrap: anywhere; }
+
+/* Screenshots: fit the column, rounded, hairline border. */
+figure { margin: 1.25em 0 1.4em; }
+img { display: block; max-width: 100%; height: auto; }
+img.screenshot, figure img {
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;          /* radius-lg */
+  background: var(--paper-2);
+}
+figure.phone img { width: min(100%, 20rem); }            /* portrait crops (popups, lists) stay narrower than the text */
+figcaption { margin-top: 0.5em; font-size: 0.82em; line-height: 1.4; color: var(--ink-2); text-align: center; }
+
+/* "Your goal is..." closing line */
+.goal {
+  margin: 1.5em 0 0;
+  padding: 0.9em 1.1em;
+  border-radius: 18px;          /* radius-xl */
+  background: var(--yellow);
+  color: var(--yellow-ink);
+  font-weight: 700;
+  font-size: 1.06em;
+  line-height: 1.35;
+}
+.goal strong { color: var(--yellow-ink); }
+
+/* Tag glossary table (tags@2x.html) */
+table { width: 100%; border-collapse: collapse; font-size: 0.88em; line-height: 1.35; margin: 0.5em 0 1em; }
+th { text-align: left; font-weight: 700; background: var(--paper-2); }
+th, td { padding: 0.5em 0.6em; border-bottom: 1px solid var(--line); vertical-align: top; }
+#tags_definitions { border: 0; }
+
+/* Japanese: whole page (<html lang="ja">) or a fragment (<span lang="ja">) */
+:lang(ja) {
+  font-family: var(--font-ja);
+  line-break: strict;          /* kinsoku: no small kana or 。、」 at line start */
+  word-break: normal;
+  overflow-wrap: anywhere;
+  -webkit-hyphens: manual;
+  hyphens: manual;
+}
+html:lang(ja) body { line-height: 1.75; }
+html:lang(ja) h2, html:lang(ja) h3 { letter-spacing: 0; font-feature-settings: "palt"; line-height: 1.3; }
+html:lang(ja) strong, html:lang(ja) b { font-weight: 700; white-space: nowrap; }   /* UI terms (正解1回, もう覚えた) never split */
+.nw { white-space: nowrap; }   /* glue a short word that must not split, e.g. <span class="nw">4回連続</span> */
+
+@media (min-width: 600px) {     /* iPad */
+  body { padding-left: 48px; padding-right: 48px; }
+}
