@@ -141,8 +141,11 @@
     }
     NSMutableAttributedString *tmpAttrString = [[[[NSAttributedString alloc] initWithString:stringToAppend] autorelease] mutableCopy];
     NSRange allRange = NSMakeRange(0, [stringToAppend length]);
-    [tmpAttrString addAttribute:(NSString *)kCTForegroundColorAttributeName
-                          value:(id)[(UIColor*)[readingHash objectForKey:@"color"] CGColor]
+    // NSForegroundColorAttributeName (not kCT*) so TTTAttributedLabel / UILabel draw the tone colours.
+    UIColor *toneColor = (UIColor *)[readingHash objectForKey:@"color"];
+    [tmpAttrString addAttribute:NSForegroundColorAttributeName value:toneColor range:allRange];
+    [tmpAttrString addAttribute:NSFontAttributeName
+                          value:[UIFont systemFontOfSize:20 weight:UIFontWeightBold]
                           range:allRange];
     [attrString appendAttributedString:tmpAttrString];
     [tmpAttrString release];
