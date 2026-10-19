@@ -14,8 +14,8 @@
 /* ActionBar.Caption.Wrong  (ActionBarViewController.m) */
 "wrong" = "wrong";
 
-/* ActionBar.Caption.BuryIt  (ActionBarViewController.m) */
-"bury it" = "bury it";
+/* ActionBar.Caption.Learned  (ActionBarViewController.m) */
+"learned" = "learned";
 
 /* ActionBar.Caption.Previous  (ActionBarViewController.m) */
 "prev" = "prev";
@@ -26,11 +26,11 @@
 /* ActionBar.Actions  (ActionBarViewController.m) */
 "Actions" = "Actions";
 
-/* ActionBar.Bury  (ActionBarViewController.m) */
-"Bury" = "Bury";
+/* ActionBar.Learned  (ActionBarViewController.m) */
+"Learned" = "Learned";
 
-/* ActionBar.BuryIt  (ActionBarViewController.m) */
-"Bury it" = "Bury it";
+/* ActionBar.MarkAsLearned  (ActionBarViewController.m) */
+"Mark as learned" = "Mark as learned";
 
 /* ActionBar.Wrong  (ActionBarViewController.m) */
 "Wrong" = "Wrong";
@@ -574,7 +574,7 @@
 /* Progress sheet: wrong answers this session (chip in the Wrong button colours) */
 "Times Wrong" = "Times Wrong";
 
-/* Progress sheet: right answers this session, buried cards included (chip in the Right button colours) */
+/* Progress sheet: right answers this session, learned cards included (chip in the Right button colours) */
 "Times Right" = "Times Right";
 
 /* Progress sheet pill: current run of right or wrong answers; the value is "3 right" / "3 wrong" */

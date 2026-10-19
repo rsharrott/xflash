@@ -102,7 +102,7 @@ static UIFont *LWEShowAnswerSubFont(void)
     [self _applyModernStyle:self.addBtn      symbolName:@"plus.circle.fill"           label:NSLocalizedString(@"actions", @"ActionBar.Caption.Actions") color:[UIColor systemBlueColor]];
     [self _applyModernStyle:self.rightBtn    symbolName:@"checkmark.circle.fill"      label:NSLocalizedString(@"right", @"ActionBar.Caption.Right")     color:[UIColor systemGreenColor]];
     [self _applyModernStyle:self.wrongBtn    symbolName:@"xmark.circle.fill"          label:NSLocalizedString(@"wrong", @"ActionBar.Caption.Wrong")     color:[UIColor systemRedColor]];
-    [self _applyModernStyle:self.buryCardBtn symbolName:@"archivebox.circle.fill"     label:NSLocalizedString(@"bury it", @"ActionBar.Caption.BuryIt")  color:[UIColor systemOrangeColor]];
+    [self _applyModernStyle:self.buryCardBtn symbolName:@"archivebox.circle.fill"     label:NSLocalizedString(@"learned", @"ActionBar.Caption.Learned")  color:[UIColor systemOrangeColor]];
     [self _applyModernStyle:self.prevCardBtn symbolName:@"chevron.left.circle.fill"   label:NSLocalizedString(@"prev", @"ActionBar.Caption.Previous")   color:[UIColor systemGrayColor]];
     [self _applyModernStyle:self.nextCardBtn symbolName:@"chevron.right.circle.fill"  label:NSLocalizedString(@"next", @"ActionBar.Caption.Next")       color:[UIColor systemGrayColor]];
   }
@@ -166,9 +166,9 @@ static UIFont *LWEShowAnswerSubFont(void)
                         fill:LWEDesignPaperButton() ink:LWEDesignInk() primary:NO];
   self.addBtn.accessibilityLabel = NSLocalizedString(@"Actions", @"ActionBar.Actions");
 
-  [self _stylePracticeButton:self.buryCardBtn title:NSLocalizedString(@"Bury", @"ActionBar.Bury") symbol:@"archivebox"
+  [self _stylePracticeButton:self.buryCardBtn title:NSLocalizedString(@"Learned", @"ActionBar.Learned") symbol:@"archivebox"
                         fill:LWEDesignPaperButton() ink:LWEDesignInk() primary:NO];
-  self.buryCardBtn.accessibilityLabel = NSLocalizedString(@"Bury it", @"ActionBar.BuryIt");
+  self.buryCardBtn.accessibilityLabel = NSLocalizedString(@"Mark as learned", @"ActionBar.MarkAsLearned");
 
   [self _stylePracticeButton:self.wrongBtn title:NSLocalizedString(@"Wrong", @"ActionBar.Wrong") symbol:@"xmark"
                         fill:LWEDesignWrongFill() ink:LWEDesignWrongInk() primary:YES];
