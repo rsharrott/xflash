@@ -146,6 +146,14 @@
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self revealCard]; });
     }
+    //   simctl launch <udid> <bundle> -LWEDebugShowReading YES  -> force the reading row visible (cFlash pinyin shots)
+    if ([settings boolForKey:@"LWEDebugShowReading"])
+    {
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self.cardViewController turnReadingOn];
+        self.cardViewController.readingVisible = YES;
+      });
+    }
     //   simctl launch --console <udid> <bundle> -LWEDebugCheckRevealTapGuard YES
     //     -> reveal, then log what a tap on the Right button's spot would hit (UIKit hit-testing, which
     //        honours userInteractionEnabled / hidden / alpha) during and after the Show answer fade.
@@ -972,12 +980,9 @@
 
 - (BOOL) hasExampleSentences
 {
-#if defined (LWE_JFLASH)
-  // JFlash is currently the only code base with example sentences
+  // When EX_DB is missing, page 2 is ExamplesUnavailable (download prompt) for both apps.
+  // cFlash has no EX_DB in the store today, but still ships that installer page.
   return [self _shouldShowExampleViewForCard:self.currentCard];
-#else
-  return NO;
-#endif
 }
 
 /**
