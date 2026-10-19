@@ -100,14 +100,45 @@ static inline CGFloat LWEReadingBalancedWrapWidth(CGFloat fullWidth, CGFloat gly
   return MIN(maxW, ceil(fullWidth / 2.0) + glyphWidth);
 }
 
-//! Spec §7: the reading's size and floor for a Dynamic Type multiplier: min(20 x dt, 28), and 15 x dt;
-//! dt is capped at 1.4, and compact cards keep the base size.  Both in 0.5pt steps.
+//! One Dynamic Type rule for all of the card's reading text -- the kana/pinyin row, the romaji row
+//! and the Show Reading pill: they follow the text size up to 1.4x (spec §7's cap: 20pt -> 28pt
+//! reading, 17 -> 24pt romaji, 13 -> 18pt pill label), and compact cards stay at 1x.
+static const CGFloat LWEReadingDynamicTypeCap = 1.4;
+static inline CGFloat LWEReadingTypeScale(CGFloat dynamicTypeMultiplier, BOOL compact)
+{
+  return compact ? 1.0 : MIN(dynamicTypeMultiplier, LWEReadingDynamicTypeCap);
+}
+
+//! Spec §7: the reading's size and floor for a Dynamic Type multiplier: min(20 x dt, 28), and 15 x dt,
+//! with dt from LWEReadingTypeScale().  Both in 0.5pt steps.
 static inline void LWEReadingSizes(CGFloat dynamicTypeMultiplier, BOOL compact, CGFloat *baseSize, CGFloat *minSize)
 {
-  CGFloat dt = compact ? 1.0 : MIN(dynamicTypeMultiplier, 1.4);
+  CGFloat dt = LWEReadingTypeScale(dynamicTypeMultiplier, compact);
   CGFloat base = MIN(28.0, round(20.0 * dt * 2.0) / 2.0);
   if (baseSize) *baseSize = base;
   if (minSize) *minSize = MIN(base, round(15.0 * dt * 2.0) / 2.0);
+}
+
+//! The legacy (cFlash) reading row's height: 42pt (two 21pt lines at 15pt), grown to fit the fitted
+//! pinyin -- two lines at a larger text size need more (2 x 21 x 1.4 = ~59pt).
+static const CGFloat LWELegacyReadingRowHeight = 42.0;
+static inline CGFloat LWELegacyReadingRowHeightFor(CGFloat fittedTextHeight)
+{
+  return MAX(LWELegacyReadingRowHeight, ceil(fittedTextHeight));
+}
+
+//! What VoiceOver says for a shown reading: the reading row, then the romaji row, with a pause
+//! between the rows only.  A wrapped line is joined back with no separator (no comma mid-reading).
+static inline NSString *LWEReadingSpokenLabel(NSString *top, NSString *below)
+{
+  NSMutableArray *parts = [NSMutableArray array];
+  for (NSString *row in [NSArray arrayWithObjects:(top ?: @""), (below ?: @""), nil])
+  {
+    NSString *joined = [[row componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] componentsJoinedByString:@""];
+    joined = [joined stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if ([joined length] > 0) [parts addObject:joined];
+  }
+  return [parts componentsJoinedByString:@", "];
 }
 
 //! Inserts a line break at the space that splits text into the two most even lines (pinyin and
@@ -137,3 +168,75 @@ static inline NSAttributedString *LWEReadingBalancedSplitAtSpace(NSAttributedStr
   [split replaceCharactersInRange:NSMakeRange((NSUInteger)best, 1) withString:@"\n"];
   return split;
 }
+
+#pragma mark - Meaning area vs the score bubble (DD review of PR #21)
+
+//! The score bubble's corner, reserved at the bottom right of the meaning area (about 56 x 44pt)
+static const CGFloat LWEMeaningBubbleCornerWidth  = 56.0;
+static const CGFloat LWEMeaningBubbleCornerHeight = 44.0;
+//! Height of the bottom fade shown while more meaning is below
+static const CGFloat LWEMeaningFadeHeight = 24.0;
+
+//! How the meaning area keeps clear of the score bubble.
+//!  wrapCorner:  the meaning fits; its lines wrap around the bubble's corner (nothing scrolls).
+//!  scrolls:     the meaning is taller than the area; it scrolls, with bottomInset of extra room at the
+//!               end so the last lines can be scrolled clear of the bubble (no corner wrap).
+typedef struct {
+  BOOL wrapCorner;
+  BOOL scrolls;
+  CGFloat bottomInset;
+} LWEMeaningInsets;
+
+//! contentHeight is the meaning's height with its lines wrapped around the corner; corner is the
+//! bubble's part of the area (CGSizeZero when the bubble is hidden).
+static inline LWEMeaningInsets LWEMeaningInsetsFor(CGFloat contentHeight, CGFloat viewportHeight, CGSize corner)
+{
+  LWEMeaningInsets insets = {NO, NO, 0.0};
+  BOOL hasCorner = (corner.width > 0.0 && corner.height > 0.0);
+  if (contentHeight <= viewportHeight + 0.5)
+  {
+    insets.wrapCorner = hasCorner;
+    return insets;
+  }
+  insets.scrolls = YES;
+  insets.bottomInset = hasCorner ? corner.height : 0.0;
+  return insets;
+}
+
+//! The bottom fade shows while a scrolling meaning has more below the visible area.
+static inline BOOL LWEMeaningShowsBottomFade(LWEMeaningInsets insets, CGFloat offsetY, CGFloat contentHeight, CGFloat viewportHeight)
+{
+  if (insets.scrolls == NO) return NO;
+  return (offsetY + viewportHeight < contentHeight + insets.bottomInset - 1.0);
+}
+
+//! A scrolling meaning is masked off above the bubble: it shows down to the bubble's top (the band
+//! beside the bubble stays empty), so nothing ever runs under the bubble while it scrolls.
+static inline CGFloat LWEMeaningVisibleHeight(LWEMeaningInsets insets, CGFloat viewportHeight)
+{
+  return insets.scrolls ? MAX(0.0, viewportHeight - insets.bottomInset) : viewportHeight;
+}
+
+//! Clear space kept around the bubble
+static const CGFloat LWEMeaningBubbleMargin = 6.0;
+
+//! The bubble's corner of a meaning area from where the bubble actually is (in the area's coordinates):
+//! from its left edge to the area's right edge, and from its top to the area's bottom, plus a margin.
+//! CGSizeZero when the bubble doesn't overlap the area.
+static inline CGSize LWEMeaningCornerForBubble(CGRect bubbleInArea, CGSize area)
+{
+  CGRect bounds = CGRectMake(0, 0, area.width, area.height);
+  if (CGRectIsEmpty(bubbleInArea) || !CGRectIntersectsRect(CGRectInset(bubbleInArea, -LWEMeaningBubbleMargin, -LWEMeaningBubbleMargin), bounds)) return CGSizeZero;
+  CGFloat w = area.width - (CGRectGetMinX(bubbleInArea) - LWEMeaningBubbleMargin);
+  CGFloat h = area.height - (CGRectGetMinY(bubbleInArea) - LWEMeaningBubbleMargin);
+  return CGSizeMake(MAX(0.0, MIN(area.width, w)), MAX(0.0, MIN(area.height, h)));
+}
+
+//! The bubble's corner inside a meaning area: the reserved 56 x 44pt grown by the theme's bubble nudge
+//! (Kutani's rim moves the bubble up and left), clipped to the area.
+static inline CGSize LWEMeaningCornerSize(BOOL bubbleVisible, CGFloat nudge, CGSize area)
+{
+  if (bubbleVisible == NO) return CGSizeZero;
+  return CGSizeMake(MIN(area.width, LWEMeaningBubbleCornerWidth + nudge), MIN(area.height, LWEMeaningBubbleCornerHeight + nudge));
+}
+

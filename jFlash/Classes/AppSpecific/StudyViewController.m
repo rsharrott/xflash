@@ -151,6 +151,21 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{ [self revealCard]; });
     }
+    //   simctl launch <udid> <bundle> -LWEDebugTapReadingThenTheme FIRE [-LWEDebugStartTheme PAPER]
+    //     -> (switch to the start theme,) tap the reading toggle as the reader would, then switch to
+    //        FIRE mid-session.  Launch without -theme, which would override the stored theme.
+    NSString *midSessionTheme = [settings stringForKey:@"LWEDebugTapReadingThenTheme"];
+    if ([midSessionTheme length] > 0)
+    {
+      NSString *startTheme = [settings stringForKey:@"LWEDebugStartTheme"];
+      if ([startTheme length] > 0) [settings setObject:startTheme forKey:APP_THEME];
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [(CardViewController *)self.cardViewController doToggleReadingBtn];
+      });
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [[NSUserDefaults standardUserDefaults] setObject:midSessionTheme forKey:APP_THEME];
+      });
+    }
     //   simctl launch <udid> <bundle> -LWEDebugShowReading YES  -> force the reading row visible (cFlash pinyin shots)
     if ([settings boolForKey:@"LWEDebugShowReading"])
     {
@@ -441,6 +456,8 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
           containerH - iconH - 8.0 - nudge,
           iconW, iconH
         );
+        // Keep the meaning clear of it (wrap around it, or stop above it while scrolling)
+        [cvc scoreBubbleDidMove];
       }
 
       // Move the reveal button below the reading/headword area so the reading toggle
@@ -464,8 +481,8 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
         self.revealCardBtn.isAccessibilityElement = (barHasShowAnswer == NO);
         self.revealCardBtn.accessibilityLabel = NSLocalizedString(@"Show answer", @"StudyViewController.ShowAnswerAccessibility");
 #else
-        // readingY (25% of containerH) + readingH (42) + gap (4) + headwordH (55) + buffer (10)
-        CGFloat headwordsBottom = roundf(containerH * 0.25) + 42.0 + 4.0 + 55.0 + 10.0;
+        // Below the headword (+10pt buffer); the pinyin row above it grows at large text sizes
+        CGFloat headwordsBottom = [cvc revealAreaTop] + 6.0;
         CGFloat revealTop = self.scrollView.frame.origin.y + headwordsBottom;
         CGRect rf = self.revealCardBtn.frame;
         rf.origin.y = revealTop;

@@ -15,6 +15,7 @@
 #import "JapaneseCard.h"
 #endif
 #import <AVFoundation/AVFoundation.h>
+#import <QuartzCore/QuartzCore.h>
 
 // Study card (J->E) metrics from the 2026 design refresh
 static const CGFloat kLWEHeadwordMaxPointSize = 88.0;
@@ -94,6 +95,11 @@ static const CGFloat kLWEReadingPillHeight     = 24.0; // the hidden-state pill
 static const CGFloat kLWEReadingPillLabelSize  = 13.0;
 static const NSTimeInterval kLWEReadingCrossfade = 0.12;
 
+//! Reading shown/hidden for this run of the app (furigana spec §1, DD review of PR #21): new card views
+//! (theme, direction, mode or text-size changes) pick it up; it starts hidden at launch and is never saved.
+static BOOL sLWESessionReadingVisible = NO;
+static void *kLWEMeaningOffsetContext = &kLWEMeaningOffsetContext;
+
 //! The reading's size, line height and floor for the current text size (spec §7).
 static void LWEReadingMetrics(BOOL compact, CGFloat *baseSize, CGFloat *minSize)
 {
@@ -158,9 +164,12 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
 - (void) _updateReadingToggle;
 //! Hidden: the "Show Reading" pill.  Shown: no title and no chrome (the button stays over the reading).
 - (void) _updateReadingToggleAppearance;
+//! Keeps the meaning clear of the score bubble: wraps around its corner, or scrolls with a bottom inset and fade
+- (void) _updateMeaningInsets;
+- (void) _updateMeaningFade;
 #if defined(LWE_CFLASH)
 //! Fits the pinyin into the legacy reading row (spec §8)
-- (void) _fitLegacyReading;
+- (CGFloat) _fitLegacyReading;
 @property (nonatomic, retain) NSAttributedString *legacyReadingSource;
 #endif
 
@@ -197,6 +206,19 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   BOOL _toggleOnRomajiRow;      // kana-only headword: the toggle sits on the romaji row below it
   CGFloat _lastLayoutWidth;
   CGFloat _lastLayoutHeight;
+  LWEMeaningInsets _meaningInsets;
+  NSUInteger _meaningMeasureToken;
+  BOOL _observingMeaningScroll;
+}
+
++ (BOOL) sessionReadingVisible
+{
+  return sLWESessionReadingVisible;
+}
+
++ (void) setSessionReadingVisible:(BOOL)visible
+{
+  sLWESessionReadingVisible = visible;
 }
 
 @synthesize delegate;
@@ -271,6 +293,8 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   self = [super initWithNibName:nibName bundle:nil];
   if (self)
   {
+    // The reader's show/hide choice from earlier in this session (hidden at launch)
+    _readingVisible = sLWESessionReadingVisible;
 #if defined(LWE_JFLASH)
     _modernCard = displayMainHeadword;
 #endif
@@ -318,6 +342,9 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   self.meaningWebViewContainer.opaque = NO;
   [self.meaningWebViewContainer addSubview:_meaningWebView];
   [_meaningWebView loadHTMLString:self.baseHtml baseURL:nil];
+  // Long meanings scroll; the bottom fade follows the scroll position
+  [_meaningWebView.scrollView addObserver:self forKeyPath:@"contentOffset" options:0 context:kLWEMeaningOffsetContext];
+  _observingMeaningScroll = YES;
 
   // Add mood icon subview - TODO: MMA this is 90% complete, but I want to find a way to do this in the NIB
   CGRect moodIconRect = CGRectMake(235, 197, 80, 73);
@@ -575,8 +602,8 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
   if ([below length] > 0)
   {
-    CGFloat dt = (self.view.bounds.size.height > 0 && self.view.bounds.size.height < kLWECompactCardHeight)
-               ? 1.0f : MIN(LWEDynamicTypeSizeMultiplier(), 1.35f);
+    CGFloat dt = LWEReadingTypeScale(LWEDynamicTypeSizeMultiplier(),
+                                     self.view.bounds.size.height > 0 && self.view.bounds.size.height < kLWECompactCardHeight);
     CGFloat romajiSize = 17.0 * dt;
     NSMutableParagraphStyle *para = [[[NSMutableParagraphStyle alloc] init] autorelease];
     para.alignment = NSTextAlignmentCenter;
@@ -818,6 +845,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   CGFloat webY = roundf(bottom + (compact ? 10.0 : kLWEMeaningGap));
   CGFloat webH = MAX(60.0, h - webY - 8.0);
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
+  [self _updateMeaningInsets];
   [self _updateReadingToggleAppearance];
 }
 #endif
@@ -842,7 +870,13 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
   // Reading row at ~25% from top of card area so it lands near 30% of screen height.
   CGFloat readingY = MAX(20.0, roundf(h * 0.25));
-  CGFloat readingH = 42.0;
+  CGFloat readingH = LWELegacyReadingRowHeight;
+#if defined(LWE_CFLASH)
+  // Fit the pinyin to the row's width first, then grow the row to the fitted text (two wrapped
+  // lines at a large text size need ~58pt, so they'd scroll in a 42pt row)
+  self.readingScrollContainer.frame = CGRectMake(hPad, readingY, contentW, readingH);
+  readingH = LWELegacyReadingRowHeightFor([self _fitLegacyReading]);
+#endif
   self.readingScrollContainer.frame = CGRectMake(hPad, readingY, contentW, readingH);
   self.readingMoreIcon.frame = CGRectMake(2.0, readingY + readingH - 17.0, 26.0, 17.0);
   // Toggle overlays the full reading row, grown to a 44pt hit area (1pt above and below the 42pt
@@ -864,17 +898,20 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   CGFloat webH = MAX(60.0, h - webY - 8.0);
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
 #if defined(LWE_CFLASH)
-  [self _fitLegacyReading];
+  // Centre the fitted pinyin in the (possibly grown) row
+  [self.readingScrollContainer resizeScrollViewWithContentView:self.readingLabel];
+  [self _updateReadingContainer];
 #endif
+  [self _updateMeaningInsets];
   [self _updateReadingToggleAppearance];
 }
 
 #if defined(LWE_CFLASH)
-- (void) _fitLegacyReading
+- (CGFloat) _fitLegacyReading
 {
   NSAttributedString *source = self.legacyReadingSource;
   CGRect row = self.readingScrollContainer.frame;
-  if ([source length] == 0 || row.size.width <= 0) return;
+  if ([source length] == 0 || row.size.width <= 0) return 0;
 
   // Spec §8: 20pt regular pinyin, max width max(headword + 48, 160); shrink in 0.5pt steps to 15pt,
   // then 2 balanced lines at 15pt (21pt lines = the 42pt row), breaking at syllable spaces only.
@@ -916,9 +953,10 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   self.readingLabel.attributedText = text;
   CGFloat labelH = MAX(1.0, LWETextHeight(text, labelW));
   self.readingLabel.frame = CGRectMake(roundf((row.size.width - labelW) / 2.0), 0, labelW, labelH);
-  // Centres the label in the row (or lets it scroll past 2 lines)
+  // Centres the label in the row (the layout grows the row to labelH)
   [self.readingScrollContainer resizeScrollViewWithContentView:self.readingLabel];
   [self _updateReadingContainer];
+  return labelH;
 }
 #endif
 
@@ -1035,6 +1073,8 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
       [self turnReadingOff];
       self.readingVisible = NO;
     }
+    // The reader's choice holds for the rest of the session, on new card views too
+    sLWESessionReadingVisible = show;
   };
   // 120ms crossfade between the pill and the reading (both states are the same height, so
   // nothing moves); instant under Reduce Motion.
@@ -1050,6 +1090,8 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
                     animations:change
                     completion:nil];
   }
+  // VoiceOver: the focused toggle now reads the reading (or "Show Reading"); say it right away
+  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, self.toggleReadingBtn);
 }
 
 #pragma mark - Public Helper Methods
@@ -1144,7 +1186,19 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   else
   {
     // Reading visible: the button over it reads the reading, and says what a double-tap does
-    self.toggleReadingBtn.accessibilityLabel = [reading stringByReplacingOccurrencesOfString:@"\n" withString:@", "];
+    // Spoken from the unwrapped text: a pause between the reading and romaji rows only
+    NSString *spokenTop = self.readingLabel.attributedText.string ?: self.readingLabel.text;
+    NSString *spokenBelow = nil;
+#if defined(LWE_JFLASH)
+    if (_modernCard)
+    {
+      spokenTop = self.topReadingText;
+      spokenBelow = self.romajiLabel.attributedText.string;
+    }
+#elif defined(LWE_CFLASH)
+    if ([self.legacyReadingSource length] > 0) spokenTop = [self.legacyReadingSource string];
+#endif
+    self.toggleReadingBtn.accessibilityLabel = LWEReadingSpokenLabel(spokenTop, spokenBelow);
     self.toggleReadingBtn.accessibilityHint = NSLocalizedString(@"Hides the reading", @"CardViewController.HideReadingAccessibilityHint");
   }
   // When the toggle is off screen (E-to-J after reveal), VoiceOver reads the reading row itself
@@ -1170,7 +1224,8 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     {
       // 24pt pill (readingToggleFill), eye.slash 15pt semibold, 5pt gap, 13pt semibold label in
       // toggleInk; centred in the 44pt button and as wide as its content.
-      CGFloat labelSize = MIN(roundf(kLWEReadingPillLabelSize * LWEDynamicTypeSizeMultiplier()), 18.0);
+      // Same Dynamic Type rule as the reading (1.4x cap: 13 -> 18pt)
+      CGFloat labelSize = roundf(kLWEReadingPillLabelSize * LWEReadingTypeScale(LWEDynamicTypeSizeMultiplier(), NO));
       CGFloat pillH = MAX(kLWEReadingPillHeight, roundf(labelSize * 1.85));
       CGFloat glyphSize = roundf(15.0 * labelSize / kLWEReadingPillLabelSize);
       NSString *title = NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading");
@@ -1299,6 +1354,113 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   _tmpJavascript = [js retain];
 
   [_meaningWebView evaluateJavaScript:js completionHandler:nil];
+  [self _updateMeaningInsets];
+}
+
+#pragma mark - Meaning vs the score bubble
+
+- (CGSize) _meaningCornerSize
+{
+  UIView *bubbleView = self.moodIcon.view;
+  UIImageView *bubble = self.moodIcon.talkBubble;
+  BOOL bubbleVisible = (bubbleView != nil && bubbleView.hidden == NO && bubble != nil && bubble.hidden == NO);
+  UIView *area = self.meaningWebViewContainer;
+  if (bubbleVisible && bubble.window != nil && bubble.window == area.window)
+  {
+    // Where the bubble really is (the study view moves it onto the card, bottom right)
+    return LWEMeaningCornerForBubble([bubble convertRect:bubble.bounds toView:area], area.bounds.size);
+  }
+  // Not on screen yet: the reserved 56 x 44pt corner
+  CGFloat nudge = [[ThemeManager sharedThemeManager] cardRimBubbleNudge];
+  return LWEMeaningCornerSize(bubbleVisible, nudge, area.bounds.size);
+}
+
+- (void) scoreBubbleDidMove
+{
+  [self _updateMeaningInsets];
+}
+
+- (void) _updateMeaningInsets
+{
+  if (_meaningWebView == nil) return;
+  CGSize area = self.meaningWebViewContainer.bounds.size;
+  if (area.width <= 0 || area.height <= 0) return;
+  CGSize corner = [self _meaningCornerSize];
+  // Two floats at the top of the meaning: a zero-width one as tall as the area above the bubble, then
+  // the corner itself, so lines next to the bubble wrap short of it.  Returns the meaning's height (pt).
+  NSString *js = [NSString stringWithFormat:
+    @"(function(W,H,cw,ch){var c=document.getElementById('container');if(!c||!W||!window.innerWidth)return -1;"
+     "var k=window.innerWidth/W,a=document.getElementById('lwe-corner-a'),b=document.getElementById('lwe-corner-b');"
+     "if(!a){a=document.createElement('div');a.id='lwe-corner-a';b=document.createElement('div');b.id='lwe-corner-b';}"
+     "if(c.firstChild!==a)c.insertBefore(a,c.firstChild);if(a.nextSibling!==b)c.insertBefore(b,a.nextSibling);"
+     "a.style.cssText='float:right;clear:right;width:0;height:0;margin:0;padding:0;border:0;';"
+     "b.style.cssText='float:right;clear:right;width:0;height:0;margin:0;padding:0;border:0;';"
+     "if(cw>0&&ch>0){var top=a.getBoundingClientRect().top+window.scrollY;"
+     "a.style.height=Math.max(0,H*k-ch*k-top)+'px';b.style.width=(cw*k)+'px';b.style.height=(ch*k)+'px';}"
+     "return Math.ceil((c.getBoundingClientRect().bottom+window.scrollY)/k);})(%.1f,%.1f,%.1f,%.1f)",
+     area.width, area.height, corner.width, corner.height];
+  NSUInteger token = ++_meaningMeasureToken;
+  [_meaningWebView evaluateJavaScript:js completionHandler:^(id result, NSError *error) {
+    if (token != _meaningMeasureToken || ![result isKindOfClass:[NSNumber class]]) return;
+    CGFloat contentHeight = [result doubleValue];
+    if (contentHeight < 0) return;
+    CGSize nowArea = self.meaningWebViewContainer.bounds.size;
+    LWEMeaningInsets insets = LWEMeaningInsetsFor(contentHeight, nowArea.height, [self _meaningCornerSize]);
+    if (insets.wrapCorner == NO)
+    {
+      // Scrolling (or no bubble): no corner notch; the bottom inset lets the end scroll clear of the bubble
+      [_meaningWebView evaluateJavaScript:@"(function(){['lwe-corner-a','lwe-corner-b'].forEach(function(i){var e=document.getElementById(i);if(e){e.style.width='0';e.style.height='0';}});})()" completionHandler:nil];
+    }
+    _meaningInsets = insets;
+    UIScrollView *scroll = _meaningWebView.scrollView;
+    UIEdgeInsets inset = scroll.contentInset;
+    inset.bottom = insets.bottomInset;
+    scroll.contentInset = inset;
+    UIEdgeInsets indicators = scroll.verticalScrollIndicatorInsets;
+    indicators.bottom = insets.bottomInset;
+    scroll.verticalScrollIndicatorInsets = indicators;
+    [self _updateMeaningFade];
+  }];
+}
+
+- (void) _updateMeaningFade
+{
+  UIView *area = self.meaningWebViewContainer;
+  UIScrollView *scroll = _meaningWebView.scrollView;
+  CGFloat h = area.bounds.size.height;
+  if (_meaningInsets.scrolls == NO || h <= 0)
+  {
+    area.layer.mask = nil;
+    return;
+  }
+  // Scrolling: visible down to the bubble's top, with a soft fade there while more is below
+  CGFloat visibleH = LWEMeaningVisibleHeight(_meaningInsets, h);
+  BOOL fade = (visibleH > LWEMeaningFadeHeight * 2.0) &&
+              LWEMeaningShowsBottomFade(_meaningInsets, scroll.contentOffset.y, scroll.contentSize.height, scroll.bounds.size.height);
+  CAGradientLayer *mask = [area.layer.mask isKindOfClass:[CAGradientLayer class]] ? (CAGradientLayer *)area.layer.mask : nil;
+  if (mask == nil)
+  {
+    mask = [CAGradientLayer layer];
+    mask.colors = @[(id)[UIColor blackColor].CGColor, (id)[UIColor blackColor].CGColor,
+                    (id)[UIColor clearColor].CGColor, (id)[UIColor clearColor].CGColor];
+    area.layer.mask = mask;
+  }
+  CGFloat fadeTop = fade ? (visibleH - LWEMeaningFadeHeight) : MAX(0.0, visibleH - 0.5);
+  [CATransaction begin];
+  [CATransaction setDisableActions:YES];
+  mask.frame = area.bounds;
+  mask.locations = @[@0.0, @(fadeTop / h), @(visibleH / h), @1.0];
+  [CATransaction commit];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+  if (context == kLWEMeaningOffsetContext)
+  {
+    [self _updateMeaningFade];
+    return;
+  }
+  [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 }
 
 
@@ -1316,6 +1478,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     [_tmpJavascript release];
     _tmpJavascript = nil;
   }
+  [self _updateMeaningInsets];
 }
 
 #pragma mark - Plumbing
@@ -1370,6 +1533,10 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [legacyReadingSource release];
 #endif
 
+  if (_observingMeaningScroll)
+  {
+    [_meaningWebView.scrollView removeObserver:self forKeyPath:@"contentOffset" context:kLWEMeaningOffsetContext];
+  }
   _meaningWebView.navigationDelegate = nil;
   [_meaningWebView release];
   [meaningWebViewContainer release];

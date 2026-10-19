@@ -30,6 +30,8 @@
   _savedReadingSetting = [[settings objectForKey:APP_READING] retain];
   [settings setObject:SET_J_TO_E forKey:APP_HEADWORD];
   [settings setObject:SET_READING_BOTH forKey:APP_READING];
+  // Each test starts as a fresh launch: reading hidden
+  [CardViewController setSessionReadingVisible:NO];
 }
 
 - (void)tearDown
@@ -43,6 +45,7 @@
   _savedHeadwordSetting = nil;
   [_savedReadingSetting release];
   _savedReadingSetting = nil;
+  [CardViewController setSessionReadingVisible:NO];
   [super tearDown];
 }
 
@@ -117,19 +120,57 @@
   XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The next card starts hidden again");
 }
 
-- (void)testNewCardViewControllerResetsChoice
+- (void)testSessionStartsHidden
+{
+  XCTAssertFalse([CardViewController sessionReadingVisible], @"Each launch starts with the reading hidden");
+}
+
+- (void)testNewCardViewControllerKeepsSessionChoice
 {
   PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
   CardViewController *first = [self _newCardViewWithDelegate:practice];
   [first setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
   [first doToggleReadingBtn];
   XCTAssertTrue(first.readingVisible);
+  XCTAssertTrue([CardViewController sessionReadingVisible], @"Tapping sets the session's choice (in memory)");
 
-  // Theme, direction, mode and text-size changes build a new card view: it starts hidden (not saved)
+  // Theme, direction, mode and text-size changes build a new card view: it keeps the choice
   CardViewController *second = [self _newCardViewWithDelegate:practice];
-  XCTAssertFalse(second.readingVisible);
+  XCTAssertTrue(second.readingVisible, @"A mid-session theme change doesn't flip the reading back to hidden");
   [second setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
-  XCTAssertTrue(second.readingScrollContainer.hidden);
+  XCTAssertFalse(second.readingScrollContainer.hidden);
+
+  // Hiding it again also carries over
+  [second doToggleReadingBtn];
+  CardViewController *third = [self _newCardViewWithDelegate:practice];
+  [third setupWithCard:[self _cardWithHeadword:@"海" reading:@"うみ" romaji:@"umi"]];
+  XCTAssertFalse(third.readingVisible);
+  XCTAssertTrue(third.readingScrollContainer.hidden);
+}
+
+- (void)testSessionChoiceIsNotSaved
+{
+  NSDictionary *before = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+  [cvc doToggleReadingBtn];
+  NSDictionary *after = [[NSUserDefaults standardUserDefaults] dictionaryRepresentation];
+  XCTAssertEqualObjects([before allKeys].count ? [NSSet setWithArray:[before allKeys]] : [NSSet set],
+                        [after allKeys].count ? [NSSet setWithArray:[after allKeys]] : [NSSet set],
+                        @"Showing the reading writes nothing to NSUserDefaults");
+}
+
+- (void)testForcedReadingDoesNotChangeSessionChoice
+{
+  // Browse mode and English-first cards set readingVisible on their own card view
+  // (BrowseModeCardViewDelegate -cardViewDidChangeMode:); that isn't the reader's choice
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *forced = [self _newCardViewWithDelegate:practice];
+  forced.readingVisible = YES;
+  XCTAssertFalse([CardViewController sessionReadingVisible]);
+  CardViewController *next = [self _newCardViewWithDelegate:practice];
+  XCTAssertFalse(next.readingVisible, @"Back in practice the reading is still hidden");
 }
 
 - (void)testToggleSitsOverReadingRowAboveHeadword
@@ -294,6 +335,147 @@
   XCTAssertTrue([lines[0] length] > 6 && [lines[1] length] > 6, @"balanced: %@", lines);
   NSAttributedString *oneSyllable = [[[NSAttributedString alloc] initWithString:@"shachihokogawara" attributes:attrs] autorelease];
   XCTAssertNil(LWEReadingBalancedSplitAtSpace(oneSyllable));
+}
+
+- (void)testToneColoursSurvivePinyinSplit
+{
+  // Per-syllable colours (as with tone colouring) stay on their syllables when the line is split
+  UIFont *font = [UIFont systemFontOfSize:15];
+  NSArray *syllables = @[@"zhōng", @"huá", @"rén", @"mín", @"gòng", @"hé", @"guó"];
+  NSArray *colours = @[[UIColor redColor], [UIColor orangeColor], [UIColor greenColor], [UIColor blueColor],
+                       [UIColor purpleColor], [UIColor brownColor], [UIColor cyanColor]];
+  NSMutableAttributedString *pinyin = [[[NSMutableAttributedString alloc] init] autorelease];
+  for (NSUInteger i = 0; i < [syllables count]; i++)
+  {
+    NSString *piece = (i + 1 < [syllables count]) ? [syllables[i] stringByAppendingString:@" "] : syllables[i];
+    [pinyin appendAttributedString:[[[NSAttributedString alloc] initWithString:piece attributes:@{
+      NSFontAttributeName: font, NSForegroundColorAttributeName: colours[i]}] autorelease]];
+  }
+  NSAttributedString *split = LWEReadingBalancedSplitAtSpace(pinyin);
+  XCTAssertNotNil(split);
+  NSString *plain = [split string];
+  NSUInteger searchFrom = 0;
+  for (NSUInteger i = 0; i < [syllables count]; i++)
+  {
+    NSRange r = [plain rangeOfString:syllables[i] options:0 range:NSMakeRange(searchFrom, [plain length] - searchFrom)];
+    XCTAssertNotEqual(r.location, (NSUInteger)NSNotFound);
+    for (NSUInteger c = r.location; c < NSMaxRange(r); c++)
+    {
+      XCTAssertEqualObjects([split attribute:NSForegroundColorAttributeName atIndex:c effectiveRange:NULL], colours[i],
+                            @"'%@' keeps its colour after the split", syllables[i]);
+    }
+    searchFrom = NSMaxRange(r);
+  }
+}
+
+#pragma mark - Text size, VoiceOver (review of PR #21)
+
+- (void)testOneDynamicTypeCapForReadingText
+{
+  XCTAssertEqualWithAccuracy(LWEReadingTypeScale(1.0, NO), 1.0, 0.001);
+  XCTAssertEqualWithAccuracy(LWEReadingTypeScale(1.35, NO), 1.35, 0.001);
+  XCTAssertEqualWithAccuracy(LWEReadingTypeScale(2.35, NO), 1.4, 0.001, @"one cap, 1.4x");
+  XCTAssertEqualWithAccuracy(LWEReadingTypeScale(2.35, YES), 1.0, 0.001, @"compact cards stay at 1x");
+  XCTAssertEqualWithAccuracy(roundf(13.0 * LWEReadingTypeScale(2.35, NO)), 18.0, 0.001, @"pill label 13 -> 18pt");
+  XCTAssertEqualWithAccuracy(17.0 * LWEReadingTypeScale(2.35, NO), 23.8, 0.001, @"romaji 17 -> 23.8pt (was capped at 1.35x)");
+}
+
+- (void)testLegacyReadingRowGrowsToFit
+{
+  XCTAssertEqualWithAccuracy(LWELegacyReadingRowHeightFor(24), 42, 0.001, @"one line: the 42pt row");
+  XCTAssertEqualWithAccuracy(LWELegacyReadingRowHeightFor(42), 42, 0.001, @"two 21pt lines at 15pt");
+  XCTAssertEqualWithAccuracy(LWELegacyReadingRowHeightFor(58.8), 59, 0.001, @"two lines at 1.4x: grow, don't scroll");
+}
+
+- (void)testSpokenReadingHasNoMidReadingPause
+{
+  XCTAssertEqualObjects(LWEReadingSpokenLabel(@"べんきょう", @"benkyou"), @"べんきょう, benkyou", @"a pause between the rows");
+  XCTAssertEqualObjects(LWEReadingSpokenLabel(@"かんむり\nかいつぶり", nil), @"かんむりかいつぶり", @"wrapped kana joined back");
+  XCTAssertEqualObjects(LWEReadingSpokenLabel(nil, @"arigatou"), @"arigatou");
+  XCTAssertEqualObjects(LWEReadingSpokenLabel(@"", @""), @"");
+}
+
+- (void)testShownReadingAccessibilityLabelUsesUnwrappedText
+{
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"冠鳰" reading:@"かんむりかいつぶり" romaji:@"kanmurikaitsuburi"]];
+  [cvc layoutCardSubviews];
+  [cvc doToggleReadingBtn];
+  NSString *label = cvc.toggleReadingBtn.accessibilityLabel;
+  XCTAssertEqualObjects(label, @"かんむりかいつぶり, kanmurikaitsuburi");
+  XCTAssertEqual([label rangeOfString:@"\n"].location, (NSUInteger)NSNotFound);
+}
+
+#pragma mark - Meaning vs the score bubble (DD review of PR #21)
+
+- (void)testShortMeaningWrapsAroundBubbleCorner
+{
+  CGSize corner = CGSizeMake(56, 44);
+  LWEMeaningInsets insets = LWEMeaningInsetsFor(180, 260, corner);
+  XCTAssertTrue(insets.wrapCorner, @"Fits: lines next to the bubble wrap short of it");
+  XCTAssertFalse(insets.scrolls);
+  XCTAssertEqualWithAccuracy(insets.bottomInset, 0, 0.001);
+  XCTAssertFalse(LWEMeaningShowsBottomFade(insets, 0, 180, 260));
+  // Exactly full still fits
+  XCTAssertTrue(LWEMeaningInsetsFor(260, 260, corner).wrapCorner);
+}
+
+- (void)testLongMeaningScrollsWithBubbleInset
+{
+  // 勉強: 4 senses, ~330pt of meaning in a ~250pt area
+  CGSize corner = CGSizeMake(56, 44);
+  LWEMeaningInsets insets = LWEMeaningInsetsFor(330, 250, corner);
+  XCTAssertTrue(insets.scrolls, @"Taller than the area: scroll instead of clipping");
+  XCTAssertFalse(insets.wrapCorner);
+  XCTAssertEqualWithAccuracy(insets.bottomInset, 44, 0.001, @"The end scrolls clear of the bubble");
+  XCTAssertTrue(LWEMeaningShowsBottomFade(insets, 0, 330, 250), @"Fade while more is below");
+  XCTAssertTrue(LWEMeaningShowsBottomFade(insets, 80, 330, 250), @"Content ends at 330, but the inset adds 44");
+  XCTAssertFalse(LWEMeaningShowsBottomFade(insets, 124, 330, 250), @"No fade at the end");
+}
+
+- (void)testScrollingMeaningStopsAboveBubble
+{
+  LWEMeaningInsets scrolls = LWEMeaningInsetsFor(330, 250, CGSizeMake(56, 44));
+  XCTAssertEqualWithAccuracy(LWEMeaningVisibleHeight(scrolls, 250), 206, 0.001, @"nothing runs under the bubble while scrolling");
+  LWEMeaningInsets fits = LWEMeaningInsetsFor(180, 250, CGSizeMake(56, 44));
+  XCTAssertEqualWithAccuracy(LWEMeaningVisibleHeight(fits, 250), 250, 0.001, @"a meaning that fits uses the whole area (wrapping the corner)");
+}
+
+- (void)testCornerFromBubblePosition
+{
+  // 勉強 on the 17 Pro: the meaning area is 354 x 250; the bubble sits 35pt into it from the right
+  // and 70pt up from its bottom
+  CGSize corner = LWEMeaningCornerForBubble(CGRectMake(319, 180, 48, 37), CGSizeMake(354, 250));
+  XCTAssertEqualWithAccuracy(corner.width, 41, 0.001, @"bubble edge to the right edge, + 6pt");
+  XCTAssertEqualWithAccuracy(corner.height, 76, 0.001, @"bubble top to the bottom, + 6pt");
+  XCTAssertTrue(CGSizeEqualToSize(LWEMeaningCornerForBubble(CGRectMake(400, 300, 48, 37), CGSizeMake(354, 250)), CGSizeZero),
+                @"a bubble outside the area reserves nothing");
+  XCTAssertTrue(CGSizeEqualToSize(LWEMeaningCornerForBubble(CGRectZero, CGSizeMake(354, 250)), CGSizeZero));
+}
+
+- (void)testNoBubbleNoInset
+{
+  LWEMeaningInsets fits = LWEMeaningInsetsFor(100, 260, CGSizeZero);
+  XCTAssertFalse(fits.wrapCorner, @"Bubble hidden (browse mode): nothing to wrap around");
+  LWEMeaningInsets tall = LWEMeaningInsetsFor(400, 260, CGSizeZero);
+  XCTAssertTrue(tall.scrolls);
+  XCTAssertEqualWithAccuracy(tall.bottomInset, 0, 0.001);
+}
+
+- (void)testCornerSizeFollowsBubbleAndNudge
+{
+  CGSize area = CGSizeMake(354, 250);
+  CGSize paper = LWEMeaningCornerSize(YES, 0, area);
+  XCTAssertEqualWithAccuracy(paper.width, 56, 0.001);
+  XCTAssertEqualWithAccuracy(paper.height, 44, 0.001);
+  CGSize kutani = LWEMeaningCornerSize(YES, 4, area);
+  XCTAssertEqualWithAccuracy(kutani.width, 60, 0.001, @"Kutani's rim nudges the bubble 4pt up and left");
+  XCTAssertEqualWithAccuracy(kutani.height, 48, 0.001);
+  XCTAssertTrue(CGSizeEqualToSize(LWEMeaningCornerSize(NO, 0, area), CGSizeZero));
+  CGSize tiny = LWEMeaningCornerSize(YES, 0, CGSizeMake(40, 30));
+  XCTAssertEqualWithAccuracy(tiny.width, 40, 0.001, @"Clipped to the area");
+  XCTAssertEqualWithAccuracy(tiny.height, 30, 0.001);
 }
 
 @end
