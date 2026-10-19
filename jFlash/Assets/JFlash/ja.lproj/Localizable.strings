@@ -339,10 +339,10 @@
 "Paper" = "和紙";
 
 /* Theme name  (JapaneseSettingsDataSource.m) */
-"Fire" = "ファイア";
+"Fire" = "紅";
 
 /* Theme name  (JapaneseSettingsDataSource.m) */
-"Water" = "ウォーター";
+"Water" = "藍";
 
 
 /* Theme name: Kimono */
@@ -350,6 +350,12 @@
 
 /* Theme name: Kutani */
 "Kutani" = "九谷";
+
+/* Theme name read by VoiceOver: Fire */
+"Fire.accessibility" = "くれない";
+
+/* Theme name read by VoiceOver: Water */
+"Water.accessibility" = "あい";
 /* SettingsViewController.DisplayReading_Romaji  (JapaneseSettingsDataSource.m) */
 "Romaji" = "ローマ字";
 

@@ -350,6 +350,12 @@
 
 /* Theme name: Kutani */
 "Kutani" = "Kutani";
+
+/* Theme name read by VoiceOver: Fire */
+"Fire.accessibility" = "Fire";
+
+/* Theme name read by VoiceOver: Water */
+"Water.accessibility" = "Water";
 /* SettingsViewController.DisplayReading_Romaji  (JapaneseSettingsDataSource.m) */
 "Romaji" = "Romaji";
 

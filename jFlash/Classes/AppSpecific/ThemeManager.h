@@ -57,6 +57,9 @@ extern const CGFloat kLWECardCornerRadius;
 //! Provide list of names of all available themes, in display order (Paper, Fire, Water, Kimono, Kutani)
 - (NSArray*) themeNameList;
 
+//! VoiceOver label for a theme key when its visible name needs a reading (ja 紅 → くれない, 藍 → あい); nil otherwise
+- (NSString*) accessibilityNameForThemeKey:(NSString*)themeKey;
+
 //! Provide dictionary-safe key reference names for all available themes, in display order
 - (NSArray*) themeKeysList;
 
