@@ -1060,7 +1060,7 @@
 	vc.view.frame = rect;
   [[ThemeManager sharedThemeManager] applyCardStyleToLayer:vc.view.layer];
   vc.view.layer.masksToBounds = NO;
-  vc.view.backgroundColor = [UIColor clearColor];
+  // Keep layer.backgroundColor (cardFill); UIView.backgroundColor would clear it.
   
   // Set the content size for the width * the number of views
 	NSInteger numViews = 2;
@@ -1160,7 +1160,7 @@
     [tm applyCardStyleToLayer:ex.layer];
     ex.layer.masksToBounds = NO;
     ex.layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:ex.bounds cornerRadius:kLWECardCornerRadius].CGPath;
-    ex.backgroundColor = [UIColor clearColor];
+    // Do not set backgroundColor here: UIView.backgroundColor overwrites layer.backgroundColor (cardFill).
   }
 
   UIColor *foot = [tm colorForSlot:@"footInk"];
