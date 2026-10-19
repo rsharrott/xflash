@@ -17,7 +17,12 @@
 #import "jFlashAppDelegate.h"
 #import <AVFoundation/AVFoundation.h>
 
-#define SHOW_BUTTON_TITLE NSLocalizedString(@"Read",@"ReadButton")
+#if defined(LWE_JFLASH)
+#define SHOW_BUTTON_TITLE NSLocalizedString(@"Kanji Readings",@"ReadButton")
+#else
+// cFlash has no Localizable.strings; keep the neutral English title (and avoid a raw key / "Kanji").
+#define SHOW_BUTTON_TITLE @"Read"
+#endif
 #define CLOSE_BUTTON_TITLE NSLocalizedString(@"Close",@"CloseButton")
 #define ADD_BUTTON_TITLE NSLocalizedString(@"Add",@"AddButton")
 

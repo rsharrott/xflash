@@ -201,7 +201,7 @@
 "Get Update" = "アップデートを入手";
 
 /* ReadButton  (ExampleSentencesViewController.m) */
-"Read" = "単語を見る";
+"Kanji Readings" = "漢字の読み";
 
 /* CloseButton  (ExampleSentencesViewController.m) */
 "Close" = "閉じる";
