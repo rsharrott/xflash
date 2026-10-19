@@ -55,20 +55,6 @@ static inline UIColor *LWEDesignWrongInk(void)  { return LWEDesignColorHex(0x7E1
 static inline UIColor *LWEDesignRightFill(void) { return LWEDesignColorHex(0xD3EEDC, 1.0); }
 static inline UIColor *LWEDesignRightInk(void)  { return LWEDesignColorHex(0x0B5A2C, 1.0); }
 
-//! Kimono B card ("kimono-kaki"), #EEA57A
-static inline UIColor *LWEDesignKimonoKaki(void) { return LWEDesignColorHex(0xEEA57A, 1.0); }
-//! Kimono B indigo accent ("kimono-ai"), #1F3558
-static inline UIColor *LWEDesignKimonoAi(void)   { return LWEDesignColorHex(0x1F3558, 1.0); }
-//! Kimono B rule / sentence highlight ("kimono-shibu"), #8A3B1C
-static inline UIColor *LWEDesignKimonoShibu(void){ return LWEDesignColorHex(0x8A3B1C, 1.0); }
-//! Kimono B seigaiha stroke ("kimono-pattern"), paper-raised at 45%
-static inline UIColor *LWEDesignKimonoPattern(void){ return LWEDesignColorHex(0xFFFDF9, 0.45); }
-//! Kutani card glaze ("kutani-green"), #1E4A3A
-static inline UIColor *LWEDesignKutaniGreen(void){ return LWEDesignColorHex(0x1E4A3A, 1.0); }
-//! Kutani headword / rim / highlight ("kutani-ochre"), #E2B13A
-static inline UIColor *LWEDesignKutaniOchre(void){ return LWEDesignColorHex(0xE2B13A, 1.0); }
-//! Kutani accent on paper ("kutani-aubergine"), #553366
-static inline UIColor *LWEDesignKutaniAubergine(void){ return LWEDesignColorHex(0x553366, 1.0); }
 
 //! A system font of `size`/`weight` that follows Dynamic Type like `style` (UIFontMetrics),
 //! optionally capped at `maxPointSize` (0 = no cap) so fixed-width controls still fit.
