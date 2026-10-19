@@ -60,6 +60,9 @@ extern NSString * const LWECardHTMLTemplate_EtoJ;
 //! Call from StudyViewController.viewDidLayoutSubviews (child VC containment is informal).
 - (void) layoutCardSubviews;
 
+//! The study view placed the score bubble: re-fit the meaning around it.
+- (void) scoreBubbleDidMove;
+
 //! Y (in this controller's view) below which a tap on the card should reveal the answer.
 //! Everything above it (headword, speaker, reading toggle, "+N readings") stays tappable.
 - (CGFloat) revealAreaTop;
@@ -74,7 +77,15 @@ extern NSString * const LWECardHTMLTemplate_EtoJ;
 @property (nonatomic, retain) IBOutlet UILabel *readingLabel;
 
 //! If yes, the reading is visible.  Separate variable than label.hidden because we preserve state across cards.
+//! A new card view starts from the session's choice (+sessionReadingVisible).
 @property BOOL readingVisible;
+
+//! The reader's show/hide choice for this run of the app: hidden at launch, kept in memory only (never
+//! saved), and picked up by every new card view (theme, direction, mode or text-size changes).
+//! Tapping the reading toggle sets it; delegates that force the reading on or off (browse mode,
+//! English-first cards) change only that card view's readingVisible.
++ (BOOL) sessionReadingVisible;
++ (void) setSessionReadingVisible:(BOOL)visible;
 
 //! Toggles the visibility of the reading off and on.  Will persist state to readingVisible
 @property (nonatomic, retain) IBOutlet UIButton *toggleReadingBtn;

@@ -122,8 +122,13 @@
 
 - (NSAttributedString *) attributedReading
 {
+  return [self attributedReadingUsingToneColors:[[self class] pinyinColoringIsOn] themeKey:nil];
+}
+
+- (NSAttributedString *) attributedReadingUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey
+{
   NSMutableAttributedString *attrString = [[[[NSAttributedString alloc] init] autorelease] mutableCopy];
-  NSArray *readingHashes = [self readingComponents];
+  NSArray *readingHashes = [self readingComponentsUsingToneColors:useToneColors themeKey:themeKey];
   for (NSInteger i = 0; i < [readingHashes count]; i++)
   {
     NSDictionary *readingHash = [readingHashes objectAtIndex:i];
@@ -143,8 +148,9 @@
     // UILabel-compatible attrs (cFlash reading label is a plain UILabel as of themes v2).
     UIColor *toneColor = (UIColor *)[readingHash objectForKey:@"color"];
     [tmpAttrString addAttribute:NSForegroundColorAttributeName value:toneColor range:allRange];
+    // 20pt regular (furigana spec §8); CardViewController shrinks or wraps long pinyin to fit the row.
     [tmpAttrString addAttribute:NSFontAttributeName
-                          value:[UIFont systemFontOfSize:20 weight:UIFontWeightBold]
+                          value:[UIFont systemFontOfSize:20 weight:UIFontWeightRegular]
                           range:allRange];
     [attrString appendAttributedString:tmpAttrString];
     [tmpAttrString release];
@@ -153,29 +159,23 @@
   return [attrString autorelease];
 }
 
-- (NSArray *) readingComponents
++ (NSDictionary *) toneColorsForThemeKey:(NSString *)themeKey cardFill:(UIColor *)cardFill
 {
-  NSMutableArray *components = [NSMutableArray array];
-  // Tone colours are theme-aware so they stay AA on light (Paper) and dark (Fire/Water) cards.
+  // The AA-checked tone palettes from the Paper/Fire/Water (#13) and Kimono/Kutani (#14) themes.
   // Light: fire-deep / dark amber / right-ink / water.  Dark: soft red / yellow / mint / sky.
-  ThemeManager *tm = [ThemeManager sharedThemeManager];
-  UIColor *cardFill = [tm colorForSlot:@"cardFill"];
   CGFloat r = 0, g = 0, b = 0, a = 0;
   [cardFill getRed:&r green:&g blue:&b alpha:&a];
   // Relative luminance (sRGB approx). Paper/Kimono are light; Fire/Water/Kutani are dark.
   CGFloat lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  BOOL lightCard = (lum > 0.45);
-  NSString *themeKey = [[tm _currentTheme] objectForKey:@"key"];
-  BOOL kimonoCard = [themeKey isEqualToString:SET_THEME_KIMONO];
-  UIColor *tone1, *tone2, *tone3, *tone4, *toneDefault;
-  if (kimonoCard)
+  BOOL lightCard = (cardFill == nil) || (lum > 0.45);
+  UIColor *tone1, *tone2, *tone3, *tone4;
+  if ([themeKey isEqualToString:SET_THEME_KIMONO])
   {
     // Mid kaki #EEA57A: darker tones so all four pass 4.5 at normal size.
     tone1 = [UIColor colorWithRed:0.478 green:0.067 blue:0.000 alpha:1.0]; // #7A1100
     tone2 = [UIColor colorWithRed:0.420 green:0.212 blue:0.000 alpha:1.0]; // #6B3600
     tone3 = [UIColor colorWithRed:0.031 green:0.271 blue:0.122 alpha:1.0]; // #08451F
     tone4 = [UIColor colorWithRed:0.055 green:0.247 blue:0.490 alpha:1.0]; // #0E3F7D
-    toneDefault = [tm colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.122 green:0.208 blue:0.345 alpha:1.0]; // kimono-ai
   }
   else if (lightCard)
   {
@@ -183,7 +183,6 @@
     tone2 = [UIColor colorWithRed:0.604 green:0.306 blue:0.000 alpha:1.0]; // #9A4E00 dark amber
     tone3 = [UIColor colorWithRed:0.043 green:0.353 blue:0.173 alpha:1.0]; // #0B5A2C right-ink
     tone4 = [UIColor colorWithRed:0.075 green:0.337 blue:0.655 alpha:1.0]; // #1356A7 water
-    toneDefault = [tm colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.114 green:0.102 blue:0.086 alpha:1.0]; // ink
   }
   else
   {
@@ -191,34 +190,70 @@
     tone2 = [UIColor colorWithRed:1.000 green:0.839 blue:0.039 alpha:1.0]; // #FFD60A yellow
     tone3 = [UIColor colorWithRed:0.490 green:0.871 blue:0.627 alpha:1.0]; // #7DDEA0
     tone4 = [UIColor colorWithRed:0.557 green:0.784 blue:1.000 alpha:1.0]; // #8EC8FF
-    toneDefault = [tm colorForSlot:@"readingInk"] ?: [UIColor whiteColor];
   }
-  NSDictionary *colorDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                             tone1,@"1", tone2,@"2", tone3,@"3", tone4,@"4", nil];
+  return [NSDictionary dictionaryWithObjectsAndKeys:tone1,@"1", tone2,@"2", tone3,@"3", tone4,@"4", nil];
+}
 
++ (NSInteger) toneForPinyinSyllable:(NSString *)syllable
+{
+  // The tone of one syllable, ignoring trailing punctuation and whitespace ('ma5,' -> 5): the last tone
+  // digit (numbered pinyin, xue2) or, failing that, the last tone mark (xué).  0 when there is none.
+  NSCharacterSet *toneDigits = [NSCharacterSet characterSetWithCharactersInString:@"12345"];
+  NSRange digit = [syllable rangeOfCharacterFromSet:toneDigits options:NSBackwardsSearch];
+  if (digit.location != NSNotFound) return [[syllable substringWithRange:digit] integerValue];
+  NSString *decomposed = [syllable decomposedStringWithCanonicalMapping];
+  for (NSInteger i = (NSInteger)[decomposed length] - 1; i >= 0; i--)
+  {
+    switch ([decomposed characterAtIndex:i])
+    {
+      case 0x0304: return 1; // macron
+      case 0x0301: return 2; // acute
+      case 0x030C: return 3; // caron
+      case 0x0300: return 4; // grave
+      default: break;
+    }
+  }
+  return 0;
+}
+
++ (BOOL) pinyinColoringIsOn
+{
+  return [[[NSUserDefaults standardUserDefaults] objectForKey:APP_PINYIN_COLOR] isEqualToString:SET_PINYIN_COLOR_ON];
+}
+
+- (NSArray *) readingComponents
+{
+  return [self readingComponentsUsingToneColors:[[self class] pinyinColoringIsOn] themeKey:nil];
+}
+
+- (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey
+{
+  // Pinyin Coloring ON (the default): each syllable in its tone colour, from the theme's palette.
+  // OFF: every syllable in the theme's readingInk, the same ink as jFlash's kana.  Neutral-tone (5)
+  // syllables use readingInk either way.  Read fresh on every call, so a setting or theme change shows
+  // on the next card render (StudyViewController observes both).
+  // themeKey nil = the current theme (the card); tests pass a key so they needn't change the setting.
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  if (themeKey == nil) themeKey = [[tm _currentTheme] objectForKey:@"key"];
+  UIColor *ink = [tm colorForSlot:@"readingInk" themeKey:themeKey] ?: [UIColor colorWithRed:0.227 green:0.208 blue:0.180 alpha:1.0]; // ink-2 #3A352E
+  NSDictionary *toneColors = nil;
+  if (useToneColors)
+  {
+    toneColors = [[self class] toneColorsForThemeKey:themeKey cardFill:[tm colorForSlot:@"cardFill" themeKey:themeKey]];
+  }
+
+  NSMutableArray *components = [NSMutableArray array];
   NSArray *pinyinSegments = [self.reading componentsSeparatedByString:@" "];
   for (NSString *pinyinSegment in pinyinSegments)
   {
-    UIColor *theColor = toneDefault;
-    NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-    BOOL useColor = [[settings objectForKey:APP_PINYIN_COLOR] isEqualToString:SET_PINYIN_COLOR_ON];
-
-    if (useColor)
+    UIColor *theColor = ink;
+    if (toneColors)
     {
-      for (NSString *toneNumber in colorDict)
-      {
-        NSRange range = [pinyinSegment rangeOfString:toneNumber];
-        if (range.location != NSNotFound)
-        {
-          theColor = (UIColor*)[colorDict objectForKey:toneNumber];
-          break;
-        }
-      }
+      NSInteger tone = [[self class] toneForPinyinSyllable:pinyinSegment];
+      theColor = (tone >= 1 && tone <= 4) ? ([toneColors objectForKey:[NSString stringWithFormat:@"%ld", (long)tone]] ?: ink) : ink;
     }
-    
     // Now pinyin-ify the string
     pinyinSegment = [self _pinyinForNumberedPinyin:pinyinSegment];
-    
     NSDictionary *pinyinHash = [NSDictionary dictionaryWithObjectsAndKeys:theColor,@"color",pinyinSegment,@"pinyin",nil];
     [components addObject:pinyinHash];
   }

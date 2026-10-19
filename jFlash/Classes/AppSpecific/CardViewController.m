@@ -10,10 +10,12 @@
 #import "LWELocalization.h"
 #import "UIScrollView+LWEUtilities.h"
 #import "LWEDesignTokens.h"
+#import "LWEReadingLayout.h"
 #if defined(LWE_JFLASH)
 #import "JapaneseCard.h"
 #endif
 #import <AVFoundation/AVFoundation.h>
+#import <QuartzCore/QuartzCore.h>
 
 // Study card (J->E) metrics from the 2026 design refresh
 static const CGFloat kLWEHeadwordMaxPointSize = 88.0;
@@ -79,10 +81,97 @@ static CGFloat LWEDynamicTypeSizeMultiplier(void)
 //! The "+N readings" pill is 30pt tall; its button extends this far above and below it (44pt hit area).
 static const CGFloat kLWEPillHitInset = 7.0;
 
+// Furigana reading row + "Show Reading" toggle (DD furigana spec, option A)
+// Reading type: 20pt (15pt floor, 28pt Dynamic Type cap) -- see LWEReadingSizes() in LWEReadingLayout.h
+static const CGFloat kLWEReadingLineFactor     = 1.4;  // line box = type size x 1.4 (20pt -> 28pt row)
+#if defined(LWE_JFLASH)
+static const CGFloat kLWEReadingHeadwordGap    = 6.0;  // reading row bottom -> headword em-box top
+static const CGFloat kLWERomajiHeadwordGap     = 8.0;  // headword em-box bottom -> romaji line top
+static const CGFloat kLWEMeaningGap            = 14.0; // romaji (or headword) -> the meaning's rule
+static const CGFloat kLWEToggleRowOutset       = 8.0;  // the toggle reaches this far above and below the row
+#endif
+static const CGFloat kLWEToggleMinHeight       = 44.0; // the toggle's hit area
+static const CGFloat kLWEReadingPillHeight     = 24.0; // the hidden-state pill
+static const CGFloat kLWEReadingPillLabelSize  = 13.0;
+static const NSTimeInterval kLWEReadingCrossfade = 0.12;
+
+//! Reading shown/hidden for this run of the app (furigana spec §1, DD review of PR #21): new card views
+//! (theme, direction, mode or text-size changes) pick it up; it starts hidden at launch and is never saved.
+static BOOL sLWESessionReadingVisible = NO;
+static void *kLWEMeaningOffsetContext = &kLWEMeaningOffsetContext;
+
+//! The reading's size, line height and floor for the current text size (spec §7).
+static void LWEReadingMetrics(BOOL compact, CGFloat *baseSize, CGFloat *minSize)
+{
+  LWEReadingSizes(LWEDynamicTypeSizeMultiplier(), compact, baseSize, minSize);
+}
+
+//! An SF Symbol drawn to fit a square box (a template image, so it takes the button's ink).  A plain
+//! symbol image would be re-sized by the button configuration to match its title.
+static UIImage *LWESymbolInBox(NSString *name, CGFloat box, UIImageSymbolWeight weight)
+{
+  UIImageSymbolConfiguration *config = [UIImageSymbolConfiguration configurationWithPointSize:box weight:weight];
+  UIImage *symbol = [UIImage systemImageNamed:name withConfiguration:config];
+  if (symbol == nil || symbol.size.width <= 0 || symbol.size.height <= 0) return nil;
+  CGFloat k = MIN(box / symbol.size.width, box / symbol.size.height);
+  CGSize drawn = CGSizeMake(symbol.size.width * k, symbol.size.height * k);
+  UIGraphicsImageRenderer *renderer = [[[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(box, box)] autorelease];
+  UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *context) {
+    [[symbol imageWithTintColor:[UIColor blackColor]] drawInRect:CGRectMake((box - drawn.width) / 2.0, (box - drawn.height) / 2.0, drawn.width, drawn.height)];
+  }];
+  return [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+}
+
+//! Height of text laid out at width (UILabel metrics)
+static CGFloat LWETextHeight(NSAttributedString *text, CGFloat width)
+{
+  if ([text length] == 0) return 0;
+  return ceilf([text boundingRectWithSize:CGSizeMake(width, CGFLOAT_MAX)
+                                  options:NSStringDrawingUsesLineFragmentOrigin
+                                  context:nil].size.height);
+}
+
+#if defined(LWE_JFLASH)
+//! First line's baseline from the top of the text, and that line's height (TextKit, as UILabel lays it out)
+static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat *baseline, CGFloat *lineHeight)
+{
+  *baseline = 0;
+  *lineHeight = 0;
+  if ([text length] == 0) return;
+  NSTextStorage *storage = [[NSTextStorage alloc] initWithAttributedString:text];
+  NSLayoutManager *layout = [[NSLayoutManager alloc] init];
+  NSTextContainer *container = [[NSTextContainer alloc] initWithSize:CGSizeMake(width, CGFLOAT_MAX)];
+  container.lineFragmentPadding = 0;
+  [layout addTextContainer:container];
+  [storage addLayoutManager:layout];
+  if ([layout numberOfGlyphs] > 0)
+  {
+    CGRect fragment = [layout lineFragmentRectForGlyphAtIndex:0 effectiveRange:NULL];
+    *baseline = fragment.origin.y + [layout locationForGlyphAtIndex:0].y;
+    *lineHeight = fragment.size.height;
+  }
+  [container release];
+  [layout release];
+  [storage release];
+}
+#endif
+
 @interface CardViewController()
 - (void) _injectMeaningHTML:(NSString*)html;
 - (void) _prepareView:(Card*)card;
 - (void) _updateReadingContainer;
+//! Hides the toggle when the card has no reading to show, and keeps its VoiceOver label in step
+- (void) _updateReadingToggle;
+//! Hidden: the "Show Reading" pill.  Shown: no title and no chrome (the button stays over the reading).
+- (void) _updateReadingToggleAppearance;
+//! Keeps the meaning clear of the score bubble: wraps around its corner, or scrolls with a bottom inset and fade
+- (void) _updateMeaningInsets;
+- (void) _updateMeaningFade;
+#if defined(LWE_CFLASH)
+//! Fits the pinyin into the legacy reading row (spec §8)
+- (CGFloat) _fitLegacyReading;
+@property (nonatomic, retain) NSAttributedString *legacyReadingSource;
+#endif
 
 //! Returns YES if the contents of theLabel fit in scrollViewContainer w/o scrolling
 - (BOOL) _shouldHideMoreIconForLabel:(UIView *)theLabel forScrollView:(UIScrollView *)scrollViewContainer;
@@ -101,6 +190,10 @@ static const CGFloat kLWEPillHitInset = 7.0;
 @property (nonatomic, retain) NSArray *kanaReadings;
 @property (nonatomic, retain) NSArray *romajiReadings;
 @property (nonatomic, retain) UIButton *moreReadingsBtn;
+//! Romaji under the headword (Both mode, and kana-only headwords in Romaji mode)
+@property (nonatomic, retain) UILabel *romajiLabel;
+//! What the reading row above the headword shows (kana, or romaji in Romaji mode); nil for none
+@property (nonatomic, copy) NSString *topReadingText;
 #endif
 @end
 
@@ -108,8 +201,24 @@ static const CGFloat kLWEPillHitInset = 7.0;
 {
   BOOL _modernCard;
   BOOL _readingsExpanded;
+  BOOL _toggleHiddenForNoReading;
+  BOOL _topReadingIsLatin;      // the top row holds romaji (Romaji mode), not kana
+  BOOL _toggleOnRomajiRow;      // kana-only headword: the toggle sits on the romaji row below it
   CGFloat _lastLayoutWidth;
   CGFloat _lastLayoutHeight;
+  LWEMeaningInsets _meaningInsets;
+  NSUInteger _meaningMeasureToken;
+  BOOL _observingMeaningScroll;
+}
+
++ (BOOL) sessionReadingVisible
+{
+  return sLWESessionReadingVisible;
+}
+
++ (void) setSessionReadingVisible:(BOOL)visible
+{
+  sLWESessionReadingVisible = visible;
 }
 
 @synthesize delegate;
@@ -120,6 +229,10 @@ static const CGFloat kLWEPillHitInset = 7.0;
 #if defined(LWE_JFLASH)
 @synthesize speakBtn, speechSynthesizer;
 @synthesize kanaReadings, romajiReadings, moreReadingsBtn;
+@synthesize romajiLabel, topReadingText;
+#endif
+#if defined(LWE_CFLASH)
+@synthesize legacyReadingSource;
 #endif
 
 #pragma mark - Flow Methods
@@ -180,6 +293,8 @@ static const CGFloat kLWEPillHitInset = 7.0;
   self = [super initWithNibName:nibName bundle:nil];
   if (self)
   {
+    // The reader's show/hide choice from earlier in this session (hidden at launch)
+    _readingVisible = sLWESessionReadingVisible;
 #if defined(LWE_JFLASH)
     _modernCard = displayMainHeadword;
 #endif
@@ -227,6 +342,9 @@ static const CGFloat kLWEPillHitInset = 7.0;
   self.meaningWebViewContainer.opaque = NO;
   [self.meaningWebViewContainer addSubview:_meaningWebView];
   [_meaningWebView loadHTMLString:self.baseHtml baseURL:nil];
+  // Long meanings scroll; the bottom fade follows the scroll position
+  [_meaningWebView.scrollView addObserver:self forKeyPath:@"contentOffset" options:0 context:kLWEMeaningOffsetContext];
+  _observingMeaningScroll = YES;
 
   // Add mood icon subview - TODO: MMA this is 90% complete, but I want to find a way to do this in the NIB
   CGRect moodIconRect = CGRectMake(235, 197, 80, 73);
@@ -264,7 +382,34 @@ static const CGFloat kLWEPillHitInset = 7.0;
     self.headwordLabel.shadowColor = nil;
     self.readingLabel.shadowColor = nil;
     [self.toggleReadingBtn setTitleColor:[tm colorForSlot:@"toggleInk"] forState:UIControlStateNormal];
+    // 13pt semibold, as on the jFlash card (replaces the XIB's Helvetica-Bold 10pt)
+    self.toggleReadingBtn.titleLabel.font = [UIFont systemFontOfSize:kLWEReadingPillLabelSize weight:UIFontWeightSemibold];
+    // cFlash NIB bakes "Show Reading" into practice-btn-showreading.png. The toggle now stays over the
+    // visible reading as its tap-to-hide target (as in the original app), so the image has to go.
+    [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateNormal];
+    [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateHighlighted];
+    self.toggleReadingBtn.backgroundColor = [UIColor clearColor];
+    // The pinyin is fitted in code (spec §8), centred in its row
+    self.readingLabel.textAlignment = NSTextAlignmentCenter;
+    self.readingLabel.numberOfLines = 0;
+    self.readingLabel.lineBreakMode = NSLineBreakByWordWrapping;
   }
+  self.toggleReadingBtn.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+  self.toggleReadingBtn.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+  if (@available(iOS 15.0, *))
+  {
+    // Pressed: label and glyph at 60% (the pill itself stays put)
+    UIColor *ink = [[ThemeManager sharedThemeManager] colorForSlot:@"toggleInk"];
+    self.toggleReadingBtn.configurationUpdateHandler = ^(UIButton *button) {
+      UIButtonConfiguration *config = [[button.configuration copy] autorelease];
+      if (config == nil) return;
+      CGFloat alpha = CGColorGetAlpha(ink.CGColor);
+      config.baseForegroundColor = button.isHighlighted ? [ink colorWithAlphaComponent:alpha * 0.6] : ink;
+      button.configuration = config;
+    };
+  }
+  // The toggle speaks for the reading row (see -_updateReadingToggle)
+  self.readingScrollContainer.accessibilityElementsHidden = YES;
 }
 
 #if defined(LWE_JFLASH)
@@ -291,13 +436,23 @@ static const CGFloat kLWEPillHitInset = 7.0;
   self.readingLabel.autoresizingMask = UIViewAutoresizingNone;
   self.readingMoreIcon.hidden = YES;
 
-  self.toggleReadingBtn.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightMedium];
+  // Toggle: the hidden-state pill is a UIButtonConfiguration (-_updateReadingToggleAppearance)
+  self.toggleReadingBtn.titleLabel.font = [UIFont systemFontOfSize:kLWEReadingPillLabelSize weight:UIFontWeightSemibold];
   [self.toggleReadingBtn setTitleColor:[tm colorForSlot:@"toggleInk"] forState:UIControlStateNormal];
-  // cFlash NIB bakes "Show Reading" into practice-btn-showreading.png; drop it so the
-  // title (and hide-when-reading-on) actually control what's on screen.
   [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateNormal];
   [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateHighlighted];
   self.toggleReadingBtn.autoresizingMask = UIViewAutoresizingNone;
+
+  // Romaji: its own row under the headword (17pt medium, romajiInk); hidden and shown with the reading
+  UILabel *romaji = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
+  romaji.backgroundColor = [UIColor clearColor];
+  romaji.textAlignment = NSTextAlignmentCenter;
+  romaji.numberOfLines = 0;
+  romaji.lineBreakMode = NSLineBreakByWordWrapping;
+  romaji.userInteractionEnabled = NO;
+  romaji.isAccessibilityElement = NO; // the toggle reads it (see -_updateReadingToggle)
+  [self.view insertSubview:romaji belowSubview:self.toggleReadingBtn];
+  self.romajiLabel = romaji;
 
   // Speaker: 44pt circle next to the headword (speakerFill / speakerInk)
   UIImageSymbolConfiguration *cfg = [UIImageSymbolConfiguration configurationWithPointSize:19 weight:UIImageSymbolWeightMedium];
@@ -383,12 +538,33 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   return (NSInteger)MAX([kana count], [romaji count]) - 1;
 }
 
-//! Builds the reading label: kana on one line, muted romaji on the next (per APP_READING).
+//! The top reading row's text at a given size: Hiragino (via the system font) 20pt regular in
+//! readingInk, tracking +0.02em (+0.01em for romaji). lineHeight > 0 fixes the line box (wrapped readings).
+- (NSAttributedString *) _topReadingString:(NSString *)text size:(CGFloat)size lineHeight:(CGFloat)lineHeight
+{
+  if ([text length] == 0) return [[[NSAttributedString alloc] initWithString:@""] autorelease];
+  NSMutableParagraphStyle *para = [[[NSMutableParagraphStyle alloc] init] autorelease];
+  para.alignment = NSTextAlignmentCenter;
+  para.lineBreakMode = NSLineBreakByWordWrapping;
+  if (lineHeight > 0)
+  {
+    para.minimumLineHeight = lineHeight;
+    para.maximumLineHeight = lineHeight;
+  }
+  return [[[NSAttributedString alloc] initWithString:text attributes:@{
+    NSFontAttributeName: [UIFont systemFontOfSize:size weight:UIFontWeightRegular],
+    NSForegroundColorAttributeName: [[ThemeManager sharedThemeManager] colorForSlot:@"readingInk"],
+    NSKernAttributeName: @(size * (_topReadingIsLatin ? 0.01 : 0.02)),
+    NSParagraphStyleAttributeName: para,
+  }] autorelease];
+}
+
+//! Works out what the reading rows say (per APP_READING): kana above the headword, romaji in its
+//! own row below it.  -_layoutModernCard fits the top row to the headword (spec §4).
 - (void) _applyReadingText
 {
   NSString *mode = [[NSUserDefaults standardUserDefaults] objectForKey:APP_READING];
   BOOL showKana = ([mode isEqualToString:SET_READING_ROMAJI] == NO);
-  BOOL showRomaji = ([mode isEqualToString:SET_READING_KANA] == NO);
 
   NSArray *kana = self.kanaReadings;
   NSArray *romaji = self.romajiReadings;
@@ -408,51 +584,43 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     kanaText = [kana count] > 0 ? [kana objectAtIndex:0] : nil;
     romajiText = [romaji count] > 0 ? [romaji objectAtIndex:0] : nil;
   }
+  // Kana-only headword (e.g. これ, or ありがとう with Prefer Kana): the kana reading would just repeat
+  // it, so there is no row above the headword; romaji (if on) stays below it, with the toggle on it.
+  // (Romaji mode: romaji is the only reading, so it takes the top row in readingInk.)
+  BOOL kanaOnly = LWEReadingIsKanaOnlyHeadword(kanaText, self.headwordLabel.text, [kana count], _readingsExpanded);
+  NSDictionary *rows = LWEReadingRows(mode, kanaText, romajiText, kanaOnly);
+  NSString *top = [rows objectForKey:LWEReadingRowTopKey];
+  NSString *below = [rows objectForKey:LWEReadingRowBelowKey];
+  _topReadingIsLatin = [[rows objectForKey:LWEReadingRowTopIsLatinKey] boolValue];
+  _toggleOnRomajiRow = [[rows objectForKey:LWEReadingRowToggleOnRomajiKey] boolValue];
+  self.topReadingText = top;
 
-  // A short card (small phone, or a tall answer bar at large text sizes) keeps the reading at
-  // its base size so the meaning still has room.
-  CGFloat dt = (self.view.bounds.size.height > 0 && self.view.bounds.size.height < kLWECompactCardHeight)
-             ? 1.0f : MIN(LWEDynamicTypeSizeMultiplier(), 1.35f);
-  NSMutableParagraphStyle *para = [[[NSMutableParagraphStyle alloc] init] autorelease];
-  para.alignment = NSTextAlignmentCenter;
-  para.paragraphSpacing = 2.0;
-  para.lineBreakMode = NSLineBreakByWordWrapping;
+  // Base size for now; -_layoutModernCard fits it once the headword's width is known
+  CGFloat baseSize = 0, minSize = 0;
+  LWEReadingMetrics(self.view.bounds.size.height > 0 && self.view.bounds.size.height < kLWECompactCardHeight, &baseSize, &minSize);
+  self.readingLabel.attributedText = [self _topReadingString:top size:baseSize lineHeight:0];
 
-  NSMutableAttributedString *text = [[[NSMutableAttributedString alloc] init] autorelease];
-  if (showKana && [kanaText length] > 0)
+  if ([below length] > 0)
   {
-    CGFloat kanaSize = (_readingsExpanded ? 24.0 : 30.0) * dt;
-    // Long readings shrink to stay on one line (down to 20pt), then wrap.
-    CGFloat availW = self.view.bounds.size.width - 48.0;
-    CGFloat kanaW = [kanaText sizeWithAttributes:@{NSFontAttributeName: [UIFont systemFontOfSize:kanaSize weight:UIFontWeightMedium]}].width;
-    if (availW > 0 && kanaW > availW)
-    {
-      kanaSize = MAX(20.0, floorf(kanaSize * availW / kanaW));
-    }
-    [text appendAttributedString:[[[NSAttributedString alloc] initWithString:kanaText attributes:@{
-      NSFontAttributeName: [UIFont systemFontOfSize:kanaSize weight:UIFontWeightMedium],
-      NSForegroundColorAttributeName: [[ThemeManager sharedThemeManager] colorForSlot:@"readingInk"],
-      NSParagraphStyleAttributeName: para,
-    }] autorelease]];
-  }
-  if (showRomaji && [romajiText length] > 0)
-  {
-    BOOL romajiOnly = ([text length] == 0);
-    if (!romajiOnly)
-    {
-      [text appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\n"] autorelease]];
-    }
-    CGFloat romajiSize = (romajiOnly ? 24.0 : 17.0) * dt;
-    [text appendAttributedString:[[[NSAttributedString alloc] initWithString:romajiText attributes:@{
+    CGFloat dt = LWEReadingTypeScale(LWEDynamicTypeSizeMultiplier(),
+                                     self.view.bounds.size.height > 0 && self.view.bounds.size.height < kLWECompactCardHeight);
+    CGFloat romajiSize = 17.0 * dt;
+    NSMutableParagraphStyle *para = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    para.alignment = NSTextAlignmentCenter;
+    para.lineBreakMode = NSLineBreakByWordWrapping;
+    para.minimumLineHeight = roundf(romajiSize * 22.0 / 17.0);
+    para.maximumLineHeight = para.minimumLineHeight;
+    self.romajiLabel.attributedText = [[[NSAttributedString alloc] initWithString:below attributes:@{
       NSFontAttributeName: [UIFont systemFontOfSize:romajiSize weight:UIFontWeightMedium],
-      // Romaji on its own is the reading, so it takes the reading ink; under kana it is the muted romajiInk
-      NSForegroundColorAttributeName: [[ThemeManager sharedThemeManager] colorForSlot:(romajiOnly ? @"readingInk" : @"romajiInk")],
+      NSForegroundColorAttributeName: [[ThemeManager sharedThemeManager] colorForSlot:@"romajiInk"],
       NSKernAttributeName: @(0.2),
       NSParagraphStyleAttributeName: para,
-    }] autorelease]];
+    }] autorelease];
   }
-  [text addAttribute:NSParagraphStyleAttributeName value:para range:NSMakeRange(0, [text length])];
-  self.readingLabel.attributedText = text;
+  else
+  {
+    self.romajiLabel.attributedText = nil;
+  }
   [self _updateMoreReadingsBtn];
 }
 
@@ -525,7 +693,6 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   BOOL compact = (h < kLWECompactCardHeight);
   CGFloat compactScale = compact ? MAX(0.55f, h / kLWECompactCardHeight) : 1.0f;
 
-  // Re-flow the reading for the final width (the first card is prepared before layout).
   // Re-flow the reading when the width or height changed (the reading size depends on both).
   if (fabs(w - _lastLayoutWidth) > 0.5 || fabs(h - _lastLayoutHeight) > 0.5)
   {
@@ -534,7 +701,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     [self _applyReadingText];
   }
 
-  // ---- Headword: ~88pt, scaled down to fit one line beside the speaker; wraps only if
+  // ---- Headword font: ~88pt, scaled down to fit one line beside the speaker; wraps only if
   // it would otherwise be smaller than the minimum.
   NSString *headword = self.headwordLabel.text ?: @"";
   CGFloat textAvailW = contentW - 2.0 * (kLWESpeakBtnSize + kLWESpeakBtnGap);
@@ -545,39 +712,123 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   {
     size = MAX(kLWEHeadwordMinPointSize, floorf(size * textAvailW / oneLineW));
     font = [UIFont systemFontOfSize:size weight:UIFontWeightBold];
+    oneLineW = [headword sizeWithAttributes:@{NSFontAttributeName: font}].width;
   }
+  CGFloat headwordInkW = MIN(oneLineW, textAvailW);
+
+  // ---- Reading row above the headword (spec §2, §4): 20pt on a 28pt line, one line over the
+  // whole word.  Too wide for max(headword + 24, 120): shrink to 15pt, then 2 balanced lines.
+  CGFloat rowY = compact ? MAX(8.0, roundf(h * 0.06)) : MAX(12.0, roundf(h * 0.117));
+  CGFloat rowH = 0;
+  CGFloat baseSize = 0, minSize = 0;
+  LWEReadingMetrics(compact, &baseSize, &minSize);
+  NSString *top = self.topReadingText;
+  if ([top length] > 0)
+  {
+    CGFloat maxW = LWEReadingMaxWidth(headwordInkW, _topReadingIsLatin, contentW);
+    LWEReadingFit fit = LWEReadingFitToWidth(^CGFloat(CGFloat s) {
+      return [[self _topReadingString:top size:s lineHeight:0] size].width;
+    }, baseSize, minSize, maxW);
+    CGFloat lineH = roundf(fit.size * kLWEReadingLineFactor);
+    NSAttributedString *text = nil;
+    CGFloat labelW = fit.width;
+    if (fit.lines == 1)
+    {
+      text = [self _topReadingString:top size:fit.size lineHeight:0];
+      rowH = roundf(baseSize * kLWEReadingLineFactor);
+    }
+    else
+    {
+      text = [self _topReadingString:top size:fit.size lineHeight:lineH];
+      CGFloat full = ceilf([[self _topReadingString:top size:fit.size lineHeight:0] size].width);
+      if (_topReadingIsLatin)
+      {
+        // Romaji wraps at spaces only, into two even lines
+        NSAttributedString *split = LWEReadingBalancedSplitAtSpace(text);
+        if (split) text = split;
+        labelW = MIN(contentW, MAX(maxW, ceilf([text size].width)));
+      }
+      else
+      {
+        // Balanced: about half the reading per line, plus one glyph
+        labelW = LWEReadingBalancedWrapWidth(full, fit.size, maxW);
+      }
+      NSInteger lines = MAX(1, (NSInteger)lroundf(LWETextHeight(text, labelW) / lineH));
+      // Two lines grow the row (the headword block moves down); past two, the row scrolls.
+      rowH = MAX(roundf(baseSize * kLWEReadingLineFactor), lineH * MIN(lines, 2));
+    }
+    self.readingLabel.attributedText = text;
+    CGFloat labelH = MAX(LWETextHeight(text, labelW), 1.0);
+    // The label is centred on the row; a reading taller than two lines scrolls inside it.
+    BOOL scrolls = (labelH > rowH + 0.5 * lineH);
+    CGFloat containerH = scrolls ? rowH : MAX(labelH, rowH);
+    CGFloat containerY = rowY + roundf((rowH - containerH) / 2.0);
+    self.readingScrollContainer.frame = CGRectMake(hPad, containerY, contentW, containerH);
+    self.readingLabel.frame = CGRectMake(roundf((contentW - labelW) / 2.0), scrolls ? 0 : roundf((containerH - labelH) / 2.0), labelW, labelH);
+    self.readingScrollContainer.contentSize = CGSizeMake(contentW, MAX(labelH, containerH));
+  }
+  else
+  {
+    self.readingLabel.attributedText = nil;
+    self.readingScrollContainer.frame = CGRectMake(hPad, rowY, contentW, 0);
+    self.readingScrollContainer.contentSize = CGSizeZero;
+  }
+  self.readingScrollContainer.contentOffset = CGPointZero;
+  self.readingMoreIcon.hidden = YES;
+
+  // ---- Headword: em-box top 6pt under the reading row (or at the row's slot when there is none).
+  // Hiragino's em box is baseline - 0.88em ... baseline + 0.12em.
+  CGFloat emTop = (rowH > 0) ? rowY + rowH + kLWEReadingHeadwordGap : rowY;
   self.headwordLabel.font = font;
-  CGRect hwBounds = [headword boundingRectWithSize:CGSizeMake(textAvailW, CGFLOAT_MAX)
-                                           options:NSStringDrawingUsesLineFragmentOrigin
-                                        attributes:@{NSFontAttributeName: font}
-                                           context:nil];
-  CGFloat hwH = ceilf(MAX(hwBounds.size.height, font.lineHeight));
+  NSAttributedString *hwText = [[[NSAttributedString alloc] initWithString:headword attributes:@{NSFontAttributeName: font}] autorelease];
+  CGFloat hwH = MAX(LWETextHeight(hwText, textAvailW), ceilf(font.lineHeight));
+  CGFloat firstBaseline = 0, firstLineH = 0;
+  LWEFirstLineMetrics(hwText, textAvailW, &firstBaseline, &firstLineH);
+  if (firstLineH <= 0) { firstBaseline = font.ascender; firstLineH = font.lineHeight; }
+  // A label taller than its text centres it: account for that offset
+  CGFloat textH = LWETextHeight(hwText, textAvailW);
+  CGFloat centringOffset = MAX(0, (hwH - textH) / 2.0);
+  CGFloat headwordY = roundf(emTop + 0.88 * size - firstBaseline - centringOffset);
   CGFloat maxHwH = roundf(h * 0.36);
   CGFloat containerH = MIN(hwH, maxHwH);
-
-  CGFloat headwordY = compact ? MAX(8.0, roundf(h * 0.06)) : MAX(16.0, roundf(h * 0.16));
   self.headwordScrollContainer.frame = CGRectMake(hPad, headwordY, contentW, containerH);
   self.headwordLabel.frame = CGRectMake(roundf((contentW - textAvailW) / 2.0), 0, textAvailW, hwH);
   self.headwordScrollContainer.contentSize = CGSizeMake(contentW, hwH);
   self.headwordScrollContainer.contentOffset = CGPointZero;
   self.headwordMoreIcon.hidden = YES;
   [self _updateSpeakBtnPosition];
+  // Em-box bottom of the last visible headword line
+  CGFloat lastBaseline = headwordY + centringOffset + firstBaseline + MAX(0, textH - firstLineH);
+  CGFloat emBottom = MIN(lastBaseline + 0.12 * size, headwordY + containerH);
 
-  // ---- Reading under the headword
-  CGFloat readingY = headwordY + containerH + (compact ? 6.0 : 16.0);
-  CGSize readingFit = [self.readingLabel.attributedText boundingRectWithSize:CGSizeMake(contentW, CGFLOAT_MAX)
-                                                                     options:NSStringDrawingUsesLineFragmentOrigin
-                                                                     context:nil].size;
-  CGFloat readingH = MAX(44.0, ceilf(readingFit.height));
-  CGFloat readingContainerH = MIN(readingH, roundf(h * 0.3));
-  self.readingScrollContainer.frame = CGRectMake(hPad, readingY, contentW, readingContainerH);
-  self.readingLabel.frame = CGRectMake(0, 0, contentW, readingH);
-  self.readingScrollContainer.contentSize = CGSizeMake(contentW, readingH);
-  self.readingMoreIcon.hidden = YES;
-  // Toggle ("Show Reading") overlays the reading row
-  self.toggleReadingBtn.frame = CGRectMake(hPad, readingY, contentW, readingContainerH);
+  // ---- Romaji: its own row, 8pt under the headword's em box (kept, blank, while the reading is hidden)
+  CGFloat bottom = emBottom;
+  if ([self.romajiLabel.attributedText length] > 0)
+  {
+    CGFloat romajiH = MAX(22.0, LWETextHeight(self.romajiLabel.attributedText, contentW));
+    self.romajiLabel.frame = CGRectMake(hPad, roundf(emBottom + kLWERomajiHeadwordGap), contentW, romajiH);
+    bottom = CGRectGetMaxY(self.romajiLabel.frame);
+  }
+  else
+  {
+    self.romajiLabel.frame = CGRectMake(hPad, roundf(emBottom), contentW, 0);
+  }
 
-  CGFloat bottom = readingY + readingContainerH;
+  // ---- Toggle: content width x 44pt (or the row + 16pt), centred on the reading row; for a
+  // kana-only headword it sits on the romaji row instead.
+  if (_toggleOnRomajiRow)
+  {
+    CGRect romajiRow = self.romajiLabel.frame;
+    CGFloat btnH = MAX(kLWEToggleMinHeight, romajiRow.size.height + 2.0 * kLWEToggleRowOutset);
+    self.toggleReadingBtn.frame = CGRectMake(hPad, roundf(CGRectGetMidY(romajiRow) - btnH / 2.0), contentW, btnH);
+  }
+  else
+  {
+    CGFloat row = MAX(rowH, roundf(baseSize * kLWEReadingLineFactor));
+    CGFloat btnH = MAX(kLWEToggleMinHeight, row + 2.0 * kLWEToggleRowOutset);
+    self.toggleReadingBtn.frame = CGRectMake(hPad, roundf(rowY + row / 2.0 - btnH / 2.0), contentW, btnH);
+  }
+
   NSInteger extra = LWEExtraReadingCount(self.kanaReadings, self.romajiReadings);
   if (extra > 0)
   {
@@ -591,9 +842,11 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   }
 
   // ---- Meaning: a short rule, then the meaning (both drawn by the HTML template)
-  CGFloat webY = bottom + (compact ? 10.0 : 20.0);
+  CGFloat webY = roundf(bottom + (compact ? 10.0 : kLWEMeaningGap));
   CGFloat webH = MAX(60.0, h - webY - 8.0);
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
+  [self _updateMeaningInsets];
+  [self _updateReadingToggleAppearance];
 }
 #endif
 
@@ -617,12 +870,19 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
   // Reading row at ~25% from top of card area so it lands near 30% of screen height.
   CGFloat readingY = MAX(20.0, roundf(h * 0.25));
-  CGFloat readingH = 42.0;
+  CGFloat readingH = LWELegacyReadingRowHeight;
+#if defined(LWE_CFLASH)
+  // Fit the pinyin to the row's width first, then grow the row to the fitted text (two wrapped
+  // lines at a large text size need ~58pt, so they'd scroll in a 42pt row)
+  self.readingScrollContainer.frame = CGRectMake(hPad, readingY, contentW, readingH);
+  readingH = LWELegacyReadingRowHeightFor([self _fitLegacyReading]);
+#endif
   self.readingScrollContainer.frame = CGRectMake(hPad, readingY, contentW, readingH);
   self.readingMoreIcon.frame = CGRectMake(2.0, readingY + readingH - 17.0, 26.0, 17.0);
-  // Toggle overlays the full reading row; positioned above the reveal-button zone
-  // so it intercepts taps without triggering the definition reveal.
-  self.toggleReadingBtn.frame = CGRectMake(hPad, readingY, contentW, readingH);
+  // Toggle overlays the full reading row, grown to a 44pt hit area (1pt above and below the 42pt
+  // row); positioned above the reveal-button zone so it intercepts taps without revealing.
+  CGFloat toggleH = MAX(kLWEToggleMinHeight, readingH);
+  self.toggleReadingBtn.frame = CGRectMake(hPad, readingY - roundf((toggleH - readingH) / 2.0), contentW, toggleH);
 
   // Headword immediately below reading.
   CGFloat headwordY = readingY + readingH + 4.0;
@@ -637,18 +897,88 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   CGFloat webY = headwordY + headwordH + 8.0;
   CGFloat webH = MAX(60.0, h - webY - 8.0);
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
+#if defined(LWE_CFLASH)
+  // Centre the fitted pinyin in the (possibly grown) row
+  [self.readingScrollContainer resizeScrollViewWithContentView:self.readingLabel];
+  [self _updateReadingContainer];
+#endif
+  [self _updateMeaningInsets];
+  [self _updateReadingToggleAppearance];
 }
+
+#if defined(LWE_CFLASH)
+- (CGFloat) _fitLegacyReading
+{
+  NSAttributedString *source = self.legacyReadingSource;
+  CGRect row = self.readingScrollContainer.frame;
+  if ([source length] == 0 || row.size.width <= 0) return 0;
+
+  // Spec §8: 20pt regular pinyin, max width max(headword + 48, 160); shrink in 0.5pt steps to 15pt,
+  // then 2 balanced lines at 15pt (21pt lines = the 42pt row), breaking at syllable spaces only.
+  NSString *headword = self.headwordLabel.text ?: @"";
+  CGFloat headwordInkW = MIN([headword sizeWithAttributes:@{NSFontAttributeName: self.headwordLabel.font}].width,
+                             self.headwordScrollContainer.frame.size.width);
+  CGFloat maxW = LWEReadingMaxWidth(headwordInkW, YES, row.size.width);
+  CGFloat baseSize = 0, minSize = 0;
+  LWEReadingMetrics(NO, &baseSize, &minSize);
+  NSAttributedString *(^build)(CGFloat, CGFloat) = ^NSAttributedString *(CGFloat size, CGFloat lineHeight) {
+    NSMutableAttributedString *text = [[source mutableCopy] autorelease];
+    NSRange all = NSMakeRange(0, [text length]);
+    [text addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:size weight:UIFontWeightRegular] range:all];
+    NSMutableParagraphStyle *para = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    para.alignment = NSTextAlignmentCenter;
+    para.lineBreakMode = NSLineBreakByWordWrapping;
+    if (lineHeight > 0)
+    {
+      para.minimumLineHeight = lineHeight;
+      para.maximumLineHeight = lineHeight;
+    }
+    [text addAttribute:NSParagraphStyleAttributeName value:para range:all];
+    return text;
+  };
+  LWEReadingFit fit = LWEReadingFitToWidth(^CGFloat(CGFloat size) { return [build(size, 0) size].width; }, baseSize, minSize, maxW);
+  NSAttributedString *text = nil;
+  CGFloat labelW = fit.width;
+  if (fit.lines == 1)
+  {
+    text = build(fit.size, 0);
+  }
+  else
+  {
+    text = build(fit.size, roundf(fit.size * kLWEReadingLineFactor));
+    NSAttributedString *split = LWEReadingBalancedSplitAtSpace(text);
+    if (split) text = split;
+    labelW = MIN(row.size.width, MAX(maxW, ceilf([text size].width)));
+  }
+  self.readingLabel.attributedText = text;
+  CGFloat labelH = MAX(1.0, LWETextHeight(text, labelW));
+  self.readingLabel.frame = CGRectMake(roundf((row.size.width - labelW) / 2.0), 0, labelW, labelH);
+  // Centres the label in the row (the layout grows the row to labelH)
+  [self.readingScrollContainer resizeScrollViewWithContentView:self.readingLabel];
+  [self _updateReadingContainer];
+  return labelH;
+}
+#endif
 
 - (CGFloat) revealAreaTop
 {
   CGFloat top = CGRectGetMaxY(self.headwordScrollContainer.frame);
-  top = MAX(top, CGRectGetMaxY(self.toggleReadingBtn.frame));
 #if defined(LWE_JFLASH)
-  if (self.moreReadingsBtn && self.moreReadingsBtn.hidden == NO)
+  if (_modernCard)
   {
-    top = MAX(top, CGRectGetMaxY(self.moreReadingsBtn.frame));
+    // The reading row (and its toggle) sit above the headword now: the zone starts under the
+    // headword, the romaji row and the "+N readings" pill -- or under the toggle when a kana-only
+    // headword puts it on the romaji row.
+    if ([self.romajiLabel.attributedText length] > 0) top = MAX(top, CGRectGetMaxY(self.romajiLabel.frame));
+    if (self.toggleReadingBtn.hidden == NO) top = MAX(top, CGRectGetMaxY(self.toggleReadingBtn.frame));
+    if (self.moreReadingsBtn && self.moreReadingsBtn.hidden == NO)
+    {
+      top = MAX(top, CGRectGetMaxY(self.moreReadingsBtn.frame));
+    }
+    return top + 4.0;
   }
 #endif
+  top = MAX(top, CGRectGetMaxY(self.toggleReadingBtn.frame));
   return top + 4.0;
 }
 
@@ -731,25 +1061,49 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
  */
 - (IBAction) doToggleReadingBtn
 {
-  if (self.readingScrollContainer.hidden == YES)
+  BOOL show = (self.readingScrollContainer.hidden == YES);
+  void (^change)(void) = ^{
+    if (show)
+    {
+      [self turnReadingOn];
+      self.readingVisible = YES;
+    }
+    else
+    {
+      [self turnReadingOff];
+      self.readingVisible = NO;
+    }
+    // The reader's choice holds for the rest of the session, on new card views too
+    sLWESessionReadingVisible = show;
+  };
+  // 120ms crossfade between the pill and the reading (both states are the same height, so
+  // nothing moves); instant under Reduce Motion.
+  if (UIAccessibilityIsReduceMotionEnabled() || self.view.window == nil)
   {
-    [self turnReadingOn];
-    self.readingVisible = YES;
+    change();
   }
   else
   {
-    [self turnReadingOff];
-    self.readingVisible = NO;
+    [UIView transitionWithView:self.view
+                      duration:kLWEReadingCrossfade
+                       options:UIViewAnimationOptionTransitionCrossDissolve | UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionAllowUserInteraction
+                    animations:change
+                    completion:nil];
   }
+  // VoiceOver: the focused toggle now reads the reading (or "Show Reading"); say it right away
+  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, self.toggleReadingBtn);
 }
 
 #pragma mark - Public Helper Methods
 
 - (void) turnReadingOn
 {
-  // Change state
+  // Change state.  As in the original app, the (now blank) toggle stays over the reading row, so
+  // tapping the reading hides it again (#13 had hidden the toggle here, which removed that).
   self.readingScrollContainer.hidden = NO;
-  self.toggleReadingBtn.hidden = YES;
+#if defined(LWE_JFLASH)
+  self.romajiLabel.hidden = NO;
+#endif
   [self.toggleReadingBtn setTitle:@"" forState:UIControlStateNormal];
   // Relayout so the reading row (sized while hidden) gets a real frame on screen.
   [self layoutCardSubviews];
@@ -759,6 +1113,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 #if defined(LWE_JFLASH)
   if (_modernCard) [self _updateMoreReadingsBtn];
 #endif
+  [self _updateReadingToggle];
 }
 
 - (void) turnReadingOff
@@ -767,6 +1122,10 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [self _updateReadingContainer];
   
   self.readingScrollContainer.hidden = YES;
+#if defined(LWE_JFLASH)
+  // The romaji row is kept (blank) so the meaning doesn't jump
+  self.romajiLabel.hidden = YES;
+#endif
   self.toggleReadingBtn.hidden = NO;
   [self.toggleReadingBtn setTitle:NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading") forState:UIControlStateNormal];
 
@@ -775,6 +1134,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 #if defined(LWE_JFLASH)
   if (_modernCard) [self _updateMoreReadingsBtn];
 #endif
+  [self _updateReadingToggle];
 }
 
 //! shows or hides the reading label and toggleButton according to the readingVisible bool
@@ -791,6 +1151,117 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 }
 
 #pragma mark - Private Methods
+
+- (void) _updateReadingToggle
+{
+  NSString *reading = self.readingLabel.attributedText.string ?: self.readingLabel.text;
+#if defined(LWE_JFLASH)
+  // Kana, then romaji (its own row under the headword)
+  NSString *romajiText = self.romajiLabel.attributedText.string;
+  if ([romajiText length] > 0)
+  {
+    reading = ([reading length] > 0) ? [NSString stringWithFormat:@"%@\n%@", reading, romajiText] : romajiText;
+  }
+#endif
+  reading = [reading stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+  if ([reading length] == 0)
+  {
+    // Nothing to show (e.g. a kana-only word in kana mode): no "Show Reading" button either.
+    // Only undo this hide ourselves, so the E-to-J delegate's own hide is left alone.
+    if (self.toggleReadingBtn.hidden == NO) _toggleHiddenForNoReading = YES;
+    self.toggleReadingBtn.hidden = YES;
+    return;
+  }
+  if (_toggleHiddenForNoReading)
+  {
+    _toggleHiddenForNoReading = NO;
+    self.toggleReadingBtn.hidden = NO;
+  }
+
+  if (self.readingScrollContainer.hidden)
+  {
+    self.toggleReadingBtn.accessibilityLabel = NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading");
+    self.toggleReadingBtn.accessibilityHint = nil;
+  }
+  else
+  {
+    // Reading visible: the button over it reads the reading, and says what a double-tap does
+    // Spoken from the unwrapped text: a pause between the reading and romaji rows only
+    NSString *spokenTop = self.readingLabel.attributedText.string ?: self.readingLabel.text;
+    NSString *spokenBelow = nil;
+#if defined(LWE_JFLASH)
+    if (_modernCard)
+    {
+      spokenTop = self.topReadingText;
+      spokenBelow = self.romajiLabel.attributedText.string;
+    }
+#elif defined(LWE_CFLASH)
+    if ([self.legacyReadingSource length] > 0) spokenTop = [self.legacyReadingSource string];
+#endif
+    self.toggleReadingBtn.accessibilityLabel = LWEReadingSpokenLabel(spokenTop, spokenBelow);
+    self.toggleReadingBtn.accessibilityHint = NSLocalizedString(@"Hides the reading", @"CardViewController.HideReadingAccessibilityHint");
+  }
+  // When the toggle is off screen (E-to-J after reveal), VoiceOver reads the reading row itself
+  self.readingScrollContainer.accessibilityElementsHidden = (self.toggleReadingBtn.hidden == NO);
+#if defined(LWE_JFLASH)
+  self.romajiLabel.isAccessibilityElement = (self.toggleReadingBtn.hidden && self.romajiLabel.hidden == NO);
+#endif
+  [self _updateReadingToggleAppearance];
+}
+
+- (void) _updateReadingToggleAppearance
+{
+  UIButton *button = self.toggleReadingBtn;
+  if (button == nil) return;
+  BOOL readingHidden = self.readingScrollContainer.hidden;
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  if (@available(iOS 15.0, *))
+  {
+    UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
+    config.background.backgroundColor = [UIColor clearColor];
+    config.contentInsets = NSDirectionalEdgeInsetsZero;
+    if (readingHidden)
+    {
+      // 24pt pill (readingToggleFill), eye.slash 15pt semibold, 5pt gap, 13pt semibold label in
+      // toggleInk; centred in the 44pt button and as wide as its content.
+      // Same Dynamic Type rule as the reading (1.4x cap: 13 -> 18pt)
+      CGFloat labelSize = roundf(kLWEReadingPillLabelSize * LWEReadingTypeScale(LWEDynamicTypeSizeMultiplier(), NO));
+      CGFloat pillH = MAX(kLWEReadingPillHeight, roundf(labelSize * 1.85));
+      CGFloat glyphSize = roundf(15.0 * labelSize / kLWEReadingPillLabelSize);
+      NSString *title = NSLocalizedString(@"Show Reading", @"CardViewController.ShowReading");
+      UIFont *labelFont = [UIFont systemFontOfSize:labelSize weight:UIFontWeightSemibold];
+      // EN tracking 0.1; Japanese (Hiragino W6 via the system font) has none
+      BOOL latinTitle = ([title canBeConvertedToEncoding:NSASCIIStringEncoding]);
+      NSNumber *kern = @(latinTitle ? 0.1 : 0.0);
+      UIImage *glyph = LWESymbolInBox(@"eye.slash", glyphSize, UIImageSymbolWeightSemibold);
+      config.title = title;
+      config.image = glyph;
+      config.imagePlacement = NSDirectionalRectEdgeLeading;
+      config.imagePadding = 5.0;
+      config.contentInsets = NSDirectionalEdgeInsetsMake(0, 9, 0, 11);
+      config.baseForegroundColor = [tm colorForSlot:@"toggleInk"];
+      config.titleLineBreakMode = NSLineBreakByTruncatingTail;
+      config.titleTextAttributesTransformer = ^NSDictionary<NSAttributedStringKey, id> *(NSDictionary<NSAttributedStringKey, id> *incoming) {
+        NSMutableDictionary *attrs = [[incoming mutableCopy] autorelease];
+        attrs[NSFontAttributeName] = labelFont;
+        attrs[NSKernAttributeName] = kern;
+        return attrs;
+      };
+      CGFloat titleW = ceilf([title sizeWithAttributes:@{NSFontAttributeName: labelFont, NSKernAttributeName: kern}].width);
+      CGFloat pillW = ceilf(9.0 + glyph.size.width + 5.0 + titleW + 11.0);
+      CGSize bounds = button.bounds.size;
+      CGFloat vInset = MAX(0, roundf((bounds.height - pillH) / 2.0));
+      CGFloat hInset = MAX(0, floorf((bounds.width - pillW) / 2.0));
+      config.background.backgroundColor = [tm colorForSlot:@"readingToggleFill"];
+      config.background.cornerRadius = pillH / 2.0;
+      config.background.backgroundInsets = NSDirectionalEdgeInsetsMake(vInset, hInset, vInset, hInset);
+      config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
+    }
+    // Shown: no title, no image, no background -- but the button stays over the reading, tappable
+    button.configuration = config;
+    [button setNeedsUpdateConfiguration];
+  }
+}
 
 // Toggle "more" icon to indicate the user can scroll meaning down
 - (BOOL) _shouldHideMoreIconForLabel:(UILabel *)theLabel forScrollView:(UIScrollView *)scrollViewContainer 
@@ -821,22 +1292,33 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     _lastLayoutHeight = self.view.bounds.size.height;
     [self _applyReadingText];
     [self _layoutModernCard];
+    [self _updateReadingToggle];
     return;
   }
   self.readingLabel.text = card.reading;
 #elif defined(LWE_CFLASH)
-  self.readingLabel.attributedText = [card attributedReading];
+  self.legacyReadingSource = [card attributedReading];
+  self.readingLabel.attributedText = self.legacyReadingSource;
 #endif
   // These calls re-size the reading & headword labels.  They used to take the scrollContainer as well,
   // but we infer it (superview) of the labels inside this call.
   CGFloat dtScale = LWEDynamicTypeSizeMultiplier();
+#if defined(LWE_JFLASH)
   [self.readingLabel resizeWithMinFontSize:(NSInteger)(READING_MIN_FONTSIZE * dtScale) maxFontSize:(NSInteger)(READING_MAX_FONTSIZE * dtScale)];
+#endif
   [self.headwordLabel resizeWithMinFontSize:(NSInteger)(HEADWORD_MIN_FONTSIZE * dtScale) maxFontSize:(NSInteger)(HEADWORD_MAX_FONTSIZE * dtScale)];
   
   // Now resize the scroll views as necessary based on the resized views above, if necessary.
   // This call also centers the label inside the scroll view.
+#if defined(LWE_JFLASH)
   [self.readingScrollContainer resizeScrollViewWithContentView:self.readingLabel];
+#endif
   [self.headwordScrollContainer resizeScrollViewWithContentView:self.headwordLabel];
+#if defined(LWE_CFLASH)
+  // Pinyin: 20pt regular, shrunk or wrapped to the headword (resizeWithMinFontSize: would replace
+  // the attributed fonts with the XIB's)
+  [self _fitLegacyReading];
+#endif
 
   //[self _updateReadingContainer];
   self.headwordMoreIcon.hidden = [self _shouldHideMoreIconForLabel:self.headwordLabel
@@ -844,6 +1326,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 #if defined(LWE_JFLASH)
   [self _updateSpeakBtnPosition];
 #endif
+  [self _updateReadingToggle];
 }
 
 - (void) _updateReadingContainer
@@ -871,6 +1354,113 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   _tmpJavascript = [js retain];
 
   [_meaningWebView evaluateJavaScript:js completionHandler:nil];
+  [self _updateMeaningInsets];
+}
+
+#pragma mark - Meaning vs the score bubble
+
+- (CGSize) _meaningCornerSize
+{
+  UIView *bubbleView = self.moodIcon.view;
+  UIImageView *bubble = self.moodIcon.talkBubble;
+  BOOL bubbleVisible = (bubbleView != nil && bubbleView.hidden == NO && bubble != nil && bubble.hidden == NO);
+  UIView *area = self.meaningWebViewContainer;
+  if (bubbleVisible && bubble.window != nil && bubble.window == area.window)
+  {
+    // Where the bubble really is (the study view moves it onto the card, bottom right)
+    return LWEMeaningCornerForBubble([bubble convertRect:bubble.bounds toView:area], area.bounds.size);
+  }
+  // Not on screen yet: the reserved 56 x 44pt corner
+  CGFloat nudge = [[ThemeManager sharedThemeManager] cardRimBubbleNudge];
+  return LWEMeaningCornerSize(bubbleVisible, nudge, area.bounds.size);
+}
+
+- (void) scoreBubbleDidMove
+{
+  [self _updateMeaningInsets];
+}
+
+- (void) _updateMeaningInsets
+{
+  if (_meaningWebView == nil) return;
+  CGSize area = self.meaningWebViewContainer.bounds.size;
+  if (area.width <= 0 || area.height <= 0) return;
+  CGSize corner = [self _meaningCornerSize];
+  // Two floats at the top of the meaning: a zero-width one as tall as the area above the bubble, then
+  // the corner itself, so lines next to the bubble wrap short of it.  Returns the meaning's height (pt).
+  NSString *js = [NSString stringWithFormat:
+    @"(function(W,H,cw,ch){var c=document.getElementById('container');if(!c||!W||!window.innerWidth)return -1;"
+     "var k=window.innerWidth/W,a=document.getElementById('lwe-corner-a'),b=document.getElementById('lwe-corner-b');"
+     "if(!a){a=document.createElement('div');a.id='lwe-corner-a';b=document.createElement('div');b.id='lwe-corner-b';}"
+     "if(c.firstChild!==a)c.insertBefore(a,c.firstChild);if(a.nextSibling!==b)c.insertBefore(b,a.nextSibling);"
+     "a.style.cssText='float:right;clear:right;width:0;height:0;margin:0;padding:0;border:0;';"
+     "b.style.cssText='float:right;clear:right;width:0;height:0;margin:0;padding:0;border:0;';"
+     "if(cw>0&&ch>0){var top=a.getBoundingClientRect().top+window.scrollY;"
+     "a.style.height=Math.max(0,H*k-ch*k-top)+'px';b.style.width=(cw*k)+'px';b.style.height=(ch*k)+'px';}"
+     "return Math.ceil((c.getBoundingClientRect().bottom+window.scrollY)/k);})(%.1f,%.1f,%.1f,%.1f)",
+     area.width, area.height, corner.width, corner.height];
+  NSUInteger token = ++_meaningMeasureToken;
+  [_meaningWebView evaluateJavaScript:js completionHandler:^(id result, NSError *error) {
+    if (token != _meaningMeasureToken || ![result isKindOfClass:[NSNumber class]]) return;
+    CGFloat contentHeight = [result doubleValue];
+    if (contentHeight < 0) return;
+    CGSize nowArea = self.meaningWebViewContainer.bounds.size;
+    LWEMeaningInsets insets = LWEMeaningInsetsFor(contentHeight, nowArea.height, [self _meaningCornerSize]);
+    if (insets.wrapCorner == NO)
+    {
+      // Scrolling (or no bubble): no corner notch; the bottom inset lets the end scroll clear of the bubble
+      [_meaningWebView evaluateJavaScript:@"(function(){['lwe-corner-a','lwe-corner-b'].forEach(function(i){var e=document.getElementById(i);if(e){e.style.width='0';e.style.height='0';}});})()" completionHandler:nil];
+    }
+    _meaningInsets = insets;
+    UIScrollView *scroll = _meaningWebView.scrollView;
+    UIEdgeInsets inset = scroll.contentInset;
+    inset.bottom = insets.bottomInset;
+    scroll.contentInset = inset;
+    UIEdgeInsets indicators = scroll.verticalScrollIndicatorInsets;
+    indicators.bottom = insets.bottomInset;
+    scroll.verticalScrollIndicatorInsets = indicators;
+    [self _updateMeaningFade];
+  }];
+}
+
+- (void) _updateMeaningFade
+{
+  UIView *area = self.meaningWebViewContainer;
+  UIScrollView *scroll = _meaningWebView.scrollView;
+  CGFloat h = area.bounds.size.height;
+  if (_meaningInsets.scrolls == NO || h <= 0)
+  {
+    area.layer.mask = nil;
+    return;
+  }
+  // Scrolling: visible down to the bubble's top, with a soft fade there while more is below
+  CGFloat visibleH = LWEMeaningVisibleHeight(_meaningInsets, h);
+  BOOL fade = (visibleH > LWEMeaningFadeHeight * 2.0) &&
+              LWEMeaningShowsBottomFade(_meaningInsets, scroll.contentOffset.y, scroll.contentSize.height, scroll.bounds.size.height);
+  CAGradientLayer *mask = [area.layer.mask isKindOfClass:[CAGradientLayer class]] ? (CAGradientLayer *)area.layer.mask : nil;
+  if (mask == nil)
+  {
+    mask = [CAGradientLayer layer];
+    mask.colors = @[(id)[UIColor blackColor].CGColor, (id)[UIColor blackColor].CGColor,
+                    (id)[UIColor clearColor].CGColor, (id)[UIColor clearColor].CGColor];
+    area.layer.mask = mask;
+  }
+  CGFloat fadeTop = fade ? (visibleH - LWEMeaningFadeHeight) : MAX(0.0, visibleH - 0.5);
+  [CATransaction begin];
+  [CATransaction setDisableActions:YES];
+  mask.frame = area.bounds;
+  mask.locations = @[@0.0, @(fadeTop / h), @(visibleH / h), @1.0];
+  [CATransaction commit];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+  if (context == kLWEMeaningOffsetContext)
+  {
+    [self _updateMeaningFade];
+    return;
+  }
+  [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
 }
 
 
@@ -888,6 +1478,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     [_tmpJavascript release];
     _tmpJavascript = nil;
   }
+  [self _updateMeaningInsets];
 }
 
 #pragma mark - Plumbing
@@ -908,6 +1499,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   self.speakBtn = nil;
   self.speechSynthesizer = nil;
   self.moreReadingsBtn = nil;
+  self.romajiLabel = nil;
 #endif
 }
 
@@ -934,8 +1526,17 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [kanaReadings release];
   [romajiReadings release];
   [moreReadingsBtn release];
+  [romajiLabel release];
+  [topReadingText release];
+#endif
+#if defined(LWE_CFLASH)
+  [legacyReadingSource release];
 #endif
 
+  if (_observingMeaningScroll)
+  {
+    [_meaningWebView.scrollView removeObserver:self forKeyPath:@"contentOffset" context:kLWEMeaningOffsetContext];
+  }
   _meaningWebView.navigationDelegate = nil;
   [_meaningWebView release];
   [meaningWebViewContainer release];
