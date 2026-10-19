@@ -426,7 +426,7 @@
 "Rate Us" = "App Storeで評価";
 
 /* SettingsViewController.Plugins_NumInstalled  (SettingsViewController.m) */
-"%d installed" = "%d件インストール済み";
+"%d installed" = "%d件";
 
 /* Global.None  (SettingsViewController.m) */
 "None" = "なし";
