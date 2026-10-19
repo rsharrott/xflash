@@ -144,21 +144,50 @@ NSInteger const kLWELearnedCardLevel       = 5;
   self.cardCount = totalCount;
 }
 
+//! Keys of the saved-session plist (ids.plist)
+static NSString * const kLWEFrozenTagIdKey  = @"tagId";
+static NSString * const kLWEFrozenUserIdKey = @"userId";
+static NSString * const kLWEFrozenLevelsKey = @"levels";
+
+//! Deletes the saved-session plist if there is one (LWEFile +deleteFile: logs an error when there isn't)
+static void LWEDeleteFrozenCardIds(void)
+{
+  NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
+  if ([[NSFileManager defaultManager] fileExistsAtPath:path])
+  {
+    [LWEFile deleteFile:path];
+  }
+}
+
 /**
  * Unarchive plist file containing the user's last session data.
- * The plist holds six arrays (one per level) of card ids; they come back as blank cards,
- * the same way CardPeer +retrieveCardsSortedByLevelForTag: returns them.
- * Returns nil if there is no plist or it is not in that shape.
+ * The plist is a dictionary: the tag and user it was saved for, and six arrays (one per level) of
+ * card ids. The ids come back as blank cards, the same way CardPeer +retrieveCardsSortedByLevelForTag:
+ * returns them.
+ * Returns nil if there is no plist, it is not in that shape, it was saved for another tag or user,
+ * or its card total doesn't match this tag's card count. Does not delete the file (-populateCardIds does).
  */
 - (NSMutableArray *) thawCardIds
 {
   NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
-  NSArray *frozenLevels = [NSArray arrayWithContentsOfFile:path];
-  if ([frozenLevels count] != 6)
+  NSDictionary *frozen = [NSDictionary dictionaryWithContentsOfFile:path];
+  if (frozen == nil)
+  {
+    return nil;   // no file, or an old-format (array) file
+  }
+  
+  id frozenTagId = [frozen objectForKey:kLWEFrozenTagIdKey];
+  id frozenUserId = [frozen objectForKey:kLWEFrozenUserIdKey];
+  NSArray *frozenLevels = [frozen objectForKey:kLWEFrozenLevelsKey];
+  NSInteger userId = [[NSUserDefaults standardUserDefaults] integerForKey:APP_USER];
+  if ([frozenTagId isKindOfClass:[NSNumber class]] == NO || [frozenTagId integerValue] != self.tagId ||
+      [frozenUserId isKindOfClass:[NSNumber class]] == NO || [frozenUserId integerValue] != userId ||
+      [frozenLevels isKindOfClass:[NSArray class]] == NO || [frozenLevels count] != 6)
   {
     return nil;
   }
   
+  NSInteger total = 0;
   NSMutableArray *cardsByLevelTmp = [NSMutableArray arrayWithCapacity:6];
   for (id frozenLevel in frozenLevels)
   {
@@ -175,7 +204,15 @@ NSInteger const kLWELearnedCardLevel       = 5;
       }
       [levelCards addObject:[CardPeer blankCardWithId:[cardId integerValue]]];
     }
+    total += [levelCards count];
     [cardsByLevelTmp addObject:levelCards];
+  }
+  
+  // The tag's cached card count (from the tags table). An uninitialized count can't be checked,
+  // so don't trust the file then either.
+  if (self.cardCount < 0 || total != self.cardCount)
+  {
+    return nil;
   }
   return cardsByLevelTmp;
 }
@@ -183,11 +220,20 @@ NSInteger const kLWELearnedCardLevel       = 5;
 
 /**
  * Archive current session data to a plist so we can re-start at same place in next session.
- * cardsByLevel holds Card objects, which a plist cannot store, so write their ids instead.
+ * cardsByLevel holds Card objects, which a plist cannot store, so write their ids, along with the
+ * tag and user they belong to (see -thawCardIds).
  */
 - (void) freezeCardIds
 {
-  NSMutableArray *frozenLevels = [NSMutableArray arrayWithCapacity:[self.cardsByLevel count]];
+  NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
+  if ([self.cardsByLevel count] != 6)
+  {
+    // Nothing loaded to save; make sure no older session is left behind either
+    LWEDeleteFrozenCardIds();
+    return;
+  }
+  
+  NSMutableArray *frozenLevels = [NSMutableArray arrayWithCapacity:6];
   for (NSArray *levelCards in self.cardsByLevel)
   {
     NSMutableArray *cardIds = [NSMutableArray arrayWithCapacity:[levelCards count]];
@@ -197,8 +243,13 @@ NSInteger const kLWELearnedCardLevel       = 5;
     }
     [frozenLevels addObject:cardIds];
   }
-  NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
-  [frozenLevels writeToFile:path atomically:YES];
+  NSInteger userId = [[NSUserDefaults standardUserDefaults] integerForKey:APP_USER];
+  NSDictionary *frozen = [NSDictionary dictionaryWithObjectsAndKeys:
+                          [NSNumber numberWithInteger:self.tagId], kLWEFrozenTagIdKey,
+                          [NSNumber numberWithInteger:userId], kLWEFrozenUserIdKey,
+                          frozenLevels, kLWEFrozenLevelsKey,
+                          nil];
+  [frozen writeToFile:path atomically:YES];
 }
 
 
@@ -206,14 +257,12 @@ NSInteger const kLWELearnedCardLevel       = 5;
 - (void) populateCardIds
 {
   NSMutableArray *tmpCardIdsArray = [self thawCardIds];
-  if (tmpCardIdsArray)
+  // The saved session is good for one load only: delete it whether it matched this tag or not,
+  // so a leftover file can never be loaded into a later set.
+  LWEDeleteFrozenCardIds();
+  if (tmpCardIdsArray == nil)
   {
-    // Delete the PLIST now that we have it in memory
-    [LWEFile deleteFile:[LWEFile createCachesPathWithFilename:@"ids.plist"]];
-  }
-  else
-  {
-    // No PLIST, generate new card Ids array
+    // No usable saved session: get the cards (and their levels) from the database
     tmpCardIdsArray = [CardPeer retrieveCardsSortedByLevelForTag:self];
   }
   

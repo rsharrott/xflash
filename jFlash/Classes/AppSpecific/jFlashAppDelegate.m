@@ -32,12 +32,13 @@
 // Scene delegate — defined here to avoid adding new project files.
 // UIKit creates a fresh instance of this class per scene; it grabs
 // the existing app delegate to access the NIB-created window.
+//! YES once the app (any scene) has been in the background in this process.
+//! sceneWillEnterForeground: also fires on a cold launch, and only a return from the background
+//! should be forwarded (see below). It lives here, not in the scene delegate, because UIKit can
+//! disconnect a background scene and connect a new one (with a new delegate) in the same process.
+static BOOL LWEAppHasEnteredBackground = NO;
+
 @interface LWESceneDelegate : UIResponder <UIWindowSceneDelegate>
-{
-  //! YES once the scene has been in the background. sceneWillEnterForeground: also fires on a
-  //! cold launch, and only a return from the background should be forwarded (see below).
-  BOOL _hasEnteredBackground;
-}
 @property (nonatomic, strong) UIWindow *window;
 @end
 
@@ -102,7 +103,7 @@
   // On a cold launch this fires before the user DB is open, and -applicationWillEnterForeground:
   // deletes ids.plist, which Tag -populateCardIds still has to read to restore the saved card
   // order. Only forward it when coming back from the background (the old app-delegate behaviour).
-  if (_hasEnteredBackground == NO)
+  if (LWEAppHasEnteredBackground == NO)
   {
     return;
   }
@@ -112,7 +113,7 @@
 
 - (void)sceneDidEnterBackground:(UIScene *)scene
 {
-  _hasEnteredBackground = YES;
+  LWEAppHasEnteredBackground = YES;
   jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
   [appDelegate applicationDidEnterBackground:[UIApplication sharedApplication]];
 }
