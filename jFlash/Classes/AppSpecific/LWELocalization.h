@@ -52,7 +52,7 @@ static inline void LWELocalizeInterface(UIView *view)
     // translation for it.  Never write back a label that UIKit derived from the title: on iOS 26.3
     // the getter returns nil when none was set (VoiceOver then reads the live title), but an
     // unconditional write-back would pin VoiceOver to a title that changes later (e.g. the reading
-    // toggle, whose title becomes "").  With no Interface.strings (cFlash, jFlashJr) nothing changes.
+    // toggle, whose title becomes "").  With no Interface.strings (cFlash) nothing changes.
     NSString *axLabel = button.accessibilityLabel;
     NSString *axLocalized = LWEInterfaceString(axLabel);
     if (axLabel && [axLocalized isEqualToString:axLabel] == NO)

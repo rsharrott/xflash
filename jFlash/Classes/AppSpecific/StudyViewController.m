@@ -598,6 +598,12 @@
     self.currentCard = [CardPeer retrieveCardByPK:self.currentCard.cardId];
     [self doChangeCard:self.currentCard direction:nil];
   }
+  else if ([keyPath isEqualToString:APP_HEADWORD_TYPE])
+  {
+    // Observed in every build (see -viewDidLoad) but only matters for cFlash's simplified/traditional
+    // headwords. Handle and ignore it here so a write never reaches NSObject, which raises on
+    // unhandled KVO notifications.
+  }
 #endif
   else
   {
