@@ -144,19 +144,61 @@ NSInteger const kLWELearnedCardLevel       = 5;
   self.cardCount = totalCount;
 }
 
-/** Unarchive plist file containing the user's last session data */
+/**
+ * Unarchive plist file containing the user's last session data.
+ * The plist holds six arrays (one per level) of card ids; they come back as blank cards,
+ * the same way CardPeer +retrieveCardsSortedByLevelForTag: returns them.
+ * Returns nil if there is no plist or it is not in that shape.
+ */
 - (NSMutableArray *) thawCardIds
 {
   NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
-  return [NSMutableArray arrayWithContentsOfFile:path];
+  NSArray *frozenLevels = [NSArray arrayWithContentsOfFile:path];
+  if ([frozenLevels count] != 6)
+  {
+    return nil;
+  }
+  
+  NSMutableArray *cardsByLevelTmp = [NSMutableArray arrayWithCapacity:6];
+  for (id frozenLevel in frozenLevels)
+  {
+    if ([frozenLevel isKindOfClass:[NSArray class]] == NO)
+    {
+      return nil;
+    }
+    NSMutableArray *levelCards = [NSMutableArray arrayWithCapacity:[frozenLevel count]];
+    for (id cardId in frozenLevel)
+    {
+      if ([cardId isKindOfClass:[NSNumber class]] == NO)
+      {
+        return nil;
+      }
+      [levelCards addObject:[CardPeer blankCardWithId:[cardId integerValue]]];
+    }
+    [cardsByLevelTmp addObject:levelCards];
+  }
+  return cardsByLevelTmp;
 }
 
 
-/** Archive current session data to a plist so we can re-start at same place in next session */
+/**
+ * Archive current session data to a plist so we can re-start at same place in next session.
+ * cardsByLevel holds Card objects, which a plist cannot store, so write their ids instead.
+ */
 - (void) freezeCardIds
 {
+  NSMutableArray *frozenLevels = [NSMutableArray arrayWithCapacity:[self.cardsByLevel count]];
+  for (NSArray *levelCards in self.cardsByLevel)
+  {
+    NSMutableArray *cardIds = [NSMutableArray arrayWithCapacity:[levelCards count]];
+    for (Card *card in levelCards)
+    {
+      [cardIds addObject:[NSNumber numberWithInteger:card.cardId]];
+    }
+    [frozenLevels addObject:cardIds];
+  }
   NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
-  [self.cardsByLevel writeToFile:path atomically:YES];
+  [frozenLevels writeToFile:path atomically:YES];
 }
 
 
