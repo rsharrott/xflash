@@ -3,7 +3,8 @@
 //  jFlash
 //
 //  VoiceOver value for the Starred / Recommended badge drawn on Study Sets rows
-//  (LWEStudySetBadgeAccessibilityValue / LWEStudySetApplyBadgeAccessibility in StudySetViewController.m).
+//  (LWEStudySetBadgeAccessibilityValue / LWEStudySetApplyBadgeAccessibility, static inline in
+//  StudySetViewController.h).
 //
 
 #import <XCTest/XCTest.h>

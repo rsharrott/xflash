@@ -36,6 +36,12 @@
   [super tearDown];
 }
 
+//! PNG bytes of an image, for comparing images by content rather than by pointer
+static NSData *LWEPNGData(UIImage *image)
+{
+  return image ? UIImagePNGRepresentation(image) : nil;
+}
+
 //! The host app's Settings tab item, or nil (test skipped) if the tab bar isn't loaded
 - (UITabBarItem *) _settingsTabItem
 {
@@ -78,6 +84,11 @@
 
 - (void) testStopInvalidatesTimer
 {
+  // -stopTabAnimation also resets the host app's Settings tab item
+  if ([self _settingsTabItem] == nil)
+  {
+    XCTSkip(@"host app tab bar not loaded");
+  }
   [self.manager startTabAnimation];
   NSTimer *timer = [[self.manager.tabIconTimer retain] autorelease];
   [self.manager stopTabAnimation];
@@ -97,7 +108,10 @@
 
   [self.manager startTabAnimation];
   [self.manager tabIconTimerDidFire:self.manager.tabIconTimer];
-  XCTAssertEqual(item.image, [self.manager.tabIconImages objectAtIndex:0], @"frame shown while downloading");
+  NSData *firstFrame = LWEPNGData([self.manager.tabIconImages objectAtIndex:0]);
+  XCTAssertNotNil(firstFrame);
+  XCTAssertEqualObjects(LWEPNGData(item.image), firstFrame, @"first gear frame shown while downloading");
+  XCTAssertEqualObjects(LWEPNGData(item.selectedImage), firstFrame, @"same frame when Settings is selected");
   // UITabBarItem may hand back its own copy of selectedImage, so compare what it is, not the pointer
   XCTAssertFalse(item.image.isSymbolImage, @"animation frames are drawn bitmaps");
   XCTAssertFalse(item.selectedImage.isSymbolImage, @"the frame also shows when Settings is selected");
@@ -107,7 +121,9 @@
   [self.manager stopTabAnimation];
   XCTAssertTrue(item.image.isSymbolImage, @"stop restores the gearshape symbol");
   XCTAssertTrue(item.selectedImage.isSymbolImage, @"stop restores the gearshape.fill symbol");
-  XCTAssertTrue(item.image != item.selectedImage);
+  XCTAssertEqualObjects(LWEPNGData(item.image), LWEPNGData([UIImage systemImageNamed:@"gearshape"]));
+  XCTAssertEqualObjects(LWEPNGData(item.selectedImage), LWEPNGData([UIImage systemImageNamed:@"gearshape.fill"]));
+  XCTAssertNotEqualObjects(LWEPNGData(item.image), LWEPNGData(item.selectedImage));
 
   // Leave the host app's tab item as we found it
   item.image = originalImage;
