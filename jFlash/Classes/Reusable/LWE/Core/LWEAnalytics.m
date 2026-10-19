@@ -47,7 +47,7 @@ static const NSInteger kGANDispatchPeriodSec = 10;
 
 + (void) logEvent:(NSString*)eventName parameters:(NSDictionary*)userInfo
 {
-#if defined(LWE_RELEASE_APP_STORE) || defined(LWE_RELEASE_ADHOC)
+#if defined(LWE_RELEASE_APP_STORE) || defined(LWE_RELEASE_AD_HOC)
   #if defined(LWE_USE_GAN)
   NSError *error = nil;
   [[GANTracker sharedTracker] trackPageview:[NSString stringWithFormat:@"\%@", eventName] withError:&error];
@@ -60,7 +60,7 @@ static const NSInteger kGANDispatchPeriodSec = 10;
 
 + (void) logError:(NSString *)errorName message:(NSString *)errorMsg
 {
-#if defined(LWE_RELEASE_APP_STORE) || defined(LWE_RELEASE_ADHOC)
+#if defined(LWE_RELEASE_APP_STORE) || defined(LWE_RELEASE_AD_HOC)
 #if defined(LWE_USE_GAN)
   [[GANTracker sharedTracker] trackPageview:[NSString stringWithFormat:@"\%@", errorName] withError:NULL];
 #endif

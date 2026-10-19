@@ -40,7 +40,7 @@ void LWEUncaughtExceptionHandler(NSException *exception)
     NSArray *callstack = [exception callStackSymbols];
     for (NSString *stackFrame in callstack)
     {
-      // We have very limited space on Flurry, so don't log any stack frame that's not our code / hex addresses
+      // Keep the debug string short: only log stack frames from our own binary (hex addresses)
       NSRange range = [stackFrame rangeOfString:appBinaryName];
       if (range.location != NSNotFound)
       {

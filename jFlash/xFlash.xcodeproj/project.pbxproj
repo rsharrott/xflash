@@ -62,8 +62,6 @@
 		490B23441277BCE100CF3484 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 490B233C1277BCE100CF3484 /* FMDatabase.m */; };
 		490B23451277BCE100CF3484 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 490B233E1277BCE100CF3484 /* FMDatabaseAdditions.m */; };
 		490B23461277BCE100CF3484 /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 490B23401277BCE100CF3484 /* FMResultSet.m */; };
-		490B23571277BF4600CF3484 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 490B23561277BF4600CF3484 /* Icon.png */; };
-		490B23591277C05100CF3484 /* Icon-72.png in Resources */ = {isa = PBXBuildFile; fileRef = 490B23581277C05100CF3484 /* Icon-72.png */; };
 		490D438C153BAA670003EA47 /* NSArray+LWEBlocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4321153BAA670003EA47 /* NSArray+LWEBlocks.m */; };
 		490D438D153BAA670003EA47 /* NSArray+LWEBlocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4321153BAA670003EA47 /* NSArray+LWEBlocks.m */; };
 		490D438E153BAA670003EA47 /* NSArray+LWEBlocks.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4321153BAA670003EA47 /* NSArray+LWEBlocks.m */; };
@@ -549,7 +547,6 @@
 		49C0C97F16291B8400F8966C /* HelpWebViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49C0C97D16291B8400F8966C /* HelpWebViewController.xib */; };
 		49C5BC2111C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */; };
 		49C6EA2C11F6F95D004633FD /* ActionBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 496BE54C11EC5303003AB713 /* ActionBarViewController.m */; };
-		49D996C212705C8300D176D0 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 49D996C012705C8300D176D0 /* Icon@2x.png */; };
 		49DADB801277F36F00B8FD72 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DADB7E1277F36F00B8FD72 /* Default.png */; };
 		49DADB811277F36F00B8FD72 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DADB7F1277F36F00B8FD72 /* Default@2x.png */; };
 		49DADB821277F36F00B8FD72 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 49DADB7E1277F36F00B8FD72 /* Default.png */; };
@@ -558,10 +555,13 @@
 		49E3D17E1472803900F79308 /* CardTagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D17A1472803900F79308 /* CardTagTest.m */; };
 		44F6A3257BC7490FB532B615 /* CardModelTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CF57AFED14CF4453BFD1623E /* CardModelTest.m */; };
 		691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CF57AFED14CF4453BFD1623E /* CardModelTest.m */; };
+		909C4F4EA894C461ACAF1E8C /* PrelaunchCleanupTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */; };
+		7CC11512982F8F6DFFFD3931 /* PrelaunchCleanupTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */; };
 		32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
 		AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
 		21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 969093541A684E73B823323F /* JapaneseCardTest.m */; };
 		3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 864F7B72A7F8966D023DCF05 /* CardReadingTest.m */; };
+		55842A4C47F165BEBC74D0C0 /* AppIconTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DFC704BFAE82E62D5771D3BA /* AppIconTest.m */; };
 		49E3D17F1472803900F79308 /* SetupDatabaseHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */; };
 		49E3D1801472803900F79308 /* SetupDatabaseHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */; };
 		49E3D1831472804400F79308 /* CFlashSearchTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D1821472804400F79308 /* CFlashSearchTest.m */; };
@@ -650,6 +650,10 @@
 		917B2DBD146CC756007C77B1 /* DSActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = 917B2DBB146CC756007C77B1 /* DSActivityView.m */; };
 		9181901811D3392300746B09 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9181901711D3392300746B09 /* SettingsViewController.m */; };
 		9191004A148052A1003E9A19 /* JFlashSearchTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910049148052A1003E9A19 /* JFlashSearchTest.m */; };
+		B4D9E00219000060000000AA /* StudySetBadgeAccessibilityTest.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */; };
+		B4D9E00419000060000000AA /* DownloadManagerTabAnimationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */; };
+		B4D9E00519000060000000AA /* DownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 498229501491D02A009EC2CD /* DownloadManager.m */; };
+		B4D9E00619000060000000AA /* ModalTaskViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4925735211C12619006FA4E1 /* ModalTaskViewController.m */; };
 		91910156148992EC003E9A19 /* TagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910155148992EC003E9A19 /* TagTest.m */; };
 		91910157148992EC003E9A19 /* TagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910155148992EC003E9A19 /* TagTest.m */; };
 		BEEF13401FC53B6372B214E9 /* AppStoreLinkTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */; };
@@ -749,8 +753,6 @@
 		490B233E1277BCE100CF3484 /* FMDatabaseAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FMDatabaseAdditions.m; path = External/FMDB/src/FMDatabaseAdditions.m; sourceTree = "<group>"; };
 		490B233F1277BCE100CF3484 /* FMResultSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FMResultSet.h; path = External/FMDB/src/FMResultSet.h; sourceTree = "<group>"; };
 		490B23401277BCE100CF3484 /* FMResultSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FMResultSet.m; path = External/FMDB/src/FMResultSet.m; sourceTree = "<group>"; };
-		490B23561277BF4600CF3484 /* Icon.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = Icon.png; path = Assets/Icon.png; sourceTree = "<group>"; };
-		490B23581277C05100CF3484 /* Icon-72.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = "Icon-72.png"; path = "Assets/Icon-72.png"; sourceTree = "<group>"; };
 		490D4320153BAA670003EA47 /* NSArray+LWEBlocks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+LWEBlocks.h"; sourceTree = "<group>"; };
 		490D4321153BAA670003EA47 /* NSArray+LWEBlocks.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+LWEBlocks.m"; sourceTree = "<group>"; };
 		490D4322153BAA670003EA47 /* NSArray+LWEEnums.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+LWEEnums.h"; sourceTree = "<group>"; };
@@ -961,7 +963,6 @@
 		49C521DE144D2461002011BD /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		49C5BC1F11C51B0D00A595D6 /* DisplaySearchedSentenceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DisplaySearchedSentenceViewController.h; path = AppSpecific/DisplaySearchedSentenceViewController.h; sourceTree = "<group>"; };
 		49C5BC2011C51B0D00A595D6 /* DisplaySearchedSentenceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DisplaySearchedSentenceViewController.m; path = AppSpecific/DisplaySearchedSentenceViewController.m; sourceTree = "<group>"; };
-		49D996C012705C8300D176D0 /* Icon@2x.png */ = {isa = PBXFileReference; explicitFileType = image.icns; name = "Icon@2x.png"; path = "Assets/icon@2x.png"; sourceTree = "<group>"; };
 		49DADB7E1277F36F00B8FD72 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Default.png; path = Assets/Default.png; sourceTree = "<group>"; };
 		49DADB7F1277F36F00B8FD72 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "Assets/Default@2x.png"; sourceTree = "<group>"; };
 		49E3D17614727FAE00F79308 /* jFlashTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "jFlashTest-Info.plist"; path = "Tests/jFlashTests/jFlashTest-Info.plist"; sourceTree = SOURCE_ROOT; };
@@ -971,10 +972,12 @@
 		49E3D17A1472803900F79308 /* CardTagTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardTagTest.m; path = Tests/CardTagTest.m; sourceTree = SOURCE_ROOT; };
 		3D4316EACB834608A16BA825 /* CardModelTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CardModelTest.h; path = Tests/CardModelTest.h; sourceTree = SOURCE_ROOT; };
 		CF57AFED14CF4453BFD1623E /* CardModelTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardModelTest.m; path = Tests/CardModelTest.m; sourceTree = SOURCE_ROOT; };
+		E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrelaunchCleanupTest.m; path = Tests/PrelaunchCleanupTest.m; sourceTree = SOURCE_ROOT; };
 		95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardViewControllerNibTest.m; path = Tests/CardViewControllerNibTest.m; sourceTree = SOURCE_ROOT; };
 		07203B478DBF477887BC9B5C /* JapaneseCardTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JapaneseCardTest.h; path = Tests/jFlashTests/JapaneseCardTest.h; sourceTree = SOURCE_ROOT; };
 		969093541A684E73B823323F /* JapaneseCardTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JapaneseCardTest.m; path = Tests/jFlashTests/JapaneseCardTest.m; sourceTree = SOURCE_ROOT; };
 		864F7B72A7F8966D023DCF05 /* CardReadingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardReadingTest.m; path = Tests/jFlashTests/CardReadingTest.m; sourceTree = SOURCE_ROOT; };
+		DFC704BFAE82E62D5771D3BA /* AppIconTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppIconTest.m; path = Tests/jFlashTests/AppIconTest.m; sourceTree = SOURCE_ROOT; };
 		49E3D17B1472803900F79308 /* SetupDatabaseHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SetupDatabaseHelper.h; path = Tests/SetupDatabaseHelper.h; sourceTree = SOURCE_ROOT; };
 		49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SetupDatabaseHelper.m; path = Tests/SetupDatabaseHelper.m; sourceTree = SOURCE_ROOT; };
 		49E3D1811472804400F79308 /* CFlashSearchTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CFlashSearchTest.h; path = Tests/cFlashTests/CFlashSearchTest.h; sourceTree = SOURCE_ROOT; };
@@ -1019,7 +1022,6 @@
 		91214D6811B4D77C0091AFEF /* PracticeModeCardViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PracticeModeCardViewDelegate.h; path = AppSpecific/PracticeModeCardViewDelegate.h; sourceTree = "<group>"; };
 		91214D6911B4D77C0091AFEF /* PracticeModeCardViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PracticeModeCardViewDelegate.m; path = AppSpecific/PracticeModeCardViewDelegate.m; sourceTree = "<group>"; };
 		912405D9109C263D00ECA1C2 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
-		9129D4F411550A2A0036C4D3 /* iTunesArtwork */ = {isa = PBXFileReference; lastKnownFileType = file; path = iTunesArtwork; sourceTree = "<group>"; };
 		913D48061353A3E0008A4649 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		913D48071353A3E0008A4649 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		913EEF71130800F300EBCF87 /* puny.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = puny.c; sourceTree = "<group>"; };
@@ -1100,6 +1102,8 @@
 		91910048148052A1003E9A19 /* JFlashSearchTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JFlashSearchTest.h; path = Tests/jFlashTests/JFlashSearchTest.h; sourceTree = SOURCE_ROOT; };
 		91910049148052A1003E9A19 /* JFlashSearchTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JFlashSearchTest.m; path = Tests/jFlashTests/JFlashSearchTest.m; sourceTree = SOURCE_ROOT; };
 		91910154148992EC003E9A19 /* TagTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TagTest.h; path = Tests/TagTest.h; sourceTree = SOURCE_ROOT; };
+		B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StudySetBadgeAccessibilityTest.m; path = Tests/StudySetBadgeAccessibilityTest.m; sourceTree = SOURCE_ROOT; };
+		B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DownloadManagerTabAnimationTest.m; path = Tests/DownloadManagerTabAnimationTest.m; sourceTree = SOURCE_ROOT; };
 		91910155148992EC003E9A19 /* TagTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TagTest.m; path = Tests/TagTest.m; sourceTree = SOURCE_ROOT; };
 		4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppStoreLinkTest.m; path = Tests/AppStoreLinkTest.m; sourceTree = SOURCE_ROOT; };
 		91992E2811D1A2F600CFCACD /* jFlash.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = jFlash.db; path = sql/jFlash.db; sourceTree = "<group>"; };
@@ -1381,6 +1385,7 @@
 				3D4316EACB834608A16BA825 /* CardModelTest.h */,
 				CF57AFED14CF4453BFD1623E /* CardModelTest.m */,
 				95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */,
+				E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */,
 				498EBDB11488D43A00BA6DE7 /* PluginTest.h */,
 				498EBDB21488D43A00BA6DE7 /* PluginTest.m */,
 				498EBDA11488AEAA00BA6DE7 /* PluginManagerTest.h */,
@@ -1390,6 +1395,8 @@
 				91910154148992EC003E9A19 /* TagTest.h */,
 				91910155148992EC003E9A19 /* TagTest.m */,
 				4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */,
+				B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */,
+				B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */,
 			);
 			name = Common;
 			sourceTree = "<group>";
@@ -1404,6 +1411,7 @@
 				07203B478DBF477887BC9B5C /* JapaneseCardTest.h */,
 				969093541A684E73B823323F /* JapaneseCardTest.m */,
 				864F7B72A7F8966D023DCF05 /* CardReadingTest.m */,
+				DFC704BFAE82E62D5771D3BA /* AppIconTest.m */,
 			);
 			name = JFlash;
 			sourceTree = "<group>";
@@ -1815,13 +1823,9 @@
 				150BFBE91CEF5AB398F769DB /* Localizable.strings */,
 				F1EBFC9FCDFD447E9F2C51ED /* Interface.strings */,
 				0BBE7DC801ED7B4C70E2D99F /* InfoPlist.strings */,
-				9129D4F411550A2A0036C4D3 /* iTunesArtwork */,
 				49DADB7E1277F36F00B8FD72 /* Default.png */,
 				49DADB7F1277F36F00B8FD72 /* Default@2x.png */,
 				49C0C97B1629151900F8966C /* Default-568h@2x.png */,
-				490B23561277BF4600CF3484 /* Icon.png */,
-				49D996C012705C8300D176D0 /* Icon@2x.png */,
-				490B23581277C05100CF3484 /* Icon-72.png */,
 			);
 			name = "Japanese Flash Assets";
 			sourceTree = "<group>";
@@ -2328,15 +2332,12 @@
 				4965FD34126F6417000AC280 /* practice-btn-wrong@2x.png in Resources */,
 				4965FD81126F6FCF000AC280 /* bluetheme-cookie-cutters in Resources */,
 				4965FD84126F7002000AC280 /* redtheme-cookie-cutters in Resources */,
-				49D996C212705C8300D176D0 /* Icon@2x.png in Resources */,
 				4947836912757EE4000F9328 /* practice-btn-unrevealed-mini@2x.png in Resources */,
 				4947836A12757EE4000F9328 /* practice-btn-unrevealed@2x.png in Resources */,
 				494783781275901E000F9328 /* practice-btn-last@2x.png in Resources */,
 				494783791275901E000F9328 /* practice-btn-next@2x.png in Resources */,
 				49B528311276C97500EE64D3 /* practice-btn-showreading@2x.png in Resources */,
 				49B528431276CDA000EE64D3 /* talkbubble-ft@2x.png in Resources */,
-				490B23571277BF4600CF3484 /* Icon.png in Resources */,
-				490B23591277C05100CF3484 /* Icon-72.png in Resources */,
 				49DADB801277F36F00B8FD72 /* Default.png in Resources */,
 				49DADB811277F36F00B8FD72 /* Default@2x.png in Resources */,
 				4993AF8C1278024800872875 /* twitter-bird@2x.png in Resources */,
@@ -2671,14 +2672,20 @@
 				9191004A148052A1003E9A19 /* JFlashSearchTest.m in Sources */,
 				44F6A3257BC7490FB532B615 /* CardModelTest.m in Sources */,
 				32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */,
+				909C4F4EA894C461ACAF1E8C /* PrelaunchCleanupTest.m in Sources */,
 				21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */,
 				3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */,
+				55842A4C47F165BEBC74D0C0 /* AppIconTest.m in Sources */,
 				4971252C14873B0000D4D150 /* MoodIcon.m in Sources */,
 				498EBDA31488AEAA00BA6DE7 /* PluginManagerTest.m in Sources */,
 				498EBDA91488B96800BA6DE7 /* Plugin.m in Sources */,
 				498EBDB51488D43A00BA6DE7 /* PluginTest.m in Sources */,
 				91910156148992EC003E9A19 /* TagTest.m in Sources */,
 				BEEF13401FC53B6372B214E9 /* AppStoreLinkTest.m in Sources */,
+				B4D9E00219000060000000AA /* StudySetBadgeAccessibilityTest.m in Sources */,
+				B4D9E00419000060000000AA /* DownloadManagerTabAnimationTest.m in Sources */,
+				B4D9E00519000060000000AA /* DownloadManager.m in Sources */,
+				B4D9E00619000060000000AA /* ModalTaskViewController.m in Sources */,
 				4979D7AE14949AB800625635 /* JFlashPluginMigrationTest.m in Sources */,
 				4944B1E41495D23700AE23BE /* CloseButtonView.m in Sources */,
 				499E56B814972A7200088BD3 /* TTTAttributedLabel.m in Sources */,
@@ -2787,6 +2794,7 @@
 				D2D1BF2CDA56A9055FE7CACE /* AppStoreLinkTest.m in Sources */,
 				691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */,
 				AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */,
+				7CC11512982F8F6DFFFD3931 /* PrelaunchCleanupTest.m in Sources */,
 				4926EA02148FADDE00F55D09 /* CardPeerTest.m in Sources */,
 				4944B1E51495D23700AE23BE /* CloseButtonView.m in Sources */,
 				499E56B914972A7200088BD3 /* TTTAttributedLabel.m in Sources */,
@@ -3019,7 +3027,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DT6C9KA2HD;
@@ -3058,7 +3065,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DT6C9KA2HD;
@@ -3357,7 +3363,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = DT6C9KA2HD;

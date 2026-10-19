@@ -26,6 +26,11 @@
                    @"%@ should load without throwing (stale outlet?)", nibName);
   XCTAssertTrue([objects count] > 0, @"%@ should contain top-level objects", nibName);
   XCTAssertNotNil(owner.meaningWebViewContainer, @"%@ should connect meaningWebViewContainer", nibName);
+  // The surviving 'delegate' outlets: both scroll views report scrolling to the card view controller
+  XCTAssertNotNil(owner.readingScrollContainer, @"%@ should connect readingScrollContainer", nibName);
+  XCTAssertNotNil(owner.headwordScrollContainer, @"%@ should connect headwordScrollContainer", nibName);
+  XCTAssertEqual((id)owner.readingScrollContainer.delegate, (id)owner, @"%@: reading scroll view's delegate should be File's Owner", nibName);
+  XCTAssertEqual((id)owner.headwordScrollContainer.delegate, (id)owner, @"%@: headword scroll view's delegate should be File's Owner", nibName);
 #if !__has_feature(objc_arc)
   [owner release];
 #endif

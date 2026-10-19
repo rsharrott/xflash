@@ -28,6 +28,39 @@
   ChineseCard *card = [[ChineseCard alloc] init];
   card.hw_reading = @"hui2";
   XCTAssertEqualObjects(card.pinyinReading,@"huí",@"Card reading should be the same");
+  [card release];
+}
+
+- (void) testToneMarkPlacement
+{
+  // a / e take the mark; in "ou" the o; otherwise the last vowel (ui -> i, iu -> u, uo -> o)
+  NSDictionary *expected = @{
+    @"hao3": @"hǎo", @"xie4": @"xiè", @"lüe4": @"lüè", @"lu:e4": @"lüè", @"xue2": @"xué",
+    @"gou3": @"gǒu", @"zhou1": @"zhōu", @"ou1": @"ōu",
+    @"hui4": @"huì", @"gui4": @"guì", @"dui4": @"duì", @"shui3": @"shuǐ",
+    @"liu2": @"liú", @"jiu3": @"jiǔ", @"cuo4": @"cuò", @"guo2": @"guó", @"zuo4": @"zuò",
+    @"nü3": @"nǚ", @"nu:3": @"nǚ", @"lü4": @"lǜ", @"zhong1": @"zhōng", @"er2": @"ér", @"yi1": @"yī",
+    @"Zhong1": @"Zhōng", @"An1": @"Ān", @"Ou1": @"Ōu",
+    @"ng2": @"ńg", @"m2": @"ḿ",
+    // v is the keyboard spelling of ü
+    @"lv4": @"lǜ", @"nv3": @"nǚ", @"lve4": @"lüè", @"nve4": @"nüè", @"Lv3": @"Lǚ",
+    @"ma5": @"ma", @"r5": @"r", @"de5": @"de",
+  };
+  for (NSString *numbered in expected)
+  {
+    ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+    card.hw_reading = numbered;
+    XCTAssertEqualObjects(card.pinyinReading, expected[numbered], @"%@", numbered);
+  }
+  // A whole reading, syllable by syllable
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  card.hw_reading = @"dui4 bu5 qi3";
+  XCTAssertEqualObjects(card.pinyinReading, @"duì bu qǐ");
+  // Not numbered pinyin: unchanged
+  card.hw_reading = @"ma";
+  XCTAssertEqualObjects(card.pinyinReading, @"ma");
+  card.hw_reading = @"ni3,";
+  XCTAssertEqualObjects(card.pinyinReading, @"ni3,", @"Trailing punctuation is left alone (pre-existing)");
 }
 
 #pragma mark - Tone Change Tests
@@ -174,39 +207,90 @@
 
 #pragma mark Rules for 2nd Tone
 
-- (void) test2Becomes1WhenPrecededBy1Or2AndFollowedByOther
+- (void) testSecondToneBetweenTonesIsNotChanged
 {
   /**
    6. A 2nd tone preceded by a 1st or 2nd tone and followed by another tone becomes a 1st tone
-   This one will probably start to feel natural after a lot of listening practice and exposure.
-   Written down, however, it looks fairly crazy.
-   
-   As symbols:
-   [1 | 2] [2] [*] ⇒ [1 | 2] [1] [*]
-   (here the | represents ‘or’, and the * represents any tone)
-   
-   Examples:
-   三年级 (third grade): sān niánjí ⇒ ‘sān niānjí’
-   谁来吃？ (who’s coming to eat?): shéi lái chī? ⇒ shéi lāi chī?
-   特别难看 (especially ugly): tèbié nánkàn ⇒ tèbié nānkàn
+   [1 | 2] [2] [*] => [1 | 2] [1] [*]
+   三年级 (third grade): sān niánjí => 'sān niānjí'
+
+   This is a fast-speech tendency, not a rule dictionaries or textbooks write, so sandhiReading
+   deliberately doesn't apply it.  (This test used to be a copy of testBu4BecomesBu2WhenFollowedByTone4
+   under this name; it now pins the intended behaviour instead.)
    */
-//  ChineseCard *card = [self _cardForKeyword:@"三年级"];
-//  XCTAssertNotNil(card, @"Card could not be found: 三年级");
-//  XCTAssertEqualObjects(@"bu4 shi4", card.reading, @"Regular reading should not change"); 
-//  XCTAssertEqualObjects(@"bù shì", card.attributedReading.string, @"Regular reading should not change"); 
-//  XCTAssertEqualObjects(@"bú shì", card.sandhiReading, @"Tone sandhi reading should change");
-  
-  ChineseCard *card = [self _cardForKeyword:@"不会"];
-  XCTAssertNotNil(card, @"Card could not be found: 不会");
-  XCTAssertEqualObjects(@"bu4 hui4", card.reading, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bù huì", card.attributedReading.string, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bú huì", card.sandhiReading, @"Tone sandhi reading should change"); 
-  
-  card = [self _cardForKeyword:@"不错"];
-  XCTAssertNotNil(card, @"Card could not be found: 不错");
-  XCTAssertEqualObjects(@"bu4 cuo4", card.reading, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bù cuò", card.attributedReading.string, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"bú cuò", card.sandhiReading, @"Tone sandhi reading should change");
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  card._headword = @"三年级";
+  card.hw_reading = @"san1 nian2 ji2";
+  XCTAssertEqualObjects(card.sandhiReading, @"sān nián jí", @"Rule 6 is not applied");
+  card._headword = @"谁来吃";
+  card.hw_reading = @"shei2 lai2 chi1";
+  XCTAssertEqualObjects(card.sandhiReading, @"shéi lái chī", @"Rule 6 is not applied");
+}
+
+- (void) testYiAndBuEdgeCases
+{
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  // 一 at the end of a word (第一) and before a neutral tone keeps tone 1
+  card._headword = @"第一";
+  card.hw_reading = @"di4 yi1";
+  XCTAssertEqualObjects(card.sandhiReading, @"dì yī");
+  card._headword = @"一个";
+  card.hw_reading = @"yi1 ge5";
+  XCTAssertEqualObjects(card.sandhiReading, @"yī ge");
+  // 不一定: 一 changes before the 4th tone; 不 is followed by 一's dictionary tone 1, so it stays bù
+  card._headword = @"不一定";
+  card.hw_reading = @"bu4 yi1 ding4";
+  XCTAssertEqualObjects(card.sandhiReading, @"bù yí dìng");
+  // A run of 3rd tones: 3 3 3 -> 2 2 3
+  card._headword = @"我很好";
+  card.hw_reading = @"wo3 hen3 hao3";
+  XCTAssertEqualObjects(card.sandhiReading, @"wó hén hǎo");
+  // Other characters before a 4th tone don't change
+  card._headword = @"他是";
+  card.hw_reading = @"ta1 shi4";
+  XCTAssertEqualObjects(card.sandhiReading, @"tā shì");
+}
+
+- (void) testNeutralToneBuAndYiAreNotChanged
+{
+  // Only a dictionary-tone 不 (bu4) / 一 (yi1) changes; a neutral-tone one stays neutral
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  card._headword = @"看不见";
+  card.hw_reading = @"kan4 bu5 jian4";
+  XCTAssertEqualObjects(card.sandhiReading, @"kàn bu jiàn");
+  card._headword = @"看一看";
+  card.hw_reading = @"kan4 yi5 kan4";
+  XCTAssertEqualObjects(card.sandhiReading, @"kàn yi kàn");
+  card._headword = @"想一想";
+  card.hw_reading = @"xiang3 yi5 xiang3";
+  XCTAssertEqualObjects(card.sandhiReading, @"xiǎng yi xiǎng");
+  // Some dictionaries write the reduplication with yi1; sandhi then applies as usual
+  card._headword = @"看一看";
+  card.hw_reading = @"kan4 yi1 kan4";
+  XCTAssertEqualObjects(card.sandhiReading, @"kàn yí kàn");
+}
+
+- (void) testYiAsANumberInDatesAndOrdinalsKeepsTone1
+{
+  ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
+  // Before 月 (a month name)
+  card._headword = @"一月";
+  card.hw_reading = @"yi1 yue4";
+  XCTAssertEqualObjects(card.sandhiReading, @"yī yuè");
+  card._headword = @"十一月";
+  card.hw_reading = @"shi2 yi1 yue4";
+  XCTAssertEqualObjects(card.sandhiReading, @"shí yī yuè");
+  // After 第 (an ordinal)
+  card._headword = @"第一天";
+  card.hw_reading = @"di4 yi1 tian1";
+  XCTAssertEqualObjects(card.sandhiReading, @"dì yī tiān");
+  card._headword = @"第一次";
+  card.hw_reading = @"di4 yi1 ci4";
+  XCTAssertEqualObjects(card.sandhiReading, @"dì yī cì");
+  // Other 一 still change
+  card._headword = @"一样";
+  card.hw_reading = @"yi1 yang4";
+  XCTAssertEqualObjects(card.sandhiReading, @"yí yàng");
 }
 
 #pragma mark - Helpers
@@ -255,8 +339,8 @@
 #pragma mark - Pinyin colour (furigana spec; Pinyin Coloring on = tone colours, off = readingInk)
 
 // These tests pass the setting and theme explicitly instead of writing them to NSUserDefaults: the host
-// app's StudyViewController observes both keys and re-renders its card on a change, which in cFlashTest
-// can reach a card view left half-built by the pre-existing English-first nib exception (separate PR).
+// app's StudyViewController observes both keys and re-renders its card on a change, so writing them
+// would make the tests depend on (and disturb) the host app's study screen.
 
 static BOOL LWESameRGBA(UIColor *a, UIColor *b)
 {
@@ -347,6 +431,43 @@ static NSDictionary *LWEPalette(NSString *themeKey)
   }
 }
 
+- (void) testUnknownThemeKeyUsesTheCurrentThemesPalette
+{
+  // An unknown key falls back to the current theme for everything, including Kimono's own palette
+  // (picked by key, not card luminance): Kimono current + unknown key = Kimono's tones, not the light set.
+  ChineseCard *card = [self _cardWithReading:@"ma1 ma2 ma3 ma4 ma5"];
+  for (NSString *currentKey in [[ThemeManager sharedThemeManager] themeKeysList])
+  {
+    NSArray *expected = [card readingComponentsUsingToneColors:YES themeKey:currentKey currentThemeKey:currentKey];
+    NSArray *unknown = [card readingComponentsUsingToneColors:YES themeKey:@"NO_SUCH_THEME" currentThemeKey:currentKey];
+    NSArray *nilKey = [card readingComponentsUsingToneColors:YES themeKey:nil currentThemeKey:currentKey];
+    XCTAssertEqual([unknown count], (NSUInteger)5, @"%@", currentKey);
+    XCTAssertEqual([nilKey count], (NSUInteger)5, @"%@", currentKey);
+    for (NSUInteger i = 0; i < [expected count] && i < [unknown count] && i < [nilKey count]; i++)
+    {
+      UIColor *want = [expected[i] objectForKey:@"color"];
+      XCTAssertTrue(LWESameRGBA([unknown[i] objectForKey:@"color"], want), @"unknown key on %@, syllable %lu", currentKey, (unsigned long)i + 1);
+      XCTAssertTrue(LWESameRGBA([nilKey[i] objectForKey:@"color"], want), @"nil key on %@, syllable %lu", currentKey, (unsigned long)i + 1);
+    }
+  }
+  NSArray *kimono = [card readingComponentsUsingToneColors:YES themeKey:@"NO_SUCH_THEME" currentThemeKey:SET_THEME_KIMONO];
+  XCTAssertEqual([kimono count], (NSUInteger)5);
+  if ([kimono count] == 5)
+  {
+    XCTAssertTrue(LWESameRGBA([kimono[0] objectForKey:@"color"], LWEHex(0x7A1100)), @"Kimono tone 1, not the light #8E1400");
+    XCTAssertTrue(LWESameRGBA([kimono[3] objectForKey:@"color"], LWEHex(0x0E3F7D)), @"Kimono tone 4, not the light #1356A7");
+    XCTAssertTrue(LWESameRGBA([kimono[4] objectForKey:@"color"], LWEInk(SET_THEME_KIMONO)), @"Kimono readingInk for the neutral tone");
+  }
+  // The public entry point with an unknown key matches the current theme (whatever the host has)
+  NSArray *viaPublic = [card readingComponentsUsingToneColors:YES themeKey:@"NO_SUCH_THEME"];
+  NSArray *viaNil = [card readingComponentsUsingToneColors:YES themeKey:nil];
+  XCTAssertEqual([viaPublic count], [viaNil count]);
+  for (NSUInteger i = 0; i < [viaPublic count] && i < [viaNil count]; i++)
+  {
+    XCTAssertTrue(LWESameRGBA([viaPublic[i] objectForKey:@"color"], [viaNil[i] objectForKey:@"color"]), @"syllable %lu", (unsigned long)i + 1);
+  }
+}
+
 - (void) testToneIgnoresTrailingPunctuation
 {
   XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"ma5,"], (NSInteger)5);
@@ -369,6 +490,7 @@ static NSDictionary *LWEPalette(NSString *themeKey)
     XCTAssertTrue(LWESameRGBA(colours[1], LWEHex(0x0B5A2C)), @"'hao3!' keeps tone 3");
   }
   colours = LWESyllableColours([[self _cardWithReading:@"ma4, ma5,"] attributedReadingUsingToneColors:YES themeKey:SET_THEME_FIRE]);
+  XCTAssertEqual([colours count], (NSUInteger)2);
   if ([colours count] == 2)
   {
     XCTAssertTrue(LWESameRGBA(colours[0], LWEHex(0x8EC8FF)), @"'ma4,' tone 4 on Fire");

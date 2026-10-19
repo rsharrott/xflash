@@ -90,7 +90,10 @@ NSInteger const kLWELearnedCardLevel       = 5;
 
 - (BOOL) isEditable
 {
-  return (self.tagEditable == 1);
+  // "My Starred Words" (STARRED_TAG_ID) is a system set in both apps: it can't be renamed, deleted or
+  // have its word list edited, whatever its row says (cFlash's bundled cFlash.db has editable = 1 for it,
+  // jFlash's has 0). Code that treats it as a user set checks tagId == STARRED_TAG_ID explicitly.
+  return (self.tagEditable == 1 && self.tagId != STARRED_TAG_ID);
 }
 
 - (NSInteger) seenCardCount
