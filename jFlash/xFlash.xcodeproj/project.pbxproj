@@ -647,6 +647,10 @@
 		917B2DBD146CC756007C77B1 /* DSActivityView.m in Sources */ = {isa = PBXBuildFile; fileRef = 917B2DBB146CC756007C77B1 /* DSActivityView.m */; };
 		9181901811D3392300746B09 /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9181901711D3392300746B09 /* SettingsViewController.m */; };
 		9191004A148052A1003E9A19 /* JFlashSearchTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910049148052A1003E9A19 /* JFlashSearchTest.m */; };
+		B4D9E00219000060000000AA /* StudySetBadgeAccessibilityTest.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */; };
+		B4D9E00419000060000000AA /* DownloadManagerTabAnimationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */; };
+		B4D9E00519000060000000AA /* DownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 498229501491D02A009EC2CD /* DownloadManager.m */; };
+		B4D9E00619000060000000AA /* ModalTaskViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4925735211C12619006FA4E1 /* ModalTaskViewController.m */; };
 		91910156148992EC003E9A19 /* TagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910155148992EC003E9A19 /* TagTest.m */; };
 		91910157148992EC003E9A19 /* TagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910155148992EC003E9A19 /* TagTest.m */; };
 		919FBDBB1622E9D2001FD77B /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 919FBDBA1622E9D2001FD77B /* Social.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
@@ -1092,6 +1096,8 @@
 		91910048148052A1003E9A19 /* JFlashSearchTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JFlashSearchTest.h; path = Tests/jFlashTests/JFlashSearchTest.h; sourceTree = SOURCE_ROOT; };
 		91910049148052A1003E9A19 /* JFlashSearchTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JFlashSearchTest.m; path = Tests/jFlashTests/JFlashSearchTest.m; sourceTree = SOURCE_ROOT; };
 		91910154148992EC003E9A19 /* TagTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TagTest.h; path = Tests/TagTest.h; sourceTree = SOURCE_ROOT; };
+		B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StudySetBadgeAccessibilityTest.m; path = Tests/StudySetBadgeAccessibilityTest.m; sourceTree = SOURCE_ROOT; };
+		B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DownloadManagerTabAnimationTest.m; path = Tests/DownloadManagerTabAnimationTest.m; sourceTree = SOURCE_ROOT; };
 		91910155148992EC003E9A19 /* TagTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TagTest.m; path = Tests/TagTest.m; sourceTree = SOURCE_ROOT; };
 		91992E2811D1A2F600CFCACD /* jFlash.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = jFlash.db; path = sql/jFlash.db; sourceTree = "<group>"; };
 		91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-CARD-2.0.db"; path = "sql/jFlash-CARD-2.0.db"; sourceTree = "<group>"; };
@@ -1379,6 +1385,8 @@
 				49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */,
 				91910154148992EC003E9A19 /* TagTest.h */,
 				91910155148992EC003E9A19 /* TagTest.m */,
+				B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */,
+				B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */,
 			);
 			name = Common;
 			sourceTree = "<group>";
@@ -2663,6 +2671,10 @@
 				498EBDA91488B96800BA6DE7 /* Plugin.m in Sources */,
 				498EBDB51488D43A00BA6DE7 /* PluginTest.m in Sources */,
 				91910156148992EC003E9A19 /* TagTest.m in Sources */,
+				B4D9E00219000060000000AA /* StudySetBadgeAccessibilityTest.m in Sources */,
+				B4D9E00419000060000000AA /* DownloadManagerTabAnimationTest.m in Sources */,
+				B4D9E00519000060000000AA /* DownloadManager.m in Sources */,
+				B4D9E00619000060000000AA /* ModalTaskViewController.m in Sources */,
 				4979D7AE14949AB800625635 /* JFlashPluginMigrationTest.m in Sources */,
 				4944B1E41495D23700AE23BE /* CloseButtonView.m in Sources */,
 				499E56B814972A7200088BD3 /* TTTAttributedLabel.m in Sources */,

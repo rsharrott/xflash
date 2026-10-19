@@ -12,6 +12,29 @@
 #import "TagPeer.h"
 #import "GroupPeer.h"
 
+/**
+ * VoiceOver value for a drawn Starred / Recommended row badge: localizedWord, or nil when the row's
+ * title already contains the word (English or localized, case-insensitive), so "My Starred Words"
+ * isn't read as "My Starred Words, Starred".  Inline in the header so the unit tests can use it
+ * (the test bundle compiles its own copies of the code under test).
+ */
+static inline NSString *LWEStudySetBadgeAccessibilityValue(NSString *title, NSString *englishWord, NSString *localizedWord)
+{
+  NSStringCompareOptions opts = NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch;
+  if (title && ((englishWord.length && [title rangeOfString:englishWord options:opts].location != NSNotFound) ||
+                (localizedWord.length && [title rangeOfString:localizedWord options:opts].location != NSNotFound)))
+  {
+    return nil;
+  }
+  return localizedWord;
+}
+
+//! Sets the row's VoiceOver badge value, or clears it when hasBadge is NO (cells are reused)
+static inline void LWEStudySetApplyBadgeAccessibility(UITableViewCell *cell, BOOL hasBadge, NSString *title, NSString *englishWord, NSString *localizedWord)
+{
+  cell.accessibilityValue = hasBadge ? LWEStudySetBadgeAccessibilityValue(title, englishWord, localizedWord) : nil;
+}
+
 @interface StudySetViewController : UITableViewController <UISearchBarDelegate>
 {
   UIBarButtonItem *_addButton;
