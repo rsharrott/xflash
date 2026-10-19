@@ -578,6 +578,10 @@ NSString * const APP_NEW_UPDATE = @"new_update";
       [blockSelf _choose:value];
     }];
     action.state = isCurrent ? UIMenuElementStateOn : UIMenuElementStateOff;
+    // The open menu's rows: UIAction has no usable accessibilityLabel (it reads back nil and VoiceOver
+    // ignores it), so a reading that differs from the title is shown as the row's subtitle (紅 / くれない).
+    // VoiceOver reads the subtitle after the title; it also helps sighted learners.
+    if (axLabel && ![axLabel isEqualToString:optionTitle]) action.subtitle = axLabel;
     [actions addObject:action];
   }
   // A stored value that isn't one of the options (old or hand-edited defaults): show the first
@@ -602,6 +606,15 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     return _menuButton;
   }
   return hit;
+}
+
+//! A reused row must not keep the previous row's spoken labels (e.g. five theme readings mapped by index onto a shorter menu)
+- (void) prepareForReuse
+{
+  [super prepareForReuse];
+  self.optionAccessibilityLabels = nil;
+  _menuButton.accessibilityLabel = nil;
+  _menuButton.accessibilityValue = nil;
 }
 
 - (void) _choose:(id)value

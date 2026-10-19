@@ -255,8 +255,8 @@
 #pragma mark - Pinyin colour (furigana spec; Pinyin Coloring on = tone colours, off = readingInk)
 
 // These tests pass the setting and theme explicitly instead of writing them to NSUserDefaults: the host
-// app's StudyViewController observes both keys and re-renders its card on a change, which in cFlashTest
-// can reach a card view left half-built by the pre-existing English-first nib exception (separate PR).
+// app's StudyViewController observes both keys and re-renders its card on a change, so writing them
+// would make the tests depend on (and disturb) the host app's study screen.
 
 static BOOL LWESameRGBA(UIColor *a, UIColor *b)
 {
@@ -347,6 +347,43 @@ static NSDictionary *LWEPalette(NSString *themeKey)
   }
 }
 
+- (void) testUnknownThemeKeyUsesTheCurrentThemesPalette
+{
+  // An unknown key falls back to the current theme for everything, including Kimono's own palette
+  // (picked by key, not card luminance): Kimono current + unknown key = Kimono's tones, not the light set.
+  ChineseCard *card = [self _cardWithReading:@"ma1 ma2 ma3 ma4 ma5"];
+  for (NSString *currentKey in [[ThemeManager sharedThemeManager] themeKeysList])
+  {
+    NSArray *expected = [card readingComponentsUsingToneColors:YES themeKey:currentKey currentThemeKey:currentKey];
+    NSArray *unknown = [card readingComponentsUsingToneColors:YES themeKey:@"NO_SUCH_THEME" currentThemeKey:currentKey];
+    NSArray *nilKey = [card readingComponentsUsingToneColors:YES themeKey:nil currentThemeKey:currentKey];
+    XCTAssertEqual([unknown count], (NSUInteger)5, @"%@", currentKey);
+    XCTAssertEqual([nilKey count], (NSUInteger)5, @"%@", currentKey);
+    for (NSUInteger i = 0; i < [expected count] && i < [unknown count] && i < [nilKey count]; i++)
+    {
+      UIColor *want = [expected[i] objectForKey:@"color"];
+      XCTAssertTrue(LWESameRGBA([unknown[i] objectForKey:@"color"], want), @"unknown key on %@, syllable %lu", currentKey, (unsigned long)i + 1);
+      XCTAssertTrue(LWESameRGBA([nilKey[i] objectForKey:@"color"], want), @"nil key on %@, syllable %lu", currentKey, (unsigned long)i + 1);
+    }
+  }
+  NSArray *kimono = [card readingComponentsUsingToneColors:YES themeKey:@"NO_SUCH_THEME" currentThemeKey:SET_THEME_KIMONO];
+  XCTAssertEqual([kimono count], (NSUInteger)5);
+  if ([kimono count] == 5)
+  {
+    XCTAssertTrue(LWESameRGBA([kimono[0] objectForKey:@"color"], LWEHex(0x7A1100)), @"Kimono tone 1, not the light #8E1400");
+    XCTAssertTrue(LWESameRGBA([kimono[3] objectForKey:@"color"], LWEHex(0x0E3F7D)), @"Kimono tone 4, not the light #1356A7");
+    XCTAssertTrue(LWESameRGBA([kimono[4] objectForKey:@"color"], LWEInk(SET_THEME_KIMONO)), @"Kimono readingInk for the neutral tone");
+  }
+  // The public entry point with an unknown key matches the current theme (whatever the host has)
+  NSArray *viaPublic = [card readingComponentsUsingToneColors:YES themeKey:@"NO_SUCH_THEME"];
+  NSArray *viaNil = [card readingComponentsUsingToneColors:YES themeKey:nil];
+  XCTAssertEqual([viaPublic count], [viaNil count]);
+  for (NSUInteger i = 0; i < [viaPublic count] && i < [viaNil count]; i++)
+  {
+    XCTAssertTrue(LWESameRGBA([viaPublic[i] objectForKey:@"color"], [viaNil[i] objectForKey:@"color"]), @"syllable %lu", (unsigned long)i + 1);
+  }
+}
+
 - (void) testToneIgnoresTrailingPunctuation
 {
   XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"ma5,"], (NSInteger)5);
@@ -369,6 +406,7 @@ static NSDictionary *LWEPalette(NSString *themeKey)
     XCTAssertTrue(LWESameRGBA(colours[1], LWEHex(0x0B5A2C)), @"'hao3!' keeps tone 3");
   }
   colours = LWESyllableColours([[self _cardWithReading:@"ma4, ma5,"] attributedReadingUsingToneColors:YES themeKey:SET_THEME_FIRE]);
+  XCTAssertEqual([colours count], (NSUInteger)2);
   if ([colours count] == 2)
   {
     XCTAssertTrue(LWESameRGBA(colours[0], LWEHex(0x8EC8FF)), @"'ma4,' tone 4 on Fire");

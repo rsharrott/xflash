@@ -21,6 +21,20 @@
 #define SEARCH_CELL_MEANING 202
 #define SEARCH_CELL_BUTTON 203
 
+//! SF Symbol for a search result's star: filled when the card is starred, so the state isn't colour-only
+static inline NSString *LWESearchStarSymbolName(BOOL starred)
+{
+  return starred ? @"star.fill" : @"star";
+}
+
+//! VoiceOver for a search result's star button: "Star, Starred" / "Star, Not starred" (not colour-only)
+static inline void LWESearchStarApplyAccessibility(UIButton *starButton, BOOL starred)
+{
+  starButton.accessibilityLabel = NSLocalizedString(@"Star", @"SearchViewController.StarButtonAccessibilityLabel");
+  starButton.accessibilityValue = starred ? NSLocalizedString(@"Starred", @"StudySetViewController.StarredBadgeAccessibility")
+                                          : NSLocalizedString(@"Not starred", @"SearchViewController.NotStarredAccessibilityValue");
+}
+
 //! State machine for searching
 typedef enum searchStates
 {
