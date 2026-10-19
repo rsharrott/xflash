@@ -1,0 +1,59 @@
+{
+  "jmdict_created": "2026-10-18",
+  "jmdict_entries": 218926,
+  "curated_cards": {
+    "0": 343,
+    "3": 173,
+    "1": 214
+  },
+  "set_links": 234917,
+  "set_links_missing_card": 0,
+  "handmade_cards_hidden_from_search_as_jmdict_duplicates": 0,
+  "tatoeba_indexed_pairs": 148014,
+  "sentences": 103271,
+  "card_sentence_links": 171610,
+  "cards_with_sentences": 29467,
+  "unresolved_index_words": 52907,
+  "user_db_templates": {
+    "jFlash.db": "0 tag counts updated",
+    "jFlashJr.db": "0 tag counts updated"
+  },
+  "bytes jFlash/sql/jFlash-CARD-2.0.db": 47255552,
+  "bytes jFlash/sql/plugins/jFlash-FTS-2.0.db": 44871680,
+  "bytes jFlash/sql/plugins/jFlash-EX-2.0.db": 18386944,
+  "card_types": {
+    "3": 219099,
+    "0": 343,
+    "1": 214
+  },
+  "common (ptag)": 22899,
+  "sources": {
+    "jmdict_created": "2026-10-18",
+    "files": {
+      "JMdict_e.gz": {
+        "url": "https://www.edrdg.org/pub/Nihongo/JMdict_e.gz",
+        "bytes": 10586132,
+        "sha256": "9cb6cb9806e031f04e61ce0026ce7e7be06f53de259c3c4813375f561ee163f6",
+        "last_modified": "2026-10-18T03:30:23+00:00"
+      },
+      "edicthdr.txt": {
+        "url": "https://www.edrdg.org/pub/Nihongo/edicthdr.txt",
+        "bytes": 187,
+        "sha256": "53a347531c5686fedf8057d19077eda6a46f7d9eff70d65dd4f41a404347d191",
+        "last_modified": "2026-10-18T03:30:28+00:00"
+      },
+      "jpn_indices.tar.bz2": {
+        "url": "https://downloads.tatoeba.org/exports/jpn_indices.tar.bz2",
+        "bytes": 2865779,
+        "sha256": "20b20f6e39dc40473b22bc5a2f050fd97b24d7ad0085ff5701915e37d7b30f2e",
+        "last_modified": "2026-10-17T06:32:32+00:00"
+      },
+      "sentences.tar.bz2": {
+        "url": "https://downloads.tatoeba.org/exports/sentences.tar.bz2",
+        "bytes": 219219103,
+        "sha256": "489e53327b2930f6746a47624c2de7e7cab4c63a395cd5014672da4364b01655",
+        "last_modified": "2026-10-17T06:19:48+00:00"
+      }
+    }
+  }
+}

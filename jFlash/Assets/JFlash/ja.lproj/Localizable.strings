@@ -308,6 +308,12 @@
 /* HelpViewController.Next  (HelpViewController.m) */
 "Next >" = "次へ";
 
+/* JFlash2.0 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated to Japanese in a Flash! 2.0" = "Japanese in a Flash! 2.0にアップデートしました";
+
+/* JFlash2.0 upgrade alert msg  (JFlashUpdateManager.m) */
+"The dictionary has been updated to the current JMdict, with new example sentences from Tatoeba. Because the cards changed, your study progress and sets from the previous version have been reset." = "辞書を最新のJMdictに更新し、Tatoebaの新しい例文を追加しました。カードが変わったため、以前のバージョンの学習記録とセットはリセットされました。";
+
 /* JFlash1.7 upgrade alert title  (JFlashUpdateManager.m) */
 "Updated to Japanese in a Flash! 1.7" = "Japanese in a Flash! 1.7にアップデートしました";
 
@@ -357,7 +363,7 @@
 "Common Kana Words" = "かな書きが多い語";
 
 /* SettingsViewController.Acknowledgements  (JapaneseSettingsDataSource.m) */
-"Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application also uses data from the EDICT dictionary and Tanaka Corpus. The EDICT files are property of the Electronic Dictionary Research and Development Group, and are used in conformance with the Group's license. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash!（旧Japanese Flash）は、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリはEDICT辞書とTanaka Corpus（田中コーパス）のデータも使用しています。EDICTファイルはElectronic Dictionary Research and Development Groupの所有物であり、同グループのライセンスに従って使用しています。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese in a Flash!のロゴと製品名はオリジナルの創作物であり、ほかの商標との類似は意図したものではなく、まったくの偶然です。";
+"Japanese in a Flash! (formerly Japanese Flash) was created on a Long Weekend over a few steaks and a few more Coronas. Special thanks goes to Teja for helping us write and simulate the frequency algorithm. This application includes material from the JMdict (EDICT, etc.) dictionary files in accordance with the licence provisions of the Electronic Dictionary Research and Development Group (EDRDG). The files are the property of the EDRDG and are used, converted and modified here under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0); the modified dictionary data is shared under the same licence at https://github.com/rsharrott/xflash. EDRDG licence: https://www.edrdg.org/edrdg/licence.html  JMdict project: https://www.edrdg.org/jmdict/j_jmdict.html  Example sentences are from the Tatoeba Project (https://tatoeba.org, originally the Tanaka Corpus) and are used under the Creative Commons Attribution 2.0 France licence (CC BY 2.0 FR): https://creativecommons.org/licenses/by/2.0/fr/. Some icons by Joseph Wain / glyphish.com. The Japanese in a Flash! logo & product name are original creations and any perceived similarities to other trademarks is unintended and purely coincidental." = "Japanese in a Flash!（旧Japanese Flash）は、ステーキ数枚とそれより少し多めのコロナビールを片手に、Long Weekendで生まれました。出題頻度のアルゴリズムの作成とシミュレーションを手伝ってくれたTejaに特に感謝します。このアプリには、Electronic Dictionary Research and Development Group（EDRDG）のライセンス規定に従い、JMdict（EDICTなど）辞書ファイルの内容が含まれています。これらのファイルはEDRDGの所有物であり、クリエイティブ・コモンズ 表示-継承 4.0（CC BY-SA 4.0）ライセンスの下で使用・変換・改変しています。改変した辞書データも同じライセンスでhttps://github.com/rsharrott/xflash にて提供しています。EDRDGライセンス：https://www.edrdg.org/edrdg/licence.html　JMdictプロジェクト：https://www.edrdg.org/jmdict/j_jmdict.html　例文はTatoebaプロジェクト（https://tatoeba.org、旧Tanaka Corpus／田中コーパス）のもので、クリエイティブ・コモンズ 表示 2.0 フランス（CC BY 2.0 FR）ライセンスの下で使用しています：https://creativecommons.org/licenses/by/2.0/fr/。一部のアイコンはJoseph Wain / glyphish.comによるものです。Japanese in a Flash!のロゴと製品名はオリジナルの創作物であり、ほかの商標との類似は意図したものではなく、まったくの偶然です。";
 
 /* PleaseWait  (PluginSettingsViewController.m) */
 "Please Wait" = "お待ちください";

@@ -283,6 +283,42 @@ NSString * const LWEPluginDidInstall = @"LWEPluginDidInstall";
   return YES;
 }
 
+#pragma mark - Bundled plugin health check
+
+//! The registered (settings) plugin for a key, or nil if there is none or it can't be decoded.
+- (Plugin *) _registeredPluginForKey:(NSString *)pluginKey
+{
+  NSData *data = [[[NSUserDefaults standardUserDefaults] objectForKey:APP_PLUGIN] objectForKey:pluginKey];
+  if ([data isKindOfClass:[NSData class]] == NO)
+  {
+    return nil;
+  }
+  NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:data error:NULL];
+  unarchiver.requiresSecureCoding = NO;
+  Plugin *plugin = (Plugin *)[unarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
+  [unarchiver finishDecoding];
+  [unarchiver release];
+  return [plugin isKindOfClass:[Plugin class]] ? plugin : nil;
+}
+
+- (BOOL) bundledPluginsNeedRegistering:(NSDictionary *)bundledPlist
+{
+  for (NSString *key in bundledPlist)
+  {
+    Plugin *bundled = [Plugin pluginWithDictionary:[bundledPlist objectForKey:key]];
+    Plugin *registered = [self _registeredPluginForKey:bundled.pluginId];
+    if (registered == nil ||
+        [LWEFile fileExists:[registered fullPath]] == NO ||
+        [bundled isNewVersionOfPlugin:registered])
+    {
+      LWE_LOG(@"Bundled plugin %@ %@ needs registering (registered: %@ %@)", bundled.pluginId, bundled.version,
+              registered.filePath, registered.version);
+      return YES;
+    }
+  }
+  return NO;
+}
+
 #pragma mark - Public Methods - Find out about plugin state
 
 //! Returns the version string of a plugin, or nil if the key is not a loaded plugin

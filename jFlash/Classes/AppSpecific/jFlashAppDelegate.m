@@ -259,12 +259,15 @@
   NSString *dbPath = [LWEFile createDocumentPathWithFilename:filename];
   BOOL openedDB = [db openDatabase:dbPath];
   LWE_ASSERT_EXC(openedDB, @"Unable to open DB: %@", filename);
-  if ([CurrentState sharedCurrentState].isFirstLoad)
+  // Install all pre-bundled plugins (CARD_DB, FTS_DB, EX_DB) from the installed plist on first load,
+  // and again whenever the registered ones are missing, point at a file that no longer exists or are
+  // older than the bundled ones.  The 2.0 dictionary refresh renamed jFlash-CARD-1.1.db & co., so an
+  // install made from an older build would otherwise fail to load its plugins and stop at launch.
+  NSString *plistPath = [[NSBundle mainBundle] pathForResource:LWE_PREINSTALLED_PLUGIN_PLIST ofType:nil];
+  LWE_ASSERT_EXC(plistPath, @"Cannot find preinstalled plugins file");
+  NSDictionary *plist = [NSDictionary dictionaryWithContentsOfFile:plistPath];
+  if ([CurrentState sharedCurrentState].isFirstLoad || [self.pluginManager bundledPluginsNeedRegistering:plist])
   {
-    // Install all pre-bundled plugins (CARD_DB, FTS_DB, EX_DB) from the installed plist
-    NSString *plistPath = [[NSBundle mainBundle] pathForResource:LWE_PREINSTALLED_PLUGIN_PLIST ofType:nil];
-    LWE_ASSERT_EXC(plistPath, @"Cannot find preinstalled plugins file");
-    NSDictionary *plist = [NSDictionary dictionaryWithContentsOfFile:plistPath];
     for (NSString *key in plist)
     {
       Plugin *plugin = [Plugin pluginWithDictionary:[plist objectForKey:key]];

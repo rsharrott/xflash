@@ -60,6 +60,11 @@ extern NSString * const LWEPluginDidInstall;
 
 - (BOOL) loadPlugin:(Plugin *)plugin error:(NSError **)error;
 
+//! YES if any plugin in bundledPlist (the preinstalled-plugins plist) is not registered, is registered
+//! with a file that no longer exists, or is registered at an older version than the bundled one --
+//! e.g. a build from before the 2.0 dictionary refresh, whose settings point at jFlash-CARD-1.1.db.
+- (BOOL) bundledPluginsNeedRegistering:(NSDictionary *)bundledPlist;
+
 - (void) processPlistHash:(NSDictionary*)plistHash;
 
 // Used to fix the plugin paths after a restore/transfer to a different device
