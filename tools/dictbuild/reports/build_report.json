@@ -15,8 +15,7 @@
   "cards_with_sentences": 29467,
   "unresolved_index_words": 52907,
   "user_db_templates": {
-    "jFlash.db": "0 tag counts updated",
-    "jFlashJr.db": "0 tag counts updated"
+    "jFlash.db": "0 tag counts updated"
   },
   "bytes jFlash/sql/jFlash-CARD-2.0.db": 47255552,
   "bytes jFlash/sql/plugins/jFlash-FTS-2.0.db": 44871680,
