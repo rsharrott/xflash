@@ -146,34 +146,19 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 }
 
 
-//! Makes "setting" move to its next state
-- (void) iterateSetting: (NSString*) setting
+//! Stores a value chosen from a row's pop-up menu
+- (void) _setValue:(NSString *)value forSetting:(NSString *)setting
 {
-  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-  NSDictionary *dict = [self.dataSource.settingsHash objectForKey:setting];
-  NSEnumerator *enumerator = [dict keyEnumerator];
-  NSString *currentValue = [settings objectForKey:setting];
-  NSString *lclKey = nil;
-  NSString *nextValue = nil;
-  
-  // Find current match in the enumeration and return the next object
-  while ((lclKey = [enumerator nextObject]))
+  [[NSUserDefaults standardUserDefaults] setValue:value forKey:setting];
+
+  // One special case, theme: re-tint the window and this page's nav bar
+  if ([setting isEqualToString:APP_THEME])
   {
-    if ([lclKey isEqual:currentValue])
-    {
-      nextValue = [enumerator nextObject];
-      break;
-    }
+    UIWindow *window = self.view.window;
+    window.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
+    self.navigationController.navigationBar.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
+    [self.tableView reloadData];
   }
-  // Now check if we got nothing because we were at the end of the list
-  if (nextValue == nil)
-  {
-    NSEnumerator *tmpEnumerator = [dict keyEnumerator];
-    nextValue = [tmpEnumerator nextObject];
-  }
-  [settings setValue:nextValue forKey:setting];
-  
-  return;
 }
 
 
@@ -245,9 +230,10 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   }
   else if (key == APP_ALGORITHM)
   {
-    cell = [LWEUITableUtils reuseCellForIdentifier:APP_ALGORITHM onTable:lclTableView usingStyle:UITableViewCellStyleDefault];
+    cell = [LWEUITableUtils reuseCellForIdentifier:APP_ALGORITHM onTable:lclTableView usingStyle:UITableViewCellStyleValue1];
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
+    cell.detailTextLabel.text = [AlgorithmSettingsViewController displayNameForDifficulty:[settings integerForKey:APP_DIFFICULTY]];
   }
 	else if (key == APP_NEW_UPDATE)
 	{
@@ -257,10 +243,29 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 	}
   else
   {
-    // Anything else
-    cell = [LWEUITableUtils reuseCellForIdentifier:key onTable:lclTableView usingStyle:UITableViewCellStyleValue1];
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.detailTextLabel.text = [[self.dataSource.settingsHash objectForKey:key] objectForKey:[settings objectForKey:key]];        
+    // A setting with a fixed list of values: a pop-up menu showing the current value
+    LWEMenuSettingCell *menuCell = [lclTableView dequeueReusableCellWithIdentifier:@"menuSetting"];
+    if (menuCell == nil)
+    {
+      menuCell = [[[LWEMenuSettingCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"menuSetting"] autorelease];
+    }
+    NSDictionary *names = [self.dataSource.settingsHash objectForKey:key];
+    NSArray *values = [self.dataSource.settingsOrder objectForKey:key];
+    NSMutableArray *titles = [NSMutableArray arrayWithCapacity:[values count]];
+    for (NSString *value in values)
+    {
+      [titles addObject:[names objectForKey:value]];
+    }
+    __block SettingsViewController *blockSelf = self;   // MRC: don't retain self from the cell
+    [menuCell configureWithTitle:displayName
+                    optionTitles:titles
+                    optionValues:values
+                    currentValue:[settings objectForKey:key]
+                       tintColor:[[ThemeManager sharedThemeManager] currentThemeTintColor]
+                         handler:^(id value) {
+      [blockSelf _setValue:value forSetting:key];
+    }];
+    return menuCell;
   }
   
   cell.textLabel.lineBreakMode = NSLineBreakByWordWrapping;
@@ -304,7 +309,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   }
   else if (key == APP_REMINDER)
   {
-    ReminderSettingsViewController *tmpVC = [[ReminderSettingsViewController alloc] initWithNibName:@"ReminderSettingsViewController" bundle:nil];
+    ReminderSettingsViewController *tmpVC = [[ReminderSettingsViewController alloc] init];
     [self.navigationController pushViewController:tmpVC animated:YES];
     [tmpVC release];
   }
@@ -314,21 +319,7 @@ NSString * const APP_NEW_UPDATE = @"new_update";
     [self.navigationController pushViewController:avc animated:YES];
     [avc release];
   }
-  else
-  {
-    // Everything else
-    [self iterateSetting:key];
-    [lclTableView reloadRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
-                        withRowAnimation:UITableViewRowAnimationNone];
-    
-    // One special case, theme: reload the nav bar for this page
-    if ([key isEqualToString:APP_THEME])
-    {
-      UIWindow *window = self.view.window;
-      window.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
-      self.navigationController.navigationBar.tintColor = [[ThemeManager sharedThemeManager] currentThemeTintColor];
-    }
-  }
+  // Rows with a fixed list of values are changed from their pop-up menu button, not by tapping the row
 }
 
 - (NSString *) tableView:(UITableView*)tableView titleForHeaderInSection:(NSInteger)section
@@ -362,6 +353,208 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   [downloadManager release];
   [dataSource release];
   [sectionArray release];
+  [super dealloc];
+}
+
+@end
+
+
+#pragma mark - LWEMenuSettingCell
+
+//! The cell's pop-up button. It takes touches anywhere inside touchTargetView (its cell), so
+//! UIKit treats a tap on the row title as a tap inside the button and opens the menu.
+@interface LWEMenuRowButton : UIButton
+@property (nonatomic, assign) UIView *touchTargetView;
+@end
+
+@implementation LWEMenuRowButton
+@synthesize touchTargetView;
+
+- (BOOL) pointInside:(CGPoint)point withEvent:(UIEvent *)event
+{
+  if (self.touchTargetView != nil)
+  {
+    CGPoint targetPoint = [self convertPoint:point toView:self.touchTargetView];
+    if ([self.touchTargetView pointInside:targetPoint withEvent:event])
+    {
+      return YES;
+    }
+  }
+  return [super pointInside:point withEvent:event];
+}
+@end
+
+@interface LWEMenuSettingCell ()
+{
+  UIStackView *_stack;
+  NSArray *_optionTitles;
+  NSArray *_optionValues;
+  id _currentValue;
+  void (^_handler)(id value);
+}
+- (void) _rebuildMenu;
+@end
+
+@implementation LWEMenuSettingCell
+
+@synthesize titleLabel = _titleLabel, menuButton = _menuButton;
+
+- (id) initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+  if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier]))
+  {
+    self.selectionStyle = UITableViewCellSelectionStyleNone;
+
+    _titleLabel = [[UILabel alloc] init];
+    _titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    _titleLabel.adjustsFontForContentSizeCategory = YES;
+    _titleLabel.numberOfLines = 0;
+    _titleLabel.isAccessibilityElement = NO;   // the button reads "Title, Value"
+    [_titleLabel setContentCompressionResistancePriority:UILayoutPriorityDefaultHigh forAxis:UILayoutConstraintAxisHorizontal];
+
+    UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
+    config.image = [UIImage systemImageNamed:@"chevron.up.chevron.down"];
+    config.preferredSymbolConfigurationForImage = [UIImageSymbolConfiguration configurationWithTextStyle:UIFontTextStyleFootnote scale:UIImageSymbolScaleSmall];
+    config.imagePlacement = NSDirectionalRectEdgeTrailing;
+    config.imagePadding = 4;
+    config.contentInsets = NSDirectionalEdgeInsetsMake(8, 8, 8, 0);
+    config.titleLineBreakMode = NSLineBreakByWordWrapping;
+    config.titleTextAttributesTransformer = ^NSDictionary<NSAttributedStringKey,id> *(NSDictionary<NSAttributedStringKey,id> *incoming) {
+      NSMutableDictionary *outgoing = [[incoming mutableCopy] autorelease];
+      UIFont *body = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+      UIFontDescriptor *semibold = [body.fontDescriptor fontDescriptorByAddingAttributes:@{UIFontDescriptorTraitsAttribute: @{UIFontWeightTrait: @(UIFontWeightSemibold)}}];
+      [outgoing setObject:[UIFont fontWithDescriptor:semibold size:0] forKey:NSFontAttributeName];
+      return outgoing;
+    };
+    _menuButton = [[LWEMenuRowButton buttonWithConfiguration:config primaryAction:nil] retain];
+    ((LWEMenuRowButton *)_menuButton).touchTargetView = self;
+    _menuButton.showsMenuAsPrimaryAction = YES;
+    _menuButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentTrailing;
+    [_menuButton setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+    [_menuButton setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+
+    _stack = [[UIStackView alloc] initWithArrangedSubviews:@[_titleLabel, _menuButton]];
+    _stack.spacing = 8;
+    _stack.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.contentView addSubview:_stack];
+    UILayoutGuide *margins = self.contentView.layoutMarginsGuide;
+    [NSLayoutConstraint activateConstraints:@[
+      [_stack.leadingAnchor constraintEqualToAnchor:margins.leadingAnchor],
+      [_stack.trailingAnchor constraintEqualToAnchor:margins.trailingAnchor],
+      [_stack.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:4],
+      [_stack.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-4],
+      [self.contentView.heightAnchor constraintGreaterThanOrEqualToConstant:44],
+    ]];
+    [self _updateForContentSize:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_contentSizeCategoryDidChange:) name:UIContentSizeCategoryDidChangeNotification object:nil];
+  }
+  return self;
+}
+
+- (void) _updateForContentSize:(UIContentSizeCategory)category
+{
+  if (category == nil) category = [UIApplication sharedApplication].preferredContentSizeCategory;
+  BOOL large = UIContentSizeCategoryIsAccessibilityCategory(category);
+  _stack.axis = large ? UILayoutConstraintAxisVertical : UILayoutConstraintAxisHorizontal;
+  _stack.alignment = large ? UIStackViewAlignmentLeading : UIStackViewAlignmentCenter;
+  _stack.spacing = large ? 0 : 8;
+  UIButtonConfiguration *config = [[_menuButton.configuration copy] autorelease];
+  config.contentInsets = large ? NSDirectionalEdgeInsetsMake(4, 0, 8, 0) : NSDirectionalEdgeInsetsMake(8, 8, 8, 0);
+  _menuButton.configuration = config;
+  _menuButton.contentHorizontalAlignment = large ? UIControlContentHorizontalAlignmentLeading : UIControlContentHorizontalAlignmentTrailing;
+}
+
+- (void) _contentSizeCategoryDidChange:(NSNotification *)notification
+{
+  [self _updateForContentSize:[notification.userInfo objectForKey:UIContentSizeCategoryNewValueKey]];
+}
+
+- (void) configureWithTitle:(NSString *)title
+                optionTitles:(NSArray *)optionTitles
+                optionValues:(NSArray *)optionValues
+                currentValue:(id)currentValue
+                   tintColor:(UIColor *)tintColor
+                     handler:(void (^)(id value))handler
+{
+  _titleLabel.text = title;
+  [_optionTitles release];
+  _optionTitles = [optionTitles copy];
+  [_optionValues release];
+  _optionValues = [optionValues copy];
+  [_currentValue release];
+  _currentValue = [currentValue retain];
+  [_handler release];
+  _handler = [handler copy];
+
+  UIButtonConfiguration *config = [[_menuButton.configuration copy] autorelease];
+  config.baseForegroundColor = tintColor;
+  _menuButton.configuration = config;
+  _menuButton.accessibilityLabel = title;
+  [self _rebuildMenu];
+}
+
+//! Button title = current value; the menu lists every option in order with a checkmark on the current one
+- (void) _rebuildMenu
+{
+  NSString *currentTitle = @"";
+  NSMutableArray *actions = [NSMutableArray arrayWithCapacity:[_optionValues count]];
+  __block LWEMenuSettingCell *blockSelf = self;
+  for (NSUInteger i = 0; i < [_optionValues count]; i++)
+  {
+    id value = [_optionValues objectAtIndex:i];
+    NSString *optionTitle = [_optionTitles objectAtIndex:i];
+    BOOL isCurrent = [value isEqual:_currentValue];
+    if (isCurrent) currentTitle = optionTitle;
+    UIAction *action = [UIAction actionWithTitle:optionTitle image:nil identifier:nil handler:^(__kindof UIAction *a) {
+      [blockSelf _choose:value];
+    }];
+    action.state = isCurrent ? UIMenuElementStateOn : UIMenuElementStateOff;
+    [actions addObject:action];
+  }
+  // A stored value that isn't one of the options (old or hand-edited defaults): show the first
+  // option rather than an empty button. Nothing is checkmarked, so picking any option fixes it.
+  if ([currentTitle length] == 0 && [_optionTitles count] > 0)
+  {
+    currentTitle = [_optionTitles objectAtIndex:0];
+  }
+  UIButtonConfiguration *config = [[_menuButton.configuration copy] autorelease];
+  config.title = currentTitle;
+  _menuButton.configuration = config;
+  _menuButton.accessibilityValue = currentTitle;
+  _menuButton.menu = [UIMenu menuWithTitle:@"" children:actions];
+}
+
+//! The whole row is the pop-up button's target: a tap anywhere on the row (title included) opens the menu
+- (UIView *) hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+  UIView *hit = [super hitTest:point withEvent:event];
+  if (hit != nil && _menuButton.enabled && _menuButton.hidden == NO && [self pointInside:point withEvent:event])
+  {
+    return _menuButton;
+  }
+  return hit;
+}
+
+- (void) _choose:(id)value
+{
+  if ([value isEqual:_currentValue]) return;
+  [_currentValue release];
+  _currentValue = [value retain];
+  [self _rebuildMenu];
+  if (_handler) _handler(value);
+}
+
+- (void) dealloc
+{
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIContentSizeCategoryDidChangeNotification object:nil];
+  [_titleLabel release];
+  ((LWEMenuRowButton *)_menuButton).touchTargetView = nil;   // the button can outlive the cell (e.g. while its menu is up)
+  [_menuButton release];
+  [_stack release];
+  [_optionTitles release];
+  [_optionValues release];
+  [_currentValue release];
+  [_handler release];
   [super dealloc];
 }
 
