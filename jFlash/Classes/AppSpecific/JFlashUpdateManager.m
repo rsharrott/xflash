@@ -326,14 +326,9 @@
  */
 + (BOOL) _needsUpdateTo20:(NSUserDefaults *) settings
 {
-#if defined (LWE_JUNIOR)
-  // jFlashJr has its own version line (LWE_CURRENT_VERSION 1.0) and is going away; leave it alone.
-  return NO;
-#else
   NSString *dataVersion = [settings objectForKey:APP_DATA_VERSION];
   return ([settings valueForKey:@"settings_already_created"] && [dataVersion isKindOfClass:[NSString class]] &&
           [dataVersion compare:LWE_JF_VERSION_2_0 options:NSNumericSearch] == NSOrderedAscending);
-#endif
 }
 
 + (void) _updateSettingsTo20:(NSUserDefaults *)settings

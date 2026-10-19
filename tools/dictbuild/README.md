@@ -9,10 +9,9 @@ open data, with the tables and columns the app reads:
 | `jFlash/sql/plugins/jFlash-FTS-2.0.db` | `FTS_DB` 2.0 | full-text table `cards_search_content(card_id, content, ptag)` |
 | `jFlash/sql/plugins/jFlash-EX-2.0.db` | `EX_DB` 2.0 | `sentences`, `card_sentence_link` (with `should_show`) |
 
-It also refreshes the cached `tags.count` column in the user DB templates:
-`jFlash/sql/jFlash.db`, and `jFlash/sql/jFlashJr.db` only if that file exists
-(it goes away with the jFlashJr target). A template is rewritten only when a
-count actually changes, so re-running the build leaves it byte-identical.
+It also refreshes the cached `tags.count` column in the user DB template
+`jFlash/sql/jFlash.db`. The template is rewritten only when a count actually
+changes, so re-running the build leaves it byte-identical.
 
 ## Usage
 
@@ -131,9 +130,9 @@ dropped. The hand-made cards that JMdict does identify (ピンク, 林檎 …) m
 the JMdict card.
 
 The script also re-maps `card_tag_link`/`last_state` in the user DB templates
-you pass with `--user-db`. A missing path is skipped, so you can leave out
-`jFlashJr.db` once that target is removed. The results are in
-`reports/legacy_match.md` (per-set counts) and `reports/legacy_unmatched.tsv`
+you pass with `--user-db` (a missing path is skipped). It was run on
+`jFlash.db` and `jFlashJr.db`, before the jFlashJr target was removed. The
+results are in `reports/legacy_match.md` (per-set counts) and `reports/legacy_unmatched.tsv`
 (dropped memberships, plus the kept headword-/reading-only matches to review).
 It doesn't need to run again. The usage line is in the script's docstring.
 
