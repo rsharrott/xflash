@@ -150,8 +150,9 @@
     if ([settings boolForKey:@"LWEDebugShowReading"])
     {
       dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self.cardViewController turnReadingOn];
-        self.cardViewController.readingVisible = YES;
+        CardViewController *cvc = (CardViewController *)self.cardViewController;
+        [cvc turnReadingOn];
+        cvc.readingVisible = YES;
       });
     }
     //   simctl launch --console <udid> <bundle> -LWEDebugCheckRevealTapGuard YES
