@@ -13,7 +13,6 @@
 #import "AddTagViewController.h"
 #import "UpdateManager.h"
 #import "CardViewController.h"
-#import "TTTAttributedLabel.h"
 #import "ActionBarViewController.h"
 #import "FirstRunViewController.h"
 #import "LWEDesignTokens.h"
@@ -154,7 +153,7 @@
         CardViewController *cvc = (CardViewController *)self.cardViewController;
         if ([self.currentCard respondsToSelector:@selector(attributedReading)])
         {
-          [(TTTAttributedLabel *)cvc.readingLabel setText:[self.currentCard attributedReading]];
+          cvc.readingLabel.attributedText = [self.currentCard attributedReading];
         }
         cvc.readingVisible = YES;
         [cvc turnReadingOn];

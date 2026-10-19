@@ -813,7 +813,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   }
   self.readingLabel.text = card.reading;
 #elif defined(LWE_CFLASH)
-  [(TTTAttributedLabel *)self.readingLabel setText:[card attributedReading]];
+  self.readingLabel.attributedText = [card attributedReading];
 #endif
   // These calls re-size the reading & headword labels.  They used to take the scrollContainer as well,
   // but we infer it (superview) of the labels inside this call.
