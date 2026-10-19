@@ -43,9 +43,6 @@ extern const CGFloat kLWECardCornerRadius;
 //! Paints `layer` as the current theme's study card: cardFill, radius 28, ring and shadow (cardStyle)
 - (void) applyCardStyleToLayer:(CALayer*)layer;
 
-//! Same as colorForSlot: for a given theme key (e.g. a Settings swatch); unknown keys use DEFAULT_THEME
-- (UIColor*) colorForSlot:(NSString*)slot themeKey:(NSString*)themeKey;
-
 //! Provide list of names of all available themes, in display order (Paper, Fire, Water)
 - (NSArray*) themeNameList;
 

@@ -131,7 +131,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
     };
     // CSS: PAPER
     NSString *paperCSS = @"body{color:#1D1A16;} #container:before{background:#CFC6B8;} ol,li{color:#1D1A16;} dfn{background-color:#FFD60A;border-color:#FFD60A;color:#3A2A00;}";
-    NSString *paperSentencesCSS = @"body{color:#1D1A16;} .headwordLabel{color:#3A352E;} .readingLabel{color:#3A352E;} .romaji,.exTitle{color:#6F665B;} li{background:#EDE6DA;} .ja{color:#1D1A16;} .hl{color:#8E1400;background:transparent;text-decoration-line:underline;text-decoration-color:#8E1400;text-decoration-thickness:2px;} .en,.ContentCell{color:#3A352E;} .button{color:#8E1400;background:#E7E1D6;} .ExpandedSentencesTable td{border-top-color:rgba(60,40,20,0.08);} .HeadwordCell{color:#1D1A16;} dfn{background-color:#FFD60A;color:#3A2A00;}";
+    NSString *paperSentencesCSS = @"body{color:#1D1A16;} .headwordLabel{color:#3A352E;} .readingLabel{color:#3A352E;} .romaji,.exTitle{color:#6F665B;} li{background:#EDE6DA;} .ja{color:#1D1A16;} .hl{color:#8E1400;background:transparent;text-decoration-line:underline;text-decoration-color:#8E1400;text-decoration-thickness:2px;} .en,.ContentCell{color:#3A352E;} .button{color:#8E1400;background:#FBF8F3;} .ExpandedSentencesTable td{border-top-color:rgba(60,40,20,0.08);} .HeadwordCell{color:#1D1A16;} dfn{background-color:#FFD60A;color:#3A2A00;}";
     // FIRE: themed slots
     NSDictionary *fireSlots = @{
       @"tint": @"#C01B00",
@@ -158,7 +158,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
     };
     // CSS: FIRE
     NSString *fireCSS = @"body{color:#FFFFFF;} #container:before{background:rgba(255,255,255,0.30);} ol,li{color:#FFFFFF;} dfn{background-color:#FFD60A;border-color:#FFD60A;color:#3A2A00;}";
-    NSString *fireSentencesCSS = @"body{color:#FFFFFF;} .headwordLabel{color:#FFD60A;} .readingLabel{color:#FFFFFF;} .romaji,.exTitle{color:rgba(255,255,255,0.88);} li{background:rgba(255,255,255,0.14);} .ja{color:#FFFFFF;} .hl{color:#3A2A00;background:#FFD60A;text-decoration-line:none;} .en,.ContentCell{color:rgba(255,255,255,0.88);} .button{color:#FFFFFF;background:rgba(255,255,255,0.16);} .ExpandedSentencesTable td{border-top-color:rgba(255,255,255,0.30);} .HeadwordCell{color:#FFD60A;} dfn{background-color:#FFD60A;color:#3A2A00;}";
+    NSString *fireSentencesCSS = @"body{color:#FFFFFF;} .headwordLabel{color:#FFD60A;} .readingLabel{color:#FFFFFF;} .romaji,.exTitle{color:rgba(255,255,255,0.88);} li{background:rgba(255,255,255,0.14);} .ja{color:#FFFFFF;} .hl{color:#3A2A00;background:#FFD60A;text-decoration-line:none;} .en,.ContentCell{color:rgba(255,255,255,0.88);} .button{color:#FFFFFF;background:#8E1400;} .ExpandedSentencesTable td{border-top-color:rgba(255,255,255,0.30);} .HeadwordCell{color:#FFD60A;} dfn{background-color:#FFD60A;color:#3A2A00;}";
     // WATER: themed slots
     NSDictionary *waterSlots = @{
       @"tint": @"#1356A7",
@@ -185,7 +185,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
     };
     // CSS: WATER
     NSString *waterCSS = @"body{color:#FFFFFF;} #container:before{background:rgba(255,255,255,0.30);} ol,li{color:#FFFFFF;} dfn{background-color:#FFD60A;border-color:#FFD60A;color:#3A2A00;}";
-    NSString *waterSentencesCSS = @"body{color:#FFFFFF;} .headwordLabel{color:#FFFFFF;} .readingLabel{color:#FFFFFF;} .romaji,.exTitle{color:rgba(255,255,255,0.88);} li{background:rgba(255,255,255,0.14);} .ja{color:#FFFFFF;} .hl{color:#3A2A00;background:#FFD60A;text-decoration-line:none;} .en,.ContentCell{color:rgba(255,255,255,0.88);} .button{color:#FFFFFF;background:rgba(255,255,255,0.16);} .ExpandedSentencesTable td{border-top-color:rgba(255,255,255,0.30);} .HeadwordCell{color:#FFD60A;} dfn{background-color:#FFD60A;color:#3A2A00;}";
+    NSString *waterSentencesCSS = @"body{color:#FFFFFF;} .headwordLabel{color:#FFFFFF;} .readingLabel{color:#FFFFFF;} .romaji,.exTitle{color:rgba(255,255,255,0.88);} li{background:rgba(255,255,255,0.14);} .ja{color:#FFFFFF;} .hl{color:#3A2A00;background:#FFD60A;text-decoration-line:none;} .en,.ContentCell{color:rgba(255,255,255,0.88);} .button{color:#FFFFFF;background:#134685;} .ExpandedSentencesTable td{border-top-color:rgba(255,255,255,0.30);} .HeadwordCell{color:#FFFFFF;} dfn{background-color:#FFD60A;color:#3A2A00;}";
 
     // Card shape is shared (inset 12pt, radius 28); only the shadow differs.  One CALayer shadow
     // (CSS blur / 2 = shadowRadius) plus an optional 1pt ring: Paper ring + e2, Fire fire-lg, Water ring + e3.
@@ -233,13 +233,17 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
 
 - (UIColor*) colorForSlot:(NSString*)slot
 {
-  return LWEThemeColorFromString([[[self _currentTheme] objectForKey:kLWEThemeSlotsKey] objectForKey:slot]);
-}
-
-- (UIColor*) colorForSlot:(NSString*)slot themeKey:(NSString*)themeKey
-{
-  NSDictionary *theme = [[self themes] objectForKey:themeKey] ?: [[self themes] objectForKey:DEFAULT_THEME];
-  return LWEThemeColorFromString([[theme objectForKey:kLWEThemeSlotsKey] objectForKey:slot]);
+  // Optional slots (cardRing, cardPatternInk, …) are simply absent — return nil.
+  id raw = [[[self _currentTheme] objectForKey:kLWEThemeSlotsKey] objectForKey:slot];
+  if (raw == nil) return nil;
+  UIColor *color = LWEThemeColorFromString(raw);
+  if (color == nil)
+  {
+    NSAssert(NO, @"ThemeManager: unparseable slot '%@' (%@) on theme '%@'", slot, raw, [[self _currentTheme] objectForKey:@"key"]);
+    // Fallback so callers that put the result in a dictionary never store nil
+    return [UIColor colorWithWhite:0.4 alpha:1.0];
+  }
+  return color;
 }
 
 - (void) applyCardStyleToLayer:(CALayer*)layer

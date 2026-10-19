@@ -117,7 +117,7 @@
 "Difficulty" = "難易度";
 
 /* AlgorithmVC.NewCardFrequency_MoreOften  (AlgorithmSettingsViewController.m) */
-"More Often" = "多めに";
+"More Often" = "多め";
 
 /* AlgorithmVC.HideLearnedCards  (AlgorithmSettingsViewController.m) */
 "Hide Learned Cards" = "覚えたカードを隠す";
@@ -402,7 +402,7 @@
 "Reminder Settings" = "リマインダーの設定";
 
 /* ReminderVC.SettingsSectionFooter  (ReminderSettingsViewController.m) */
-"Reminders are reset each time the app is opened.  If you're diligent about studying, you may never see one!" = "リマインダーはアプリを開くたびにリセットされます。こまめに学習していれば、一度も届かないかもしれません！";
+"Reminders are reset each time the app is opened. If you're diligent about studying, you may never see one!" = "リマインダーはアプリを開くたびにリセットされます。こまめに学習していれば、一度も届かないかもしれません！";
 
 /* RemindersVC.DaysAfterLastSesssionLabel  (ReminderSettingsViewController.m) */
 "Days After Last Session" = "前回の学習からの日数";
@@ -609,3 +609,21 @@
 
 /* Progress sheet footnote marker after the capped study-pool number; must match the start of "*You can change this in" */
 "StudyPoolCapMarker" = "※";
+
+/* AlgorithmVC.Preset_Easy  (AlgorithmSettingsViewController.m) */
+"Easy" = "やさしい";
+
+/* AlgorithmVC.Preset_Medium  (AlgorithmSettingsViewController.m) */
+"Medium" = "ふつう";
+
+/* AlgorithmVC.Preset_Hard  (AlgorithmSettingsViewController.m) */
+"Hard" = "むずかしい";
+
+/* AlgorithmVC.Preset_Custom  (AlgorithmSettingsViewController.m) */
+"Custom" = "カスタム";
+
+/* AlgorithmVC.PresetDetail: study pool size, then new-card frequency (1-4)  (AlgorithmSettingsViewController.m) */
+"%ld cards · new cards %ld of 4" = "%ld枚・新出頻度 %ld/4";
+
+/* AlgorithmVC.NewCardFrequency_LessOften  (AlgorithmSettingsViewController.m) */
+"Less Often" = "少なめ";

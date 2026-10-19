@@ -166,7 +166,7 @@ static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *hea
     NSString *sentenceIdStr = [NSString stringWithFormat:@"%d", sentence.sentenceId];
     [_sentenceTexts setObject:sentence.sentenceJa forKey:sentenceIdStr];
 
-    NSString *speakSVG = @"<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='white' style='vertical-align:middle'><path d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z'/></svg>";
+    NSString *speakSVG = @"<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='currentColor' style='vertical-align:middle'><path d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z'/></svg>";
     NSString *speakLink = [NSString stringWithFormat:@"<a href='http://xflash.com/%@?id=%d'><span class='button'>%@</span></a>",
       SPEAK_SENTENCE, sentence.sentenceId, speakSVG];
 
@@ -213,12 +213,8 @@ static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *hea
   }
 
   // Replace the CSS & the sentences to create the full HTML string
-#if defined(LWE_JFLASH)
-  // The sentences page sits on the theme card: its inks come from SENTENCES_CSS
+  // The sentences page sits on the theme card: inks come from SENTENCES_CSS (jFlash and cFlash)
   NSString *cssHeader = [[ThemeManager sharedThemeManager] sentencesCSS];
-#else
-  NSString *cssHeader = [[ThemeManager sharedThemeManager] currentThemeCSS];
-#endif
   NSString *html = [LWESentencesHTML stringByReplacingOccurrencesOfString:@"##THEMECSS##" withString:cssHeader];
   html = [html stringByReplacingOccurrencesOfString:@"##EXAMPLES##" withString:sentencesHTML];
   [self.sentencesWebView loadHTMLString:html baseURL:nil];
