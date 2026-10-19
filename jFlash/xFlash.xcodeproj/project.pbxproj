@@ -558,6 +558,8 @@
 		49E3D17E1472803900F79308 /* CardTagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D17A1472803900F79308 /* CardTagTest.m */; };
 		44F6A3257BC7490FB532B615 /* CardModelTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CF57AFED14CF4453BFD1623E /* CardModelTest.m */; };
 		691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CF57AFED14CF4453BFD1623E /* CardModelTest.m */; };
+		32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
+		AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
 		21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 969093541A684E73B823323F /* JapaneseCardTest.m */; };
 		3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 864F7B72A7F8966D023DCF05 /* CardReadingTest.m */; };
 		49E3D17F1472803900F79308 /* SetupDatabaseHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */; };
@@ -967,6 +969,7 @@
 		49E3D17A1472803900F79308 /* CardTagTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardTagTest.m; path = Tests/CardTagTest.m; sourceTree = SOURCE_ROOT; };
 		3D4316EACB834608A16BA825 /* CardModelTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CardModelTest.h; path = Tests/CardModelTest.h; sourceTree = SOURCE_ROOT; };
 		CF57AFED14CF4453BFD1623E /* CardModelTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardModelTest.m; path = Tests/CardModelTest.m; sourceTree = SOURCE_ROOT; };
+		95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardViewControllerNibTest.m; path = Tests/CardViewControllerNibTest.m; sourceTree = SOURCE_ROOT; };
 		07203B478DBF477887BC9B5C /* JapaneseCardTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JapaneseCardTest.h; path = Tests/jFlashTests/JapaneseCardTest.h; sourceTree = SOURCE_ROOT; };
 		969093541A684E73B823323F /* JapaneseCardTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JapaneseCardTest.m; path = Tests/jFlashTests/JapaneseCardTest.m; sourceTree = SOURCE_ROOT; };
 		864F7B72A7F8966D023DCF05 /* CardReadingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardReadingTest.m; path = Tests/jFlashTests/CardReadingTest.m; sourceTree = SOURCE_ROOT; };
@@ -1374,6 +1377,7 @@
 				49E3D17A1472803900F79308 /* CardTagTest.m */,
 				3D4316EACB834608A16BA825 /* CardModelTest.h */,
 				CF57AFED14CF4453BFD1623E /* CardModelTest.m */,
+				95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */,
 				498EBDB11488D43A00BA6DE7 /* PluginTest.h */,
 				498EBDB21488D43A00BA6DE7 /* PluginTest.m */,
 				498EBDA11488AEAA00BA6DE7 /* PluginManagerTest.h */,
@@ -2662,6 +2666,7 @@
 				49AD1808148476340017EFB4 /* ZipArchive.mm in Sources */,
 				9191004A148052A1003E9A19 /* JFlashSearchTest.m in Sources */,
 				44F6A3257BC7490FB532B615 /* CardModelTest.m in Sources */,
+				32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */,
 				21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */,
 				3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */,
 				4971252C14873B0000D4D150 /* MoodIcon.m in Sources */,
@@ -2775,6 +2780,7 @@
 				498EBDB61488D43A00BA6DE7 /* PluginTest.m in Sources */,
 				91910157148992EC003E9A19 /* TagTest.m in Sources */,
 				691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */,
+				AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */,
 				4926EA02148FADDE00F55D09 /* CardPeerTest.m in Sources */,
 				4944B1E51495D23700AE23BE /* CloseButtonView.m in Sources */,
 				499E56B914972A7200088BD3 /* TTTAttributedLabel.m in Sources */,
