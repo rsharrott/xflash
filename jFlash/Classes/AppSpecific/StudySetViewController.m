@@ -9,29 +9,16 @@
 #import "StudySetViewController.h"
 #import "StudySetWordsViewController.h"
 #import "AddStudySetInputViewController.h"
-#import "UpgradeAdViewController.h"
 
 #import "CustomCellBackgroundView.h"
 #import "SettingsViewController.h"
 #import "Constants.h"
 
-#if defined (LWE_JUNIOR)
-enum Sections {
-  kLWEGroupsSection = 0,
-  kLWETagsSection = 1,
-  kLWEPremiumTagsSection = 2,
-  NUM_SECTIONS
-};
-#else
 enum Sections {
   kLWEGroupsSection = 0,
   kLWETagsSection = 1,
   NUM_SECTIONS
 };
-
-// stub to avoid scattering LWE_JUNIOR ifdefs further
-NSInteger const kLWEPremiumTagsSection = INT32_MAX;
-#endif
 
 @interface StudySetViewController ()
 - (void) _commonInit;
@@ -209,13 +196,8 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
 /** Pops up AddStudySetInputViewController modal to create a new set */
 - (IBAction)addStudySet:(id)sender
 {
-#if defined (LWE_JUNIOR)
-  // For JFlash & CFlash Junior, we don't let them add a new study set, so show the Coffee modal instead.
-  UpgradeAdViewController *tmpVC = [[UpgradeAdViewController alloc] initWithNibName:@"UpgradeAdViewController" bundle:nil];
-#else
   // TODO: iPad customization?
   AddStudySetInputViewController *tmpVC = [[AddStudySetInputViewController alloc] initWithDefaultCard:nil inGroup:self.group];
-#endif
   UINavigationController *modalNavController = [[UINavigationController alloc] initWithRootViewController:tmpVC];
   [self.navigationController presentViewController:modalNavController animated:YES completion:nil];
   [modalNavController release];
@@ -272,10 +254,6 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
     if (section == kLWETagsSection)
     {
       return [self.tagArray count];
-    }
-    else if (section == kLWEPremiumTagsSection)
-    {
-      return 1;
     }
     else
     {
@@ -355,18 +333,6 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
         cell.detailTextLabel.text = NSLocalizedString(@"Loading cards...",@"StudySetViewController.LoadingCards");
       }
     }
-  }
-  else if (indexPath.section == kLWEPremiumTagsSection)
-  {
-    cell = [LWEUITableUtils reuseCellForIdentifier:@"normal" onTable:lclTableView usingStyle:UITableViewCellStyleSubtitle];
-    cell.textLabel.numberOfLines = 0;
-    cell.textLabel.text = NSLocalizedString(@"Get More Sets", @"StudySetViewController.premiumSets");
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
-    cell.detailTextLabel.text = NSLocalizedString(@"Tap For Details",@"StudySetViewController.details");;
-    UIImageView *tmpView = cell.imageView;
-    tmpView.image = [UIImage imageNamed:[tm elementWithCurrentTheme:@"tag-starred-icon.png"]];
-    cell.accessoryView = nil;
   }
   // Group Cells
   else
@@ -510,17 +476,6 @@ NSInteger const kLWEPremiumTagsSection = INT32_MAX;
       // deselect "no results" msg
       [lclTableView deselectRowAtIndexPath:indexPath animated:NO];    
     }
-  }
-  else if (indexPath.section == kLWEPremiumTagsSection)
-  {
-    #if defined (LWE_JUNIOR)
-      // For JFlash & CFlash Junior, we don't let them add a new study set, so show the Coffee modal instead.
-      UpgradeAdViewController *tmpVC = [[UpgradeAdViewController alloc] initWithNibName:@"UpgradeAdViewController" bundle:nil];
-      UINavigationController *modalNavController = [[UINavigationController alloc] initWithRootViewController:tmpVC];
-      [self.navigationController presentViewController:modalNavController animated:YES completion:nil];
-      [modalNavController release];
-      [tmpVC release];
-    #endif
   }
   else
   {

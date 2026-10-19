@@ -91,14 +91,9 @@ NSString * LWEAppStoreURLString(void)
 
       NSString * const LWE_XFLASH_HOMEPAGE       = @"https://japaneseinaflash.com";
 
-#if defined(LWE_JUNIOR)
-      NSString * const LWE_CURRENT_VERSION       = @"1.0";
-      NSString * const LWE_CURRENT_USER_DATABASE = @"jFlashJr.db";
-#else
       // These constants are general to the flashes
       NSString * const LWE_CURRENT_VERSION       = @"2.0";
       NSString * const LWE_CURRENT_USER_DATABASE = @"jFlash.db";
-#endif
 
       // These constants are JF specific
       NSString * const LWE_JF_10_USER_DATABASE       = @"jFlash.db";

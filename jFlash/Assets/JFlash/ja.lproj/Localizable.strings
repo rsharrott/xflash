@@ -2,7 +2,7 @@
   Localizable.strings (Japanese)
   Japanese in a Flash! (jFlash target)
   Keys are the English text passed to NSLocalizedString in code, so a target without
-  this file (cFlash, jFlashJr) falls back to the same English.
+  this file (cFlash) falls back to the same English.
 */
 
 /* ActionBar.Caption.Actions  (ActionBarViewController.m) */
@@ -442,12 +442,6 @@
 
 /* StudySetViewController.LoadingCards  (StudySetViewController.m) */
 "Loading cards..." = "カードを読み込み中…";
-
-/* StudySetViewController.premiumSets  (StudySetViewController.m) */
-"Get More Sets" = "ほかのセットを入手";
-
-/* StudySetViewController.details  (StudySetViewController.m) */
-"Tap For Details" = "タップして詳細を表示";
 
 /* StudySetViewController.GroupCount  (StudySetViewController.m) */
 "%d Groups" = "%dグループ";
