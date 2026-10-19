@@ -42,6 +42,8 @@ extern const CGFloat kLWECardCornerRadius;
  * unparseable value asserts in debug and falls back to a grey.
  */
 - (UIColor*) colorForSlot:(NSString*)slot;
+//! The same for a given theme key (nil or unknown: the current theme), without changing the setting
+- (UIColor*) colorForSlot:(NSString*)slot themeKey:(NSString*)themeKey;
 
 //! Paints `layer` as the current theme's study card: cardFill, radius 28, ring and shadow (cardStyle)
 - (void) applyCardStyleToLayer:(CALayer*)layer;

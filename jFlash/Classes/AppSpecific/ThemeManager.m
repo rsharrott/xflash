@@ -315,13 +315,19 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(ThemeManager);
 
 - (UIColor*) colorForSlot:(NSString*)slot
 {
+  return [self colorForSlot:slot themeKey:nil];
+}
+
+- (UIColor*) colorForSlot:(NSString*)slot themeKey:(NSString*)themeKey
+{
+  NSDictionary *theme = (themeKey ? [[self themes] objectForKey:themeKey] : nil) ?: [self _currentTheme];
   // Optional slots (cardRing, cardPatternInk, …) are simply absent — return nil.
-  id raw = [[[self _currentTheme] objectForKey:kLWEThemeSlotsKey] objectForKey:slot];
+  id raw = [[theme objectForKey:kLWEThemeSlotsKey] objectForKey:slot];
   if (raw == nil) return nil;
   UIColor *color = LWEThemeColorFromString(raw);
   if (color == nil)
   {
-    NSAssert(NO, @"ThemeManager: unparseable slot '%@' (%@) on theme '%@'", slot, raw, [[self _currentTheme] objectForKey:@"key"]);
+    NSAssert(NO, @"ThemeManager: unparseable slot '%@' (%@) on theme '%@'", slot, raw, [theme objectForKey:@"key"]);
     // Fallback so callers that put the result in a dictionary never store nil
     return [UIColor colorWithWhite:0.4 alpha:1.0];
   }

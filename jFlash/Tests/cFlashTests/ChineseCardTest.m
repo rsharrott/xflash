@@ -252,29 +252,17 @@
 }
 
 
-#pragma mark - Pinyin ink (furigana spec, DD review of PR #21)
+#pragma mark - Pinyin colour (furigana spec; Pinyin Coloring on = tone colours, off = readingInk)
+
+// These tests pass the setting and theme explicitly instead of writing them to NSUserDefaults: the host
+// app's StudyViewController observes both keys and re-renders its card on a change, which in cFlashTest
+// can reach a card view left half-built by the pre-existing English-first nib exception (separate PR).
 
 static BOOL LWESameRGBA(UIColor *a, UIColor *b)
 {
   CGFloat r1 = 0, g1 = 0, b1 = 0, a1 = 0, r2 = 0, g2 = 0, b2 = 0, a2 = 0;
   if (![a getRed:&r1 green:&g1 blue:&b1 alpha:&a1] || ![b getRed:&r2 green:&g2 blue:&b2 alpha:&a2]) return NO;
   return fabs(r1 - r2) < 0.002 && fabs(g1 - g2) < 0.002 && fabs(b1 - b2) < 0.002 && fabs(a1 - a2) < 0.002;
-}
-
-//! Writes a setting for this test.  The host app's StudyViewController observes these keys and rebuilds
-//! its card view; in cFlash that can throw from the stale English-first nib (a pre-existing bug, see
-//! PR #21), which isn't what this test checks.
-static void LWESetTestSetting(id value, NSString *key)
-{
-  @try
-  {
-    if (value) [[NSUserDefaults standardUserDefaults] setObject:value forKey:key];
-    else [[NSUserDefaults standardUserDefaults] removeObjectForKey:key];
-  }
-  @catch (NSException *exception)
-  {
-    NSLog(@"Host app threw while observing %@: %@", key, exception);
-  }
 }
 
 static UIColor *LWEHex(unsigned rgb)
@@ -287,162 +275,158 @@ static NSArray *LWESyllableColours(NSAttributedString *pinyin)
 {
   NSMutableArray *colours = [NSMutableArray array];
   NSString *plain = [pinyin string];
+  NSCharacterSet *breaks = [NSCharacterSet whitespaceAndNewlineCharacterSet];
   NSUInteger i = 0;
   while (i < [plain length])
   {
-    NSRange space = [plain rangeOfString:@" " options:0 range:NSMakeRange(i, [plain length] - i)];
-    NSUInteger end = (space.location == NSNotFound) ? [plain length] : space.location;
+    NSRange sep = [plain rangeOfCharacterFromSet:breaks options:0 range:NSMakeRange(i, [plain length] - i)];
+    NSUInteger end = (sep.location == NSNotFound) ? [plain length] : sep.location;
     if (end > i) [colours addObject:[pinyin attribute:NSForegroundColorAttributeName atIndex:i effectiveRange:NULL]];
     i = end + 1;
   }
   return colours;
 }
 
-//! Saves and restores the theme and Pinyin Coloring settings around a test
-- (void) _withSavedSettings:(void (^)(void))block
+static UIColor *LWEInk(NSString *themeKey)
 {
-  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-  id savedTheme = [[settings objectForKey:APP_THEME] retain];
-  id savedColor = [[settings objectForKey:APP_PINYIN_COLOR] retain];
-  block();
-  LWESetTestSetting(savedTheme, APP_THEME);
-  LWESetTestSetting(savedColor, APP_PINYIN_COLOR);
-  [savedTheme release];
-  [savedColor release];
+  return [[ThemeManager sharedThemeManager] colorForSlot:@"readingInk" themeKey:themeKey];
 }
 
-- (ChineseCard *) _allTonesCard
+static NSDictionary *LWEPalette(NSString *themeKey)
+{
+  return [ChineseCard toneColorsForThemeKey:themeKey cardFill:[[ThemeManager sharedThemeManager] colorForSlot:@"cardFill" themeKey:themeKey]];
+}
+
+- (ChineseCard *) _cardWithReading:(NSString *)reading
 {
   ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
-  card.hw_reading = @"ma1 ma2 ma3 ma4 ma5";
+  card.hw_reading = reading;
   return card;
 }
 
 - (void) testPinyinUsesThemeToneColoursWhenColoringIsOn
 {
-  [self _withSavedSettings:^{
-    LWESetTestSetting(SET_PINYIN_COLOR_ON, APP_PINYIN_COLOR);
-    ThemeManager *tm = [ThemeManager sharedThemeManager];
-    NSArray *themeKeys = [tm themeKeysList];
-    XCTAssertTrue([themeKeys count] >= 5, @"All five themes");
-    for (NSString *themeKey in themeKeys)
+  NSArray *themeKeys = [[ThemeManager sharedThemeManager] themeKeysList];
+  XCTAssertTrue([themeKeys count] >= 5, @"All five themes");
+  ChineseCard *card = [self _cardWithReading:@"ma1 ma2 ma3 ma4 ma5"];
+  for (NSString *themeKey in themeKeys)
+  {
+    NSDictionary *palette = LWEPalette(themeKey);
+    NSArray *colours = LWESyllableColours([card attributedReadingUsingToneColors:YES themeKey:themeKey]);
+    XCTAssertEqual([colours count], (NSUInteger)5, @"%@", themeKey);
+    for (NSUInteger tone = 1; tone <= 4 && tone <= [colours count]; tone++)
     {
-      LWESetTestSetting(themeKey, APP_THEME);
-      NSDictionary *palette = [ChineseCard toneColorsForThemeKey:themeKey cardFill:[tm colorForSlot:@"cardFill"]];
-      NSArray *colours = LWESyllableColours([[self _allTonesCard] attributedReading]);
-      XCTAssertEqual([colours count], (NSUInteger)5, @"%@", themeKey);
-      for (NSUInteger tone = 1; tone <= 4; tone++)
-      {
-        UIColor *expected = palette[[NSString stringWithFormat:@"%lu", (unsigned long)tone]];
-        XCTAssertTrue(LWESameRGBA(colours[tone - 1], expected), @"%@ tone %lu: %@, expected %@", themeKey, (unsigned long)tone, colours[tone - 1], expected);
-        XCTAssertFalse(LWESameRGBA(colours[tone - 1], [tm colorForSlot:@"readingInk"]), @"%@ tone %lu is coloured", themeKey, (unsigned long)tone);
-      }
-      XCTAssertTrue(LWESameRGBA(colours[4], [tm colorForSlot:@"readingInk"]), @"%@: neutral tone in readingInk", themeKey);
+      UIColor *expected = palette[[NSString stringWithFormat:@"%lu", (unsigned long)tone]];
+      XCTAssertTrue(LWESameRGBA(colours[tone - 1], expected), @"%@ tone %lu: %@, expected %@", themeKey, (unsigned long)tone, colours[tone - 1], expected);
+      XCTAssertFalse(LWESameRGBA(colours[tone - 1], LWEInk(themeKey)), @"%@ tone %lu is coloured", themeKey, (unsigned long)tone);
     }
-  }];
+    if ([colours count] == 5) XCTAssertTrue(LWESameRGBA(colours[4], LWEInk(themeKey)), @"%@: neutral tone in readingInk", themeKey);
+  }
 }
 
 - (void) testTonePalettesAreTheAACheckedOnes
 {
-  // Light (Paper, #13), dark (Fire/Water #13, Kutani #14) and Kimono (#14) palettes
-  ThemeManager *tm = [ThemeManager sharedThemeManager];
-  [self _withSavedSettings:^{
-    NSDictionary *expected = @{
-      SET_THEME_PAPER:  @[LWEHex(0x8E1400), LWEHex(0x9A4E00), LWEHex(0x0B5A2C), LWEHex(0x1356A7)],
-      SET_THEME_FIRE:   @[LWEHex(0xFFA294), LWEHex(0xFFD60A), LWEHex(0x7DDEA0), LWEHex(0x8EC8FF)],
-      SET_THEME_KIMONO: @[LWEHex(0x7A1100), LWEHex(0x6B3600), LWEHex(0x08451F), LWEHex(0x0E3F7D)],
-    };
-    for (NSString *themeKey in expected)
+  // Light (Paper, #13), dark (Fire/Water #13, Kutani #14) and Kimono (#14) palettes: all five themes
+  NSArray *dark = @[LWEHex(0xFFA294), LWEHex(0xFFD60A), LWEHex(0x7DDEA0), LWEHex(0x8EC8FF)];
+  NSDictionary *expected = @{
+    SET_THEME_PAPER:  @[LWEHex(0x8E1400), LWEHex(0x9A4E00), LWEHex(0x0B5A2C), LWEHex(0x1356A7)],
+    SET_THEME_FIRE:   dark,
+    SET_THEME_WATER:  dark,
+    SET_THEME_KIMONO: @[LWEHex(0x7A1100), LWEHex(0x6B3600), LWEHex(0x08451F), LWEHex(0x0E3F7D)],
+    SET_THEME_KUTANI: dark,
+  };
+  XCTAssertEqualObjects([NSSet setWithArray:[expected allKeys]], [NSSet setWithArray:[[ThemeManager sharedThemeManager] themeKeysList]], @"every theme has a row");
+  for (NSString *themeKey in expected)
+  {
+    NSDictionary *palette = LWEPalette(themeKey);
+    for (NSUInteger tone = 1; tone <= 4; tone++)
     {
-      LWESetTestSetting(themeKey, APP_THEME);
-      NSDictionary *palette = [ChineseCard toneColorsForThemeKey:themeKey cardFill:[tm colorForSlot:@"cardFill"]];
-      for (NSUInteger tone = 1; tone <= 4; tone++)
-      {
-        XCTAssertTrue(LWESameRGBA(palette[[NSString stringWithFormat:@"%lu", (unsigned long)tone]], expected[themeKey][tone - 1]),
-                      @"%@ tone %lu", themeKey, (unsigned long)tone);
-      }
+      XCTAssertTrue(LWESameRGBA(palette[[NSString stringWithFormat:@"%lu", (unsigned long)tone]], expected[themeKey][tone - 1]),
+                    @"%@ tone %lu", themeKey, (unsigned long)tone);
     }
-  }];
+  }
+}
+
+- (void) testToneIgnoresTrailingPunctuation
+{
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"ma5,"], (NSInteger)5);
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"hao3,"], (NSInteger)3);
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"xue2 "], (NSInteger)2);
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"ma1."], (NSInteger)1);
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"shi4)\n"], (NSInteger)4);
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"lü4"], (NSInteger)4);
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"xué,"], (NSInteger)2, @"tone mark");
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"hǎo!"], (NSInteger)3, @"tone mark");
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@"ma"], (NSInteger)0);
+  XCTAssertEqual([ChineseCard toneForPinyinSyllable:@","], (NSInteger)0);
+
+  // On the card: a syllable with trailing punctuation keeps its tone colour (not readingInk)
+  NSArray *colours = LWESyllableColours([[self _cardWithReading:@"ni3, hao3!"] attributedReadingUsingToneColors:YES themeKey:SET_THEME_PAPER]);
+  XCTAssertEqual([colours count], (NSUInteger)2);
+  if ([colours count] == 2)
+  {
+    XCTAssertTrue(LWESameRGBA(colours[0], LWEHex(0x0B5A2C)), @"'ni3,' keeps tone 3");
+    XCTAssertTrue(LWESameRGBA(colours[1], LWEHex(0x0B5A2C)), @"'hao3!' keeps tone 3");
+  }
+  colours = LWESyllableColours([[self _cardWithReading:@"ma4, ma5,"] attributedReadingUsingToneColors:YES themeKey:SET_THEME_FIRE]);
+  if ([colours count] == 2)
+  {
+    XCTAssertTrue(LWESameRGBA(colours[0], LWEHex(0x8EC8FF)), @"'ma4,' tone 4 on Fire");
+    XCTAssertTrue(LWESameRGBA(colours[1], LWEInk(SET_THEME_FIRE)), @"'ma5,' neutral tone in ink");
+  }
 }
 
 - (void) testPinyinUsesReadingInkWhenColoringIsOff
 {
-  [self _withSavedSettings:^{
-    LWESetTestSetting(SET_PINYIN_COLOR_OFF, APP_PINYIN_COLOR);
-    ThemeManager *tm = [ThemeManager sharedThemeManager];
-    for (NSString *themeKey in [tm themeKeysList])
+  for (NSString *themeKey in [[ThemeManager sharedThemeManager] themeKeysList])
+  {
+    UIColor *ink = LWEInk(themeKey);
+    NSAttributedString *pinyin = [[self _cardWithReading:@"xue2 xi2"] attributedReadingUsingToneColors:NO themeKey:themeKey];
+    XCTAssertEqualObjects([pinyin string], @"xué xí");
+    for (UIColor *colour in LWESyllableColours(pinyin))
     {
-      LWESetTestSetting(themeKey, APP_THEME);
-      UIColor *ink = [tm colorForSlot:@"readingInk"];
-      ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
-      card.hw_reading = @"xue2 xi2";
-      NSAttributedString *pinyin = [card attributedReading];
-      XCTAssertEqualObjects([pinyin string], @"xué xí");
-      for (UIColor *colour in LWESyllableColours(pinyin))
-      {
-        XCTAssertTrue(LWESameRGBA(colour, ink), @"%@: %@ should be readingInk %@", themeKey, colour, ink);
-      }
-      for (UIColor *colour in LWESyllableColours([[self _allTonesCard] attributedReading]))
-      {
-        XCTAssertTrue(LWESameRGBA(colour, ink), @"%@: every tone in readingInk when off", themeKey);
-      }
+      XCTAssertTrue(LWESameRGBA(colour, ink), @"%@: %@ should be readingInk %@", themeKey, colour, ink);
     }
-    // Paper's readingInk is ink-2 #3A352E
-    LWESetTestSetting(SET_THEME_PAPER, APP_THEME);
-    XCTAssertTrue(LWESameRGBA([tm colorForSlot:@"readingInk"], LWEHex(0x3A352E)));
-  }];
+    for (UIColor *colour in LWESyllableColours([[self _cardWithReading:@"ma1 ma2 ma3 ma4 ma5"] attributedReadingUsingToneColors:NO themeKey:themeKey]))
+    {
+      XCTAssertTrue(LWESameRGBA(colour, ink), @"%@: every tone in readingInk when off", themeKey);
+    }
+  }
+  XCTAssertTrue(LWESameRGBA(LWEInk(SET_THEME_PAPER), LWEHex(0x3A352E)), @"Paper readingInk is ink-2 #3A352E");
 }
 
-- (void) testPinyinFollowsTheSettingWhenItChanges
+- (void) testPinyinFollowsTheSetting
 {
-  // The same card re-renders with the new setting (nothing is cached), as StudyViewController does on a change
-  [self _withSavedSettings:^{
-    LWESetTestSetting(SET_THEME_PAPER, APP_THEME);
-    ThemeManager *tm = [ThemeManager sharedThemeManager];
-    UIColor *ink = [tm colorForSlot:@"readingInk"];
-    ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
-    card.hw_reading = @"xue2 xi2";
-    LWESetTestSetting(SET_PINYIN_COLOR_ON, APP_PINYIN_COLOR);
-    XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReading])[0], LWEHex(0x9A4E00)), @"on: tone 2 dark amber");
-    LWESetTestSetting(SET_PINYIN_COLOR_OFF, APP_PINYIN_COLOR);
-    XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReading])[0], ink), @"off: readingInk");
-    LWESetTestSetting(SET_PINYIN_COLOR_ON, APP_PINYIN_COLOR);
-    XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReading])[0], LWEHex(0x9A4E00)), @"on again");
-    // and a theme change while on picks that theme's palette
-    LWESetTestSetting(SET_THEME_FIRE, APP_THEME);
-    XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReading])[0], LWEHex(0xFFD60A)), @"Fire: tone 2 yellow");
-  }];
+  // The card's own render reads the current setting and theme each time (nothing cached), so the
+  // re-render StudyViewController does on a Pinyin Coloring change shows the new colours.
+  ChineseCard *card = [self _cardWithReading:@"xue2 xi2"];
+  NSString *current = [[[ThemeManager sharedThemeManager] _currentTheme] objectForKey:@"key"];
+  NSAttributedString *expected = [card attributedReadingUsingToneColors:[ChineseCard pinyinColoringIsOn] themeKey:current];
+  XCTAssertEqualObjects([card attributedReading], expected, @"attributedReading = the current setting and theme");
+  XCTAssertEqual([ChineseCard pinyinColoringIsOn],
+                 [[[NSUserDefaults standardUserDefaults] objectForKey:APP_PINYIN_COLOR] isEqualToString:SET_PINYIN_COLOR_ON]);
+  // the same card object, on -> off -> on
+  XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReadingUsingToneColors:YES themeKey:SET_THEME_PAPER])[0], LWEHex(0x9A4E00)), @"on: tone 2 dark amber");
+  XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReadingUsingToneColors:NO themeKey:SET_THEME_PAPER])[0], LWEInk(SET_THEME_PAPER)), @"off: readingInk");
+  XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReadingUsingToneColors:YES themeKey:SET_THEME_PAPER])[0], LWEHex(0x9A4E00)), @"on again");
+  XCTAssertTrue(LWESameRGBA(LWESyllableColours([card attributedReadingUsingToneColors:YES themeKey:SET_THEME_FIRE])[0], LWEHex(0xFFD60A)), @"Fire: tone 2 yellow");
 }
 
 - (void) testToneColoursSurviveTheLongPinyinSplit
 {
   // A long reading wrapped onto two lines (the card's fit rule) keeps each syllable's tone colour
-  [self _withSavedSettings:^{
-    LWESetTestSetting(SET_PINYIN_COLOR_ON, APP_PINYIN_COLOR);
-    LWESetTestSetting(SET_THEME_PAPER, APP_THEME);
-    ChineseCard *card = [[[ChineseCard alloc] init] autorelease];
-    card.hw_reading = @"zhong1 hua2 ren2 min2 gong4 he2 guo2";
-    NSAttributedString *pinyin = [card attributedReading];
-    NSArray *before = LWESyllableColours(pinyin);
-    NSAttributedString *split = LWEReadingBalancedSplitAtSpace(pinyin);
-    XCTAssertNotNil(split);
-    NSMutableArray *after = [NSMutableArray array];
-    NSString *plain = [split string];
-    NSUInteger i = 0;
-    while (i < [plain length])
-    {
-      NSRange sep = [plain rangeOfCharacterFromSet:[NSCharacterSet whitespaceAndNewlineCharacterSet] options:0 range:NSMakeRange(i, [plain length] - i)];
-      NSUInteger end = (sep.location == NSNotFound) ? [plain length] : sep.location;
-      if (end > i) [after addObject:[split attribute:NSForegroundColorAttributeName atIndex:i effectiveRange:NULL]];
-      i = end + 1;
-    }
-    XCTAssertEqual([after count], [before count]);
-    for (NSUInteger s = 0; s < MIN([after count], [before count]); s++)
-    {
-      XCTAssertTrue(LWESameRGBA(after[s], before[s]), @"syllable %lu keeps its tone colour", (unsigned long)s);
-    }
-    XCTAssertTrue(LWESameRGBA(before[4], LWEHex(0x1356A7)), @"gòng is tone 4 water");
-  }];
+  NSAttributedString *pinyin = [[self _cardWithReading:@"zhong1 hua2 ren2 min2 gong4 he2 guo2"] attributedReadingUsingToneColors:YES themeKey:SET_THEME_PAPER];
+  NSArray *before = LWESyllableColours(pinyin);
+  NSAttributedString *split = LWEReadingBalancedSplitAtSpace(pinyin);
+  XCTAssertNotNil(split);
+  XCTAssertTrue([[split string] rangeOfString:@"\n"].location != NSNotFound, @"split onto two lines");
+  NSArray *after = LWESyllableColours(split);
+  XCTAssertEqual([after count], [before count]);
+  for (NSUInteger i = 0; i < MIN([after count], [before count]); i++)
+  {
+    XCTAssertTrue(LWESameRGBA(after[i], before[i]), @"syllable %lu keeps its tone colour", (unsigned long)i);
+  }
+  if ([before count] == 7) XCTAssertTrue(LWESameRGBA(before[4], LWEHex(0x1356A7)), @"gòng is tone 4 water");
 }
 
 @end

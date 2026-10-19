@@ -122,8 +122,13 @@
 
 - (NSAttributedString *) attributedReading
 {
+  return [self attributedReadingUsingToneColors:[[self class] pinyinColoringIsOn] themeKey:nil];
+}
+
+- (NSAttributedString *) attributedReadingUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey
+{
   NSMutableAttributedString *attrString = [[[[NSAttributedString alloc] init] autorelease] mutableCopy];
-  NSArray *readingHashes = [self readingComponents];
+  NSArray *readingHashes = [self readingComponentsUsingToneColors:useToneColors themeKey:themeKey];
   for (NSInteger i = 0; i < [readingHashes count]; i++)
   {
     NSDictionary *readingHash = [readingHashes objectAtIndex:i];
@@ -189,24 +194,52 @@
   return [NSDictionary dictionaryWithObjectsAndKeys:tone1,@"1", tone2,@"2", tone3,@"3", tone4,@"4", nil];
 }
 
-- (NSArray *) readingComponents
++ (NSInteger) toneForPinyinSyllable:(NSString *)syllable
 {
-  BOOL useToneColors = [[[NSUserDefaults standardUserDefaults] objectForKey:APP_PINYIN_COLOR] isEqualToString:SET_PINYIN_COLOR_ON];
-  return [self readingComponentsUsingToneColors:useToneColors];
+  // The tone of one syllable, ignoring trailing punctuation and whitespace ('ma5,' -> 5): the last tone
+  // digit (numbered pinyin, xue2) or, failing that, the last tone mark (xué).  0 when there is none.
+  NSCharacterSet *toneDigits = [NSCharacterSet characterSetWithCharactersInString:@"12345"];
+  NSRange digit = [syllable rangeOfCharacterFromSet:toneDigits options:NSBackwardsSearch];
+  if (digit.location != NSNotFound) return [[syllable substringWithRange:digit] integerValue];
+  NSString *decomposed = [syllable decomposedStringWithCanonicalMapping];
+  for (NSInteger i = (NSInteger)[decomposed length] - 1; i >= 0; i--)
+  {
+    switch ([decomposed characterAtIndex:i])
+    {
+      case 0x0304: return 1; // macron
+      case 0x0301: return 2; // acute
+      case 0x030C: return 3; // caron
+      case 0x0300: return 4; // grave
+      default: break;
+    }
+  }
+  return 0;
 }
 
-- (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors
++ (BOOL) pinyinColoringIsOn
+{
+  return [[[NSUserDefaults standardUserDefaults] objectForKey:APP_PINYIN_COLOR] isEqualToString:SET_PINYIN_COLOR_ON];
+}
+
+- (NSArray *) readingComponents
+{
+  return [self readingComponentsUsingToneColors:[[self class] pinyinColoringIsOn] themeKey:nil];
+}
+
+- (NSArray *) readingComponentsUsingToneColors:(BOOL)useToneColors themeKey:(NSString *)themeKey
 {
   // Pinyin Coloring ON (the default): each syllable in its tone colour, from the theme's palette.
   // OFF: every syllable in the theme's readingInk, the same ink as jFlash's kana.  Neutral-tone (5)
   // syllables use readingInk either way.  Read fresh on every call, so a setting or theme change shows
   // on the next card render (StudyViewController observes both).
+  // themeKey nil = the current theme (the card); tests pass a key so they needn't change the setting.
   ThemeManager *tm = [ThemeManager sharedThemeManager];
-  UIColor *ink = [tm colorForSlot:@"readingInk"] ?: [UIColor colorWithRed:0.227 green:0.208 blue:0.180 alpha:1.0]; // ink-2 #3A352E
+  if (themeKey == nil) themeKey = [[tm _currentTheme] objectForKey:@"key"];
+  UIColor *ink = [tm colorForSlot:@"readingInk" themeKey:themeKey] ?: [UIColor colorWithRed:0.227 green:0.208 blue:0.180 alpha:1.0]; // ink-2 #3A352E
   NSDictionary *toneColors = nil;
   if (useToneColors)
   {
-    toneColors = [[self class] toneColorsForThemeKey:[[tm _currentTheme] objectForKey:@"key"] cardFill:[tm colorForSlot:@"cardFill"]];
+    toneColors = [[self class] toneColorsForThemeKey:themeKey cardFill:[tm colorForSlot:@"cardFill" themeKey:themeKey]];
   }
 
   NSMutableArray *components = [NSMutableArray array];
@@ -214,11 +247,10 @@
   for (NSString *pinyinSegment in pinyinSegments)
   {
     UIColor *theColor = ink;
-    if (toneColors && [pinyinSegment length] > 0)
+    if (toneColors)
     {
-      // Numbered pinyin carries its tone as the last character (xue2)
-      NSString *toneNumber = [pinyinSegment substringFromIndex:[pinyinSegment length] - 1];
-      theColor = [toneColors objectForKey:toneNumber] ?: ink;
+      NSInteger tone = [[self class] toneForPinyinSyllable:pinyinSegment];
+      theColor = (tone >= 1 && tone <= 4) ? ([toneColors objectForKey:[NSString stringWithFormat:@"%ld", (long)tone]] ?: ink) : ink;
     }
     // Now pinyin-ify the string
     pinyinSegment = [self _pinyinForNumberedPinyin:pinyinSegment];
