@@ -273,6 +273,7 @@ static const CGFloat kLWEPillHitInset = 7.0;
   self.readingLabel.numberOfLines = 0;
   self.readingLabel.lineBreakMode = NSLineBreakByWordWrapping;
   self.readingLabel.textAlignment = NSTextAlignmentCenter;
+  self.readingLabel.textColor = [tm colorForSlot:@"readingInk"]; // base for TTTAttributedLabel / non-tone
   self.readingLabel.shadowColor = nil;
   self.readingLabel.shadowOffset = CGSizeZero;
   self.readingLabel.autoresizingMask = UIViewAutoresizingNone;
