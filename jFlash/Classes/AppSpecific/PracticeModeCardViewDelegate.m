@@ -92,6 +92,7 @@
 {
   cardViewController.meaningWebViewContainer.hidden = NO;
   [cardViewController turnReadingOn];
+  cardViewController.readingVisible = YES;
 }
 
 
