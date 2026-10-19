@@ -476,6 +476,10 @@
   [center addObserver:self selector:@selector(pluginDidInstall:) name:LWEPluginDidInstall object:nil];
   [center addObserver:self selector:@selector(_tagContentDidChange:) name:LWETagContentDidChange object:nil];
   [center addObserver:self selector:@selector(_applicationDidEnterBackground:) name:UIApplicationWillTerminateNotification object:nil];
+  // A suspended app is killed without -applicationWillTerminate:, so also save the session when we
+  // go to the background. Coming back without being killed deletes the plist again
+  // (-applicationWillEnterForeground:); after a kill, the next cold launch restores it.
+  [center addObserver:self selector:@selector(_applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
   [center addObserver:self selector:@selector(_contentSizeCategoryDidChange:) name:UIContentSizeCategoryDidChangeNotification object:nil];
   
   // Initialize the progressBarView

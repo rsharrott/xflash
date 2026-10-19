@@ -182,8 +182,8 @@
 /* SettingsViewController.SettingNames_ActiveUser  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
 "Active User" = "使用中のユーザー";
 
-/* SettingsViewController.SettingNames_DownloadExtras  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
-"Updates" = "アップデート";
+/* SettingsViewController.SettingNames_DownloadExtras, PluginSettingsViewController.NavBarTitle  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m, PluginSettingsViewController.m) */
+"Installed Data" = "インストール済みデータ";
 
 /* SettingsViewController.TableHeader_Application  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
 "Application" = "アプリ";
@@ -273,7 +273,7 @@
 "Learning Algorithm" = "学習アルゴリズム";
 
 /* HelpViewController.Table_Sharing  (HelpViewController.m) */
-"Sharing" = "シェア";
+"Multiple Users" = "複数のユーザー";
 
 /* HelpViewController.Table_Integration  (HelpViewController.m) */
 "Integration" = "ほかのアプリとの連携";
@@ -368,9 +368,6 @@
 /* PleaseWait  (PluginSettingsViewController.m) */
 "Please Wait" = "お待ちください";
 
-/* PluginSettingsViewController.NavBarTitle  (PluginSettingsViewController.m) */
-"Get Updates" = "アップデートを入手";
-
 /* PluginSettingsViewController.TableHeader_Installed  (PluginSettingsViewController.m) */
 "Installed" = "インストール済み";
 
@@ -382,9 +379,6 @@
 
 /* LastUpdate  (PluginSettingsViewController.m) */
 "Last update : %@" = "最終アップデート：%@";
-
-/* PluginSettings.UpdatesUnavailable  (PluginSettingsViewController.m) */
-"Online updates are not available right now." = "現在、オンラインでのアップデートはご利用いただけません。";
 
 /* Study Set Learned  (PracticeModeCardViewDelegate.m) */
 "Study Set Learned" = "このセットは覚えました";
@@ -432,7 +426,7 @@
 "Rate Us" = "App Storeで評価";
 
 /* SettingsViewController.Plugins_NumInstalled  (SettingsViewController.m) */
-"%d installed" = "%d件インストール済み";
+"%d installed" = "%d件";
 
 /* Global.None  (SettingsViewController.m) */
 "None" = "なし";
@@ -512,9 +506,6 @@
 /* StudyNotification.Body  (jFlashAppDelegate.m) */
 "You're Awesome!  It's time to learn some more words!" = "その調子です！そろそろ新しい単語を覚えましょう！";
 
-/* StudyNotification.Action  (jFlashAppDelegate.m) */
-"Study" = "学習する";
-
 /* Default DSActivtyView label text  (DSActivityView.m) */
 "Loading..." = "読み込み中…";
 
@@ -553,6 +544,27 @@
 
 /* Next  (LWEFormView.m) */
 "Next" = "次へ";
+
+/* Plugin.DisplayName.CardDB  (Plugin.m) */
+"Dictionary & Flash Cards" = "辞書と単語カード";
+
+/* Plugin.DisplayName.FTSDB  (Plugin.m) */
+"Fast Dictionary Search" = "高速辞書検索";
+
+/* User.SeededNickname: sample users that ship in the bundled DB  (User.m) */
+"You" = "あなた";
+"My Best Friend" = "親友";
+"Mom" = "お母さん";
+"Horiemon" = "ホリエモン";
+
+/* ReminderVC.NotificationsDenied.Title  (ReminderSettingsViewController.m) */
+"Notifications Are Off" = "通知がオフになっています";
+
+/* ReminderVC.NotificationsDenied.Message  (ReminderSettingsViewController.m) */
+"To get study reminders, allow notifications for this app in the Settings app." = "学習リマインダーを受け取るには、設定アプリでこのアプリの通知を許可してください。";
+
+/* ReminderVC.NotificationsDenied.OpenSettings  (ReminderSettingsViewController.m) */
+"Open Settings" = "設定を開く";
 
 /* ---- Progress sheet (ProgressDetailsViewController.m) ---- */
 

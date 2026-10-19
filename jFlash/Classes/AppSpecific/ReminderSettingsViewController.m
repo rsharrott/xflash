@@ -7,10 +7,15 @@
 //
 
 #import "ReminderSettingsViewController.h"
+#import <UserNotifications/UserNotifications.h>
 #import "LWEViewAnimationUtils.h"
+
+NSString * const LWEStudyReminderRequestIdentifier = @"LWEStudyReminder";
 
 @interface ReminderSettingsViewController ()
 - (void) _writeNumDaysSetting:(NSInteger)numDays;
+- (void) _setRemindersOn:(BOOL)on;
+- (void) _showNotificationsDeniedAlert;
 @property (retain) NSArray *numDaysArray;
 @end
 
@@ -56,6 +61,21 @@
   [self.view addSubview:self.picker];
 }
 
+- (void) viewWillAppear:(BOOL)animated
+{
+  [super viewWillAppear:animated];
+  // If notifications were turned off in the Settings app, show reminders as Off here too
+  [[self class] syncReminderSettingWithNotificationPermission:^{
+    BOOL on = ([[[NSUserDefaults standardUserDefaults] objectForKey:APP_REMINDER] integerValue] > 0);
+    if (on != self.remindersOn)
+    {
+      self.remindersOn = on;
+      self.onOffSwitch.on = on;
+      [self.tableView reloadData];
+    }
+  }];
+}
+
 - (void) viewDidUnload
 {
   [super viewDidUnload];
@@ -67,15 +87,48 @@
 
 - (IBAction) switchValueChanged:(UISwitch*)sender
 {
-  self.remindersOn = sender.on;
-  
-  // Now animate the changes
-  NSIndexSet *settingsSection = [NSIndexSet indexSetWithIndex:1];
+  if (sender.on == NO)
+  {
+    [self _setRemindersOn:NO];
+    [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers:@[LWEStudyReminderRequestIdentifier]];
+    return;
+  }
+
+  // Turning reminders on: ask for permission first (iOS only shows the prompt once;
+  // after that this returns the user's earlier answer straight away).
+  [sender setEnabled:NO];
+  UNAuthorizationOptions options = (UNAuthorizationOptionAlert | UNAuthorizationOptionSound);
+  [[UNUserNotificationCenter currentNotificationCenter] requestAuthorizationWithOptions:options
+                                                                      completionHandler:^(BOOL granted, NSError *error) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [sender setEnabled:YES];
+      if (granted)
+      {
+        [self _setRemindersOn:YES];
+      }
+      else
+      {
+        [sender setOn:NO animated:YES];
+        [self _showNotificationsDeniedAlert];
+      }
+    });
+  }];
+}
+
+//! Shows/hides the "Reminder Settings" section and stores the setting
+- (void) _setRemindersOn:(BOOL)on
+{
+  if (on == self.remindersOn)
+  {
+    return;
+  }
+  self.remindersOn = on;
+  NSIndexSet *settingsSection = [NSIndexSet indexSetWithIndex:REMINDER_SETTINGS_TABLE_DAYS_SECTION];
   [self.tableView beginUpdates];
-  if (sender.on)
+  if (on)
   {
     [self.tableView insertSections:settingsSection withRowAnimation:UITableViewRowAnimationFade];
-    [self _writeNumDaysSetting:4];
+    [self _writeNumDaysSetting:DEFAULT_REMINDER_DAYS];
   }
   else
   {
@@ -83,6 +136,46 @@
     [self _writeNumDaysSetting:0];
   }
   [self.tableView endUpdates];
+}
+
+- (void) _showNotificationsDeniedAlert
+{
+  UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedString(@"Notifications Are Off", @"ReminderVC.NotificationsDenied.Title")
+                                                                 message:NSLocalizedString(@"To get study reminders, allow notifications for this app in the Settings app.", @"ReminderVC.NotificationsDenied.Message")
+                                                          preferredStyle:UIAlertControllerStyleAlert];
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"Open Settings", @"ReminderVC.NotificationsDenied.OpenSettings")
+                                            style:UIAlertActionStyleDefault
+                                          handler:^(UIAlertAction *a) {
+    NSString *urlString = UIApplicationOpenSettingsURLString;
+    if (@available(iOS 16.0, *))
+    {
+      urlString = UIApplicationOpenNotificationSettingsURLString;
+    }
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:urlString] options:@{} completionHandler:nil];
+  }]];
+  [alert addAction:[UIAlertAction actionWithTitle:NSLocalizedString(@"OK", @"Global.OK") style:UIAlertActionStyleCancel handler:nil]];
+  [self presentViewController:alert animated:YES completion:nil];
+}
+
++ (void) syncReminderSettingWithNotificationPermission:(void (^)(void))completion
+{
+  void (^finish)(void) = [[completion copy] autorelease];
+  [[UNUserNotificationCenter currentNotificationCenter] getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *notificationSettings) {
+    UNAuthorizationStatus status = notificationSettings.authorizationStatus;
+    BOOL allowed = (status == UNAuthorizationStatusAuthorized || status == UNAuthorizationStatusProvisional);
+    if (@available(iOS 14.0, *))
+    {
+      allowed = allowed || (status == UNAuthorizationStatusEphemeral);
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+      NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+      if (allowed == NO && [[settings objectForKey:APP_REMINDER] integerValue] > 0)
+      {
+        [settings removeObjectForKey:APP_REMINDER];
+      }
+      if (finish) finish();
+    });
+  }];
 }
 
 #pragma mark - UIPickerViewDataSource Methods
@@ -210,7 +303,10 @@
     if (indexPath.row == 0)
     {
       cell.textLabel.text = NSLocalizedString(@"Days After Last Session",@"RemindersVC.DaysAfterLastSesssionLabel");
-      cell.detailTextLabel.text = [NSString stringWithFormat:@"%d",_numDays];
+      // Same "%@ day(s)" wording as the picker rows
+      NSString *daysFormat = (_numDays == 1) ? NSLocalizedString(@"%@ day",@"ReminderVC.pickerFormatSingle")
+                                             : NSLocalizedString(@"%@ days",@"ReminderVC.pickerFormatPlural");
+      cell.detailTextLabel.text = [NSString stringWithFormat:daysFormat,[NSString stringWithFormat:@"%ld",(long)_numDays]];
       cell.selectionStyle = UITableViewCellSelectionStyleGray;
     }
   }

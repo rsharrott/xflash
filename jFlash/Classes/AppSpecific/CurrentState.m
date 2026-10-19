@@ -177,7 +177,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(CurrentState);
   [settings setValue:SET_PINYIN_CHANGE_TONE_ON forKey:APP_PINYIN_CHANGE_TONE];
 #endif
     
-  [settings setInteger:DEFAULT_REMINDER_DAYS forKey:APP_REMINDER];
+  // Study reminders start Off: turning them on asks for notification permission
+  [settings removeObjectForKey:APP_REMINDER];
   [settings setValue:DEFAULT_THEME forKey:APP_THEME];
   [settings setValue:SET_MODE_QUIZ forKey:APP_MODE];
 #if defined(LWE_JFLASH)

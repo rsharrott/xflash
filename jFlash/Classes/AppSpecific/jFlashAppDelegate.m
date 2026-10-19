@@ -5,6 +5,8 @@
 //  Copyright LONG WEEKEND INC 2009. All rights reserved.
 
 #import "jFlashAppDelegate.h"
+#import <UserNotifications/UserNotifications.h>
+#import "ReminderSettingsViewController.h"
 #import "LWELocalization.h"
 #import <objc/runtime.h>
 
@@ -30,6 +32,12 @@
 // Scene delegate — defined here to avoid adding new project files.
 // UIKit creates a fresh instance of this class per scene; it grabs
 // the existing app delegate to access the NIB-created window.
+//! YES once the app (any scene) has been in the background in this process.
+//! sceneWillEnterForeground: also fires on a cold launch, and only a return from the background
+//! should be forwarded (see below). It lives here, not in the scene delegate, because UIKit can
+//! disconnect a background scene and connect a new one (with a new delegate) in the same process.
+static BOOL LWEAppHasEnteredBackground = NO;
+
 @interface LWESceneDelegate : UIResponder <UIWindowSceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @end
@@ -79,6 +87,35 @@
       [appDelegate handleIncomingURL:urlContext.URL sourceApplication:urlContext.options.sourceApplication];
     }
   }
+}
+
+// With a scene manifest UIKit sends the lifecycle callbacks to the scene delegate instead of the
+// app delegate, so forward them: the app delegate schedules the study reminder when we go to the
+// background and clears it when we come back.
+- (void)sceneDidBecomeActive:(UIScene *)scene
+{
+  jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+  [appDelegate applicationDidBecomeActive:[UIApplication sharedApplication]];
+}
+
+- (void)sceneWillEnterForeground:(UIScene *)scene
+{
+  // On a cold launch this fires before the user DB is open, and -applicationWillEnterForeground:
+  // deletes ids.plist, which Tag -populateCardIds still has to read to restore the saved card
+  // order. Only forward it when coming back from the background (the old app-delegate behaviour).
+  if (LWEAppHasEnteredBackground == NO)
+  {
+    return;
+  }
+  jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+  [appDelegate applicationWillEnterForeground:[UIApplication sharedApplication]];
+}
+
+- (void)sceneDidEnterBackground:(UIScene *)scene
+{
+  LWEAppHasEnteredBackground = YES;
+  jFlashAppDelegate *appDelegate = (jFlashAppDelegate *)[UIApplication sharedApplication].delegate;
+  [appDelegate applicationDidEnterBackground:[UIApplication sharedApplication]];
 }
 
 // Warm launch: the app is already running (foreground or background) and receives jflash://WORD
@@ -419,30 +456,63 @@
 
 #pragma mark - Local Notifications
 
-- (void) scheduleLocalNotification 
+- (void) scheduleLocalNotification
 {
+  [self scheduleLocalNotificationWithCompletion:nil];
+}
+
+//! Schedules the study reminder, then calls completion (on an arbitrary queue) when the request
+//! has been added, or right away when there is nothing to schedule.
+- (void) scheduleLocalNotificationWithCompletion:(void (^)(void))completion
+{
+  void (^finish)(void) = [[completion copy] autorelease];
+
   // should we set up a new one
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   NSNumber *reminderSetting = [settings objectForKey:APP_REMINDER];
   if (reminderSetting == nil || [reminderSetting intValue] == 0)
   {
+    if (finish) finish();
     return;
   }
-  
-  // create a notification to study again
-  UILocalNotification *localNotification = [[UILocalNotification alloc] init];
-  NSTimeInterval secondsToNextReminder = 24 * 60 * 60 * [reminderSetting intValue];
-  localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:secondsToNextReminder];
-  localNotification.timeZone = [NSTimeZone localTimeZone];
-  localNotification.alertBody = NSLocalizedString(@"You're Awesome!  It's time to learn some more words!",@"StudyNotification.Body");
-  localNotification.alertAction = NSLocalizedString(@"Study",@"StudyNotification.Action");
-  localNotification.soundName = UILocalNotificationDefaultSoundName;
 
-  // schedule it
-  [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
-  
-  // the application retains the notification
-  [localNotification release];
+  // One reminder, N calendar days after this session ends (same time of day, DST-safe). It is
+  // removed again whenever the app becomes active, so a regular studier never sees it.
+  NSCalendar *calendar = [NSCalendar currentCalendar];
+  NSDate *fireDate = [calendar dateByAddingUnit:NSCalendarUnitDay value:[reminderSetting integerValue] toDate:[NSDate date] options:0];
+  NSDateComponents *fireComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond) fromDate:fireDate];
+
+  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+  [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *notificationSettings) {
+    // Same rule as ReminderSettingsViewController +syncReminderSettingWithNotificationPermission:
+    UNAuthorizationStatus status = notificationSettings.authorizationStatus;
+    BOOL allowed = (status == UNAuthorizationStatusAuthorized || status == UNAuthorizationStatusProvisional);
+    if (@available(iOS 14.0, *))
+    {
+      allowed = allowed || (status == UNAuthorizationStatusEphemeral);
+    }
+    if (allowed == NO)
+    {
+      if (finish) finish();
+      return;
+    }
+    UNMutableNotificationContent *content = [[[UNMutableNotificationContent alloc] init] autorelease];
+    content.body = NSLocalizedString(@"You're Awesome!  It's time to learn some more words!",@"StudyNotification.Body");
+    content.sound = [UNNotificationSound defaultSound];
+    UNCalendarNotificationTrigger *trigger = [UNCalendarNotificationTrigger triggerWithDateMatchingComponents:fireComponents repeats:NO];
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:LWEStudyReminderRequestIdentifier content:content trigger:trigger];
+    [center addNotificationRequest:request withCompletionHandler:^(NSError *error) {
+      if (error)
+      {
+        LWE_LOG(@"Could not schedule the study reminder: %@", error);
+      }
+      else
+      {
+        LWE_LOG(@"Scheduled the study reminder for %@", fireDate);
+      }
+      if (finish) finish();
+    }];
+  }];
 }
 
 #pragma mark - UIApplication Delegate methods
@@ -454,15 +524,34 @@
 {
   // We no longer care if we came from another app
   [self.externalAppManager resetState];
-  
-  [self scheduleLocalNotification];
+
+  // The reminder is scheduled from async UserNotifications callbacks, so keep the app running
+  // until the request has been added; otherwise iOS can suspend us before it is saved.
+  __block UIBackgroundTaskIdentifier taskId = UIBackgroundTaskInvalid;
+  void (^endOnMain)(void) = ^{
+    if (taskId != UIBackgroundTaskInvalid)
+    {
+      [application endBackgroundTask:taskId];
+      taskId = UIBackgroundTaskInvalid;
+    }
+  };
+  // The expiration handler runs on the main thread and must end the task before it returns;
+  // the UserNotifications completion arrives on a background queue.
+  void (^endTask)(void) = ^{
+    if ([NSThread isMainThread]) endOnMain();
+    else dispatch_async(dispatch_get_main_queue(), endOnMain);
+  };
+  taskId = [application beginBackgroundTaskWithName:@"LWEStudyReminder" expirationHandler:endTask];
+  [self scheduleLocalNotificationWithCompletion:endTask];
 }
 
 - (void) applicationDidBecomeActive:(UIApplication *)application
 {
   // get rid of old notifications -- we use "did become active" because it is called both on 
   // first launch AND on resume from background/SMS/just about anything
-  [[UIApplication sharedApplication] cancelAllLocalNotifications];
+  UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+  [center removePendingNotificationRequestsWithIdentifiers:@[LWEStudyReminderRequestIdentifier]];
+  [center removeDeliveredNotificationsWithIdentifiers:@[LWEStudyReminderRequestIdentifier]];
 }
 
 /**

@@ -169,7 +169,6 @@ enum ControlSectionRows
     [switchView setOn:hideBuriedCard];
     [switchView addTarget:self action:@selector(switchView_eventValueChanged:) forControlEvents:UIControlEventValueChanged];
     [cell setAccessoryView:switchView];
-    [cell addSubview:switchView];
     [switchView release];
   }
   else 

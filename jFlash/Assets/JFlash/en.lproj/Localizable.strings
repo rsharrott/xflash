@@ -182,8 +182,8 @@
 /* SettingsViewController.SettingNames_ActiveUser  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
 "Active User" = "Active User";
 
-/* SettingsViewController.SettingNames_DownloadExtras  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
-"Updates" = "Updates";
+/* SettingsViewController.SettingNames_DownloadExtras, PluginSettingsViewController.NavBarTitle  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m, PluginSettingsViewController.m) */
+"Installed Data" = "Installed Data";
 
 /* SettingsViewController.TableHeader_Application  (ChineseSettingsDataSource.m, JapaneseSettingsDataSource.m) */
 "Application" = "Application";
@@ -273,7 +273,7 @@
 "Learning Algorithm" = "Learning Algorithm";
 
 /* HelpViewController.Table_Sharing  (HelpViewController.m) */
-"Sharing" = "Sharing";
+"Multiple Users" = "Multiple Users";
 
 /* HelpViewController.Table_Integration  (HelpViewController.m) */
 "Integration" = "Integration";
@@ -368,9 +368,6 @@
 /* PleaseWait  (PluginSettingsViewController.m) */
 "Please Wait" = "Please Wait";
 
-/* PluginSettingsViewController.NavBarTitle  (PluginSettingsViewController.m) */
-"Get Updates" = "Get Updates";
-
 /* PluginSettingsViewController.TableHeader_Installed  (PluginSettingsViewController.m) */
 "Installed" = "Installed";
 
@@ -382,9 +379,6 @@
 
 /* LastUpdate  (PluginSettingsViewController.m) */
 "Last update : %@" = "Last update : %@";
-
-/* PluginSettings.UpdatesUnavailable  (PluginSettingsViewController.m) */
-"Online updates are not available right now." = "Online updates are not available right now.";
 
 /* Study Set Learned  (PracticeModeCardViewDelegate.m) */
 "Study Set Learned" = "Study Set Learned";
@@ -512,9 +506,6 @@
 /* StudyNotification.Body  (jFlashAppDelegate.m) */
 "You're Awesome!  It's time to learn some more words!" = "You're Awesome!  It's time to learn some more words!";
 
-/* StudyNotification.Action  (jFlashAppDelegate.m) */
-"Study" = "Study";
-
 /* Default DSActivtyView label text  (DSActivityView.m) */
 "Loading..." = "Loading...";
 
@@ -553,6 +544,27 @@
 
 /* Next  (LWEFormView.m) */
 "Next" = "Next";
+
+/* Plugin.DisplayName.CardDB  (Plugin.m) */
+"Dictionary & Flash Cards" = "Dictionary & Flash Cards";
+
+/* Plugin.DisplayName.FTSDB  (Plugin.m) */
+"Fast Dictionary Search" = "Fast Dictionary Search";
+
+/* User.SeededNickname: sample users that ship in the bundled DB  (User.m) */
+"You" = "You";
+"My Best Friend" = "My Best Friend";
+"Mom" = "Mom";
+"Horiemon" = "Horiemon";
+
+/* ReminderVC.NotificationsDenied.Title  (ReminderSettingsViewController.m) */
+"Notifications Are Off" = "Notifications Are Off";
+
+/* ReminderVC.NotificationsDenied.Message  (ReminderSettingsViewController.m) */
+"To get study reminders, allow notifications for this app in the Settings app." = "To get study reminders, allow notifications for this app in the Settings app.";
+
+/* ReminderVC.NotificationsDenied.OpenSettings  (ReminderSettingsViewController.m) */
+"Open Settings" = "Open Settings";
 
 /* ---- Progress sheet (ProgressDetailsViewController.m) ---- */
 

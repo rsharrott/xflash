@@ -91,7 +91,7 @@
   NSMutableArray *userSettingNames = [NSMutableArray arrayWithObjects:NSLocalizedString(@"Theme",@"SettingsViewController.SettingNames_Theme"),
                                       NSLocalizedString(@"Study Reminders",@"SettingsViewController.SettingNames_Reminders"),
                                       NSLocalizedString(@"Active User",@"SettingsViewController.SettingNames_ActiveUser"),
-                                      NSLocalizedString(@"Updates",@"SettingsViewController.SettingNames_DownloadExtras"),nil];
+                                      NSLocalizedString(@"Installed Data",@"SettingsViewController.SettingNames_DownloadExtras"),nil];
   NSMutableArray *userSettingKeys = [NSMutableArray arrayWithObjects:APP_THEME,APP_REMINDER,APP_USER,APP_PLUGIN,nil];
   NSMutableArray *userSettingArray = [NSMutableArray arrayWithObjects:userSettingNames,userSettingKeys,NSLocalizedString(@"Application",@"SettingsViewController.TableHeader_Application"),nil];
   

@@ -24,7 +24,22 @@ NSInteger const kLWEUninitializedUserId = -1;
 - (void) hydrate:(FMResultSet*)rs
 {
   self.userId          = [rs intForColumn:@"user_id"];
-  self.userNickname    = [rs stringForColumn:@"nickname"];
+  self.userNickname    = [[self class] _displayNicknameForStoredNickname:[rs stringForColumn:@"nickname"]];
+}
+
+//! The sample users ship in the bundled DB in English. Show them in the UI language
+//! (a nickname the user typed themselves is left alone).
++ (NSString *) _displayNicknameForStoredNickname:(NSString *)stored
+{
+  if (stored == nil) return nil;
+  NSDictionary *seeded = [NSDictionary dictionaryWithObjectsAndKeys:
+                          NSLocalizedString(@"You", @"User.SeededNickname"), @"You",
+                          NSLocalizedString(@"My Best Friend", @"User.SeededNickname"), @"My Best Friend",
+                          NSLocalizedString(@"Mom", @"User.SeededNickname"), @"Mom",
+                          NSLocalizedString(@"Horiemon", @"User.SeededNickname"), @"Horiemon",
+                          nil];
+  NSString *localized = [seeded objectForKey:stored];
+  return (localized != nil) ? localized : stored;
 }
 
 - (void) save
