@@ -17,7 +17,7 @@
 #import "jFlashAppDelegate.h"
 #import <AVFoundation/AVFoundation.h>
 
-#define SHOW_BUTTON_TITLE NSLocalizedString(@"Read",@"ReadButton")
+#define SHOW_BUTTON_TITLE NSLocalizedString(@"Kanji Readings",@"ReadButton")
 #define CLOSE_BUTTON_TITLE NSLocalizedString(@"Close",@"CloseButton")
 #define ADD_BUTTON_TITLE NSLocalizedString(@"Add",@"AddButton")
 
