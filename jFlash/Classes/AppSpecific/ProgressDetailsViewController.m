@@ -220,6 +220,13 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 - (void) traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
 {
   [super traitCollectionDidChange:previousTraitCollection];
+  UIContentSizeCategory previous = previousTraitCollection.preferredContentSizeCategory;
+  UIContentSizeCategory current = self.traitCollection.preferredContentSizeCategory;
+  if (previous == nil || current == nil ||
+      [previous isEqualToString:UIContentSizeCategoryUnspecified] || [current isEqualToString:UIContentSizeCategoryUnspecified])
+  {
+    return; // the first trait pass (content was built in -viewDidLoad) or no real size category yet
+  }
   if ([previousTraitCollection.preferredContentSizeCategory isEqualToString:self.traitCollection.preferredContentSizeCategory] == NO)
   {
     // Rows switch between side-by-side and stacked layouts, and the attributed text re-resolves its fonts.
@@ -322,12 +329,9 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 }
 
 //! "You are studying 14 cards out of 14 in this set." with the two numbers large and bold.
-- (UIView *) _leadView
+- (UIView *) _leadViewWithStudyPool:(NSInteger)studying capped:(BOOL)capped
 {
-  NSInteger maxStudying = [[NSUserDefaults standardUserDefaults] integerForKey:APP_MAX_STUDYING];
   NSInteger totalWords = self.tag.cardCount;
-  BOOL capped = (maxStudying > 0 && totalWords > maxStudying);
-  NSInteger studying = capped ? maxStudying : totalWords;
 
   NSDictionary *textAttrs = @{ NSFontAttributeName: LWEDesignScaledFont(UIFontTextStyleBody, 17, UIFontWeightMedium, 0),
                                NSForegroundColorAttributeName: LWEDesignInk2() };
@@ -342,7 +346,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
     // The capped sentence carries the footnote marker (%3$@) where each language wants it:
     // en "1,234* cards", ja "1,234枚※" (the footnote itself starts with the same marker).
     NSString *format = NSLocalizedString(@"You are studying %1$@%3$@ cards out of %2$@ in this set.", @"ProgressDetailsViewController.StudyingSentenceCapped");
-    NSString *markerText = NSLocalizedString(@"StudyPoolCapMarker", @"ProgressDetailsViewController.CapMarker");
+    NSString *markerText = NSLocalizedStringWithDefaultValue(@"StudyPoolCapMarker", nil, [NSBundle mainBundle], @"*", @"ProgressDetailsViewController.CapMarker");
     NSMutableDictionary *markerAttrs = [[numberAttrs mutableCopy] autorelease];
     markerAttrs[NSForegroundColorAttributeName] = LWEDesignFire();
     NSAttributedString *marker = [[[NSAttributedString alloc] initWithString:markerText attributes:markerAttrs] autorelease];
@@ -381,7 +385,10 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
   UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
   button.translatesAutoresizingMaskIntoConstraints = NO;
   [button addSubview:label];
-  button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", note, settings];
+  // VoiceOver: no "asterisk" / ※ in front of the footnote.
+  NSString *marker = NSLocalizedStringWithDefaultValue(@"StudyPoolCapMarker", nil, [NSBundle mainBundle], @"*", @"ProgressDetailsViewController.CapMarker");
+  NSString *spokenNote = [note hasPrefix:marker] ? [note substringFromIndex:[marker length]] : note;
+  button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", spokenNote, settings];
   button.accessibilityTraits = UIAccessibilityTraitButton;
   [button addTarget:self action:@selector(switchToSettings:) forControlEvents:UIControlEventTouchUpInside];
   [button addTarget:self action:@selector(_dimLink:) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragEnter];
@@ -612,11 +619,13 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 
   UIView *header = [self _headerView];
   [_stack addArrangedSubview:header];
-  UIView *lead = [self _leadView];
+  // The study pool (Settings > max studying) caps how many of the set's cards are in play.
+  NSInteger maxStudying = [[NSUserDefaults standardUserDefaults] integerForKey:APP_MAX_STUDYING];
+  BOOL capped = (maxStudying > 0 && self.tag.cardCount > maxStudying);
+  UIView *lead = [self _leadViewWithStudyPool:(capped ? maxStudying : self.tag.cardCount) capped:capped];
   [_stack addArrangedSubview:lead];
   [_stack setCustomSpacing:4 afterView:lead];
-  NSInteger maxStudying = [[NSUserDefaults standardUserDefaults] integerForKey:APP_MAX_STUDYING];
-  if (maxStudying > 0 && self.tag.cardCount > maxStudying)
+  if (capped)
   {
     // The footnote explains the capped number, so it only shows when the study pool is capped.
     UIView *link = [self _settingsLinkView];
@@ -662,7 +671,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
     streak = [self _pillWithTitle:NSLocalizedString(@"Streak", @"ProgressDetailsViewController.Streak") value:streakValue];
   }
   // Seen: cards in this set answered at least once, ever (total minus Unseen; the same counts the bars use).
-  NSString *seenValue = [NSString stringWithFormat:NSLocalizedString(@"Seen pill: %1$@ of %2$@", @"ProgressDetailsViewController.SeenOfTotal"),
+  NSString *seenValue = [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"Seen pill: %1$@ of %2$@", nil, [NSBundle mainBundle], @"%1$@ of %2$@", @"ProgressDetailsViewController.SeenOfTotal"),
                          LWEProgressNumber(self.tag.seenCardCount), LWEProgressNumber(self.tag.cardCount)];
   UIView *seen = [self _pillWithTitle:NSLocalizedString(@"Seen", @"ProgressDetailsViewController.SeenInSet") value:seenValue];
   UIStackView *pills = [[[UIStackView alloc] initWithArrangedSubviews:(streak ? @[streak, seen] : @[seen])] autorelease];
