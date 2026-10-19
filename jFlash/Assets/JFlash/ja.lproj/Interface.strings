@@ -1,0 +1,84 @@
+/*
+  Interface.strings (Japanese)
+  Japanese in a Flash! (jFlash target)
+  Text that lives in the XIBs (and MainWindow tab titles).  LWELocalizeInterface() /
+  LWEInterfaceString() in LWELocalization.h look these up at runtime by the English text.
+*/
+
+/* Tab bar: practice (study) tab */
+"Practice" = "練習";
+
+/* Tab bar & nav bar: study sets */
+"Study Sets" = "学習セット";
+
+/* Nav bar: search */
+"Search" = "検索";
+
+/* Tab bar & nav bar: settings; also the button in the progress popup */
+"Settings" = "設定";
+
+/* Tab bar & nav bar: help */
+"Help" = "ヘルプ";
+
+/* Tab bar only (short; 学習セット is truncated in the tab bar) */
+"Tab.Study Sets" = "セット";
+
+/* Progress bar / popup level: cards being studied */
+"Studying" = "学習中";
+
+/* Progress level: right once */
+"Right 1x" = "正解1回";
+
+/* Progress level: right twice */
+"Right 2x" = "正解2回";
+
+/* Progress level: right three times */
+"Right 3x" = "正解3回";
+
+/* Progress level: learned */
+"Learned" = "覚えた";
+
+/* Placeholder for a new study set name */
+"e.g. New Words I Heard on TV" = "例：テレビで聞いた新しい単語";
+
+/* New study set prompt */
+"Name your study set!" = "学習セットに名前をつけましょう";
+
+/* Difficulty segment */
+"Easy" = "やさしい";
+
+/* Difficulty segment */
+"Medium" = "ふつう";
+
+/* Difficulty segment */
+"Hard" = "むずかしい";
+
+/* Difficulty segment */
+"Custom" = "カスタム";
+
+/* Download dialog button */
+"Start Download >" = "ダウンロード開始";
+
+/* Plugin settings button */
+"Check For Updates" = "アップデートを確認";
+
+/* Button to go back to Rikai Browser */
+"Return To Rikai Browser" = "Rikai Browserに戻る";
+
+/* Search progress cell */
+"Awesomely Searching..." = "検索中…";
+
+/* User details label */
+"Nickname" = "ニックネーム";
+
+/* User name placeholder */
+"Type your name here" = "名前を入力";
+
+/* User details button */
+"Select User" = "このユーザーを使う";
+
+/* User details button */
+"Save" = "保存";
+
+/* Card: show reading button */
+"Show Reading" = "読みを表示";

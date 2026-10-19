@@ -30,9 +30,13 @@
 	NSInteger newAvailableUpdate = [pluginManager.downloadablePlugins count];
 	
 	//This is to set up the very top row and section in the settings table view.
-	NSArray *newUpdateNames = [NSArray arrayWithObjects:[NSString stringWithFormat:@"%d Update%@ Available", newAvailableUpdate, (newAvailableUpdate>1) ? @"s" : @""], nil];
+  NSString *newUpdateName = (newAvailableUpdate == 1) ? NSLocalizedString(@"1 Update Available", @"SettingsViewController.OneUpdateAvailable")
+                                                       : [NSString stringWithFormat:NSLocalizedString(@"%d Updates Available", @"SettingsViewController.NUpdatesAvailable"), newAvailableUpdate];
+  NSString *newUpdateHeader = (newAvailableUpdate == 1) ? NSLocalizedString(@"Available Update", @"SettingsViewController.TableHeader_AvailableUpdate")
+                                                         : NSLocalizedString(@"Available Updates", @"SettingsViewController.TableHeader_AvailableUpdates");
+	NSArray *newUpdateNames = [NSArray arrayWithObjects:newUpdateName, nil];
   NSArray *newUpdateKeys = [NSArray arrayWithObjects:APP_NEW_UPDATE,nil];
-  NSArray *newUpdateArray = [NSArray arrayWithObjects:newUpdateNames,newUpdateKeys, [NSString stringWithFormat:@"Available Update%@", (newAvailableUpdate>1) ? @"s" : @""], nil];
+  NSArray *newUpdateArray = [NSArray arrayWithObjects:newUpdateNames,newUpdateKeys,newUpdateHeader, nil];
 	
   // The following dictionaries contain all the mappings from actual settings to how they display on the phone
   NSArray *modeObjects = [NSArray arrayWithObjects:NSLocalizedString(@"Practice",@"SettingsViewController.Practice"), NSLocalizedString(@"Browse",@"SettingsViewController.Browse"), nil];
@@ -46,7 +50,14 @@
   
   // Source theme information from the ThemeManager
   ThemeManager *tm = [ThemeManager sharedThemeManager];
-  NSDictionary *themeDict = [NSDictionary dictionaryWithObjects:[tm themeNameList] forKeys:[tm themeKeysList]];
+  // Theme names are display-only here (the keys are what get saved), so translate them for the table.
+  // Keys: NSLocalizedString(@"Fire",@"Theme name"), NSLocalizedString(@"Water",@"Theme name"), NSLocalizedString(@"Tame",@"Theme name")
+  NSMutableArray *themeNames = [NSMutableArray array];
+  for (NSString *themeName in [tm themeNameList])
+  {
+    [themeNames addObject:[[NSBundle mainBundle] localizedStringForKey:themeName value:themeName table:nil]];
+  }
+  NSDictionary *themeDict = [NSDictionary dictionaryWithObjects:themeNames forKeys:[tm themeKeysList]];
   
   NSArray *readingObjects = [NSArray arrayWithObjects:NSLocalizedString(@"Kana",@"SettingsViewController.DisplayReading_Kana"),
                              NSLocalizedString(@"Romaji",@"SettingsViewController.DisplayReading_Romaji"),

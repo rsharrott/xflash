@@ -7,30 +7,104 @@
 //
 
 #import "ActionBarViewController.h"
+#import "LWEDesignTokens.h"
+
+// Practice-mode answer bar metrics (design Option A)
+static const CGFloat kLWEBarPadTop       = 16.0;
+static const CGFloat kLWEBarPadSide      = 16.0;
+static const CGFloat kLWEBarGap          = 10.0;
+static const CGFloat kLWEBarSecondaryH   = 44.0;  // minimum; grows with Dynamic Type
+static const CGFloat kLWEBarPrimaryH     = 60.0;  // minimum; grows with Dynamic Type
+static const CGFloat kLWEBarPadBottom    = 14.0;
+// Dynamic Type: base sizes, and caps so "Actions" / "Wrong" etc. still fit a half-width button
+// on a 320pt-wide screen at the largest accessibility size.
+static const CGFloat kLWEBarSecondaryFontSize = 15.0;
+static const CGFloat kLWEBarSecondaryFontMax  = 24.0;
+static const CGFloat kLWEBarPrimaryFontSize   = 17.0;
+static const CGFloat kLWEBarPrimaryFontMax    = 28.0;
+
+static UIFont *LWEBarSecondaryFont(void)
+{
+  return LWEDesignScaledFont(UIFontTextStyleSubheadline, kLWEBarSecondaryFontSize, UIFontWeightMedium, kLWEBarSecondaryFontMax);
+}
+
+static UIFont *LWEBarPrimaryFont(void)
+{
+  return LWEDesignScaledFont(UIFontTextStyleBody, kLWEBarPrimaryFontSize, UIFontWeightSemibold, kLWEBarPrimaryFontMax);
+}
+
+//! Row heights: the 44 / 60pt design heights, or taller when the text needs it.
+static CGFloat LWEBarSecondaryHeight(void) { return MAX(kLWEBarSecondaryH, ceilf(LWEBarSecondaryFont().lineHeight + 24.0)); }
+static CGFloat LWEBarPrimaryHeight(void)   { return MAX(kLWEBarPrimaryH, ceilf(LWEBarPrimaryFont().lineHeight + 38.0)); }
+
+// "Show answer" (design option C): paper button with a fire outline covering the whole 2x2 grid.
+static const CGFloat kLWEShowAnswerFontSize    = 19.0;
+static const CGFloat kLWEShowAnswerFontMax     = 28.0;
+static const CGFloat kLWEShowAnswerSubFontSize = 13.0;
+static const CGFloat kLWEShowAnswerSubFontMax  = 19.0;
+static const NSInteger kLWEShowAnswerEyeTag    = 9101;
+
+static UIFont *LWEShowAnswerFont(void)
+{
+  return LWEDesignScaledFont(UIFontTextStyleBody, kLWEShowAnswerFontSize, UIFontWeightSemibold, kLWEShowAnswerFontMax);
+}
+
+static UIFont *LWEShowAnswerSubFont(void)
+{
+  return LWEDesignScaledFont(UIFontTextStyleFootnote, kLWEShowAnswerSubFontSize, UIFontWeightMedium, kLWEShowAnswerSubFontMax);
+}
 
 @interface ActionBarViewController ()
+{
+  BOOL _isPracticeBar;
+  CGFloat _nibHeight;
+}
 - (void) _reportBadData;
+- (void) _setupPracticeBar API_AVAILABLE(ios(15.0));
+- (void) _layoutPracticeBar;
+- (void) _stylePracticeButton:(UIButton *)btn title:(NSString *)title symbol:(NSString *)symbol
+                         fill:(UIColor *)fill ink:(UIColor *)ink primary:(BOOL)primary API_AVAILABLE(ios(15.0));
 - (void) _applyModernStyle:(UIButton *)btn symbolName:(NSString *)name label:(NSString *)labelText color:(UIColor *)color;
+- (UIButton *) _makeShowAnswerButton;
+- (void) _showAnswerTouchDown:(UIButton *)sender;
+- (void) _showAnswerTouchUp:(UIButton *)sender;
 @end
 
 @implementation ActionBarViewController
 @synthesize delegate, currentCard;
 @synthesize nextCardBtn, prevCardBtn, addBtn, rightBtn, wrongBtn, buryCardBtn;
-@synthesize cardMeaningBtnHint;
+@synthesize cardMeaningBtnHint, showAnswerBtn;
 
 #pragma mark - View lifecycle
 
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+  _nibHeight = self.view.bounds.size.height;
+
+#if defined(LWE_JFLASH)
+  // The practice NIB has right/wrong buttons; the browse NIB has prev/next instead.
+  // (Japanese in a Flash only -- Chinese Flash keeps the original bar.)
+  _isPracticeBar = (self.rightBtn != nil && self.wrongBtn != nil);
+#endif
+  if (_isPracticeBar)
+  {
+    if (@available(iOS 15.0, *)) {
+      [self _setupPracticeBar];
+      return;
+    }
+  }
+  _isPracticeBar = NO;
+
   if (@available(iOS 13.0, *)) {
     self.view.backgroundColor = [UIColor systemBackgroundColor];
-    [self _applyModernStyle:self.addBtn      symbolName:@"plus.circle.fill"           label:@"actions" color:[UIColor systemBlueColor]];
-    [self _applyModernStyle:self.rightBtn    symbolName:@"checkmark.circle.fill"      label:@"right"   color:[UIColor systemGreenColor]];
-    [self _applyModernStyle:self.wrongBtn    symbolName:@"xmark.circle.fill"          label:@"wrong"   color:[UIColor systemRedColor]];
-    [self _applyModernStyle:self.buryCardBtn symbolName:@"archivebox.circle.fill"     label:@"bury it" color:[UIColor systemOrangeColor]];
-    [self _applyModernStyle:self.prevCardBtn symbolName:@"chevron.left.circle.fill"   label:@"prev"    color:[UIColor systemGrayColor]];
-    [self _applyModernStyle:self.nextCardBtn symbolName:@"chevron.right.circle.fill"  label:@"next"    color:[UIColor systemGrayColor]];
+    // Small captions under the icon buttons (lowercase by design)
+    [self _applyModernStyle:self.addBtn      symbolName:@"plus.circle.fill"           label:NSLocalizedString(@"actions", @"ActionBar.Caption.Actions") color:[UIColor systemBlueColor]];
+    [self _applyModernStyle:self.rightBtn    symbolName:@"checkmark.circle.fill"      label:NSLocalizedString(@"right", @"ActionBar.Caption.Right")     color:[UIColor systemGreenColor]];
+    [self _applyModernStyle:self.wrongBtn    symbolName:@"xmark.circle.fill"          label:NSLocalizedString(@"wrong", @"ActionBar.Caption.Wrong")     color:[UIColor systemRedColor]];
+    [self _applyModernStyle:self.buryCardBtn symbolName:@"archivebox.circle.fill"     label:NSLocalizedString(@"bury it", @"ActionBar.Caption.BuryIt")  color:[UIColor systemOrangeColor]];
+    [self _applyModernStyle:self.prevCardBtn symbolName:@"chevron.left.circle.fill"   label:NSLocalizedString(@"prev", @"ActionBar.Caption.Previous")   color:[UIColor systemGrayColor]];
+    [self _applyModernStyle:self.nextCardBtn symbolName:@"chevron.right.circle.fill"  label:NSLocalizedString(@"next", @"ActionBar.Caption.Next")       color:[UIColor systemGrayColor]];
   }
 }
 
@@ -64,6 +138,207 @@
     }
     lbl.text = labelText;
   }
+}
+
+#pragma mark - Practice answer bar (paper panel)
+
+/**
+ * Two rows on a paper panel: quieter Actions / Bury on top and Wrong / Right below, shown once
+ * the answer is revealed.  Before that, one outlined "Show answer" button covers the same
+ * 2x2 area, so the panel never resizes.  Row heights start at 44 / 60pt and grow with Dynamic Type.
+ * The buttons keep their NIB tags & actions (doCardBtn: via the responder chain,
+ * showCardActionSheet), so behaviour is unchanged.
+ */
+- (void) _setupPracticeBar
+{
+  self.view.backgroundColor = LWEDesignPaper();
+  self.view.layer.cornerRadius = 28.0;
+  self.view.layer.maskedCorners = kCALayerMinXMinYCorner | kCALayerMaxXMinYCorner;
+  if (@available(iOS 13.0, *)) {
+    self.view.layer.cornerCurve = kCACornerCurveContinuous;
+  }
+  self.view.clipsToBounds = YES;
+
+  // The old brush-script "TAP FOR ANSWER" strip is replaced by the Show answer button.
+  self.cardMeaningBtnHint.hidden = YES;
+
+  [self _stylePracticeButton:self.addBtn title:NSLocalizedString(@"Actions", @"ActionBar.Actions") symbol:@"plus.circle"
+                        fill:LWEDesignPaperButton() ink:LWEDesignInk() primary:NO];
+  self.addBtn.accessibilityLabel = NSLocalizedString(@"Actions", @"ActionBar.Actions");
+
+  [self _stylePracticeButton:self.buryCardBtn title:NSLocalizedString(@"Bury", @"ActionBar.Bury") symbol:@"archivebox"
+                        fill:LWEDesignPaperButton() ink:LWEDesignInk() primary:NO];
+  self.buryCardBtn.accessibilityLabel = NSLocalizedString(@"Bury it", @"ActionBar.BuryIt");
+
+  [self _stylePracticeButton:self.wrongBtn title:NSLocalizedString(@"Wrong", @"ActionBar.Wrong") symbol:@"xmark"
+                        fill:LWEDesignWrongFill() ink:LWEDesignWrongInk() primary:YES];
+  self.wrongBtn.accessibilityLabel = NSLocalizedString(@"Wrong", @"ActionBar.Wrong");
+
+  [self _stylePracticeButton:self.rightBtn title:NSLocalizedString(@"Right", @"ActionBar.Right") symbol:@"checkmark"
+                        fill:LWEDesignRightFill() ink:LWEDesignRightInk() primary:YES];
+  self.rightBtn.accessibilityLabel = NSLocalizedString(@"Right", @"ActionBar.Right");
+
+  // Show answer: same action as tapping the card (StudyViewController -revealCard via the responder chain).
+  // It is the only "Show answer" VoiceOver element; the card's invisible reveal area is hidden from VoiceOver.
+  UIButton *show = [self _makeShowAnswerButton];
+  [show addTarget:nil action:@selector(revealCard) forControlEvents:UIControlEventTouchUpInside];
+  [self.view addSubview:show];
+  self.showAnswerBtn = show;
+}
+
+/**
+ * Design option C: one paper (#FFFDF9) button, 2pt fire (#C01B00) outline, 18pt corners,
+ * centred "[eye] Show answer" in fire red with the muted subline "Then mark it Wrong or Right".
+ * Its frame is the whole revealed 2x2 grid (see _layoutPracticeBar), so the panel never resizes.
+ * The labels are subviews of the button, so VoiceOver sees one element: "Show answer".
+ */
+- (UIButton *) _makeShowAnswerButton
+{
+  UIButton *show = [UIButton buttonWithType:UIButtonTypeCustom];
+  show.autoresizingMask = UIViewAutoresizingNone;
+  show.backgroundColor = LWEDesignColorHex(0xFFFDF9, 1.0);
+  show.layer.cornerRadius = 18.0;
+  if (@available(iOS 13.0, *)) {
+    show.layer.cornerCurve = kCACornerCurveContinuous;
+  }
+  show.layer.borderWidth = 2.0;
+  show.layer.borderColor = LWEDesignFire().CGColor;
+  show.isAccessibilityElement = YES;
+  show.accessibilityTraits = UIAccessibilityTraitButton;
+  show.accessibilityLabel = NSLocalizedString(@"Show answer", @"ActionBar.ShowAnswer");
+  show.accessibilityHint = NSLocalizedString(@"Then mark it Wrong or Right", @"ActionBar.ShowAnswerSubline");
+
+  UIImageView *eye = [[[UIImageView alloc] init] autorelease];
+  eye.tag = kLWEShowAnswerEyeTag;
+  eye.tintColor = LWEDesignFire();
+  eye.contentMode = UIViewContentModeScaleAspectFit;
+  if (@available(iOS 13.0, *)) {
+    eye.image = [UIImage systemImageNamed:@"eye"];
+    eye.preferredSymbolConfiguration = [UIImageSymbolConfiguration configurationWithFont:LWEShowAnswerFont() scale:UIImageSymbolScaleMedium];
+  }
+
+  UILabel *title = [[[UILabel alloc] init] autorelease];
+  title.text = NSLocalizedString(@"Show answer", @"ActionBar.ShowAnswer");
+  title.font = LWEShowAnswerFont();
+  title.adjustsFontForContentSizeCategory = YES;
+  title.textColor = LWEDesignFire();
+  title.adjustsFontSizeToFitWidth = YES;
+  title.minimumScaleFactor = 0.7;
+
+  UIStackView *titleRow = [[[UIStackView alloc] initWithArrangedSubviews:@[eye, title]] autorelease];
+  titleRow.axis = UILayoutConstraintAxisHorizontal;
+  titleRow.alignment = UIStackViewAlignmentCenter;
+  titleRow.spacing = 9.0;
+
+  UILabel *sub = [[[UILabel alloc] init] autorelease];
+  sub.text = NSLocalizedString(@"Then mark it Wrong or Right", @"ActionBar.ShowAnswerSubline");
+  sub.font = LWEShowAnswerSubFont();
+  sub.adjustsFontForContentSizeCategory = YES;
+  sub.textColor = LWEDesignColorHex(0xA3341C, 1.0);
+  sub.textAlignment = NSTextAlignmentCenter;
+  sub.adjustsFontSizeToFitWidth = YES;
+  sub.minimumScaleFactor = 0.7;
+
+  UIStackView *stack = [[[UIStackView alloc] initWithArrangedSubviews:@[titleRow, sub]] autorelease];
+  stack.axis = UILayoutConstraintAxisVertical;
+  stack.alignment = UIStackViewAlignmentCenter;
+  stack.spacing = 3.0;
+  stack.userInteractionEnabled = NO;
+  stack.translatesAutoresizingMaskIntoConstraints = NO;
+  [show addSubview:stack];
+  [NSLayoutConstraint activateConstraints:@[
+    [stack.centerXAnchor constraintEqualToAnchor:show.centerXAnchor],
+    [stack.centerYAnchor constraintEqualToAnchor:show.centerYAnchor],
+    [stack.leadingAnchor constraintGreaterThanOrEqualToAnchor:show.leadingAnchor constant:14.0],
+    [stack.topAnchor constraintGreaterThanOrEqualToAnchor:show.topAnchor constant:6.0],
+  ]];
+
+  [show addTarget:self action:@selector(_showAnswerTouchDown:) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragEnter];
+  [show addTarget:self action:@selector(_showAnswerTouchUp:)
+     forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchDragExit | UIControlEventTouchCancel];
+  return show;
+}
+
+- (void) _showAnswerTouchDown:(UIButton *)sender
+{
+  sender.backgroundColor = LWEDesignColorHex(0xF6E7E1, 1.0);
+}
+
+- (void) _showAnswerTouchUp:(UIButton *)sender
+{
+  sender.backgroundColor = LWEDesignColorHex(0xFFFDF9, 1.0);
+}
+
+- (void) _stylePracticeButton:(UIButton *)btn title:(NSString *)title symbol:(NSString *)symbol
+                         fill:(UIColor *)fill ink:(UIColor *)ink primary:(BOOL)primary
+{
+  if (btn == nil) return;
+  // Clear the NIB's legacy images
+  [btn setImage:nil forState:UIControlStateNormal];
+  [btn setImage:nil forState:UIControlStateHighlighted];
+  [btn setBackgroundImage:nil forState:UIControlStateNormal];
+  [btn setBackgroundImage:nil forState:UIControlStateHighlighted];
+  [btn setTitle:nil forState:UIControlStateNormal];
+  btn.backgroundColor = [UIColor clearColor];
+  btn.autoresizingMask = UIViewAutoresizingNone;
+
+  // Title font follows Dynamic Type (UIFontMetrics, capped); see LWEDesignButtonConfiguration.
+  UIButtonConfiguration *config = LWEDesignButtonConfiguration(title, fill, ink,
+    primary ? UIFontTextStyleBody : UIFontTextStyleSubheadline,
+    primary ? kLWEBarPrimaryFontSize : kLWEBarSecondaryFontSize,
+    primary ? UIFontWeightSemibold : UIFontWeightMedium,
+    primary ? kLWEBarPrimaryFontMax : kLWEBarSecondaryFontMax,
+    primary ? 18.0 : 14.0);
+  config.imagePadding = 8.0;
+  config.contentInsets = NSDirectionalEdgeInsetsMake(0, 8, 0, 8);
+  config.titleLineBreakMode = NSLineBreakByTruncatingTail;
+  if (symbol)
+  {
+    // Symbol scales with the title (16 / 17pt at the default size)
+    UIFont *font = primary ? LWEBarPrimaryFont() : LWEBarSecondaryFont();
+    CGFloat base = primary ? kLWEBarPrimaryFontSize : kLWEBarSecondaryFontSize;
+    CGFloat pointSize = roundf((primary ? 16.0 : 17.0) * font.pointSize / base);
+    UIImageSymbolWeight weight = primary ? UIImageSymbolWeightBold : UIImageSymbolWeightRegular;
+    config.image = [UIImage systemImageNamed:symbol];
+    config.preferredSymbolConfigurationForImage = [UIImageSymbolConfiguration configurationWithPointSize:pointSize weight:weight];
+  }
+  btn.configuration = config;
+  btn.titleLabel.adjustsFontForContentSizeCategory = YES;
+}
+
+- (void) _layoutPracticeBar
+{
+  CGFloat w = self.view.bounds.size.width;
+  if (w <= 0) return;
+  CGFloat innerW = w - 2.0 * kLWEBarPadSide;
+  CGFloat halfW = floorf((innerW - kLWEBarGap) / 2.0);
+
+  CGFloat secondaryH = LWEBarSecondaryHeight();
+  CGFloat primaryH = LWEBarPrimaryHeight();
+
+  CGFloat y1 = kLWEBarPadTop;
+  self.addBtn.frame      = CGRectMake(kLWEBarPadSide, y1, halfW, secondaryH);
+  self.buryCardBtn.frame = CGRectMake(w - kLWEBarPadSide - halfW, y1, halfW, secondaryH);
+
+  CGFloat y2 = y1 + secondaryH + kLWEBarGap;
+  self.wrongBtn.frame      = CGRectMake(kLWEBarPadSide, y2, halfW, primaryH);
+  self.rightBtn.frame      = CGRectMake(w - kLWEBarPadSide - halfW, y2, halfW, primaryH);
+  // Show answer covers exactly the 2x2 grid (Actions / Bury over Wrong / Right).
+  self.showAnswerBtn.frame = CGRectMake(kLWEBarPadSide, y1, innerW, (y2 + primaryH) - y1);
+  if (@available(iOS 13.0, *)) {
+    // Keep the eye the size of the (Dynamic Type) title.
+    UIImageView *eye = (UIImageView *)[self.showAnswerBtn viewWithTag:kLWEShowAnswerEyeTag];
+    eye.preferredSymbolConfiguration = [UIImageSymbolConfiguration configurationWithFont:LWEShowAnswerFont() scale:UIImageSymbolScaleMedium];
+  }
+}
+
+- (CGFloat) preferredBarHeight
+{
+  if (_isPracticeBar)
+  {
+    return kLWEBarPadTop + LWEBarSecondaryHeight() + kLWEBarGap + LWEBarPrimaryHeight() + kLWEBarPadBottom;
+  }
+  return (_nibHeight > 0) ? _nibHeight : self.view.bounds.size.height;
 }
 
 // MMA: 11/14/2011 -- this method appears to be unused...
@@ -231,6 +506,11 @@
 
 - (void)distributeButtonsEvenly
 {
+  if (_isPracticeBar)
+  {
+    [self _layoutPracticeBar];
+    return;
+  }
   CGFloat width = self.view.bounds.size.width;
   CGFloat height = self.view.bounds.size.height;
   if (width <= 0 || height <= 0) return;
@@ -258,6 +538,7 @@
 {
   [super viewDidLayoutSubviews];
   [self distributeButtonsEvenly];
+  if (_isPracticeBar) return;
 
   if (@available(iOS 13.0, *)) {
     NSMutableArray *btns = [NSMutableArray array];
@@ -292,6 +573,7 @@
   self.rightBtn = nil;
   self.wrongBtn = nil;
 	self.cardMeaningBtnHint = nil;
+  self.showAnswerBtn = nil;
 }
 
 - (void)dealloc
@@ -304,6 +586,7 @@
   [prevCardBtn release];
   [rightBtn release];
   [wrongBtn release];
+  [showAnswerBtn release];
   [super dealloc];
 }
 @end

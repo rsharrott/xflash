@@ -7,170 +7,719 @@
 //
 
 #import "ProgressDetailsViewController.h"
-#import "UserPeer.h"
+#import "LWELocalization.h"
+#import "LWEDesignTokens.h"
+
+//! Mascot next to the encouragement line (same image the old XIB used; folder reference in jFlash and cFlash).
+static NSString * const kLWEProgressMascotImage = @"redtheme-cookie-cutters/mood-icons/positive/hh-happy.png";
+
+//! Custom detent sized to the content (iOS 16+)
+static NSString * const kLWEProgressFitDetent = @"com.longweekend.progress.fit";
+
+@interface ProgressDetailsViewController ()
+{
+  UIScrollView *_scroll;
+  UIStackView *_stack;
+}
+- (void) _buildContent;
+- (CGFloat) _fittingContentHeight;
+@end
 
 @implementation ProgressDetailsViewController
-@synthesize closeBtn, currentStudySet, motivationLabel, streakLabel, rightStreak, wrongStreak;
-@synthesize cardSetProgressLabel0, cardSetProgressLabel1, cardSetProgressLabel2, cardSetProgressLabel3, cardSetProgressLabel4, cardSetProgressLabel5;
-@synthesize cardsViewedAllTime, cardsViewedNow, cardsRightNow, cardsWrongNow, progressViewTitle;
-@synthesize currentNumberOfWords, totalNumberOfWords;
-@synthesize bgView;
+@synthesize tag, rightCount, wrongCount, rightStreak, wrongStreak;
 
-@synthesize tag;
+#pragma mark - Formatting
+
+//! Grouped integer in the current locale ("1,234" / "1,234")
+static NSString *LWEProgressNumber(NSInteger value)
+{
+  static NSNumberFormatter *formatter = nil;
+  if (formatter == nil)
+  {
+    formatter = [[NSNumberFormatter alloc] init];
+    formatter.numberStyle = NSNumberFormatterDecimalStyle;
+    formatter.usesGroupingSeparator = YES;
+    formatter.maximumFractionDigits = 0;
+  }
+  return [formatter stringFromNumber:[NSNumber numberWithInteger:value]];
+}
+
+//! Whole-number percentage in the current locale ("22%")
+static NSString *LWEProgressPercent(CGFloat fraction)
+{
+  static NSNumberFormatter *formatter = nil;
+  if (formatter == nil)
+  {
+    formatter = [[NSNumberFormatter alloc] init];
+    formatter.numberStyle = NSNumberFormatterPercentStyle;
+    formatter.maximumFractionDigits = 0;
+  }
+  return [formatter stringFromNumber:[NSNumber numberWithDouble:fraction]];
+}
+
+//! Replaces %1$@, %2$@ ... in a localized format with attributed arguments; the rest of the text gets |attrs|.
+static NSAttributedString *LWEProgressAttributedFormat(NSString *format, NSDictionary *attrs, NSArray *args)
+{
+  NSMutableAttributedString *result = [[[NSMutableAttributedString alloc] initWithString:format attributes:attrs] autorelease];
+  for (NSInteger i = (NSInteger)[args count] - 1; i >= 0; i--)
+  {
+    NSString *token = [NSString stringWithFormat:@"%%%ld$@", (long)(i + 1)];
+    NSRange range = [[result string] rangeOfString:token];
+    if (range.location == NSNotFound && [args count] == 1)
+    {
+      range = [[result string] rangeOfString:@"%@"];
+    }
+    if (range.location != NSNotFound)
+    {
+      [result replaceCharactersInRange:range withAttributedString:[args objectAtIndex:i]];
+    }
+  }
+  return result;
+}
+
+static UILabel *LWEProgressLabel(UIFont *font, UIColor *color)
+{
+  UILabel *label = [[[UILabel alloc] init] autorelease];
+  label.translatesAutoresizingMaskIntoConstraints = NO;
+  label.font = font;
+  label.textColor = color;
+  label.numberOfLines = 0;
+  label.adjustsFontForContentSizeCategory = YES;
+  return label;
+}
+
+//! Wraps |content| in a rounded, filled box with the given insets (a plain view, so the corner radius clips the fill).
+static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NSDirectionalEdgeInsets insets)
+{
+  UIView *box = [[[UIView alloc] init] autorelease];
+  box.translatesAutoresizingMaskIntoConstraints = NO;
+  box.backgroundColor = fill;
+  box.layer.cornerRadius = radius;
+  box.layer.cornerCurve = kCACornerCurveContinuous;
+  content.translatesAutoresizingMaskIntoConstraints = NO;
+  [box addSubview:content];
+  [NSLayoutConstraint activateConstraints:@[
+    [content.topAnchor constraintEqualToAnchor:box.topAnchor constant:insets.top],
+    [content.bottomAnchor constraintEqualToAnchor:box.bottomAnchor constant:-insets.bottom],
+    [content.leadingAnchor constraintEqualToAnchor:box.leadingAnchor constant:insets.leading],
+    [content.trailingAnchor constraintEqualToAnchor:box.trailingAnchor constant:-insets.trailing],
+  ]];
+  return box;
+}
+
+#pragma mark - Init
+
+- (id) initWithTag:(Tag *)aTag rightCount:(NSInteger)right wrongCount:(NSInteger)wrong
+       rightStreak:(NSInteger)rStreak wrongStreak:(NSInteger)wStreak
+{
+  self = [super initWithNibName:nil bundle:nil];
+  if (self)
+  {
+    self.tag = aTag;
+    self.rightCount = right;
+    self.wrongCount = wrong;
+    self.rightStreak = rStreak;
+    self.wrongStreak = wStreak;
+
+    self.modalPresentationStyle = UIModalPresentationPageSheet;
+    UISheetPresentationController *sheet = self.sheetPresentationController;
+    if (@available(iOS 16.0, *))
+    {
+      // First detent: exactly as tall as the content (the medium detent cut off the lower levels and
+      // the mascot line at the default text size), capped at the large detent; large stays available.
+      __block ProgressDetailsViewController *blockSelf = self; // MRC: don't retain self from its own sheet
+      UISheetPresentationControllerDetent *fit =
+        [UISheetPresentationControllerDetent customDetentWithIdentifier:kLWEProgressFitDetent
+                                                               resolver:^CGFloat(id<UISheetPresentationControllerDetentResolutionContext> context) {
+          return MIN([blockSelf _fittingContentHeight], context.maximumDetentValue);
+        }];
+      sheet.detents = @[fit, [UISheetPresentationControllerDetent largeDetent]];
+    }
+    else
+    {
+      sheet.detents = @[[UISheetPresentationControllerDetent largeDetent]];
+    }
+    sheet.prefersGrabberVisible = YES;
+    sheet.preferredCornerRadius = 28; // radius-3xl
+    sheet.prefersScrollingExpandsWhenScrolledToEdge = YES;
+    sheet.prefersEdgeAttachedInCompactHeight = YES;
+  }
+  return self;
+}
+
+- (id) initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+  return [self initWithTag:nil rightCount:0 wrongCount:0 rightStreak:0 wrongStreak:0];
+}
 
 #pragma mark - UIViewController Methods
 
-- (void)viewDidLoad
+- (void) viewDidLoad
 {
   [super viewDidLoad];
-  
-  // Set the background view to be semi-transparent to shadow over the study view 
-  self.view.backgroundColor = [UIColor colorWithHue:0.0 saturation:0.0 brightness:0.0 alpha:0.7];
+  self.view.backgroundColor = LWEDesignPaper();
 
-  // Draw the border & the rounded corners on the background view
-  self.bgView.layer.cornerRadius = 10.0f;
-  self.bgView.layer.borderWidth = 2.0f;
-  self.bgView.layer.borderColor = [[UIColor whiteColor] CGColor];
+  _scroll = [[UIScrollView alloc] init];
+  _scroll.translatesAutoresizingMaskIntoConstraints = NO;
+  _scroll.alwaysBounceVertical = YES;
+  _scroll.showsVerticalScrollIndicator = YES;
+  [self.view addSubview:_scroll];
 
-  [self updateView];
+  _stack = [[UIStackView alloc] init];
+  _stack.translatesAutoresizingMaskIntoConstraints = NO;
+  _stack.axis = UILayoutConstraintAxisVertical;
+  _stack.alignment = UIStackViewAlignmentFill;
+  _stack.spacing = 12; // space-3
+  _stack.layoutMarginsRelativeArrangement = YES;
+  // Top leaves room for the grabber; sides are space-5.
+  _stack.directionalLayoutMargins = NSDirectionalEdgeInsetsMake(20, 20, 24, 20);
+  [_scroll addSubview:_stack];
+
+  UILayoutGuide *content = _scroll.contentLayoutGuide;
+  UILayoutGuide *frame = _scroll.frameLayoutGuide;
+  [NSLayoutConstraint activateConstraints:@[
+    [_scroll.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+    [_scroll.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+    [_scroll.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+    [_scroll.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+    [_stack.topAnchor constraintEqualToAnchor:content.topAnchor],
+    [_stack.bottomAnchor constraintEqualToAnchor:content.bottomAnchor],
+    [_stack.leadingAnchor constraintEqualToAnchor:content.leadingAnchor],
+    [_stack.trailingAnchor constraintEqualToAnchor:content.trailingAnchor],
+    [_stack.widthAnchor constraintEqualToAnchor:frame.widthAnchor],
+  ]];
+
+  [self _buildContent];
 }
 
-
-- (void)viewDidUnload
+- (void) viewWillAppear:(BOOL)animated
 {
-    self.bgView = nil;
-	self.currentNumberOfWords = nil;
-	self.totalNumberOfWords = nil;
-	self.closeBtn = nil;
-	self.currentStudySet = nil;
-	self.motivationLabel = nil;
-	self.streakLabel = nil;
-	self.cardsViewedNow = nil;
-	self.cardsViewedAllTime = nil;
-	self.cardsRightNow = nil;
-	self.cardsWrongNow = nil;
-	self.cardSetProgressLabel0 = nil;
-	self.cardSetProgressLabel1 = nil;
-	self.cardSetProgressLabel2 = nil;
-	self.cardSetProgressLabel3 = nil;
-	self.cardSetProgressLabel4 = nil;
-	self.cardSetProgressLabel5 = nil;
-	self.progressViewTitle = nil;
-	[super viewDidUnload];
+  [super viewWillAppear:animated];
+  // At accessibility text sizes the content is taller than the screen anyway, so open at large.
+  if (UIContentSizeCategoryIsAccessibilityCategory(self.traitCollection.preferredContentSizeCategory))
+  {
+    self.sheetPresentationController.selectedDetentIdentifier = UISheetPresentationControllerDetentIdentifierLarge;
+  }
 }
 
-#pragma mark -
-
-- (void)updateView
+#if defined (LWE_DEBUG)
+- (void) viewDidAppear:(BOOL)animated
 {
-  [self drawProgressBars];
-  [self setStreakLabel];
-  
-  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
-  NSInteger maxStudying = [settings integerForKey:APP_MAX_STUDYING];
+  [super viewDidAppear:animated];
+  // Fit-detent check: where the content ends vs. the visible scroll area (both in sheet points).
+  UIView *last = [_stack.arrangedSubviews lastObject];
+  CGRect lastInView = [last convertRect:last.bounds toView:self.view];
+  CGFloat visibleBottom = self.view.bounds.size.height - _scroll.adjustedContentInset.bottom;
+  NSLog(@"LWEDebugProgressFit sheet=%.0fx%.0f fit=%.0f content=%.0f mascotBottom=%.0f visibleBottom=%.0f gap=%.0f detent=%@",
+        self.view.bounds.size.width, self.view.bounds.size.height, [self _fittingContentHeight], _scroll.contentSize.height,
+        CGRectGetMaxY(lastInView), visibleBottom, visibleBottom - CGRectGetMaxY(lastInView),
+        self.sheetPresentationController.selectedDetentIdentifier);
+}
+#endif
+
+- (void) traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
+{
+  [super traitCollectionDidChange:previousTraitCollection];
+  UIContentSizeCategory previous = previousTraitCollection.preferredContentSizeCategory;
+  UIContentSizeCategory current = self.traitCollection.preferredContentSizeCategory;
+  if (previous == nil || current == nil ||
+      [previous isEqualToString:UIContentSizeCategoryUnspecified] || [current isEqualToString:UIContentSizeCategoryUnspecified])
+  {
+    return; // the first trait pass (content was built in -viewDidLoad) or no real size category yet
+  }
+  if ([previousTraitCollection.preferredContentSizeCategory isEqualToString:self.traitCollection.preferredContentSizeCategory] == NO)
+  {
+    // Rows switch between side-by-side and stacked layouts, and the attributed text re-resolves its fonts.
+    [self _buildContent];
+    [self _invalidateFitDetent];
+  }
+}
+
+- (void) updateView
+{
+  if ([self isViewLoaded])
+  {
+    [self _buildContent];
+    [self _invalidateFitDetent];
+  }
+}
+
+- (void) _invalidateFitDetent
+{
+  if (@available(iOS 16.0, *))
+  {
+    [self.sheetPresentationController animateChanges:^{
+      [self.sheetPresentationController invalidateDetents];
+    }];
+  }
+}
+
+#pragma mark - Content
+
+//! Height the scrolling content needs at the sheet's width (what the fit detent resolves to).
+//! The stack is pinned to the scroll view's content guide (not its frame), so nothing outside it fixes
+//! its height; it's measured at a required width with the lowest vertical priority (compressed fitting height).
+- (CGFloat) _fittingContentHeight
+{
+  if ([self isViewLoaded] == NO || _stack == nil)
+  {
+    return CGFLOAT_MAX; // resolves to the large detent
+  }
+  CGFloat width = self.view.bounds.size.width;
+  if (width <= 0)
+  {
+    width = self.presentingViewController.view.bounds.size.width;
+  }
+  CGSize size = [_stack systemLayoutSizeFittingSize:CGSizeMake(width, UILayoutFittingCompressedSize.height)
+                      withHorizontalFittingPriority:UILayoutPriorityRequired
+                            verticalFittingPriority:UILayoutPriorityFittingSizeLevel];
+  // No -layoutIfNeeded here: UIKit resolves detents during the sheet's own layout, and forcing a
+  // layout pass from the resolver trips a UIKit assertion (EXC_BREAKPOINT in _UISheetInteraction).
+  // The Debug-only LWEDebugProgressFit log compares this value with the laid-out contentSize.
+  return ceil(size.height);
+}
+
+- (BOOL) _isAccessibilitySize
+{
+  return UIContentSizeCategoryIsAccessibilityCategory(self.traitCollection.preferredContentSizeCategory);
+}
+
+- (UIView *) _headerView
+{
+  UILabel *title = LWEProgressLabel(LWEDesignScaledFont(UIFontTextStyleTitle2, 22, UIFontWeightBold, 0), LWEDesignInk());
+  title.text = self.tag.tagName;
+  title.numberOfLines = [self _isAccessibilitySize] ? 0 : 3;
+  title.lineBreakMode = NSLineBreakByTruncatingTail;
+  title.accessibilityTraits = UIAccessibilityTraitHeader;
+
+  // Close: a 36pt paper-button circle centred in a 44 x 44pt tap target.
+  UIButton *close = [UIButton buttonWithType:UIButtonTypeCustom];
+  close.translatesAutoresizingMaskIntoConstraints = NO;
+  close.accessibilityLabel = NSLocalizedString(@"Close", @"ProgressDetailsViewController.Close");
+  [close addTarget:self action:@selector(dismiss) forControlEvents:UIControlEventTouchUpInside];
+  UIView *circle = [[[UIView alloc] init] autorelease];
+  circle.translatesAutoresizingMaskIntoConstraints = NO;
+  circle.userInteractionEnabled = NO;
+  circle.backgroundColor = LWEDesignPaperButton();
+  circle.layer.cornerRadius = 18;
+  [close addSubview:circle];
+  UIImageSymbolConfiguration *symbolConfig = [UIImageSymbolConfiguration configurationWithPointSize:14 weight:UIImageSymbolWeightBold];
+  UIImageView *xmark = [[[UIImageView alloc] initWithImage:[UIImage systemImageNamed:@"xmark" withConfiguration:symbolConfig]] autorelease];
+  xmark.translatesAutoresizingMaskIntoConstraints = NO;
+  xmark.tintColor = LWEDesignInk2();
+  [circle addSubview:xmark];
+  [NSLayoutConstraint activateConstraints:@[
+    [close.widthAnchor constraintEqualToConstant:44],
+    [close.heightAnchor constraintEqualToConstant:44],
+    [circle.widthAnchor constraintEqualToConstant:36],
+    [circle.heightAnchor constraintEqualToConstant:36],
+    [circle.centerXAnchor constraintEqualToAnchor:close.centerXAnchor],
+    [circle.centerYAnchor constraintEqualToAnchor:close.centerYAnchor],
+    [xmark.centerXAnchor constraintEqualToAnchor:circle.centerXAnchor],
+    [xmark.centerYAnchor constraintEqualToAnchor:circle.centerYAnchor],
+  ]];
+
+  UIStackView *row = [[[UIStackView alloc] initWithArrangedSubviews:@[title, close]] autorelease];
+  row.axis = UILayoutConstraintAxisHorizontal;
+  row.alignment = UIStackViewAlignmentTop;
+  row.spacing = 12;
+  [close setContentHuggingPriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  [close setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+  return row;
+}
+
+//! "You are studying 14 cards out of 14 in this set." with the two numbers large and bold.
+- (UIView *) _leadViewWithStudyPool:(NSInteger)studying capped:(BOOL)capped
+{
   NSInteger totalWords = self.tag.cardCount;
-  if (totalWords > maxStudying)
+
+  NSDictionary *textAttrs = @{ NSFontAttributeName: LWEDesignScaledFont(UIFontTextStyleBody, 17, UIFontWeightMedium, 0),
+                               NSForegroundColorAttributeName: LWEDesignInk2() };
+  NSDictionary *numberAttrs = @{ NSFontAttributeName: LWEDesignScaledFont(UIFontTextStyleTitle1, 28, UIFontWeightBold, 0),
+                                 NSForegroundColorAttributeName: LWEDesignInk() };
+  NSAttributedString *current = [[[NSAttributedString alloc] initWithString:LWEProgressNumber(studying) attributes:numberAttrs] autorelease];
+  NSAttributedString *total = [[[NSAttributedString alloc] initWithString:LWEProgressNumber(totalWords) attributes:numberAttrs] autorelease];
+
+  UILabel *lead = LWEProgressLabel(textAttrs[NSFontAttributeName], LWEDesignInk2());
+  if (capped)
   {
-    self.currentNumberOfWords.text = [NSString stringWithFormat:@"%d*",maxStudying];
-    self.totalNumberOfWords.text = [NSString stringWithFormat:@"%d",totalWords];
+    // The capped sentence carries the footnote marker (%3$@) where each language wants it:
+    // en "1,234* cards", ja "1,234枚※" (the footnote itself starts with the same marker).
+    NSString *format = NSLocalizedString(@"You are studying %1$@%3$@ cards out of %2$@ in this set.", @"ProgressDetailsViewController.StudyingSentenceCapped");
+    NSString *markerText = NSLocalizedStringWithDefaultValue(@"StudyPoolCapMarker", nil, [NSBundle mainBundle], @"*", @"ProgressDetailsViewController.CapMarker");
+    NSMutableDictionary *markerAttrs = [[numberAttrs mutableCopy] autorelease];
+    markerAttrs[NSForegroundColorAttributeName] = LWEDesignFire();
+    NSAttributedString *marker = [[[NSAttributedString alloc] initWithString:markerText attributes:markerAttrs] autorelease];
+    lead.attributedText = LWEProgressAttributedFormat(format, textAttrs, @[current, total, marker]);
+    // VoiceOver reads the sentence without the marker ("asterisk").
+    lead.accessibilityLabel = [NSString stringWithFormat:format, LWEProgressNumber(studying), LWEProgressNumber(totalWords), @""];
   }
   else
   {
-    self.currentNumberOfWords.text = [NSString stringWithFormat:@"%d",totalWords];
-    self.totalNumberOfWords.text = [NSString stringWithFormat:@"%d",totalWords];
-  }    
-  
-  self.cardsViewedAllTime.text = [NSString stringWithFormat:@"%d",(self.tag.cardCount - [[self.tag.cardLevelCounts objectAtIndex:kLWEUnseenCardLevel] integerValue])];
-  self.currentStudySet.text = self.tag.tagName;
+    NSString *format = NSLocalizedString(@"You are studying %1$@ cards out of %2$@ in this set.", @"ProgressDetailsViewController.StudyingSentence");
+    lead.attributedText = LWEProgressAttributedFormat(format, textAttrs, @[current, total]);
+  }
+  return lead;
 }
 
-- (void)setStreakLabel
+//! "*You can change this in Settings ›" -- one button, so the whole line is the tap target and it wraps.
+- (UIView *) _settingsLinkView
 {
-  NSString *streakText = nil;
-  if (self.wrongStreak > 0)
+  UIFont *font = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightRegular, 0);
+  UIFont *linkFont = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightSemibold, 0);
+  NSString *note = NSLocalizedString(@"*You can change this in", @"ProgressDetailsViewController.ChangeInSettings");
+  NSString *settings = LWEInterfaceString(@"Settings");
+
+  // No space after a full-width colon (ja: ※枚数の変更：設定 ›)
+  NSString *gap = [note hasSuffix:@"\uFF1A"] ? @"" : @" ";
+  NSMutableAttributedString *text = [[[NSMutableAttributedString alloc] initWithString:[note stringByAppendingString:gap]
+                                                                             attributes:@{ NSFontAttributeName: font, NSForegroundColorAttributeName: LWEDesignMuted() }] autorelease];
+  [text appendAttributedString:[[[NSAttributedString alloc] initWithString:[settings stringByAppendingString:@"\u00A0\u203A"]
+                                                                attributes:@{ NSFontAttributeName: linkFont, NSForegroundColorAttributeName: LWEDesignFire() }] autorelease]];
+
+  // A label inside a plain button: the label wraps and drives the height (UIButton's own title
+  // label doesn't report a multi-line size), the button keeps a 44pt minimum tap height.
+  UILabel *label = LWEProgressLabel(font, LWEDesignMuted());
+  label.attributedText = text;
+  label.userInteractionEnabled = NO;
+  UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+  button.translatesAutoresizingMaskIntoConstraints = NO;
+  [button addSubview:label];
+  // VoiceOver: no "asterisk" / ※ in front of the footnote.
+  NSString *marker = NSLocalizedStringWithDefaultValue(@"StudyPoolCapMarker", nil, [NSBundle mainBundle], @"*", @"ProgressDetailsViewController.CapMarker");
+  NSString *spokenNote = [note hasPrefix:marker] ? [note substringFromIndex:[marker length]] : note;
+  button.accessibilityLabel = [NSString stringWithFormat:@"%@ %@", spokenNote, settings];
+  button.accessibilityTraits = UIAccessibilityTraitButton;
+  [button addTarget:self action:@selector(switchToSettings:) forControlEvents:UIControlEventTouchUpInside];
+  [button addTarget:self action:@selector(_dimLink:) forControlEvents:UIControlEventTouchDown | UIControlEventTouchDragEnter];
+  [button addTarget:self action:@selector(_undimLink:) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchDragExit | UIControlEventTouchCancel];
+  NSLayoutConstraint *top = [label.topAnchor constraintEqualToAnchor:button.topAnchor constant:4];
+  top.priority = UILayoutPriorityDefaultHigh;
+  [NSLayoutConstraint activateConstraints:@[
+    [button.heightAnchor constraintGreaterThanOrEqualToConstant:44],
+    [label.leadingAnchor constraintEqualToAnchor:button.leadingAnchor],
+    [label.trailingAnchor constraintEqualToAnchor:button.trailingAnchor],
+    [label.centerYAnchor constraintEqualToAnchor:button.centerYAnchor],
+    [label.topAnchor constraintGreaterThanOrEqualToAnchor:button.topAnchor constant:4],
+    top,
+  ]];
+  return button;
+}
+
+- (UIView *) _chipWithTitle:(NSString *)title value:(NSInteger)value fill:(UIColor *)fill ink:(UIColor *)ink
+{
+  UILabel *titleLabel = LWEProgressLabel(LWEDesignScaledFont(UIFontTextStyleFootnote, 13, UIFontWeightSemibold, 0), ink);
+  titleLabel.text = title;
+  UILabel *valueLabel = LWEProgressLabel(LWEDesignScaledFont(UIFontTextStyleTitle1, 28, UIFontWeightBold, 0), ink);
+  valueLabel.text = LWEProgressNumber(value);
+
+  UIStackView *texts = [[[UIStackView alloc] initWithArrangedSubviews:@[titleLabel, valueLabel]] autorelease];
+  texts.axis = UILayoutConstraintAxisVertical;
+  texts.spacing = 2;
+  // radius-xl, same as the answer buttons
+  UIView *chip = LWEProgressBox(texts, fill, 18, NSDirectionalEdgeInsetsMake(12, 16, 12, 16));
+  chip.isAccessibilityElement = YES;
+  chip.accessibilityLabel = title;
+  chip.accessibilityValue = valueLabel.text;
+  return chip;
+}
+
+- (UIView *) _pillWithTitle:(NSString *)title value:(NSString *)value
+{
+  UIFont *font = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightMedium, 0);
+  UIFont *bold = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightBold, 0);
+  NSMutableAttributedString *text = [[[NSMutableAttributedString alloc] initWithString:[title stringByAppendingString:@"  "]
+                                                                             attributes:@{ NSFontAttributeName: font, NSForegroundColorAttributeName: LWEDesignInk2() }] autorelease];
+  [text appendAttributedString:[[[NSAttributedString alloc] initWithString:value
+                                                                attributes:@{ NSFontAttributeName: bold, NSForegroundColorAttributeName: LWEDesignInk() }] autorelease]];
+  UILabel *label = LWEProgressLabel(font, LWEDesignInk2());
+  label.attributedText = text;
+
+  UIView *pill = LWEProgressBox(label, LWEDesignPaperButton(), 12, NSDirectionalEdgeInsetsMake(8, 12, 8, 12)); // radius-md
+  pill.isAccessibilityElement = YES;
+  pill.accessibilityLabel = title;
+  pill.accessibilityValue = value;
+  return pill;
+}
+
+- (UIView *) _ruleView
+{
+  UIView *rule = [[[UIView alloc] init] autorelease];
+  rule.translatesAutoresizingMaskIntoConstraints = NO;
+  rule.backgroundColor = LWEDesignHairline();
+  [rule.heightAnchor constraintEqualToConstant:1].active = YES;
+  return rule;
+}
+
+//! A thin (6pt) bar: paper-2 track, token fire fill (muted for Unseen).
+- (UIView *) _trackWithFraction:(CGFloat)fraction fill:(UIColor *)fillColor hasCards:(BOOL)hasCards
+{
+  UIView *track = [[[UIView alloc] init] autorelease];
+  track.translatesAutoresizingMaskIntoConstraints = NO;
+  track.backgroundColor = LWEDesignPaper2();
+  track.layer.cornerRadius = 3;
+  track.clipsToBounds = YES;
+  UIView *fill = [[[UIView alloc] init] autorelease];
+  fill.translatesAutoresizingMaskIntoConstraints = NO;
+  fill.backgroundColor = fillColor;
+  fill.layer.cornerRadius = 3;
+  [track addSubview:fill];
+
+  NSLayoutConstraint *width = [fill.widthAnchor constraintEqualToAnchor:track.widthAnchor multiplier:MAX(0.0, MIN(1.0, fraction))];
+  width.priority = UILayoutPriorityDefaultHigh;
+  NSMutableArray *constraints = [NSMutableArray arrayWithArray:@[
+    [track.heightAnchor constraintEqualToConstant:6],
+    [track.widthAnchor constraintGreaterThanOrEqualToConstant:56],
+    [fill.leadingAnchor constraintEqualToAnchor:track.leadingAnchor],
+    [fill.topAnchor constraintEqualToAnchor:track.topAnchor],
+    [fill.bottomAnchor constraintEqualToAnchor:track.bottomAnchor],
+    [fill.widthAnchor constraintLessThanOrEqualToAnchor:track.widthAnchor],
+    width,
+  ]];
+  if (hasCards)
   {
-    streakText = [[NSString alloc] initWithFormat:NSLocalizedString(@"%i wrong",@"ProgressDetailsViewController.NumWrongStreak"), self.wrongStreak];
+    // A level with a few cards still shows a dot rather than nothing.
+    [constraints addObject:[fill.widthAnchor constraintGreaterThanOrEqualToConstant:6]];
+  }
+  [NSLayoutConstraint activateConstraints:constraints];
+  track.isAccessibilityElement = NO;
+  return track;
+}
+
+//! The level list: Unseen, a hairline, then Studying ... Learned.  Labels and values share column widths.
+- (UIView *) _levelsView
+{
+  NSArray *names = @[NSLocalizedString(@"Unseen", @"ProgressDetailsViewController.UnseenLevel"),
+                     LWEInterfaceString(@"Studying"), LWEInterfaceString(@"Right 1x"), LWEInterfaceString(@"Right 2x"),
+                     LWEInterfaceString(@"Right 3x"), LWEInterfaceString(@"Learned")];
+  BOOL stacked = [self _isAccessibilitySize];
+  UIFont *font = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightMedium, 0);
+  UIFont *pctFont = LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightRegular, 0);
+  NSInteger total = self.tag.cardCount;
+
+  UIStackView *list = [[[UIStackView alloc] init] autorelease];
+  list.axis = UILayoutConstraintAxisVertical;
+  list.spacing = stacked ? 12 : 8;
+  UILabel *firstName = nil, *firstValue = nil;
+  NSMutableArray *constraints = [NSMutableArray array];
+  for (NSInteger i = 0; i < 6 && i < (NSInteger)[self.tag.cardLevelCounts count]; i++)
+  {
+    NSInteger count = [[self.tag.cardLevelCounts objectAtIndex:i] integerValue];
+    CGFloat fraction = (total > 0) ? ((CGFloat)count / (CGFloat)total) : 0.0;
+
+    UILabel *name = LWEProgressLabel(font, (i == kLWEUnseenCardLevel) ? LWEDesignInk2() : LWEDesignInk());
+    name.text = [names objectAtIndex:i];
+    NSString *countText = LWEProgressNumber(count);
+    NSString *pctText = LWEProgressPercent(fraction);
+    NSMutableAttributedString *valueText = [[[NSMutableAttributedString alloc] initWithString:countText
+                                                                                   attributes:@{ NSFontAttributeName: font, NSForegroundColorAttributeName: LWEDesignInk2() }] autorelease];
+    [valueText appendAttributedString:[[[NSAttributedString alloc] initWithString:[@" \u00B7 " stringByAppendingString:pctText]
+                                                                       attributes:@{ NSFontAttributeName: pctFont, NSForegroundColorAttributeName: LWEDesignMuted() }] autorelease]];
+    UILabel *value = LWEProgressLabel(font, LWEDesignInk2());
+    value.attributedText = valueText;
+    UIView *track = [self _trackWithFraction:fraction fill:(i == kLWEUnseenCardLevel ? LWEDesignMuted() : LWEDesignFire()) hasCards:(count > 0)];
+
+    UIStackView *row = nil;
+    if (stacked)
+    {
+      UIStackView *texts = [[[UIStackView alloc] initWithArrangedSubviews:@[name, value]] autorelease];
+      texts.axis = UILayoutConstraintAxisVertical;
+      texts.spacing = 2;
+      row = [[[UIStackView alloc] initWithArrangedSubviews:@[texts, track]] autorelease];
+      row.axis = UILayoutConstraintAxisVertical;
+      row.spacing = 6;
+    }
+    else
+    {
+      name.numberOfLines = 1;
+      value.numberOfLines = 1;
+      value.textAlignment = NSTextAlignmentRight;
+      [name setContentHuggingPriority:UILayoutPriorityDefaultHigh forAxis:UILayoutConstraintAxisHorizontal]; // < the equal-width column constraints
+      [name setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+      [value setContentHuggingPriority:UILayoutPriorityDefaultHigh forAxis:UILayoutConstraintAxisHorizontal]; // < the equal-width column constraints
+      [value setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisHorizontal];
+      row = [[[UIStackView alloc] initWithArrangedSubviews:@[name, track, value]] autorelease];
+      row.axis = UILayoutConstraintAxisHorizontal;
+      row.alignment = UIStackViewAlignmentCenter;
+      row.spacing = 12;
+      // Grid columns: every label (and every value) as wide as the widest one.
+      if (firstName)
+      {
+        [constraints addObject:[name.widthAnchor constraintEqualToAnchor:firstName.widthAnchor]];
+        [constraints addObject:[value.widthAnchor constraintEqualToAnchor:firstValue.widthAnchor]];
+      }
+      else
+      {
+        firstName = name;
+        firstValue = value;
+      }
+    }
+    row.isAccessibilityElement = YES;
+    row.accessibilityLabel = name.text;
+    row.accessibilityValue = [NSString stringWithFormat:@"%@, %@", countText, pctText];
+    [list addArrangedSubview:row];
+
+    if (i == kLWEUnseenCardLevel)
+    {
+      UIView *gap = [self _ruleView];
+      [list addArrangedSubview:gap];
+      [list setCustomSpacing:(stacked ? 12 : 8) afterView:row];
+    }
+  }
+  [NSLayoutConstraint activateConstraints:constraints];
+  return list;
+}
+
+//! One of a few fixed, localized lines picked from the session state (no numbers in them).
+- (NSString *) _encouragementLine
+{
+  NSInteger learned = ([self.tag.cardLevelCounts count] > kLWELearnedCardLevel) ? [[self.tag.cardLevelCounts objectAtIndex:kLWELearnedCardLevel] integerValue] : 0;
+  if (self.tag.cardCount > 0 && learned == self.tag.cardCount)
+  {
+    return NSLocalizedString(@"You've learned every card in this set.", @"ProgressDetailsViewController.AllLearned");
+  }
+  if (self.rightCount + self.wrongCount == 0)
+  {
+    return NSLocalizedString(@"Answer a few cards and this session's counts show up here.", @"ProgressDetailsViewController.NoAnswersYet");
+  }
+  return NSLocalizedString(@"You're doing great, keep going!", @"ProgressDetailsViewController.Motivation");
+}
+
+- (UIView *) _moodView
+{
+  UIImageView *mascot = [[[UIImageView alloc] initWithImage:[UIImage imageNamed:kLWEProgressMascotImage]] autorelease];
+  mascot.translatesAutoresizingMaskIntoConstraints = NO;
+  mascot.contentMode = UIViewContentModeScaleAspectFit;
+  mascot.isAccessibilityElement = NO;
+  [NSLayoutConstraint activateConstraints:@[
+    [mascot.widthAnchor constraintEqualToConstant:29],
+    [mascot.heightAnchor constraintEqualToConstant:44],
+  ]];
+  UILabel *line = LWEProgressLabel(LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightMedium, 0), LWEDesignInk2());
+  line.text = [self _encouragementLine];
+  UIStackView *row = [[[UIStackView alloc] initWithArrangedSubviews:@[mascot, line]] autorelease];
+  row.axis = UILayoutConstraintAxisHorizontal;
+  row.alignment = UIStackViewAlignmentCenter;
+  row.spacing = 12;
+  return row;
+}
+
+- (void) _buildContent
+{
+  for (UIView *view in [[_stack.arrangedSubviews copy] autorelease])
+  {
+    [_stack removeArrangedSubview:view];
+    [view removeFromSuperview];
+  }
+  if (self.tag == nil)
+  {
+    return;
+  }
+  BOOL stacked = [self _isAccessibilitySize];
+
+  UIView *header = [self _headerView];
+  [_stack addArrangedSubview:header];
+  // The study pool (Settings > max studying) caps how many of the set's cards are in play.
+  NSInteger maxStudying = [[NSUserDefaults standardUserDefaults] integerForKey:APP_MAX_STUDYING];
+  BOOL capped = (maxStudying > 0 && self.tag.cardCount > maxStudying);
+  UIView *lead = [self _leadViewWithStudyPool:(capped ? maxStudying : self.tag.cardCount) capped:capped];
+  [_stack addArrangedSubview:lead];
+  [_stack setCustomSpacing:4 afterView:lead];
+  if (capped)
+  {
+    // The footnote explains the capped number, so it only shows when the study pool is capped.
+    UIView *link = [self _settingsLinkView];
+    [_stack addArrangedSubview:link];
+    [_stack setCustomSpacing:8 afterView:link];
   }
   else
   {
-    streakText = [[NSString alloc] initWithFormat:NSLocalizedString(@"%i right",@"ProgressDetailsViewController.NumRightStreak"), self.rightStreak];
+    [_stack setCustomSpacing:16 afterView:lead];
   }
-  self.streakLabel.text = streakText;
-  [streakText release];
-}
 
-- (void)drawProgressBars
-{
-  NSString *labelText = nil;
-  NSArray *labelsArray = [[NSArray alloc] initWithObjects:self.cardSetProgressLabel0, self.cardSetProgressLabel1, self.cardSetProgressLabel2 , self.cardSetProgressLabel3, self.cardSetProgressLabel4, self.cardSetProgressLabel5, nil];
-  for (NSInteger i = 0; i < 6; i++)
+  // ---- This session: Wrong / Right chips (answer-button colours), then the Streak pill
+  UILabel *session = LWEProgressLabel(LWEDesignScaledFont(UIFontTextStyleSubheadline, 15, UIFontWeightSemibold, 0), LWEDesignInk());
+  session.text = NSLocalizedString(@"This session", @"ProgressDetailsViewController.ThisSession");
+  session.accessibilityTraits = UIAccessibilityTraitHeader;
+  [_stack addArrangedSubview:session];
+  [_stack setCustomSpacing:8 afterView:session];
+
+  UIView *wrong = [self _chipWithTitle:NSLocalizedString(@"Times Wrong", @"ProgressDetailsViewController.TimesWrong")
+                                 value:self.wrongCount fill:LWEDesignWrongFill() ink:LWEDesignWrongInk()];
+  UIView *right = [self _chipWithTitle:NSLocalizedString(@"Times Right", @"ProgressDetailsViewController.TimesRight")
+                                 value:self.rightCount fill:LWEDesignRightFill() ink:LWEDesignRightInk()];
+  UIStackView *chips = [[[UIStackView alloc] initWithArrangedSubviews:@[wrong, right]] autorelease];
+  chips.axis = stacked ? UILayoutConstraintAxisVertical : UILayoutConstraintAxisHorizontal;
+  chips.distribution = UIStackViewDistributionFillEqually;
+  chips.alignment = UIStackViewAlignmentFill;
+  chips.spacing = 12;
+  [_stack addArrangedSubview:chips];
+
+  // Streak only means something once a card has been answered this session.
+  UIView *streak = nil;
+  if (self.rightCount + self.wrongCount > 0)
   {
-    NSNumber *cardsAtLevel = [self.tag.cardLevelCounts objectAtIndex:i];
-    labelText = [NSString stringWithFormat:@"%.0f%% ~ %i", (100*([cardsAtLevel floatValue] / (CGFloat)self.tag.cardCount)), [cardsAtLevel integerValue]];
-    [[labelsArray objectAtIndex:i] setText:labelText];
+    NSString *streakValue = nil;
+    if (self.wrongStreak > 0)
+    {
+      streakValue = [NSString stringWithFormat:NSLocalizedString(@"%@ wrong", @"ProgressDetailsViewController.NumWrongStreak"), LWEProgressNumber(self.wrongStreak)];
+    }
+    else
+    {
+      streakValue = [NSString stringWithFormat:NSLocalizedString(@"%@ right", @"ProgressDetailsViewController.NumRightStreak"), LWEProgressNumber(self.rightStreak)];
+    }
+    streak = [self _pillWithTitle:NSLocalizedString(@"Streak", @"ProgressDetailsViewController.Streak") value:streakValue];
   }
-  [labelsArray release];
-  
-  NSArray *lineColors = [NSArray arrayWithObjects:[UIColor darkGrayColor],[UIColor redColor],[UIColor lightGrayColor],[UIColor cyanColor],[UIColor orangeColor],[UIColor greenColor], nil];
-  for (NSInteger i = 0; i < 6; i++)
-  {
-    // We are adding 100 here because the progress views in the XIB are arbitrarily tagged 100~105
-    UIProgressView *progressView = (UIProgressView *)[self.view viewWithTag:(100+i)];
-    LWE_ASSERT_EXC(progressView, @"Must get a progress view out of the XIB for i: %d", i);
-    [progressView setTintColor:[lineColors objectAtIndex:i]];
-    progressView.progress = ([[self.tag.cardLevelCounts objectAtIndex:i] floatValue] / (CGFloat)self.tag.cardCount);
-  }
+  // Seen: cards in this set answered at least once, ever (total minus Unseen; the same counts the bars use).
+  NSString *seenValue = [NSString stringWithFormat:NSLocalizedStringWithDefaultValue(@"Seen pill: %1$@ of %2$@", nil, [NSBundle mainBundle], @"%1$@ of %2$@", @"ProgressDetailsViewController.SeenOfTotal"),
+                         LWEProgressNumber(self.tag.seenCardCount), LWEProgressNumber(self.tag.cardCount)];
+  UIView *seen = [self _pillWithTitle:NSLocalizedString(@"Seen", @"ProgressDetailsViewController.SeenInSet") value:seenValue];
+  UIStackView *pills = [[[UIStackView alloc] initWithArrangedSubviews:(streak ? @[streak, seen] : @[seen])] autorelease];
+  pills.axis = stacked ? UILayoutConstraintAxisVertical : UILayoutConstraintAxisHorizontal;
+  pills.alignment = stacked ? UIStackViewAlignmentLeading : UIStackViewAlignmentTop;
+  pills.spacing = 8;
+  UIStackView *pillRow = [[[UIStackView alloc] initWithArrangedSubviews:@[pills]] autorelease];
+  pillRow.alignment = UIStackViewAlignmentLeading; // pills hug their text instead of stretching
+  pillRow.axis = UILayoutConstraintAxisVertical;
+  [_stack addArrangedSubview:pillRow];
+
+  [_stack addArrangedSubview:[self _ruleView]];
+  UIView *levels = [self _levelsView];
+  [_stack addArrangedSubview:levels];
+  [_stack setCustomSpacing:16 afterView:levels];
+  [_stack addArrangedSubview:[self _moodView]];
 }
 
 #pragma mark - IBActions
 
-- (IBAction)switchToSettings:(id)sender
-{
-  // And switch to settings
-  NSNumber *index = [NSNumber numberWithInt:SETTINGS_VIEW_CONTROLLER_TAB_INDEX];
-  NSDictionary *userInfo = [NSDictionary dictionaryWithObject:index forKey:@"index"];
-  [[NSNotificationCenter defaultCenter] postNotificationName:LWEShouldSwitchTab object:self userInfo:userInfo];
-  
-  // Make sure to call this last
-  [self dismiss];
-}
+- (void) _dimLink:(UIButton *)sender   { sender.alpha = 0.5; }
+- (void) _undimLink:(UIButton *)sender { sender.alpha = 1.0; }
 
-- (void) closeButtonViewShouldDismiss:(CloseButtonView *)view
+- (IBAction) switchToSettings:(id)sender
 {
-  [self dismiss];
+  // Dismiss first, then switch tabs, so the tab bar isn't changed under a presented sheet.
+  NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt:SETTINGS_VIEW_CONTROLLER_TAB_INDEX] forKey:@"index"];
+  [self.presentingViewController dismissViewControllerAnimated:YES completion:^{
+    [[NSNotificationCenter defaultCenter] postNotificationName:LWEShouldSwitchTab object:self userInfo:userInfo];
+  }];
 }
 
 - (IBAction) dismiss
 {
-  [self.view removeFromSuperview];
+  [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - Class Plumbing
 
-- (void)dealloc
+- (void) dealloc
 {
-  [bgView release];
-  [currentStudySet release];
-  [closeBtn release];
-  [streakLabel release];
-  [motivationLabel release];
-  [cardsViewedNow release];
-  [progressViewTitle release];
-  
-  [currentNumberOfWords release];
-  [totalNumberOfWords release];
-  [cardSetProgressLabel0 release];
-  [cardSetProgressLabel1 release];
-  [cardSetProgressLabel2 release];
-  [cardSetProgressLabel3 release];
-  [cardSetProgressLabel4 release];
-  [cardSetProgressLabel5 release];
-  [cardsViewedAllTime release];
-  [cardsWrongNow release];
-  [cardsRightNow release];
-
+#if defined (LWE_DEBUG)
+  NSLog(@"LWEDebugProgressCycles dealloc %p", self);
+#endif
+  [tag release];
+  [_stack release];
+  [_scroll release];
   [super dealloc];
 }
-
 
 @end
