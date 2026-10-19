@@ -43,6 +43,9 @@
 + (BOOL) _needs17to18SettingsUpdate:(NSUserDefaults *) settings;
 + (void) _updateSettingsFrom17to18:(NSUserDefaults *)settings;
 
+// JFLASH 1.x -> 2.0 (JMdict dictionary refresh)
++ (BOOL) _needsUpdateTo20:(NSUserDefaults *) settings;
++ (void) _updateSettingsTo20:(NSUserDefaults *)settings;
 
 @end
 
@@ -310,6 +313,48 @@
   [settings setObject:LWE_JF_VERSION_1_8 forKey:APP_SETTINGS_VERSION];
 }
 
+#pragma mark Version 2.0
+
+/**
+ * 2.0 replaced the 2010 EDICT card data with JMdict (jFlash-CARD-2.0.db): card_ids changed, so study
+ * history, sets and the last-studied card from any 1.x install point at cards that are gone or are now
+ * different words.  The app never shipped, so there is no remapping: 1.x user data (dev/test installs)
+ * is reset to the bundled template.  Runs after all the 1.x steps above, so any data version < 2.0
+ * (including 1.8/1.9, which have no step of their own) gets here.
+ */
++ (BOOL) _needsUpdateTo20:(NSUserDefaults *) settings
+{
+#if defined (LWE_JUNIOR)
+  // jFlashJr has its own version line (LWE_CURRENT_VERSION 1.0) and is going away; leave it alone.
+  return NO;
+#else
+  NSString *dataVersion = [settings objectForKey:APP_DATA_VERSION];
+  return ([settings valueForKey:@"settings_already_created"] && [dataVersion isKindOfClass:[NSString class]] &&
+          [dataVersion compare:LWE_JF_VERSION_2_0 options:NSNumericSearch] == NSOrderedAscending);
+#endif
+}
+
++ (void) _updateSettingsTo20:(NSUserDefaults *)settings
+{
+  // 1. Start the user database over: delete it, and the launch sequence copies the bundled
+  //    template again (jFlashAppDelegate _needToCopyDatabase), exactly like a fresh install.
+  NSString *userDBPath = [LWEFile createDocumentPathWithFilename:LWE_CURRENT_USER_DATABASE];
+  if ([LWEFile fileExists:userDBPath])
+  {
+    [LWEFile deleteFile:userDBPath];
+  }
+  [settings setBool:NO forKey:@"db_did_finish_copying"];
+
+  // 2. Point the settings at things the fresh template has.
+  [settings setInteger:DEFAULT_TAG_ID forKey:@"tag_id"];
+  [settings setInteger:DEFAULT_USER_ID forKey:APP_USER];
+
+  // 3. The plugin registrations (jFlash-CARD-1.1.db etc.) are replaced at launch by the bundled 2.0
+  //    plugins: see -[PluginManager bundledPluginsNeedRegistering:].
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_SETTINGS_VERSION];
+}
+
 #pragma mark -
 
 + (BOOL) performMigrations:(NSUserDefaults*)settings
@@ -387,6 +432,14 @@
     migrated = YES;
   }
 
+  // Must stay last: it catches every pre-2.0 data version.
+  if ([JFlashUpdateManager _needsUpdateTo20:settings])
+  {
+    LWE_LOG(@"[Migration Log] Updating to 2.0: new dictionary, resetting 1.x study data");
+    [JFlashUpdateManager _updateSettingsTo20:settings];
+    migrated = YES;
+  }
+
   return migrated;
 }
 
@@ -394,7 +447,12 @@
 {
   NSString *version = [settings objectForKey:APP_SETTINGS_VERSION];
   // The 1.6.x alerts promoted Rikai Browser, which is no longer on the App Store; removed.
-  if ([version isEqualToString:LWE_JF_VERSION_1_7])
+  if ([version isEqualToString:LWE_JF_VERSION_2_0])
+  {
+    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Updated to Japanese in a Flash! 2.0",@"JFlash2.0 upgrade alert title")
+                                       message:NSLocalizedString(@"The dictionary has been updated to the current JMdict, with new example sentences from Tatoeba. Because the cards changed, your study progress and sets from the previous version have been reset.",@"JFlash2.0 upgrade alert msg")];
+  }
+  else if ([version isEqualToString:LWE_JF_VERSION_1_7])
   {
     [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Updated to Japanese in a Flash! 1.7",@"JFlash1.7 upgrade alert title")
                                        message:NSLocalizedString(@"Thanks for updating!  Cool new feature: you can browse example sentences for a card within the Search feature.  Also, thanks to Kobe and Murray, who helped us update about 8 dictionary entries.",@"JFlash1.7 upgrade alert msg")];

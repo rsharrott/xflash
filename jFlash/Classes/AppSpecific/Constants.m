@@ -96,10 +96,9 @@ NSString * LWEAppStoreURLString(void)
       NSString * const LWE_CURRENT_USER_DATABASE = @"jFlashJr.db";
 #else
       // These constants are general to the flashes
-      NSString * const LWE_CURRENT_VERSION       = @"1.9";
+      NSString * const LWE_CURRENT_VERSION       = @"2.0";
       NSString * const LWE_CURRENT_USER_DATABASE = @"jFlash.db";
 #endif
-      NSString * const LWE_CURRENT_CARD_DATABASE = @"jFlash-CARD-2.0.db";
 
       // These constants are JF specific
       NSString * const LWE_JF_10_USER_DATABASE       = @"jFlash.db";
@@ -122,6 +121,7 @@ NSString * LWEAppStoreURLString(void)
       NSString * const LWE_JF_VERSION_1_7           = @"1.7";
       NSString * const LWE_JF_VERSION_1_8           = @"1.8";
       NSString * const LWE_JF_VERSION_1_9           = @"1.9";
+      NSString * const LWE_JF_VERSION_2_0           = @"2.0";
 
       // This pertains to the plugin manager
       NSString * const LWE_AVAILABLE_PLUGIN_PLIST   = @"jFlash-available.plist";
@@ -158,7 +158,6 @@ NSString * LWEAppStoreURLString(void)
 
       // These constants are general to the flashes
       NSString * const LWE_CURRENT_VERSION          = @"1.2";
-      NSString * const LWE_CURRENT_CARD_DATABASE    = @"cFlash-CARD-1.0.db";
       NSString * const LWE_CURRENT_USER_DATABASE    = @"cFlash.db";
 
       // These constants are CF specific
