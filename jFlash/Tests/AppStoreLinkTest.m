@@ -43,6 +43,20 @@
   return item;
 }
 
+- (void) testShareWithNilURLIsNoOp
+{
+  Class settingsClass = NSClassFromString(@"SettingsViewController");
+  UITableViewController *settings = [[settingsClass alloc] initWithStyle:UITableViewStyleGrouped];
+  SEL sel = NSSelectorFromString(@"_shareAppURLString:");
+  XCTAssertTrue([settings respondsToSelector:sel]);
+  BOOL (*share)(id, SEL, NSString *) = (BOOL (*)(id, SEL, NSString *))[settings methodForSelector:sel];
+  XCTAssertFalse(share(settings, sel, nil), @"A nil store URL must not reach the share sheet");
+  XCTAssertNil(settings.presentedViewController);
+#if !__has_feature(objc_arc)
+  [settings release];
+#endif
+}
+
 #if defined(LWE_JFLASH)
 
 - (void) testJFlashAppStoreID
