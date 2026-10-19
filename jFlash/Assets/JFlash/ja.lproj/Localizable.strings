@@ -200,7 +200,7 @@
 /* ModalTaskViewController_Update.NavBarTitle  (DownloadManager.m) */
 "Get Update" = "アップデートを入手";
 
-/* ReadButton  (ExampleSentencesViewController.m) — NEEDS NATIVE JA REVIEW */
+/* ReadButton  (ExampleSentencesViewController.m) */
 "Kanji Readings" = "漢字の読み";
 
 /* CloseButton  (ExampleSentencesViewController.m) */
