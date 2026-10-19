@@ -10,3 +10,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 This licence covers the source code only. The dictionary and example-sentence
 data in jFlash/sql (JMdict/EDICT: CC BY-SA 4.0; Tatoeba: CC BY 2.0 FR; CC-CEDICT)
 is NOT covered by the MIT licence; see jFlash/sql/DATA-LICENSE.md.
+The Android tab icons and the Fix Card menu icon in android/res/drawable (target,
+tags, search, knob, lifebuoy and their _up variants; wrench_icon) are Google Material
+Symbols, Apache License 2.0 (https://github.com/google/material-design-icons).
+Most iOS UI icons are Apple SF Symbols (system symbols, used under Apple's SF Symbols
+licence; not bundled).

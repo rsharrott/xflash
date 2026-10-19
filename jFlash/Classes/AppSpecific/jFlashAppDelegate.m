@@ -343,6 +343,29 @@ static BOOL LWEAppHasEnteredBackground = NO;
     }
   }
 
+  // Tab icons are SF Symbols (deployment target >= 15), not bundled PNGs.
+  // Selected tabs use the .fill variant where there is one.  Search keeps its system item.
+  NSArray *viewControllers = self.tabBarController.viewControllers;
+  for (NSUInteger i = 0; i < [viewControllers count]; i++)
+  {
+    NSString *symbol = nil;
+    NSString *selectedSymbol = nil;
+    switch (i)
+    {
+      case STUDY_VIEW_CONTROLLER_TAB_INDEX:     symbol = @"target";              selectedSymbol = @"target"; break;
+      case STUDY_SET_VIEW_CONTROLLER_TAB_INDEX: symbol = @"tag";                 selectedSymbol = @"tag.fill"; break;
+      case SETTINGS_VIEW_CONTROLLER_TAB_INDEX:  symbol = @"gearshape";           selectedSymbol = @"gearshape.fill"; break;
+      case HELP_VIEW_CONTROLLER_TAB_INDEX:      symbol = @"questionmark.circle"; selectedSymbol = @"questionmark.circle.fill"; break;
+      default: break;
+    }
+    if (symbol)
+    {
+      UITabBarItem *item = [[viewControllers objectAtIndex:i] tabBarItem];
+      item.image = [UIImage systemImageNamed:symbol];
+      item.selectedImage = [UIImage systemImageNamed:selectedSymbol];
+    }
+  }
+
   [self.window setTintColor:[[ThemeManager sharedThemeManager] currentThemeTintColor]];
 
   // Make the tab bar opaque so UIKit sizes child view controllers' views to end above
@@ -382,6 +405,11 @@ static BOOL LWEAppHasEnteredBackground = NO;
   if (debugTab > 0 && debugTab < (NSInteger)[self.tabBarController.viewControllers count])
   {
     self.tabBarController.selectedIndex = debugTab;
+  }
+  // `-LWEDebugTabAnimation YES` runs the Settings tab's "downloading" gear animation (DownloadManager)
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"LWEDebugTabAnimation"])
+  {
+    [self.downloadManager startTabAnimation];
   }
 #endif
 
