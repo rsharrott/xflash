@@ -24,7 +24,7 @@ static const CGFloat kLWESpeakBtnSize         = 44.0;
 static const CGFloat kLWESpeakBtnGap          = 14.0;
 static const CGFloat kLWECompactCardHeight    = 420.0; // = LWECompactCardHeight: card areas shorter than this use the compact layout
 
-// Maps iOS system text size category to a CSS font-size string for WKWebView/UIWebView HTML.
+// Maps iOS system text size category to a CSS font-size string for the meaning WKWebView's HTML.
 static NSString *LWEDynamicTypeCSSFontSize(void)
 {
   static NSDictionary *map = nil;
@@ -325,7 +325,7 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   LWELocalizeInterface(self.view);
 
   // Create the WKWebView programmatically inside the XIB-instantiated container.
-  // (UIWebView is removed in modern iOS so we no longer instantiate it from the XIB.)
+  // No XIB contains a web view: App Store Connect rejects any reference to the old one (ITMS-90809).
   WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
   _meaningWebView = [[WKWebView alloc] initWithFrame:self.meaningWebViewContainer.bounds
                                        configuration:config];
@@ -1591,7 +1591,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
 @end
 
-// HTML Header content that will be displayed in the meaning UIWebView before the actual meaning
+// HTML Header content that will be displayed in the meaning WKWebView before the actual meaning
 NSString * const LWECardHTMLTemplate = @""
 "<html><head><meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 #if defined(LWE_JFLASH)

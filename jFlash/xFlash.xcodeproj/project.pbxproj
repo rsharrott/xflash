@@ -102,10 +102,6 @@
 		490D43B1153BAA670003EA47 /* UIScrollView+LWEUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4333153BAA670003EA47 /* UIScrollView+LWEUtilities.m */; };
 		490D43B2153BAA670003EA47 /* UIScrollView+LWEUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4333153BAA670003EA47 /* UIScrollView+LWEUtilities.m */; };
 		490D43B3153BAA670003EA47 /* UIScrollView+LWEUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4333153BAA670003EA47 /* UIScrollView+LWEUtilities.m */; };
-		490D43B4153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4335153BAA670003EA47 /* UIWebView+LWENoBounces.m */; };
-		490D43B5153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4335153BAA670003EA47 /* UIWebView+LWENoBounces.m */; };
-		490D43B6153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4335153BAA670003EA47 /* UIWebView+LWENoBounces.m */; };
-		490D43B7153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D4335153BAA670003EA47 /* UIWebView+LWENoBounces.m */; };
 		490D43C0153BAA670003EA47 /* LWEError.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D433D153BAA670003EA47 /* LWEError.m */; };
 		490D43C1153BAA670003EA47 /* LWEError.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D433D153BAA670003EA47 /* LWEError.m */; };
 		490D43C2153BAA670003EA47 /* LWEError.m in Sources */ = {isa = PBXBuildFile; fileRef = 490D433D153BAA670003EA47 /* LWEError.m */; };
@@ -777,8 +773,6 @@
 		490D4331153BAA670003EA47 /* UILabel+LWEUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UILabel+LWEUtilities.m"; sourceTree = "<group>"; };
 		490D4332153BAA670003EA47 /* UIScrollView+LWEUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIScrollView+LWEUtilities.h"; sourceTree = "<group>"; };
 		490D4333153BAA670003EA47 /* UIScrollView+LWEUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIScrollView+LWEUtilities.m"; sourceTree = "<group>"; };
-		490D4334153BAA670003EA47 /* UIWebView+LWENoBounces.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+LWENoBounces.h"; sourceTree = "<group>"; };
-		490D4335153BAA670003EA47 /* UIWebView+LWENoBounces.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+LWENoBounces.m"; sourceTree = "<group>"; };
 		490D433B153BAA670003EA47 /* LWEDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LWEDebug.h; sourceTree = "<group>"; };
 		490D433C153BAA670003EA47 /* LWEError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LWEError.h; sourceTree = "<group>"; };
 		490D433D153BAA670003EA47 /* LWEError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LWEError.m; sourceTree = "<group>"; };
@@ -1472,8 +1466,6 @@
 				490D4331153BAA670003EA47 /* UILabel+LWEUtilities.m */,
 				490D4332153BAA670003EA47 /* UIScrollView+LWEUtilities.h */,
 				490D4333153BAA670003EA47 /* UIScrollView+LWEUtilities.m */,
-				490D4334153BAA670003EA47 /* UIWebView+LWENoBounces.h */,
-				490D4335153BAA670003EA47 /* UIWebView+LWENoBounces.m */,
 			);
 			name = Categories;
 			path = Reusable/LWE/Categories;
@@ -2603,7 +2595,6 @@
 				490D43A8153BAA670003EA47 /* UIColor+LWEUtilities.m in Sources */,
 				490D43AC153BAA670003EA47 /* UILabel+LWEUtilities.m in Sources */,
 				490D43B0153BAA670003EA47 /* UIScrollView+LWEUtilities.m in Sources */,
-				490D43B4153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */,
 				490D43C0153BAA670003EA47 /* LWEError.m in Sources */,
 				490D43C4153BAA670003EA47 /* LWEFile.m in Sources */,
 				490D43C8153BAA670003EA47 /* LWEImageUtils.m in Sources */,
@@ -2716,7 +2707,6 @@
 				490D43AA153BAA670003EA47 /* UIColor+LWEUtilities.m in Sources */,
 				490D43AE153BAA670003EA47 /* UILabel+LWEUtilities.m in Sources */,
 				490D43B2153BAA670003EA47 /* UIScrollView+LWEUtilities.m in Sources */,
-				490D43B6153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */,
 				490D43C2153BAA670003EA47 /* LWEError.m in Sources */,
 				490D43C6153BAA670003EA47 /* LWEFile.m in Sources */,
 				490D43CA153BAA670003EA47 /* LWEImageUtils.m in Sources */,
@@ -2830,7 +2820,6 @@
 				490D43AB153BAA670003EA47 /* UIColor+LWEUtilities.m in Sources */,
 				490D43AF153BAA670003EA47 /* UILabel+LWEUtilities.m in Sources */,
 				490D43B3153BAA670003EA47 /* UIScrollView+LWEUtilities.m in Sources */,
-				490D43B7153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */,
 				490D43C3153BAA670003EA47 /* LWEError.m in Sources */,
 				490D43C7153BAA670003EA47 /* LWEFile.m in Sources */,
 				490D43CB153BAA670003EA47 /* LWEImageUtils.m in Sources */,
@@ -2956,7 +2945,6 @@
 				490D43A9153BAA670003EA47 /* UIColor+LWEUtilities.m in Sources */,
 				490D43AD153BAA670003EA47 /* UILabel+LWEUtilities.m in Sources */,
 				490D43B1153BAA670003EA47 /* UIScrollView+LWEUtilities.m in Sources */,
-				490D43B5153BAA670003EA47 /* UIWebView+LWENoBounces.m in Sources */,
 				490D43C1153BAA670003EA47 /* LWEError.m in Sources */,
 				490D43C5153BAA670003EA47 /* LWEFile.m in Sources */,
 				490D43C9153BAA670003EA47 /* LWEImageUtils.m in Sources */,

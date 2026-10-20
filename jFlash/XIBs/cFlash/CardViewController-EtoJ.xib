@@ -17,7 +17,6 @@
 			<string>IBProxyObject</string>
 			<string>IBUILabel</string>
 			<string>IBUICustomObject</string>
-			<string>IBUIWebView</string>
 			<string>IBUIScrollView</string>
 			<string>IBUIButton</string>
 		</object>
@@ -577,7 +576,7 @@
 							<string>UILabel</string>
 							<string>UIImageView</string>
 							<string>UIScrollView</string>
-							<string>UIWebView</string>
+							<string>UIView</string>
 							<string>MoodIcon</string>
 							<string>UILabel</string>
 							<string>UIImageView</string>
@@ -620,7 +619,7 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">meaningWebViewContainer</string>
-								<string key="candidateClassName">UIWebView</string>
+								<string key="candidateClassName">UIView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">moodIcon</string>
