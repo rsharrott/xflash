@@ -490,6 +490,7 @@
 		499E56B914972A7200088BD3 /* TTTAttributedLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 499E56B514972A7200088BD3 /* TTTAttributedLabel.m */; };
 		49A3EC1514DB99C800621183 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4938F8C214027818001EB473 /* CoreText.framework */; };
 		49A465B314FCF50B00CF5C44 /* ChineseCardTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 49A465B214FCF50B00CF5C44 /* ChineseCardTest.m */; };
+		155418871236E7A3135C4827 /* CFlashAccessibilityTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1E94DCCE80287AC43B6B6683 /* CFlashAccessibilityTest.m */; };
 		49A465B414FD04D500CF5C44 /* PracticeModeCardViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 91214D6911B4D77C0091AFEF /* PracticeModeCardViewDelegate.m */; };
 		49A465B514FD04D600CF5C44 /* PracticeModeCardViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 91214D6911B4D77C0091AFEF /* PracticeModeCardViewDelegate.m */; };
 		49A465B614FD04F700CF5C44 /* ActionBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 496BE54C11EC5303003AB713 /* ActionBarViewController.m */; };
@@ -932,6 +933,7 @@
 		499E56B514972A7200088BD3 /* TTTAttributedLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TTTAttributedLabel.m; path = External/TTTAttributedLabel/TTTAttributedLabel.m; sourceTree = "<group>"; };
 		49A465B114FCF50B00CF5C44 /* ChineseCardTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChineseCardTest.h; path = Tests/cFlashTests/ChineseCardTest.h; sourceTree = SOURCE_ROOT; };
 		49A465B214FCF50B00CF5C44 /* ChineseCardTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ChineseCardTest.m; path = Tests/cFlashTests/ChineseCardTest.m; sourceTree = SOURCE_ROOT; };
+		1E94DCCE80287AC43B6B6683 /* CFlashAccessibilityTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CFlashAccessibilityTest.m; path = Tests/cFlashTests/CFlashAccessibilityTest.m; sourceTree = SOURCE_ROOT; };
 		49AAB8B8147106BE0015D64B /* CardViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CardViewController.h; path = AppSpecific/CardViewController.h; sourceTree = "<group>"; };
 		B3DA970611C98A52D5FC2D33 /* LWEReadingLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LWEReadingLayout.h; path = AppSpecific/LWEReadingLayout.h; sourceTree = "<group>"; };
 		49AAB8B9147106BE0015D64B /* CardViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardViewController.m; path = AppSpecific/CardViewController.m; sourceTree = "<group>"; };
@@ -1430,6 +1432,7 @@
 				4926EA01148FADDE00F55D09 /* CardPeerTest.m */,
 				49A465B114FCF50B00CF5C44 /* ChineseCardTest.h */,
 				49A465B214FCF50B00CF5C44 /* ChineseCardTest.m */,
+				1E94DCCE80287AC43B6B6683 /* CFlashAccessibilityTest.m */,
 			);
 			name = CFlash;
 			sourceTree = "<group>";
@@ -2809,6 +2812,7 @@
 				4964E54114A959EB00683A58 /* PracticeCardSelector.m in Sources */,
 				491E277114F5DA7B00C5243A /* ExternalAppManager.m in Sources */,
 				49A465B314FCF50B00CF5C44 /* ChineseCardTest.m in Sources */,
+				155418871236E7A3135C4827 /* CFlashAccessibilityTest.m in Sources */,
 				49A465B414FD04D500CF5C44 /* PracticeModeCardViewDelegate.m in Sources */,
 				49A465B614FD04F700CF5C44 /* ActionBarViewController.m in Sources */,
 				49A465BD14FD052900CF5C44 /* SearchViewController.m in Sources */,

@@ -54,7 +54,7 @@
   Card *card = [[Card alloc] init];
   card._meaning = @"<dfn>cat</dfn><dfn>kitten</dfn>";
   NSString *result = [card meaningWithoutMarkup];
-  XCTAssertTrue([result rangeOfString:@"cat,kitten"].location != NSNotFound, @"Adjacent dfn tags should be joined with a comma, got: %@", result);
+  XCTAssertTrue([result rangeOfString:@"cat, kitten"].location != NSNotFound, @"Adjacent dfn tags should be joined with a comma and a space, got: %@", result);
   [card release];
 }
 
@@ -66,6 +66,39 @@
   XCTAssertTrue([result rangeOfString:@"first"].location != NSNotFound, @"List item text should be preserved, got: %@", result);
   XCTAssertTrue([result rangeOfString:@"<ol>"].location == NSNotFound, @"<ol> should be stripped");
   XCTAssertTrue([result rangeOfString:@"<li>"].location == NSNotFound, @"<li> should be stripped");
+  [card release];
+}
+
+- (void)testMeaningWithoutMarkupSpacesPartsOfSpeechLikeProse
+{
+  // QA (search results): "study(noun,~する verb reg,verb trans); diligence..." read as one run-on word
+  Card *card = [[Card alloc] init];
+  card._meaning = @"<ol><li>study<dfn>noun</dfn><dfn>~する verb reg</dfn><dfn>verb trans</dfn></li><li>diligence / working hard<dfn>noun</dfn></li></ol>";
+  XCTAssertEqualObjects([card meaningWithoutMarkup], @"study (noun, ~する verb reg, verb trans); diligence / working hard (noun)");
+  [card release];
+}
+
+- (void)testMeaningWithoutMarkupKeepsOneSpaceBeforeParenthesis
+{
+  Card *card = [[Card alloc] init];
+  card._meaning = @"<ol><li>study <dfn>noun</dfn></li></ol>";
+  XCTAssertEqualObjects([card meaningWithoutMarkup], @"study (noun)");
+  [card release];
+}
+
+- (void)testMeaningWithoutMarkupHasNoTrailingSeparator
+{
+  Card *card = [[Card alloc] init];
+  card._meaning = @"<ol><li>first</li><li>second</li></ol>";
+  XCTAssertEqualObjects([card meaningWithoutMarkup], @"first; second");
+  [card release];
+}
+
+- (void)testMeaningWithoutMarkupPlainChineseMeaningIsUnchanged
+{
+  Card *card = [[Card alloc] init];
+  card._meaning = @"component in Chinese character 殷[yin1]";
+  XCTAssertEqualObjects([card meaningWithoutMarkup], @"component in Chinese character 殷[yin1]");
   [card release];
 }
 

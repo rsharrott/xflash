@@ -44,6 +44,21 @@
 /* ActionBar.ShowAnswerSubline  (ActionBarViewController.m) */
 "Then mark it Wrong or Right" = "そのあと「正解」か「不正解」を選びます";
 
+/* StudyViewController.ProgressAccessibility: VoiceOver name of the progress strip at the top of the study screen (it opens the progress sheet)  (StudyViewController.m) */
+"Study progress" = "学習の進み具合";
+
+/* StudyViewController.ProgressAccessibilityHint: VoiceOver hint for the progress strip  (StudyViewController.m) */
+"Shows your progress in this set" = "このセットの進み具合を表示します";
+
+/* MoodIcon.SessionScoreAccessibility: VoiceOver name of the score bubble (the face) on the card  (MoodIcon.m) */
+"Session score" = "今回の正答率";
+
+/* MoodIcon.PercentRightAccessibility: VoiceOver value of the score bubble: share of cards answered right this session  (MoodIcon.m) */
+"%ld%% right" = "%ld%%正解";
+
+/* MoodIcon.ToggleHint: VoiceOver hint; tapping the face shows or hides the percentage bubble  (MoodIcon.m) */
+"Shows or hides the score" = "正答率の表示・非表示を切り替えます";
+
 /* ActionBarViewController.ActionSheetRemoveFromFavorites  (ActionBarViewController.m) */
 "Remove from Starred" = "スターを外す";
 

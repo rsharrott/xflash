@@ -8,8 +8,15 @@
 
 #import "MoodIcon.h"
 
+@interface MoodIcon ()
+//! The last score shown (or hidden) in the bubble, so VoiceOver can read it again when it reappears
+@property (nonatomic, assign) CGFloat lastPercentCorrect;
+@property (nonatomic, assign) BOOL hasPercentCorrect;
+@end
+
 //! Handles "hot head" mood icons
 @implementation MoodIcon
+@synthesize lastPercentCorrect, hasPercentCorrect;
 @synthesize talkBubble;
 
 @synthesize percentCorrectLabel, moodIconBtn, view;
@@ -17,7 +24,39 @@
 - (void) awakeFromNib
 {
   [[NSBundle mainBundle] loadNibNamed:@"MoodIcon" owner:self options:nil];
+  // VoiceOver: one "Session score, 100% right" element (the face); the bubble's "100%" is not read twice
+  self.moodIconBtn.isAccessibilityElement = YES;
+  self.moodIconBtn.accessibilityLabel = NSLocalizedString(@"Session score", @"MoodIcon.SessionScoreAccessibility");
+  self.percentCorrectLabel.isAccessibilityElement = NO;
+  self.percentCorrectLabel.accessibilityElementsHidden = YES;
+  self.talkBubble.isAccessibilityElement = NO;
+  [self _updateAccessibility];
   [self applyTheme];
+}
+
++ (NSString *) accessibilityValueForPercentCorrect:(CGFloat)percentCorrect
+{
+  return [NSString stringWithFormat:NSLocalizedString(@"%ld%% right", @"MoodIcon.PercentRightAccessibility"), (long)lroundf(percentCorrect)];
+}
+
+//! Practice mode: tapping the face shows / hides the bubble, so it is a button; otherwise plain text
+//! (not a "dimmed" button).  VoiceOver reads the score only while the bubble shows it: with the
+//! bubble hidden there is no value, and in Browse mode (not tappable, no score on screen) the face is
+//! not an element at all.
+- (void) _updateAccessibility
+{
+  BOOL enabled = self.moodIconBtn.enabled;
+  BOOL scoreShown = (self.talkBubble.hidden == NO);
+  self.moodIconBtn.isAccessibilityElement = [MoodIcon scoreBubbleIsAccessibilityElementWhenEnabled:enabled bubbleHidden:self.talkBubble.hidden];
+  self.moodIconBtn.accessibilityTraits = enabled ? UIAccessibilityTraitButton : UIAccessibilityTraitStaticText;
+  self.moodIconBtn.accessibilityHint = enabled ? NSLocalizedString(@"Shows or hides the score", @"MoodIcon.ToggleHint") : nil;
+  self.moodIconBtn.accessibilityValue = (scoreShown && self.hasPercentCorrect) ? [MoodIcon accessibilityValueForPercentCorrect:self.lastPercentCorrect] : nil;
+}
+
++ (BOOL) scoreBubbleIsAccessibilityElementWhenEnabled:(BOOL)enabled bubbleHidden:(BOOL)bubbleHidden
+{
+  // Tappable (Practice): always, so it can be found to show the score again.  Otherwise only while it shows a score.
+  return enabled || (bubbleHidden == NO);
 }
 
 //! Themes v2: the 67% bubble fill follows the card (fire-wash on Paper/Fire, paper on Water)
@@ -42,6 +81,7 @@
 - (void) setButtonEnabled:(BOOL)enable
 {
   self.moodIconBtn.enabled = enable;
+  [self _updateAccessibility];
 }
 
 /**
@@ -66,17 +106,22 @@
 {
   self.talkBubble.hidden = YES;
   self.percentCorrectLabel.hidden = YES;
+  [self _updateAccessibility];
 }
 
 - (void) turnPercentCorrectOn
 {
   self.talkBubble.hidden = NO;
   self.percentCorrectLabel.hidden = NO;
+  [self _updateAccessibility];
 }
 
 - (void) updateMoodIcon:(CGFloat)percentCorrect
 {
   self.percentCorrectLabel.text = [NSString stringWithFormat:@"%.0f%%",percentCorrect];
+  self.lastPercentCorrect = percentCorrect;
+  self.hasPercentCorrect = YES;
+  [self _updateAccessibility];
 
   // TODO: iPad customization!
   NSArray *hotHeadsArray = [[NSArray alloc] initWithObjects:

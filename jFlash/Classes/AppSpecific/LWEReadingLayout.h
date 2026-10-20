@@ -15,11 +15,14 @@
 #define LWEReadingRowTopIsLatinKey    @"topIsLatin"    // NSNumber BOOL: the top row holds romaji (Romaji mode)
 #define LWEReadingRowToggleOnRomajiKey @"toggleOnRomaji" // NSNumber BOOL: the toggle sits on the romaji row
 
-//! Spec §5: a kana-only headword (e.g. これ, or ありがとう with Prefer Kana) whose single kana reading
-//! is the headword itself.  Its kana would only repeat the headword, so it is dropped.
+//! Spec §5: a kana-only headword (e.g. これ, テレビ, or ありがとう with Prefer Kana) whose first kana
+//! reading is the headword itself.  That kana would only repeat the headword, so the row is dropped.
+//! With more readings (e.g. ゴールデンウィーク; ゴールデン・ウィーク) the "+N readings" pill still
+//! offers the others, and the expanded list shows them all.
 static inline BOOL LWEReadingIsKanaOnlyHeadword(NSString *kanaText, NSString *headword, NSUInteger kanaCount, BOOL expanded)
 {
-  return (expanded == NO && kanaCount <= 1 && [kanaText length] > 0 && [kanaText isEqualToString:headword]);
+  (void)kanaCount;
+  return (expanded == NO && [kanaText length] > 0 && [kanaText isEqualToString:headword]);
 }
 
 //! What the reading rows say for APP_READING mode (KANA / ROMAJI / BOTH):
@@ -177,6 +180,16 @@ static const CGFloat LWEMeaningBubbleCornerHeight = 44.0;
 //! Height of the bottom fade shown while more meaning is below
 static const CGFloat LWEMeaningFadeHeight = 24.0;
 
+//! The fade for a visible meaning band visibleHeight tall: the full 24pt, shortened (to 40% of the band,
+//! at least 12pt) on a band under 48pt -- an iPhone SE at larger text sizes -- so a short card still
+//! hints that more is below instead of dropping the cue (it used to show no fade there).
+static inline CGFloat LWEMeaningFadeHeightFor(CGFloat visibleHeight)
+{
+  if (visibleHeight <= 0.0) return 0.0;
+  if (visibleHeight >= LWEMeaningFadeHeight * 2.0) return LWEMeaningFadeHeight;
+  return MIN(visibleHeight * 0.5, MAX(12.0, floor(visibleHeight * 0.4)));
+}
+
 //! How the meaning area keeps clear of the score bubble.
 //!  wrapCorner:  the meaning fits; its lines wrap around the bubble's corner (nothing scrolls).
 //!  scrolls:     the meaning is taller than the area; it scrolls, with bottomInset of extra room at the
@@ -240,3 +253,45 @@ static inline CGSize LWEMeaningCornerSize(BOOL bubbleVisible, CGFloat nudge, CGS
   return CGSizeMake(MIN(area.width, LWEMeaningBubbleCornerWidth + nudge), MIN(area.height, LWEMeaningBubbleCornerHeight + nudge));
 }
 
+#pragma mark - Card spacing on short cards (QA: iPhone SE)
+
+//! Card areas shorter than this use the compact layout (iPhone SE / mini and other short cards)
+static const CGFloat LWECompactCardHeight = 420.0;
+
+//! The vertical spacing of the headword block for a card area h points tall.  Regular cards (every
+//! 6.1"+ iPhone and the iPad) keep the design spacing; compact cards shrink the headword with the
+//! square of the height ratio and tighten the gaps, which leaves the meaning ~30pt more room on an
+//! iPhone SE (about a sense more of a long entry).
+typedef struct {
+  CGFloat headwordScale;   //!< multiplier on the 88pt headword (compact: floored at 48pt by the caller)
+  CGFloat rowY;            //!< top of the reading row
+  CGFloat romajiGap;       //!< headword em box -> romaji row
+  CGFloat moreReadingsGap; //!< romaji -> "+N readings" pill
+  CGFloat meaningGap;      //!< headword block -> the meaning's rule
+} LWECardSpacing;
+
+static inline BOOL LWECardIsCompact(CGFloat h)
+{
+  return (h > 0.0 && h < LWECompactCardHeight);
+}
+
+static inline LWECardSpacing LWECardSpacingFor(CGFloat h)
+{
+  LWECardSpacing spacing;
+  if (LWECardIsCompact(h) == NO)
+  {
+    spacing.headwordScale = 1.0;
+    spacing.rowY = MAX(12.0, round(h * 0.117));
+    spacing.romajiGap = 8.0;
+    spacing.moreReadingsGap = 12.0;
+    spacing.meaningGap = 14.0;
+    return spacing;
+  }
+  CGFloat ratio = h / LWECompactCardHeight;
+  spacing.headwordScale = MAX(0.55, ratio * ratio);
+  spacing.rowY = MAX(8.0, round(h * 0.035));
+  spacing.romajiGap = 4.0;
+  spacing.moreReadingsGap = 4.0;
+  spacing.meaningGap = 6.0;
+  return spacing;
+}

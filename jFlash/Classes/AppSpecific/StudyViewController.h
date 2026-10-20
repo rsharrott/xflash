@@ -6,6 +6,7 @@
 //  Copyright LONG WEEKEND INC 2009. All rights reserved.
 
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 #import "Constants.h"
 #import "ProgressDetailsViewController.h"
 #import "ProgressBarViewController.h"
@@ -25,6 +26,16 @@
 #define STUDY_SET_HAS_FINISHED_ALERT_TAG  777
 #define STUDY_SET_SHOW_BURIED_IDX         1
 #define STUDY_SET_CHANGE_SET_IDX          0
+
+//! The card-to-card transition: a short push, or (Reduce Motion) a cross-fade with no direction.
+static inline NSString *LWECardTransitionType(BOOL reduceMotion)
+{
+  return reduceMotion ? kCATransitionFade : kCATransitionPush;
+}
+static inline NSString *LWECardTransitionSubtype(BOOL reduceMotion, NSString *direction)
+{
+  return reduceMotion ? nil : direction;
+}
 
 @interface StudyViewController : UIViewController <UIScrollViewDelegate,
                                                    UIActionSheetDelegate,

@@ -121,17 +121,47 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 
   self.tableView.rowHeight = UITableViewAutomaticDimension;
   self.tableView.estimatedRowHeight = 60;
+  // The table starts under the navigation bar, not behind it: the scrolled-off "Search Sets By Name"
+  // bar would otherwise sit behind the translucent bar and show through it (pushed group screens).
+  self.edgesForExtendedLayout = UIRectEdgeNone;
+  [self _applyNavigationBarAppearance];
+}
+
+//! Opaque paper nav bar (theme navBarFill), so the bar over the table isn't the white window
+- (void) _applyNavigationBarAppearance
+{
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  LWEStudySetApplyNavigationBarAppearance(self.navigationItem, [tm colorForSlot:@"navBarFill"], [tm colorForSlot:@"navTitleInk"]);
 }
 
 - (void) viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
+  [self _applyNavigationBarAppearance]; // the theme may have changed in Settings
   self.searchBar.placeholder = NSLocalizedString(@"Search Sets By Name",@"StudySetViewController.SearchPlaceholder");
   if (searching == NO)
   {
     [self hideSearchBar];
   }
   [self reloadTableData];
+}
+
+- (void) viewDidAppear:(BOOL)animated
+{
+  [super viewDidAppear:animated];
+#if defined (LWE_DEBUG)
+  // Screenshot hook (Debug builds only): `-LWEDebugSelectTab 1 -LWEDebugOpenGroup 1` opens the Study Sets
+  // tab and pushes its first group (1-based row in the groups section), once per launch.
+  static BOOL sLWEDebugOpenedGroup = NO;
+  NSInteger row = [[NSUserDefaults standardUserDefaults] integerForKey:@"LWEDebugOpenGroup"];
+  if (sLWEDebugOpenedGroup == NO && row > 0 && [self.group isTopLevelGroup] && row <= (NSInteger)[self.subgroupArray count])
+  {
+    sLWEDebugOpenedGroup = YES;
+    StudySetViewController *subgroupController = [[StudySetViewController alloc] initWithGroup:[self.subgroupArray objectAtIndex:(row - 1)]];
+    [self.navigationController pushViewController:subgroupController animated:NO];
+    [subgroupController release];
+  }
+#endif
 }
 
 #pragma mark - KVO
@@ -204,7 +234,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
  */
 - (void) hideSearchBar
 {
-  self.tableView.contentOffset = CGPointMake(0, self.searchBar.frame.size.height);
+  // Measured from the top of the content area, whatever inset the table has
+  self.tableView.contentOffset = CGPointMake(0, -self.tableView.adjustedContentInset.top + self.searchBar.frame.size.height);
 }
 
 /**
@@ -318,7 +349,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
     {
       cell = [LWEUITableUtils reuseCellForIdentifier:@"result" onTable:lclTableView usingStyle:UITableViewCellStyleSubtitle];
       cell.accessoryType = UITableViewCellAccessoryNone;
-      cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];    
+      cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
+      cell.detailTextLabel.textColor = [tm colorForSlot:@"cellValueInk"]; // "4 Sets" / "7546 Words": 4.5:1+ (WCAG AA)
       cell.selectionStyle = UITableViewCellSelectionStyleGray;
       cell.textLabel.numberOfLines = 0;
       cell.textLabel.text = NSLocalizedString(@"No Results Found",@"StudySetViewController.SearchedButNoResults");
@@ -352,6 +384,7 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
       cell.selectionStyle = UITableViewCellSelectionStyleNone;
       NSString *tmpDetailText = [NSString stringWithFormat:NSLocalizedString(@"%d Words",@"StudySetViewController.WordCount"), [tmpTag cardCount]];
       cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
+      cell.detailTextLabel.textColor = [tm colorForSlot:@"cellValueInk"]; // "4 Sets" / "7546 Words": 4.5:1+ (WCAG AA)
       cell.detailTextLabel.text = tmpDetailText;
       cell.accessoryView = nil;
       if (tmpTag.cardCount == 0)
@@ -420,6 +453,7 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
     
     cell.accessoryType = UITableViewCellAccessoryNone;
     cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
+    cell.detailTextLabel.textColor = [tm colorForSlot:@"cellValueInk"]; // "4 Sets" / "7546 Words": 4.5:1+ (WCAG AA)
     cell.detailTextLabel.text = tmpDetailText;
   }
   return cell;

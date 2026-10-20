@@ -170,7 +170,12 @@ static UIFont *LWEShowAnswerSubFont(void)
 
   [self _stylePracticeButton:self.buryCardBtn title:NSLocalizedString(@"Learned", @"ActionBar.Learned") symbol:@"archivebox"
                         fill:LWEDesignPaperButton() ink:LWEDesignInk() primary:NO];
-  self.buryCardBtn.accessibilityLabel = NSLocalizedString(@"Mark as learned", @"ActionBar.MarkAsLearned");
+  // The label matches the visible title, so Voice Control's "Tap Learned" works (WCAG 2.5.3); the
+  // longer wording is the hint and a second spoken name.
+  self.buryCardBtn.accessibilityLabel = NSLocalizedString(@"Learned", @"ActionBar.Learned");
+  self.buryCardBtn.accessibilityHint = NSLocalizedString(@"Mark as learned", @"ActionBar.MarkAsLearned");
+  self.buryCardBtn.accessibilityUserInputLabels = @[NSLocalizedString(@"Learned", @"ActionBar.Learned"),
+                                                    NSLocalizedString(@"Mark as learned", @"ActionBar.MarkAsLearned")];
 
   [self _stylePracticeButton:self.wrongBtn title:NSLocalizedString(@"Wrong", @"ActionBar.Wrong") symbol:@"xmark"
                         fill:LWEDesignWrongFill() ink:LWEDesignWrongInk() primary:YES];

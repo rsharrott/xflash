@@ -59,19 +59,35 @@ NSInteger const kLWEUninitializedCardId    = -1;
 
 #pragma mark - Handy Method
 
-/** Returns the meaning field w/o any HTML markup */
+/**
+ * Returns the meaning field w/o any HTML markup, punctuated like prose:
+ * "<ol><li>study<dfn>noun</dfn><dfn>verb trans</dfn></li><li>diligence</li></ol>"
+ * becomes "study (noun, verb trans); diligence".
+ */
 - (NSString*) meaningWithoutMarkup
 {
   //Remove HTML from cards.meaning field ... messy!
-  NSString *txtStr = nil;
-  txtStr = [self._meaning stringByReplacingOccurrencesOfString:@"</dfn><dfn>" withString:@","];
-  txtStr = [txtStr stringByReplacingOccurrencesOfString:@"<dfn>" withString:@"("];
+  NSString *txtStr = self._meaning ?: @"";
+  txtStr = [txtStr stringByReplacingOccurrencesOfString:@"</dfn><dfn>" withString:@", "];
+  txtStr = [txtStr stringByReplacingOccurrencesOfString:@"<dfn>" withString:@" ("];
   txtStr = [txtStr stringByReplacingOccurrencesOfString:@"</dfn>" withString:@")"];
   txtStr = [txtStr stringByReplacingOccurrencesOfString:@"<li>" withString:@""];
   txtStr = [txtStr stringByReplacingOccurrencesOfString:@"</li>" withString:@"; "];
   txtStr = [txtStr stringByReplacingOccurrencesOfString:@"<ol>" withString:@""];
   txtStr = [txtStr stringByReplacingOccurrencesOfString:@"</ol>" withString:@""];
+  // A gloss that already ends in a space ("study <dfn>") keeps a single space before the "("
+  while ([txtStr rangeOfString:@"  "].location != NSNotFound)
+  {
+    txtStr = [txtStr stringByReplacingOccurrencesOfString:@"  " withString:@" "];
+  }
   txtStr = [txtStr stringByReplacingOccurrencesOfString:@" ; " withString:@"; "];
+  // No dangling separator after the last sense
+  NSCharacterSet *ws = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+  txtStr = [txtStr stringByTrimmingCharactersInSet:ws];
+  if ([txtStr hasSuffix:@";"])
+  {
+    txtStr = [[txtStr substringToIndex:[txtStr length] - 1] stringByTrimmingCharactersInSet:ws];
+  }
   return txtStr;
 }
 

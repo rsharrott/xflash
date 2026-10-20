@@ -625,7 +625,7 @@ const NSInteger KSegmentedTableHeader = 100;
   if (readingLabel == nil)
   {
     readingLabel = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
-    readingLabel.textColor = [UIColor grayColor];
+    readingLabel.textColor = [[ThemeManager sharedThemeManager] colorForSlot:@"cellValueInk"]; // 4.5:1+ (grey was 3.9:1)
     readingLabel.tag = SEARCH_CELL_READING;
     [cell.contentView addSubview:readingLabel];
   }
