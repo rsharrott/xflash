@@ -125,13 +125,62 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
   // bar would otherwise sit behind the translucent bar and show through it (pushed group screens).
   self.edgesForExtendedLayout = UIRectEdgeNone;
   [self _applyNavigationBarAppearance];
+
+  // Shared paper screen, like Settings: paper-2 behind paper cells, hairline separators (the XIB's
+  // system grouped grey showed as a light band between the paper nav bar and the first row)
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  self.tableView.backgroundColor = [tm colorForSlot:@"groupedBackground"];
+  self.tableView.separatorColor = [tm colorForSlot:@"separator"];
+  self.tableView.sectionHeaderTopPadding = 0; // deployment target ≥ 15
 }
 
 //! Opaque paper nav bar (theme navBarFill), so the bar over the table isn't the white window
 - (void) _applyNavigationBarAppearance
 {
   ThemeManager *tm = [ThemeManager sharedThemeManager];
-  LWEStudySetApplyNavigationBarAppearance(self.navigationItem, [tm colorForSlot:@"navBarFill"], [tm colorForSlot:@"navTitleInk"]);
+  LWEStudySetApplyNavigationBarAppearance(self.navigationItem, [tm colorForSlot:@"navBarFill"], [tm colorForSlot:@"navTitleInk"], [tm colorForSlot:@"separator"]);
+}
+
+- (void) viewDidLayoutSubviews
+{
+  [super viewDidLayoutSubviews];
+  [self updateSearchBarScrollRoom];
+}
+
+/**
+ * Keeps enough bottom inset that the search bar can scroll off the top of a short list (see
+ * LWEStudySetSearchBarScrollRoom).  Only our own share of contentInset.bottom is changed.
+ */
+- (void) updateSearchBarScrollRoom
+{
+  if (self.isViewLoaded == NO || searching)
+  {
+    return;
+  }
+  UITableView *tv = self.tableView;
+  UIEdgeInsets inset = tv.contentInset;
+  UIEdgeInsets adjusted = tv.adjustedContentInset;
+  CGFloat visibleHeight = tv.bounds.size.height - adjusted.top - (adjusted.bottom - _searchBarScrollRoom);
+  CGFloat room = LWEStudySetSearchBarScrollRoom(visibleHeight, self.searchBar.frame.size.height, tv.contentSize.height);
+  if (fabs(room - _searchBarScrollRoom) >= 0.5)
+  {
+    inset.bottom = MAX(0, inset.bottom - _searchBarScrollRoom + room);
+    _searchBarScrollRoom = room;
+    tv.contentInset = inset;
+  }
+  // The rows can settle after -hideSearchBar (first layout in the window); if the shorter content
+  // clamped the offset, the search bar peeks out again, so put it back off the top
+  CGFloat hiddenOffsetY = -tv.adjustedContentInset.top + self.searchBar.frame.size.height;
+  if (_keepSearchBarHidden && tv.isDragging == NO && tv.contentOffset.y < hiddenOffsetY - 0.5)
+  {
+    [tv setContentOffset:CGPointMake(tv.contentOffset.x, hiddenOffsetY) animated:NO];
+  }
+}
+
+//! The user scrolls the list themselves from here on (e.g. pulls the search bar down)
+- (void) scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+  _keepSearchBarHidden = NO;
 }
 
 - (void) viewWillAppear:(BOOL)animated
@@ -139,11 +188,12 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
   [super viewWillAppear:animated];
   [self _applyNavigationBarAppearance]; // the theme may have changed in Settings
   self.searchBar.placeholder = NSLocalizedString(@"Search Sets By Name",@"StudySetViewController.SearchPlaceholder");
+  // Reload first: a reload re-clamps the offset to the (new) content size
+  [self reloadTableData];
   if (searching == NO)
   {
     [self hideSearchBar];
   }
-  [self reloadTableData];
 }
 
 - (void) viewDidAppear:(BOOL)animated
@@ -234,8 +284,12 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
  */
 - (void) hideSearchBar
 {
+  // Lay out the rows first, so the content size (and the room a short list needs) is real
+  [self.tableView layoutIfNeeded];
+  [self updateSearchBarScrollRoom];
   // Measured from the top of the content area, whatever inset the table has
   self.tableView.contentOffset = CGPointMake(0, -self.tableView.adjustedContentInset.top + self.searchBar.frame.size.height);
+  _keepSearchBarHidden = YES;
 }
 
 /**
@@ -460,6 +514,42 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 }
 
 #pragma mark - UITableViewDelegate Methods
+
+/**
+ * A group screen with no subgroups still has an (empty) groups section; its footer and the sets
+ * section's header left a 20pt band between the nav bar and the first set.  Empty sections take no
+ * space, and the first section with rows starts right under the search bar, as on the top level.
+ */
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+  BOOL firstWithRows = YES;
+  for (NSInteger i = 0; i < section; i++)
+  {
+    if ([self tableView:tableView numberOfRowsInSection:i] > 0)
+    {
+      firstWithRows = NO;
+      break;
+    }
+  }
+  if (firstWithRows || [self tableView:tableView numberOfRowsInSection:section] == 0)
+  {
+    return CGFLOAT_MIN;
+  }
+  return UITableViewAutomaticDimension;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+  return ([self tableView:tableView numberOfRowsInSection:section] == 0) ? CGFLOAT_MIN : UITableViewAutomaticDimension;
+}
+
+//! Paper cells on the paper list, like Settings (the detail ink is set per row in cellForRowAtIndexPath)
+- (void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  cell.backgroundColor = [tm colorForSlot:@"cellFill"];
+  cell.textLabel.textColor = [tm colorForSlot:@"cellLabelInk"];
+}
 
 /**
  * Allows user to delete the selected tag
@@ -718,8 +808,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 
   // Replace the done button w/ the add button again
 	self.navigationItem.rightBarButtonItem = _addButton;
-  [self hideSearchBar];
   [self reloadTableData];
+  [self hideSearchBar];
   
   // Kill search overlay
   [_searchOverlay removeFromSuperview];

@@ -9,6 +9,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import <objc/runtime.h>
 #import "CardViewController.h"
 #import "PracticeModeCardViewDelegate.h"
 #import "ChineseCard.h"
@@ -17,6 +18,40 @@
 #import "ProgressBarViewController.h"
 #import "StudySetViewController.h"
 #import "ThemeManager.h"
+
+//! Stands in for a Group, so the Study Sets screen can load without the database
+@interface LWEStudySetStubGroup : NSObject
+@property (nonatomic, retain) NSString *groupName;
+@property (nonatomic) NSInteger groupId;
+@end
+
+@implementation LWEStudySetStubGroup
+@synthesize groupName, groupId;
+- (NSArray *) childTags { return [NSArray array]; }
+- (BOOL) isTopLevelGroup { return NO; }
+- (void) dealloc { [groupName release]; [super dealloc]; }
+@end
+
+static void LWEStudySetTestNoop(id self, SEL _cmd) {}
+
+/**
+ * The host app's StudySetViewController (the test bundle doesn't compile its own copy, so it is looked
+ * up at run time), with -reloadSubgroupData stubbed out so the screen loads without the database.
+ */
+static Class LWEStudySetControllerClassWithoutDatabase(void)
+{
+  Class base = NSClassFromString(@"StudySetViewController");
+  if (base == nil) return nil;
+  const char *name = "LWEStudySetViewControllerWithoutDatabase";
+  Class cls = objc_getClass(name);
+  if (cls == nil)
+  {
+    cls = objc_allocateClassPair(base, name, 0);
+    class_addMethod(cls, @selector(reloadSubgroupData), (IMP)LWEStudySetTestNoop, "v@:");
+    objc_registerClassPair(cls);
+  }
+  return cls;
+}
 
 @interface CFlashAccessibilityTest : XCTestCase
 @end
@@ -180,7 +215,8 @@ static CGFloat LWECFTestContrast(UIColor *a, UIColor *b)
     UIColor *ink = [tm colorForSlot:@"navTitleInk" themeKey:key];
     XCTAssertNotNil(fill, @"%@", key);
     UINavigationItem *item = [[[UINavigationItem alloc] initWithTitle:@"HSK"] autorelease];
-    LWEStudySetApplyNavigationBarAppearance(item, fill, ink);
+    UIColor *hairline = [tm colorForSlot:@"separator" themeKey:key];
+    LWEStudySetApplyNavigationBarAppearance(item, fill, ink, hairline);
     for (UINavigationBarAppearance *a in @[item.standardAppearance, item.scrollEdgeAppearance, item.compactAppearance, item.compactScrollEdgeAppearance])
     {
       XCTAssertEqualObjects(a.backgroundColor, fill, @"%@", key);
@@ -188,8 +224,58 @@ static CGFloat LWECFTestContrast(UIColor *a, UIColor *b)
       [a.backgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
       XCTAssertEqualWithAccuracy(alpha, 1.0, 0.001, @"%@: opaque", key);
       XCTAssertEqualObjects(a.titleTextAttributes[NSForegroundColorAttributeName], ink, @"%@", key);
+      XCTAssertEqualObjects(a.shadowColor, hairline, @"%@: theme hairline", key);
     }
   }
+}
+
+- (void) testStudySetViewControllerAppliesTheNavigationBarAppearance
+{
+  // Review nit: the screen itself must use the helper (not just the helper being right), on every bar state
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  UIColor *fill = [tm colorForSlot:@"navBarFill"];
+  UIColor *ink = [tm colorForSlot:@"navTitleInk"];
+  UIColor *hairline = [tm colorForSlot:@"separator"];
+  XCTAssertNotNil(fill);
+  Class studySetClass = LWEStudySetControllerClassWithoutDatabase();
+  XCTAssertNotNil(studySetClass);
+  LWEStudySetStubGroup *group = [[[LWEStudySetStubGroup alloc] init] autorelease];
+  group.groupName = @"Test Group";
+  StudySetViewController *vc = [[[studySetClass alloc] initWithGroup:(Group *)group] autorelease];
+  [vc loadViewIfNeeded];
+  UINavigationItem *item = vc.navigationItem;
+  for (int pass = 0; pass < 2; pass++)
+  {
+    NSArray *states = @[item.standardAppearance ?: [NSNull null], item.scrollEdgeAppearance ?: [NSNull null],
+                        item.compactAppearance ?: [NSNull null], item.compactScrollEdgeAppearance ?: [NSNull null]];
+    for (id a in states)
+    {
+      XCTAssertTrue([a isKindOfClass:[UINavigationBarAppearance class]], @"pass %d: every bar state has the appearance", pass);
+      if ([a isKindOfClass:[UINavigationBarAppearance class]] == NO) continue;
+      UINavigationBarAppearance *appearance = (UINavigationBarAppearance *)a;
+      XCTAssertEqualObjects(appearance.backgroundColor, fill, @"pass %d", pass);
+      XCTAssertEqualObjects(appearance.titleTextAttributes[NSForegroundColorAttributeName], ink, @"pass %d", pass);
+      XCTAssertEqualObjects(appearance.shadowColor, hairline, @"pass %d: theme hairline", pass);
+    }
+    // viewWillAppear: puts it back (the theme may have changed in Settings)
+    item.standardAppearance = nil;
+    item.scrollEdgeAppearance = nil;
+    item.compactAppearance = nil;
+    item.compactScrollEdgeAppearance = nil;
+    [vc viewWillAppear:NO];
+  }
+  // Paper list behind the rows, not the XIB's system grouped grey
+  XCTAssertEqualObjects(vc.tableView.backgroundColor, [tm colorForSlot:@"groupedBackground"]);
+  XCTAssertEqualWithAccuracy(vc.tableView.sectionHeaderTopPadding, 0, 0.001);
+}
+
+- (void) testStudySetSearchBarScrollRoomLetsAShortListHideTheSearchBar
+{
+  // Short group (4 sets): 675pt visible + 64pt bar - 723pt content = 16pt more needed
+  XCTAssertEqualWithAccuracy(LWEStudySetSearchBarScrollRoom(675, 64, 723), 16, 0.001);
+  XCTAssertEqualWithAccuracy(LWEStudySetSearchBarScrollRoom(675, 64, 739), 0, 0.001, @"exactly enough");
+  XCTAssertEqualWithAccuracy(LWEStudySetSearchBarScrollRoom(675, 64, 1810), 0, 0.001, @"long list needs nothing");
+  XCTAssertEqualWithAccuracy(LWEStudySetSearchBarScrollRoom(500.25, 56, 500), 57, 0.001, @"rounded up to whole points");
 }
 
 @end
