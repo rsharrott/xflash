@@ -4,7 +4,7 @@
 //
 //  App Store links (Rate Us / share): the URL builders, the per-app kAppStoreID,
 //  and that Settings only shows its Rate Us + share buttons when the app has an ID.
-//  jFlash ships as Apple ID 6817409240; cFlash is not on the App Store, so its ID
+//  jFlash ships as Apple ID 6824724935; cFlash is not on the App Store, so its ID
 //  stays empty and the buttons stay hidden.
 //
 
@@ -61,18 +61,18 @@
 
 - (void) testJFlashAppStoreID
 {
-  XCTAssertEqualObjects(kAppStoreID, @"6817409240");
+  XCTAssertEqualObjects(kAppStoreID, @"6824724935");
 }
 
 - (void) testJFlashStoreURL
 {
-  XCTAssertEqualObjects(LWEAppStoreURLString(), @"https://apps.apple.com/app/id6817409240");
+  XCTAssertEqualObjects(LWEAppStoreURLString(), @"https://apps.apple.com/app/id6824724935");
   XCTAssertNotNil([NSURL URLWithString:LWEAppStoreURLString()]);
 }
 
 - (void) testJFlashWriteReviewURL
 {
-  XCTAssertEqualObjects(LWEAppStoreWriteReviewURLString(), @"https://apps.apple.com/app/id6817409240?action=write-review");
+  XCTAssertEqualObjects(LWEAppStoreWriteReviewURLString(), @"https://apps.apple.com/app/id6824724935?action=write-review");
   XCTAssertNotNil([NSURL URLWithString:LWEAppStoreWriteReviewURLString()]);
 }
 
