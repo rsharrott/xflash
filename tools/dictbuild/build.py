@@ -36,7 +36,27 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..'))
 VERSION = '2.0'
 SHOWN_PER_CARD = 10      # the app shows at most 10 sentences per card (should_show = 1)
-LINKS_PER_CARD = 20      # extra links (should_show = 0) are kept for sentence search only
+LINKS_PER_CARD = 20      # each card picks its best 20 sentences (the first 10 shown); only these ship
+
+# Words that never get the extra (should_show = 0) links that list a sentence's other words:
+# tatoeba.STOP_WORDS (particles and function words, matched there on the B-line surface form)
+# plus the conjunctive particle のに.  The B-lines often write a stop word differently from the
+# list (の resolves to the 乃 card; 仕舞う, 彼の(あの), 何の(どの) vs しまう, あの, どの), so the check
+# is on the resolved card: its headword, or its reading when the card is written in kana.  The cards still keep their own
+# top LINKS_PER_CARD sentences, as in the original build.
+EXTRA_LINK_STOP_WORDS = frozenset(tatoeba.STOP_WORDS | {'のに'})
+
+
+def card_readings(card):
+    return {x.strip() for x in (card.get('reading') or '').replace(',', ';').split(';') if x.strip()}
+
+
+def is_stop_card(card):
+    """True for a particle / function-word card (乃 の, な, のに, 彼の あの ...)."""
+    if card['headword'] in EXTRA_LINK_STOP_WORDS:
+        return True
+    return bool(card.get('kana_only')) and bool(card_readings(card) & EXTRA_LINK_STOP_WORDS)
+
 
 SCHEMA_CARD = [
     "CREATE TABLE cards (card_id INTEGER PRIMARY KEY, card_type TEXT, headword TEXT, headword_en TEXT, reading TEXT, romaji TEXT, kana_only integer(1))",
@@ -89,6 +109,39 @@ def finish_db(db):
     db.commit()
     db.execute('VACUUM')
     db.close()
+
+
+def choose_links(card_links, usable, length, is_stop=lambda card_id: False):
+    """Pick the card_sentence_link rows and the sentences that ship.
+
+    card_links: {card_id: {sentence_id: (checked, sense_number)}}, every resolved B-line word.
+    usable(sentence_id): the sentence and its English translation both exist.
+    length(sentence_id): length of the Japanese text, used for ranking.
+    is_stop(card_id): the card is a particle / function word (see is_stop_card).
+
+    1. Per card, rank its usable sentences (checked words first, then shorter sentences,
+       then id) and keep the best LINKS_PER_CARD; the first SHOWN_PER_CARD get
+       should_show = 1.  Those sentences are the ones that ship; no others are added.
+    2. Every shipped sentence then also links to each of its other resolved words
+       (should_show = 0), so the expanded sentence can list all its words (母, 忙しい ...)
+       while each card's own sentence list stays at its best SHOWN_PER_CARD.  Stop cards
+       (is_stop) get none of these extra links.
+
+    Returns (sorted rows of (card_id, sentence_id, should_show, sense_number), set of sentence ids).
+    """
+    rows, used = {}, set()
+    for cid, d in card_links.items():
+        ranked = sorted((jid for jid in d if usable(jid)), key=lambda j: (not d[j][0], length(j), j))
+        for n, jid in enumerate(ranked[:LINKS_PER_CARD]):
+            rows[(cid, jid)] = (1 if n < SHOWN_PER_CARD else 0, d[jid][1])
+            used.add(jid)
+    for cid, d in card_links.items():
+        if is_stop(cid):
+            continue
+        for jid, (_, sense) in d.items():
+            if jid in used and (cid, jid) not in rows:
+                rows[(cid, jid)] = (0, sense)
+    return sorted((cid, jid, show, sense) for (cid, jid), (show, sense) in rows.items()), used
 
 
 def main():
@@ -225,13 +278,10 @@ def main():
     wanted = set(pairs) | {e for e, _ in pairs.values()}
     text = tatoeba.read_sentences(src('sentences.tar.bz2'), wanted)
 
-    link_rows, used = [], set()
-    for cid, d in card_links.items():
-        ranked = sorted((jid for jid in d if jid in text and pairs[jid][0] in text),
-                        key=lambda j: (not d[j][0], len(text[j]), j))
-        for n, jid in enumerate(ranked[:LINKS_PER_CARD]):
-            link_rows.append((cid, jid, 1 if n < SHOWN_PER_CARD else 0, d[jid][1]))
-            used.add(jid)
+    link_rows, used = choose_links(card_links,
+                                   usable=lambda j: j in text and pairs[j][0] in text,
+                                   length=lambda j: len(text[j]),
+                                   is_stop=lambda cid: is_stop_card(cards[cid]))
     log('writing', ex_path)
     db = new_db(ex_path)
     for s in SCHEMA_EX:
@@ -239,13 +289,16 @@ def main():
     db.execute("INSERT INTO version VALUES ('EX_DB', ?, 'Example Sentence Data')", (VERSION,))
     db.executemany('INSERT INTO sentences VALUES (?,?,?,?)',
                    ((j, text[j], text[pairs[j][0]], 1 if pairs[j][1] else 0) for j in sorted(used)))
-    db.executemany('INSERT INTO card_sentence_link VALUES (?,?,?,?)', sorted(link_rows))
+    db.executemany('INSERT INTO card_sentence_link VALUES (?,?,?,?)', link_rows)
     for s in INDEX_EX:
         db.execute(s)
     finish_db(db)
     report['tatoeba_indexed_pairs'] = len(pairs)
     report['sentences'] = len(used)
     report['card_sentence_links'] = len(link_rows)
+    report['card_sentence_links_shown'] = sum(1 for r in link_rows if r[2])
+    stop_ids = {i for i in cards if is_stop_card(cards[i])}
+    report['card_sentence_links_to_stop_cards'] = sum(1 for r in link_rows if r[0] in stop_ids)
     report['cards_with_sentences'] = len({r[0] for r in link_rows})
     report['unresolved_index_words'] = unresolved
 

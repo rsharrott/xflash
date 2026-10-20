@@ -22,6 +22,7 @@ python3 build.py           # ~1 min; checks the lock again, writes the DBs and r
 ```
 
 Python 3.9+ standard library only (sqlite3 with FTS4, gzip, tarfile/bz2).
+`python3 -m unittest -v test_build` runs the unit tests (no sources needed).
 Building twice from the same sources produces byte-identical files.
 
 ### Sources and the lock file
@@ -92,8 +93,20 @@ and licence links.
   * Each `jpn_indices` B-line word is resolved to a card by kanji or kana form,
     filtered by the given reading (or the `#ent_seq` disambiguator), preferring the
     exact headword, then common words. Words with more than 3 candidate cards are skipped.
-  * Per card, the 10 best links (checked words first, then shorter sentences) get
-    `should_show = 1`, and at most 20 links are kept.
+  * Per card, the 20 best sentences (checked words first, then shorter sentences)
+    are kept, and the first 10 get `should_show = 1`. Only those sentences ship.
+  * Every shipped sentence then also links to each of its other resolved words with
+    `should_show = 0`, so an expanded sentence lists all its words (母, 忙しい …) and not
+    only the cards that picked it. A card's own sentence list still reads only its
+    `should_show = 1` links (at most 10).
+  * Stop words: B-line words in `tatoeba.STOP_WORDS` (particles, function words) are
+    dropped by their surface form before linking. The extra `should_show = 0` links
+    also skip any card that resolves to a stop word (`build.EXTRA_LINK_STOP_WORDS`:
+    that list plus のに), checked on the card's headword, or on its reading when the
+    card is written in kana. The surface check alone misses most of them: the B-lines
+    write の (→ the 乃 card), な, 仕舞う, 彼の(あの) and 何の(どの), while the list has
+    乃, しまう, あの and どの. Those cards keep their own top 20 sentences, as in the
+    original build, but aren't listed under other sentences.
   * `sentence_id` = Tatoeba Japanese sentence id.
 * **Curated inputs** in `data/` hold what JMdict doesn't provide, and they are
   the source of truth for it. Edit them to change built-in sets.

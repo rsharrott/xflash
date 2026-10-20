@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "ExampleSentence.h"
 
+//! Most sentences +searchSentencesForKeyword: returns (the same cap as the word search)
+extern NSInteger const kLWESentenceSearchLimit;
 
 @interface ExampleSentencePeer : NSObject
 

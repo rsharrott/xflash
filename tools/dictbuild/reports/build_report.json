@@ -11,7 +11,9 @@
   "handmade_cards_hidden_from_search_as_jmdict_duplicates": 0,
   "tatoeba_indexed_pairs": 148014,
   "sentences": 103271,
-  "card_sentence_links": 171610,
+  "card_sentence_links": 457367,
+  "card_sentence_links_shown": 122447,
+  "card_sentence_links_to_stop_cards": 151,
   "cards_with_sentences": 29467,
   "unresolved_index_words": 52907,
   "user_db_templates": {
@@ -19,7 +21,7 @@
   },
   "bytes jFlash/sql/jFlash-CARD-2.0.db": 47255552,
   "bytes jFlash/sql/plugins/jFlash-FTS-2.0.db": 44871680,
-  "bytes jFlash/sql/plugins/jFlash-EX-2.0.db": 18386944,
+  "bytes jFlash/sql/plugins/jFlash-EX-2.0.db": 30461952,
   "card_types": {
     "3": 219099,
     "0": 343,
