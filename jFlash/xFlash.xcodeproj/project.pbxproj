@@ -656,6 +656,8 @@
 		B4D9E00619000060000000AA /* ModalTaskViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4925735211C12619006FA4E1 /* ModalTaskViewController.m */; };
 		91910156148992EC003E9A19 /* TagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910155148992EC003E9A19 /* TagTest.m */; };
 		91910157148992EC003E9A19 /* TagTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 91910155148992EC003E9A19 /* TagTest.m */; };
+		BEEF13401FC53B6372B214E9 /* AppStoreLinkTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */; };
+		D2D1BF2CDA56A9055FE7CACE /* AppStoreLinkTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */; };
 		919FBDBB1622E9D2001FD77B /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 919FBDBA1622E9D2001FD77B /* Social.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		91B3E2F1144FD8ED003F8986 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 91B3E2F0144FD8ED003F8986 /* libz.tbd */; };
 		91CBA67811BB496C004BD0D0 /* ExampleSentencesView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 91CBA67711BB496C004BD0D0 /* ExampleSentencesView.xib */; };
@@ -1103,6 +1105,7 @@
 		B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StudySetBadgeAccessibilityTest.m; path = Tests/StudySetBadgeAccessibilityTest.m; sourceTree = SOURCE_ROOT; };
 		B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DownloadManagerTabAnimationTest.m; path = Tests/DownloadManagerTabAnimationTest.m; sourceTree = SOURCE_ROOT; };
 		91910155148992EC003E9A19 /* TagTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TagTest.m; path = Tests/TagTest.m; sourceTree = SOURCE_ROOT; };
+		4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppStoreLinkTest.m; path = Tests/AppStoreLinkTest.m; sourceTree = SOURCE_ROOT; };
 		91992E2811D1A2F600CFCACD /* jFlash.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = jFlash.db; path = sql/jFlash.db; sourceTree = "<group>"; };
 		91992E3311D1A31B00CFCACD /* jFlash-CARD-2.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "jFlash-CARD-2.0.db"; path = "sql/jFlash-CARD-2.0.db"; sourceTree = "<group>"; };
 		919FBDBA1622E9D2001FD77B /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
@@ -1391,6 +1394,7 @@
 				49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */,
 				91910154148992EC003E9A19 /* TagTest.h */,
 				91910155148992EC003E9A19 /* TagTest.m */,
+				4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */,
 				B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */,
 				B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */,
 			);
@@ -2677,6 +2681,7 @@
 				498EBDA91488B96800BA6DE7 /* Plugin.m in Sources */,
 				498EBDB51488D43A00BA6DE7 /* PluginTest.m in Sources */,
 				91910156148992EC003E9A19 /* TagTest.m in Sources */,
+				BEEF13401FC53B6372B214E9 /* AppStoreLinkTest.m in Sources */,
 				B4D9E00219000060000000AA /* StudySetBadgeAccessibilityTest.m in Sources */,
 				B4D9E00419000060000000AA /* DownloadManagerTabAnimationTest.m in Sources */,
 				B4D9E00519000060000000AA /* DownloadManager.m in Sources */,
@@ -2786,6 +2791,7 @@
 				498EBDAA1488B96800BA6DE7 /* Plugin.m in Sources */,
 				498EBDB61488D43A00BA6DE7 /* PluginTest.m in Sources */,
 				91910157148992EC003E9A19 /* TagTest.m in Sources */,
+				D2D1BF2CDA56A9055FE7CACE /* AppStoreLinkTest.m in Sources */,
 				691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */,
 				AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */,
 				7CC11512982F8F6DFFFD3931 /* PrelaunchCleanupTest.m in Sources */,
