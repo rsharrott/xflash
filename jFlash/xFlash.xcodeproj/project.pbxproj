@@ -3048,7 +3048,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ross.jflash;
+				PRODUCT_BUNDLE_IDENTIFIER = com.japaneseinaflash.jflash;
 				PRODUCT_NAME = jFlash;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3086,7 +3086,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ross.jflash;
+				PRODUCT_BUNDLE_IDENTIFIER = com.japaneseinaflash.jflash;
 				PRODUCT_NAME = jFlash;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3384,7 +3384,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ross.jflash;
+				PRODUCT_BUNDLE_IDENTIFIER = com.japaneseinaflash.jflash;
 				PRODUCT_NAME = jFlash;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = 1;
