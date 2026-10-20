@@ -108,8 +108,8 @@ NSString * LWEAppStoreWriteReviewURLString(void)
 
       NSString * const LWE_XFLASH_HOMEPAGE       = @"https://japaneseinaflash.com";
 
-      // App Store ID (Apple ID) of Japanese in a Flash! (com.ross.jflash, SKU jflash)
-      NSString * const kAppStoreID               = @"6817409240";
+      // App Store ID (Apple ID) of Japanese in a Flash! (bundle ID and SKU com.japaneseinaflash.jflash)
+      NSString * const kAppStoreID               = @"6824724935";
 
       // These constants are general to the flashes
       NSString * const LWE_CURRENT_VERSION       = @"2.0";
