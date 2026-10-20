@@ -128,26 +128,33 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 //! nothing, and its ObjC API is deprecated in iOS 18).
 - (void) _requestReview
 {
-  NSString *appURL = LWEAppStoreURLString();
-  if (appURL == nil)
+  NSString *reviewURLString = LWEAppStoreWriteReviewURLString();
+  if (reviewURLString == nil)
   {
     return;
   }
-  NSURL *reviewURL = [NSURL URLWithString:[appURL stringByAppendingString:@"?action=write-review"]];
+  NSURL *reviewURL = [NSURL URLWithString:reviewURLString];
   [[UIApplication sharedApplication] openURL:reviewURL options:@{} completionHandler:nil];
 }
 
 - (void) _shareJFlash
 {
-  NSString *appURL = LWEAppStoreURLString();
+  [self _shareAppURLString:LWEAppStoreURLString()];
+}
+
+//! Presents the share sheet for a store URL; no-op if the string is nil or won't parse (malformed ID)
+- (BOOL) _shareAppURLString:(NSString *)appURLString
+{
+  NSURL *appURL = (appURLString != nil) ? [NSURL URLWithString:appURLString] : nil;
   if (appURL == nil)
   {
-    return;
+    return NO;
   }
-  NSArray *sharingItems = @[[NSURL URLWithString:appURL]];
+  NSArray *sharingItems = @[appURL];
   UIActivityViewController *activityController = [[[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil] autorelease];
   activityController.popoverPresentationController.barButtonItem = self.navigationItem.rightBarButtonItem;
   [self presentViewController:activityController animated:YES completion:nil];
+  return YES;
 }
 
 

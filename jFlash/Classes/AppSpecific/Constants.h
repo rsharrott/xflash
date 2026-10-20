@@ -83,10 +83,14 @@ extern NSString * const LWE_SUPPORT_EMAIL;
 extern NSString * const LWE_SUPPORT_URL;
 extern NSString * const LWE_PRIVACY_URL;
 
-//! App Store ID of this app. Empty until the new app has one -- see Constants.m (TODO).
+//! App Store ID of this app (set per app in Constants.m). Empty while the app is not on the App Store.
 extern NSString * const kAppStoreID;
+//! https://apps.apple.com/app/id<appStoreID>, or nil when appStoreID is empty.
+extern NSString * LWEAppStoreURLStringForID(NSString *appStoreID);
 //! https://apps.apple.com/app/id<kAppStoreID>, or nil while kAppStoreID is empty.
 extern NSString * LWEAppStoreURLString(void);
+//! The App Store write-a-review page (<store URL>?action=write-review), or nil while kAppStoreID is empty.
+extern NSString * LWEAppStoreWriteReviewURLString(void);
 
 extern NSString * const LWE_XFLASH_HOMEPAGE;
 
