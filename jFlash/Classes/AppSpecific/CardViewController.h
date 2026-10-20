@@ -67,6 +67,10 @@ extern NSString * const LWECardHTMLTemplate_EtoJ;
 //! the card shows (on an iPhone SE often only the first sense fits), once its height is known.
 - (void) flashMeaningScrollIndicatorIfScrollable;
 
+//! YES while a reveal's scroll-indicator flash waits for the meaning to be measured.  Cleared when
+//! the next card is set up, so it never carries over to another card.
+- (BOOL) meaningScrollFlashPending;
+
 //! Y (in this controller's view) below which a tap on the card should reveal the answer.
 //! Everything above it (headword, speaker, reading toggle, "+N readings") stays tappable.
 - (CGFloat) revealAreaTop;

@@ -35,6 +35,38 @@ static inline void LWEStudySetApplyBadgeAccessibility(UITableViewCell *cell, BOO
   cell.accessibilityValue = hasBadge ? LWEStudySetBadgeAccessibilityValue(title, englishWord, localizedWord) : nil;
 }
 
+/**
+ * Opaque nav bar for the Study Sets screens, in the theme's navBarFill / navTitleInk.  The table starts
+ * under the bar (edgesForExtendedLayout = none), so the default transparent scroll-edge bar would show
+ * the white window instead of the paper screen.  Autoreleased; same appearance for every bar state.
+ */
+static inline UINavigationBarAppearance *LWEStudySetNavigationBarAppearance(UIColor *fill, UIColor *titleInk)
+{
+  UINavigationBarAppearance *appearance = [[[UINavigationBarAppearance alloc] init] autorelease];
+  [appearance configureWithOpaqueBackground];
+  if (fill) appearance.backgroundColor = fill;
+  if (titleInk)
+  {
+    NSMutableDictionary *attrs = [NSMutableDictionary dictionaryWithDictionary:appearance.titleTextAttributes];
+    [attrs setObject:titleInk forKey:NSForegroundColorAttributeName];
+    appearance.titleTextAttributes = attrs;
+    NSMutableDictionary *largeAttrs = [NSMutableDictionary dictionaryWithDictionary:appearance.largeTitleTextAttributes];
+    [largeAttrs setObject:titleInk forKey:NSForegroundColorAttributeName];
+    appearance.largeTitleTextAttributes = largeAttrs;
+  }
+  return appearance;
+}
+
+//! Puts the appearance on this screen's navigation item (pushed group screens get their own), for every bar state
+static inline void LWEStudySetApplyNavigationBarAppearance(UINavigationItem *item, UIColor *fill, UIColor *titleInk)
+{
+  UINavigationBarAppearance *appearance = LWEStudySetNavigationBarAppearance(fill, titleInk);
+  item.standardAppearance = appearance;
+  item.scrollEdgeAppearance = appearance;
+  item.compactAppearance = appearance;
+  item.compactScrollEdgeAppearance = appearance;
+}
+
 @interface StudySetViewController : UITableViewController <UISearchBarDelegate>
 {
   UIBarButtonItem *_addButton;

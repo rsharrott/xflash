@@ -18,6 +18,9 @@
 //! VoiceOver value for the score bubble: "100% right" (localized)
 + (NSString *) accessibilityValueForPercentCorrect:(CGFloat)percentCorrect;
 
+//! The face is a VoiceOver element when it can be tapped (Practice) or shows a score
++ (BOOL) scoreBubbleIsAccessibilityElementWhenEnabled:(BOOL)enabled bubbleHidden:(BOOL)bubbleHidden;
+
 - (IBAction) doTogglePercentCorrectBtn;
 
 - (void) turnPercentCorrectOff;

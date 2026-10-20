@@ -17,6 +17,7 @@
 #import "StudyViewController.h"
 #import "ProgressBarViewController.h"
 #import "ThemeManager.h"
+#import "StudySetViewController.h"
 
 @interface CardReadingTest : XCTestCase
 @end
@@ -611,6 +612,106 @@ static CGFloat LWETestContrast(UIColor *a, UIColor *b)
     }
   }
   XCTAssertLessThan(LWETestContrast([UIColor grayColor], [UIColor whiteColor]), 4.5, @"The grey it replaces fails AA");
+}
+
+#pragma mark - PR #28 review follow-ups
+
+- (void)testScoreBubbleReadsTheScoreInPracticeMode
+{
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  MoodIcon *mood = cvc.moodIcon;
+  XCTAssertNotNil(mood.moodIconBtn);
+  [cvc studyViewModeDidChange:nil];
+  [mood updateMoodIcon:100.0f];
+  XCTAssertFalse(mood.talkBubble.hidden, @"Practice shows the % bubble");
+  XCTAssertTrue(mood.moodIconBtn.isAccessibilityElement);
+  XCTAssertEqualObjects(mood.moodIconBtn.accessibilityLabel, NSLocalizedString(@"Session score", nil));
+  XCTAssertEqualObjects(mood.moodIconBtn.accessibilityValue, [MoodIcon accessibilityValueForPercentCorrect:100.0f]);
+  XCTAssertTrue((mood.moodIconBtn.accessibilityTraits & UIAccessibilityTraitButton) != 0);
+}
+
+- (void)testBrowseModeScoreBubbleHasNoScoreForVoiceOver
+{
+  // Review: VoiceOver said "Session score, 100% right" on every Browse card while the % is hidden
+  Class browseClass = NSClassFromString(@"BrowseModeCardViewDelegate");
+  XCTAssertNotNil(browseClass);
+  id<CardViewControllerDelegate> browse = [[[browseClass alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:browse];
+  MoodIcon *mood = cvc.moodIcon;
+  [cvc studyViewModeDidChange:nil];
+  [mood updateMoodIcon:100.0f]; // CardViewController seeds 100%; a later update must not bring the value back
+  XCTAssertTrue(mood.talkBubble.hidden, @"Browse never shows the %% bubble");
+  XCTAssertNil(mood.moodIconBtn.accessibilityValue, @"No score read while none is on screen");
+  XCTAssertFalse(mood.moodIconBtn.isAccessibilityElement, @"Not tappable and no score: not a VoiceOver stop");
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+  XCTAssertNil(mood.moodIconBtn.accessibilityValue, @"...on the next card too");
+
+  // Back to Practice: the bubble and its value return
+  cvc.delegate = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  [cvc studyViewModeDidChange:nil];
+  XCTAssertTrue(mood.moodIconBtn.isAccessibilityElement);
+  XCTAssertEqualObjects(mood.moodIconBtn.accessibilityValue, [MoodIcon accessibilityValueForPercentCorrect:100.0f]);
+}
+
+- (void)testPracticeScoreBubbleHiddenByTapHasNoValue
+{
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  MoodIcon *mood = cvc.moodIcon;
+  [cvc studyViewModeDidChange:nil];
+  [mood updateMoodIcon:67.0f];
+  [mood doTogglePercentCorrectBtn];
+  XCTAssertTrue(mood.talkBubble.hidden);
+  XCTAssertNil(mood.moodIconBtn.accessibilityValue, @"Bubble hidden: no score value");
+  XCTAssertTrue(mood.moodIconBtn.isAccessibilityElement, @"Still a button, to show the score again");
+  [mood doTogglePercentCorrectBtn];
+  XCTAssertEqualObjects(mood.moodIconBtn.accessibilityValue, [MoodIcon accessibilityValueForPercentCorrect:67.0f]);
+  XCTAssertTrue([MoodIcon scoreBubbleIsAccessibilityElementWhenEnabled:YES bubbleHidden:YES]);
+  XCTAssertTrue([MoodIcon scoreBubbleIsAccessibilityElementWhenEnabled:NO bubbleHidden:NO]);
+  XCTAssertFalse([MoodIcon scoreBubbleIsAccessibilityElementWhenEnabled:NO bubbleHidden:YES]);
+}
+
+- (void)testMeaningScrollFlashDoesNotCarryOverToTheNextCard
+{
+  // Review: a reveal's pending scroll-indicator flash could fire on the next card
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+  XCTAssertFalse([cvc meaningScrollFlashPending]);
+  [practice cardViewDidReveal:cvc]; // meaning not measured yet: the flash waits for the measurement
+  XCTAssertTrue([cvc meaningScrollFlashPending]);
+  [cvc setupWithCard:[self _cardWithHeadword:@"海" reading:@"うみ" romaji:@"umi"]];
+  XCTAssertFalse([cvc meaningScrollFlashPending], @"The next card starts with no flash pending");
+  [cvc flashMeaningScrollIndicatorIfScrollable];
+  XCTAssertTrue([cvc meaningScrollFlashPending], @"...and flashes after its own reveal");
+}
+
+- (void)testStudySetNavigationBarIsOpaqueInTheThemeColours
+{
+  // Review: the Study Sets nav bar showed the white window instead of paper #E7E1D6
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  for (NSString *key in [tm themeKeysList])
+  {
+    UIColor *fill = [tm colorForSlot:@"navBarFill" themeKey:key];
+    UIColor *ink = [tm colorForSlot:@"navTitleInk" themeKey:key];
+    XCTAssertNotNil(fill, @"%@", key);
+    UINavigationItem *item = [[[UINavigationItem alloc] initWithTitle:@"JLPT"] autorelease];
+    LWEStudySetApplyNavigationBarAppearance(item, fill, ink);
+    for (UINavigationBarAppearance *a in @[item.standardAppearance, item.scrollEdgeAppearance, item.compactAppearance, item.compactScrollEdgeAppearance])
+    {
+      XCTAssertEqualObjects(a.backgroundColor, fill, @"%@", key);
+      CGFloat red = 0, green = 0, blue = 0, alpha = 0;
+      [a.backgroundColor getRed:&red green:&green blue:&blue alpha:&alpha];
+      XCTAssertEqualWithAccuracy(alpha, 1.0, 0.001, @"%@: opaque", key);
+      XCTAssertEqualObjects(a.titleTextAttributes[NSForegroundColorAttributeName], ink, @"%@", key);
+    }
+  }
+  CGFloat r = 0, g = 0, b = 0, alpha = 0;
+  [[tm colorForSlot:@"navBarFill" themeKey:@"PAPER"] getRed:&r green:&g blue:&b alpha:&alpha];
+  XCTAssertEqual((int)lround(r * 255), 0xE7);
+  XCTAssertEqual((int)lround(g * 255), 0xE1);
+  XCTAssertEqual((int)lround(b * 255), 0xD6);
 }
 
 @end

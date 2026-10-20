@@ -207,6 +207,7 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   LWEMeaningInsets _meaningInsets;
   NSUInteger _meaningMeasureToken;
   BOOL _meaningFlashPending;
+  NSUInteger _meaningFlashToken; // bumped on every card setup: a flash queued for the last card is dropped
   BOOL _observingMeaningScroll;
 }
 
@@ -1273,6 +1274,11 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 // Prepare the view for the current card
 - (void) _prepareView:(Card*)card
 {
+  // A new card: a scroll-indicator flash still pending (or queued) for the last card's reveal must not
+  // carry over; this card flashes only after its own reveal.
+  _meaningFlashPending = NO;
+  _meaningFlashToken++;
+
   // Reset the meaning's scroll view location.
   _meaningWebView.scrollView.contentOffset = CGPointZero;
   
@@ -1443,11 +1449,17 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   }
 }
 
+- (BOOL) meaningScrollFlashPending
+{
+  return _meaningFlashPending;
+}
+
 - (void) _flashMeaningScrollIndicator
 {
-  // After the reveal has drawn, so the flash is seen
+  // After the reveal has drawn, so the flash is seen (and only if the card hasn't changed meanwhile)
+  NSUInteger token = _meaningFlashToken;
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    if (self.meaningWebViewContainer.hidden == NO && _meaningInsets.scrolls)
+    if (token == _meaningFlashToken && self.meaningWebViewContainer.hidden == NO && _meaningInsets.scrolls)
     {
       [_meaningWebView.scrollView flashScrollIndicators];
     }
