@@ -1,3 +1,0 @@
-[submodule "jFlash/Server/lweflash/lib/gaesessions"]
-	path = jFlash/Server/lweflash/lib/gaesessions
-	url = https://github.com/dound/gae-sessions.git
