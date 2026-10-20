@@ -283,21 +283,21 @@
 }
 
 /**
- * Returns an array containng cardId integers that are linked to the sentence
+ * Returns an array of the Cards (simply hydrated) for every word linked to the sentence
  * \param sentenceId Primary key of the sentence to look up cards for
+ *
+ * All links count here, whatever their should_show.  should_show only picks the (at most 10)
+ * sentences a *card* lists (ExampleSentencePeer); an expanded sentence lists all of its words.
+ * Since EX 2.0 every shipped sentence is linked to each word in it (tools/dictbuild), so
+ * filtering on should_show would drop words like 母 in 母は家事を切り盛りするのに忙しい。
+ * whose card picked other sentences.
  */
 + (NSArray*) retrieveCardSetForExampleSentenceId:(NSInteger)sentenceId
 {	
 	LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-  FMResultSet *rs = nil;
-  if ([ExampleSentencePeer isNewVersion])
-  {
-    rs = [db.dao executeQuery:@"SELECT c.* FROM card_sentence_link l, cards c WHERE l.card_id = c.card_id AND sentence_id = ? AND l.should_show = '1'", [NSNumber numberWithInt:sentenceId]];
-  }
-  else
-  {
-    rs = [db.dao executeQuery:@"SELECT c.* FROM card_sentence_link l, cards c WHERE l.card_id = c.card_id AND sentence_id = ?", [NSNumber numberWithInt:sentenceId]];
-  }
+  // card_id keeps the order the same on every run (the links are stored in that order).
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT c.* FROM card_sentence_link l, cards c WHERE l.card_id = c.card_id AND l.sentence_id = ? ORDER BY l.card_id ASC",
+                     [NSNumber numberWithInteger:sentenceId]];
 	        
 	NSMutableArray *cardList = [NSMutableArray array];
 	while ([rs next])

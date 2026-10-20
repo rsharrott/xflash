@@ -10,6 +10,8 @@
 #import "CardPeer.h"
 #import "jFlashAppDelegate.h"
 
+NSInteger const kLWESentenceSearchLimit = 100;
+
 /*!
     @class ExampleSentencePeer
     @abstract    Handles getting ExampleSentence objects from LWEDatabase
@@ -21,7 +23,9 @@
 #if defined (LWE_JFLASH)
   // "New" example databases (EX 1.2 and later, including the 2.0 Tatoeba refresh) have
   // card_sentence_link.should_show; EX 1.1 didn't.  Ask the attached database for the column
-  // instead of guessing from its version string, and only re-check when the loaded version changes.
+  // instead of guessing from its version string.  A YES is kept until the loaded version changes; a NO
+  // is checked again next time (one PRAGMA), so asking before EX_DB is attached to the current
+  // connection (the unit tests reopen the database) can't stick.
   static NSString *checkedVersion = nil;
   static BOOL hasShouldShow = NO;
   jFlashAppDelegate *appDelegate = (jFlashAppDelegate*)[[UIApplication sharedApplication] delegate];
@@ -30,7 +34,7 @@
   {
     return NO;
   }
-  if (checkedVersion == nil || [checkedVersion isEqualToString:exVersion] == NO)
+  if (hasShouldShow == NO || checkedVersion == nil || [checkedVersion isEqualToString:exVersion] == NO)
   {
     hasShouldShow = NO;
     // The plugin is attached under its pluginId (EX_DB), one of our own constants.
@@ -174,7 +178,14 @@
   }
   NSString *inList = [placeholders componentsJoinedByString:@","];
 
-  NSString *sql = [NSString stringWithFormat:@"SELECT DISTINCT(s.sentence_id), s.sentence_ja, s.sentence_en, s.checked FROM sentences s, card_sentence_link c WHERE s.sentence_id = c.sentence_id AND c.card_id IN (%@)", inList];
+  // Every shipped sentence links to all of its words (EX 2.0), so a common word can match
+  // hundreds of sentences.  Cap the result like the word search (+[CardPeer searchCardsForKeyword:],
+  // 100 cards), whose results the Search tab shows as one unpaged list.  (The Search tab no longer
+  // has a sentences mode, so nothing calls this today.)  Sentences a card shows come first.
+  NSString *order = [ExampleSentencePeer isNewVersion] ? @"MAX(c.should_show) DESC, s.sentence_id ASC" : @"s.sentence_id ASC";
+  NSString *sql = [NSString stringWithFormat:@"SELECT s.sentence_id, s.sentence_ja, s.sentence_en, s.checked FROM sentences s, card_sentence_link c "
+                   "WHERE s.sentence_id = c.sentence_id AND c.card_id IN (%@) GROUP BY s.sentence_id ORDER BY %@ LIMIT %ld",
+                   inList, order, (long)kLWESentenceSearchLimit];
   return [ExampleSentencePeer retrieveSentencesWithSQL:sql hydrate:YES arguments:arguments];
 }
 

@@ -562,6 +562,7 @@
 		AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
 		21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 969093541A684E73B823323F /* JapaneseCardTest.m */; };
 		3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 864F7B72A7F8966D023DCF05 /* CardReadingTest.m */; };
+		5E17A0B2C3D4E5F60718293B /* ExampleSentenceLinkTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E17A0B2C3D4E5F60718293A /* ExampleSentenceLinkTest.m */; };
 		55842A4C47F165BEBC74D0C0 /* AppIconTest.m in Sources */ = {isa = PBXBuildFile; fileRef = DFC704BFAE82E62D5771D3BA /* AppIconTest.m */; };
 		49E3D17F1472803900F79308 /* SetupDatabaseHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */; };
 		49E3D1801472803900F79308 /* SetupDatabaseHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */; };
@@ -978,6 +979,7 @@
 		07203B478DBF477887BC9B5C /* JapaneseCardTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JapaneseCardTest.h; path = Tests/jFlashTests/JapaneseCardTest.h; sourceTree = SOURCE_ROOT; };
 		969093541A684E73B823323F /* JapaneseCardTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JapaneseCardTest.m; path = Tests/jFlashTests/JapaneseCardTest.m; sourceTree = SOURCE_ROOT; };
 		864F7B72A7F8966D023DCF05 /* CardReadingTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardReadingTest.m; path = Tests/jFlashTests/CardReadingTest.m; sourceTree = SOURCE_ROOT; };
+		5E17A0B2C3D4E5F60718293A /* ExampleSentenceLinkTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ExampleSentenceLinkTest.m; path = Tests/jFlashTests/ExampleSentenceLinkTest.m; sourceTree = SOURCE_ROOT; };
 		DFC704BFAE82E62D5771D3BA /* AppIconTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppIconTest.m; path = Tests/jFlashTests/AppIconTest.m; sourceTree = SOURCE_ROOT; };
 		49E3D17B1472803900F79308 /* SetupDatabaseHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SetupDatabaseHelper.h; path = Tests/SetupDatabaseHelper.h; sourceTree = SOURCE_ROOT; };
 		49E3D17C1472803900F79308 /* SetupDatabaseHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SetupDatabaseHelper.m; path = Tests/SetupDatabaseHelper.m; sourceTree = SOURCE_ROOT; };
@@ -1412,6 +1414,7 @@
 				07203B478DBF477887BC9B5C /* JapaneseCardTest.h */,
 				969093541A684E73B823323F /* JapaneseCardTest.m */,
 				864F7B72A7F8966D023DCF05 /* CardReadingTest.m */,
+				5E17A0B2C3D4E5F60718293A /* ExampleSentenceLinkTest.m */,
 				DFC704BFAE82E62D5771D3BA /* AppIconTest.m */,
 			);
 			name = JFlash;
@@ -2675,6 +2678,7 @@
 				E7A1C0DE5B1A4E0F9C2D3B42 /* AppBundleResourcesTest.m in Sources */,
 				21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */,
 				3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */,
+				5E17A0B2C3D4E5F60718293B /* ExampleSentenceLinkTest.m in Sources */,
 				55842A4C47F165BEBC74D0C0 /* AppIconTest.m in Sources */,
 				4971252C14873B0000D4D150 /* MoodIcon.m in Sources */,
 				498EBDA31488AEAA00BA6DE7 /* PluginManagerTest.m in Sources */,
