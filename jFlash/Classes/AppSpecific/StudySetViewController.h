@@ -87,7 +87,7 @@ static inline CGFloat LWEStudySetSearchBarScrollRoom(CGFloat visibleHeight, CGFl
   UIView *_searchOverlay;
 	BOOL searching;
   CGFloat _searchBarScrollRoom; //!< bottom inset added by -updateSearchBarScrollRoom (see LWEStudySetSearchBarScrollRoom)
-  BOOL _keepSearchBarHidden;    //!< -hideSearchBar ran and the user hasn't scrolled since: keep it off the top
+  BOOL _keepSearchBarHidden;    //!< -hideSearchBar ran and the user hasn't scrolled since: keep it off the top (one-shot)
 }
 
 - (id) initWithGroup:(Group*)aGroup;
@@ -98,6 +98,9 @@ static inline CGFloat LWEStudySetSearchBarScrollRoom(CGFloat visibleHeight, CGFl
 - (void) doDoneSearching;
 - (void) hideSearchBar;
 - (void) updateSearchBarScrollRoom;
+
+//! YES from -hideSearchBar until the user scrolls (drag, status-bar tap, search field) or the screen has appeared
+@property (nonatomic, readonly) BOOL keepsSearchBarHidden;
 
 @property NSInteger selectedTagId;
 @property (nonatomic, retain) IBOutlet UISearchBar *searchBar;

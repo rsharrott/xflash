@@ -24,14 +24,50 @@
 @interface LWEStudySetStubGroup : NSObject
 @property (nonatomic, retain) NSString *groupName;
 @property (nonatomic) NSInteger groupId;
+@property (nonatomic, retain) NSArray *tags; //!< childTags (empty when nil)
 @end
 
 @implementation LWEStudySetStubGroup
-@synthesize groupName, groupId;
-- (NSArray *) childTags { return [NSArray array]; }
+@synthesize groupName, groupId, tags;
+- (NSArray *) childTags { return tags ?: [NSArray array]; }
 - (BOOL) isTopLevelGroup { return NO; }
-- (void) dealloc { [groupName release]; [super dealloc]; }
+- (void) dealloc { [groupName release]; [tags release]; [super dealloc]; }
 @end
+
+//! Stands in for a Tag row (name, id, word count), so set rows draw without the database
+@interface LWEStudySetStubTag : NSObject
+@property (nonatomic, retain) NSString *tagName;
+@property (nonatomic) NSInteger tagId;
+@property (nonatomic) NSInteger cardCount;
+@end
+
+@implementation LWEStudySetStubTag
+@synthesize tagName, tagId, cardCount;
+- (BOOL) isEditable { return NO; }
+- (void) dealloc { [tagName release]; [super dealloc]; }
+@end
+
+//! count stub sets, "Set 1" ... (ids from 1000, so none is the starred set)
+static NSMutableArray *LWEStudySetStubTags(NSInteger count)
+{
+  NSMutableArray *tags = [NSMutableArray arrayWithCapacity:count];
+  for (NSInteger i = 0; i < count; i++)
+  {
+    LWEStudySetStubTag *tag = [[LWEStudySetStubTag alloc] init];
+    tag.tagName = [NSString stringWithFormat:@"Set %ld", (long)(i + 1)];
+    tag.tagId = 1000 + i;
+    tag.cardCount = 100;
+    [tags addObject:tag];
+    [tag release];
+  }
+  return tags;
+}
+
+//! Lets queued main-queue work (the one-shot re-hide reset after -viewDidAppear:) run
+static void LWEStudySetSpinMainQueue(void)
+{
+  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+}
 
 static void LWEStudySetTestNoop(id self, SEL _cmd) {}
 
@@ -798,6 +834,126 @@ static CGFloat LWETestContrast(UIColor *a, UIColor *b)
   XCTAssertEqualWithAccuracy(LWEStudySetSearchBarScrollRoom(675, 64, 739), 0, 0.001, @"exactly enough");
   XCTAssertEqualWithAccuracy(LWEStudySetSearchBarScrollRoom(675, 64, 1810), 0, 0.001, @"long list needs nothing");
   XCTAssertEqualWithAccuracy(LWEStudySetSearchBarScrollRoom(500.25, 56, 500), 57, 0.001, @"rounded up to whole points");
+}
+
+/**
+ * Review nit on #32: the real controller in a 375x675 window.  A short group gets bottom room so the
+ * search bar hides fully, a long list gets none, and while searching (results from all sets) the
+ * target is 0.  The re-hide flag is cleared by a status-bar tap, the search field and after
+ * -viewDidAppear:, and the re-hide is skipped while searching.
+ */
+- (void) testStudySetSearchBarScrollRoomAndReHideInAWindow
+{
+  Class studySetClass = LWEStudySetControllerClassWithoutDatabase();
+  XCTAssertNotNil(studySetClass);
+  if (studySetClass == nil) return;
+
+  UIWindowScene *scene = nil;
+  for (UIScene *s in [UIApplication sharedApplication].connectedScenes)
+  {
+    if ([s isKindOfClass:[UIWindowScene class]]) { scene = (UIWindowScene *)s; break; }
+  }
+  UIWindow *window = scene ? [[UIWindow alloc] initWithWindowScene:scene] : [[UIWindow alloc] init];
+  window.frame = CGRectMake(0, 0, 375, 675);
+
+  // Short group: 4 sets
+  LWEStudySetStubGroup *shortGroup = [[[LWEStudySetStubGroup alloc] init] autorelease];
+  shortGroup.groupName = @"JLPT N4";
+  shortGroup.tags = LWEStudySetStubTags(4);
+  StudySetViewController *vc = [[[studySetClass alloc] initWithGroup:(Group *)shortGroup] autorelease];
+  window.rootViewController = vc;
+  window.hidden = NO;
+  UITableView *tv = vc.tableView;
+  [vc viewWillAppear:NO]; // reload + -hideSearchBar
+  [window layoutIfNeeded];
+  [tv layoutIfNeeded];
+  [vc updateSearchBarScrollRoom];
+
+  CGFloat barHeight = vc.searchBar.frame.size.height;
+  XCTAssertGreaterThan(barHeight, 0);
+  CGFloat hiddenY = -tv.adjustedContentInset.top + barHeight;
+  CGFloat maxY = tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.size.height;
+  CGFloat shortRoom = tv.contentInset.bottom;
+  XCTAssertGreaterThan(shortRoom, 0, @"short group: room to scroll the search bar off");
+  XCTAssertGreaterThanOrEqual(maxY, hiddenY - 0.5, @"the hidden offset is reachable");
+  XCTAssertEqualWithAccuracy(tv.contentOffset.y, hiddenY, 0.5, @"search bar fully hidden");
+  XCTAssertTrue(vc.keepsSearchBarHidden);
+
+  // The re-hide puts a clamped offset back while the flag is set
+  tv.contentOffset = CGPointMake(0, -tv.adjustedContentInset.top);
+  [vc updateSearchBarScrollRoom];
+  XCTAssertEqualWithAccuracy(tv.contentOffset.y, hiddenY, 0.5, @"re-hidden before the user scrolls");
+
+  // Status-bar tap clears it, and the scroll to the top then stays
+  XCTAssertTrue([vc scrollViewShouldScrollToTop:tv]);
+  XCTAssertFalse(vc.keepsSearchBarHidden, @"status-bar tap");
+  tv.contentOffset = CGPointMake(0, -tv.adjustedContentInset.top);
+  [vc updateSearchBarScrollRoom];
+  XCTAssertEqualWithAccuracy(tv.contentOffset.y, -tv.adjustedContentInset.top, 0.5, @"no snap back after a status-bar tap");
+
+  // -viewDidAppear: clears it once, after the in-window layout
+  [vc hideSearchBar];
+  XCTAssertTrue(vc.keepsSearchBarHidden);
+  [vc viewDidAppear:NO];
+  LWEStudySetSpinMainQueue();
+  XCTAssertFalse(vc.keepsSearchBarHidden, @"one-shot: cleared after viewDidAppear");
+
+  // The search field clears it (searching is set first so the delegate skips the all-sets query)
+  [vc hideSearchBar];
+  XCTAssertTrue(vc.keepsSearchBarHidden);
+  [vc setValue:@YES forKey:@"searching"];
+  [vc searchBarTextDidBeginEditing:vc.searchBar];
+  XCTAssertFalse(vc.keepsSearchBarHidden, @"search field");
+
+  // Searching: a long result list (from all sets) gets no room, and the re-hide is skipped
+  [vc setValue:@YES forKey:@"searching"];
+  vc.tagArray = LWEStudySetStubTags(40);
+  [tv reloadData];
+  [tv layoutIfNeeded];
+  [vc updateSearchBarScrollRoom];
+  XCTAssertEqualWithAccuracy(tv.contentInset.bottom, 0, 0.5, @"searching: target inset 0");
+  [vc setValue:@YES forKey:@"keepSearchBarHidden"];
+  tv.contentOffset = CGPointMake(0, -tv.adjustedContentInset.top);
+  [vc updateSearchBarScrollRoom];
+  XCTAssertEqualWithAccuracy(tv.contentOffset.y, -tv.adjustedContentInset.top, 0.5, @"no re-hide while searching");
+  maxY = tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.size.height;
+  CGFloat lastRowBottom = CGRectGetMaxY([tv rectForRowAtIndexPath:[NSIndexPath indexPathForRow:39 inSection:0]]);
+  XCTAssertLessThan(maxY + tv.bounds.size.height - lastRowBottom, 60, @"results end near the bottom, no blank space");
+
+  // Done searching: the group's room comes back
+  [vc setValue:@NO forKey:@"searching"];
+  [vc doDoneSearching];
+  [tv layoutIfNeeded];
+  [vc updateSearchBarScrollRoom];
+  // The group's rows again (the exact room can differ by a few points once the rows are measured)
+  hiddenY = -tv.adjustedContentInset.top + barHeight;
+  maxY = tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.size.height;
+  XCTAssertGreaterThan(tv.contentInset.bottom, 0, @"room back after searching");
+  XCTAssertEqualWithAccuracy(maxY, hiddenY, 1.0, @"just enough room: the hidden offset is the end of the list");
+  XCTAssertEqualWithAccuracy(tv.contentOffset.y, hiddenY, 0.5, @"search bar hidden again after searching");
+  LWEStudySetSpinMainQueue();
+  XCTAssertFalse(vc.keepsSearchBarHidden, @"one-shot after done searching too");
+
+  window.hidden = YES;
+  window.rootViewController = nil;
+
+  // Long group: 40 sets need no room
+  LWEStudySetStubGroup *longGroup = [[[LWEStudySetStubGroup alloc] init] autorelease];
+  longGroup.groupName = @"Long";
+  longGroup.tags = LWEStudySetStubTags(40);
+  StudySetViewController *longVC = [[[studySetClass alloc] initWithGroup:(Group *)longGroup] autorelease];
+  window.rootViewController = longVC;
+  window.hidden = NO;
+  [longVC viewWillAppear:NO];
+  [window layoutIfNeeded];
+  [longVC.tableView layoutIfNeeded];
+  [longVC updateSearchBarScrollRoom];
+  XCTAssertEqualWithAccuracy(longVC.tableView.contentInset.bottom, 0, 0.5, @"long list needs no room");
+  XCTAssertEqualWithAccuracy(longVC.tableView.contentOffset.y, -longVC.tableView.adjustedContentInset.top + longVC.searchBar.frame.size.height, 0.5);
+
+  window.hidden = YES;
+  window.rootViewController = nil;
+  [window release];
 }
 
 @end

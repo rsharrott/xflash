@@ -22,6 +22,7 @@ enum Sections {
 
 @interface StudySetViewController ()
 - (void) _commonInit;
+- (void) _stopKeepingSearchBarHiddenAfterThisLayout;
 @end
 
 //! Row icons are SF Symbols; ~28pt like the old art
@@ -150,10 +151,13 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 /**
  * Keeps enough bottom inset that the search bar can scroll off the top of a short list (see
  * LWEStudySetSearchBarScrollRoom).  Only our own share of contentInset.bottom is changed.
+ * While searching the target is 0: the results come from all sets, not this group, so the room
+ * worked out for a short group would let a long result list scroll into blank space.
+ * -doDoneSearching (-hideSearchBar) puts the group's room back.
  */
 - (void) updateSearchBarScrollRoom
 {
-  if (self.isViewLoaded == NO || searching)
+  if (self.isViewLoaded == NO)
   {
     return;
   }
@@ -161,12 +165,18 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
   UIEdgeInsets inset = tv.contentInset;
   UIEdgeInsets adjusted = tv.adjustedContentInset;
   CGFloat visibleHeight = tv.bounds.size.height - adjusted.top - (adjusted.bottom - _searchBarScrollRoom);
-  CGFloat room = LWEStudySetSearchBarScrollRoom(visibleHeight, self.searchBar.frame.size.height, tv.contentSize.height);
+  CGFloat room = searching ? 0 : LWEStudySetSearchBarScrollRoom(visibleHeight, self.searchBar.frame.size.height, tv.contentSize.height);
   if (fabs(room - _searchBarScrollRoom) >= 0.5)
   {
     inset.bottom = MAX(0, inset.bottom - _searchBarScrollRoom + room);
     _searchBarScrollRoom = room;
     tv.contentInset = inset;
+  }
+  // Only the re-hide is skipped while searching, or while the search field is active (e.g. the user
+  // cleared the text with the keyboard still up): the search bar must not scroll away from the typing
+  if (searching || self.searchBar.isFirstResponder)
+  {
+    return;
   }
   // The rows can settle after -hideSearchBar (first layout in the window); if the shorter content
   // clamped the offset, the search bar peeks out again, so put it back off the top
@@ -181,6 +191,30 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 - (void) scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
   _keepSearchBarHidden = NO;
+}
+
+//! A status-bar tap scrolls to the top with an animation: let it show the search bar
+- (BOOL) scrollViewShouldScrollToTop:(UIScrollView *)scrollView
+{
+  _keepSearchBarHidden = NO;
+  return YES;
+}
+
+- (BOOL) keepsSearchBarHidden
+{
+  return _keepSearchBarHidden;
+}
+
+/**
+ * The re-hide is one-shot: it only covers the layout passes right after -hideSearchBar (the first
+ * layout in the window).  After those, other scrolls (VoiceOver focus on the search field, a
+ * three-finger scroll) are left alone.
+ */
+- (void) _stopKeepingSearchBarHiddenAfterThisLayout
+{
+  dispatch_async(dispatch_get_main_queue(), ^{
+    _keepSearchBarHidden = NO;
+  });
 }
 
 - (void) viewWillAppear:(BOOL)animated
@@ -199,6 +233,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 - (void) viewDidAppear:(BOOL)animated
 {
   [super viewDidAppear:animated];
+  // The in-window layout that clamped the offset has run by now
+  [self _stopKeepingSearchBarHiddenAfterThisLayout];
 #if defined (LWE_DEBUG)
   // Screenshot hook (Debug builds only): `-LWEDebugSelectTab 1 -LWEDebugOpenGroup 1` opens the Study Sets
   // tab and pushes its first group (1-based row in the groups section), once per launch.
@@ -210,6 +246,24 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
     StudySetViewController *subgroupController = [[StudySetViewController alloc] initWithGroup:[self.subgroupArray objectAtIndex:(row - 1)]];
     [self.navigationController pushViewController:subgroupController animated:NO];
     [subgroupController release];
+  }
+  // `-LWEDebugSearch <text>` (with -LWEDebugOpenGroup): searches on the pushed group screen, keyboard
+  // dismissed as after tapping Search, and scrolls to the end of the results
+  static BOOL sLWEDebugSearched = NO;
+  NSString *query = [[NSUserDefaults standardUserDefaults] stringForKey:@"LWEDebugSearch"];
+  if (sLWEDebugSearched == NO && query.length > 0 && [self.group isTopLevelGroup] == NO)
+  {
+    sLWEDebugSearched = YES;
+    [self.searchBar becomeFirstResponder];
+    self.searchBar.text = query;
+    [self searchBar:self.searchBar textDidChange:query];
+    [self searchBarSearchButtonClicked:self.searchBar];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+      UITableView *tv = self.tableView;
+      [tv layoutIfNeeded];
+      CGFloat endY = tv.contentSize.height + tv.adjustedContentInset.bottom - tv.bounds.size.height;
+      [tv setContentOffset:CGPointMake(0, MAX(-tv.adjustedContentInset.top, endY)) animated:NO];
+    });
   }
 #endif
 }
@@ -733,6 +787,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
  */
 - (void) searchBarTextDidBeginEditing:(UISearchBar *)theSearchBar
 {	
+  // The user is in the search field: never scroll the search bar away from under them
+  _keepSearchBarHidden = NO;
 	//When the user clicks back from teh detail view
 	if (searching) return;
 	
@@ -810,6 +866,8 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
 	self.navigationItem.rightBarButtonItem = _addButton;
   [self reloadTableData];
   [self hideSearchBar];
+  // Already in the window: the hide has its real offset, so the re-hide is done after this pass
+  [self _stopKeepingSearchBarHiddenAfterThisLayout];
   
   // Kill search overlay
   [_searchOverlay removeFromSuperview];
