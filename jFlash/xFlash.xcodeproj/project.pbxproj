@@ -557,6 +557,8 @@
 		691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CF57AFED14CF4453BFD1623E /* CardModelTest.m */; };
 		909C4F4EA894C461ACAF1E8C /* PrelaunchCleanupTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */; };
 		7CC11512982F8F6DFFFD3931 /* PrelaunchCleanupTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */; };
+		224845E4038DDEBB1877607E /* AppVersionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FF6939B02DFFE88C167A5175 /* AppVersionTest.m */; };
+		07AC7BCE5740BF6F07CC9340 /* AppVersionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FF6939B02DFFE88C167A5175 /* AppVersionTest.m */; };
 		E7A1C0DE5B1A4E0F9C2D3B42 /* AppBundleResourcesTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */; };
 		E7A1C0DE5B1A4E0F9C2D3B43 /* AppBundleResourcesTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */; };
 		32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
@@ -974,6 +976,7 @@
 		3D4316EACB834608A16BA825 /* CardModelTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CardModelTest.h; path = Tests/CardModelTest.h; sourceTree = SOURCE_ROOT; };
 		CF57AFED14CF4453BFD1623E /* CardModelTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardModelTest.m; path = Tests/CardModelTest.m; sourceTree = SOURCE_ROOT; };
 		E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrelaunchCleanupTest.m; path = Tests/PrelaunchCleanupTest.m; sourceTree = SOURCE_ROOT; };
+		FF6939B02DFFE88C167A5175 /* AppVersionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppVersionTest.m; path = Tests/AppVersionTest.m; sourceTree = SOURCE_ROOT; };
 		E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppBundleResourcesTest.m; path = Tests/AppBundleResourcesTest.m; sourceTree = SOURCE_ROOT; };
 		95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardViewControllerNibTest.m; path = Tests/CardViewControllerNibTest.m; sourceTree = SOURCE_ROOT; };
 		07203B478DBF477887BC9B5C /* JapaneseCardTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JapaneseCardTest.h; path = Tests/jFlashTests/JapaneseCardTest.h; sourceTree = SOURCE_ROOT; };
@@ -1386,6 +1389,7 @@
 				CF57AFED14CF4453BFD1623E /* CardModelTest.m */,
 				95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */,
 				E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */,
+				FF6939B02DFFE88C167A5175 /* AppVersionTest.m */,
 				E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */,
 				498EBDB11488D43A00BA6DE7 /* PluginTest.h */,
 				498EBDB21488D43A00BA6DE7 /* PluginTest.m */,
@@ -2673,6 +2677,7 @@
 				44F6A3257BC7490FB532B615 /* CardModelTest.m in Sources */,
 				32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */,
 				909C4F4EA894C461ACAF1E8C /* PrelaunchCleanupTest.m in Sources */,
+				224845E4038DDEBB1877607E /* AppVersionTest.m in Sources */,
 				E7A1C0DE5B1A4E0F9C2D3B42 /* AppBundleResourcesTest.m in Sources */,
 				21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */,
 				3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */,
@@ -2796,6 +2801,7 @@
 				691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */,
 				AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */,
 				7CC11512982F8F6DFFFD3931 /* PrelaunchCleanupTest.m in Sources */,
+				07AC7BCE5740BF6F07CC9340 /* AppVersionTest.m in Sources */,
 				E7A1C0DE5B1A4E0F9C2D3B43 /* AppBundleResourcesTest.m in Sources */,
 				4926EA02148FADDE00F55D09 /* CardPeerTest.m in Sources */,
 				4944B1E51495D23700AE23BE /* CloseButtonView.m in Sources */,
@@ -3031,6 +3037,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DT6C9KA2HD;
 				GCC_PREFIX_HEADER = jFlash_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3056,6 +3063,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.japaneseinaflash.jflash;
 				PRODUCT_NAME = jFlash;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -3069,6 +3077,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DT6C9KA2HD;
 				GCC_PREFIX_HEADER = jFlash_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3094,6 +3103,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.japaneseinaflash.jflash;
 				PRODUCT_NAME = jFlash;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -3105,6 +3115,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/jFlash.app/jFlash";
+				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
@@ -3120,6 +3131,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/jFlashTests/jFlashTest-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3134,6 +3146,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/jFlash.app/jFlash";
+				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
@@ -3149,6 +3162,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/jFlashTests/jFlashTest-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3163,6 +3177,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/jFlash.app/jFlash";
+				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
@@ -3179,6 +3194,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/jFlashTests/jFlashTest-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3193,6 +3209,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/cFlash.app/cFlash";
+				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
@@ -3208,6 +3225,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/cFlashTests/cFlashTest-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3222,6 +3240,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/cFlash.app/cFlash";
+				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
@@ -3237,6 +3256,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/cFlashTests/cFlashTest-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3251,6 +3271,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/cFlash.app/cFlash";
+				CURRENT_PROJECT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
@@ -3267,6 +3288,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "Tests/cFlashTests/cFlashTest-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
 					XCTest,
@@ -3281,6 +3303,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 5;
 				GCC_PREFIX_HEADER = cFlash_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LWE_DEBUG,
@@ -3292,6 +3315,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 				);
+				MARKETING_VERSION = 1.2;
 				PRODUCT_NAME = cFlash;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3302,6 +3326,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CURRENT_PROJECT_VERSION = 5;
 				GCC_PREFIX_HEADER = cFlash_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LWE_RELEASE_AD_HOC,
@@ -3313,6 +3338,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 				);
+				MARKETING_VERSION = 1.2;
 				PRODUCT_NAME = cFlash;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3323,6 +3349,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CURRENT_PROJECT_VERSION = 5;
 				GCC_PREFIX_HEADER = cFlash_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					LWE_RELEASE_APP_STORE,
@@ -3334,6 +3361,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 				);
+				MARKETING_VERSION = 1.2;
 				PRODUCT_NAME = cFlash;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3366,6 +3394,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = DT6C9KA2HD;
 				GCC_PREFIX_HEADER = jFlash_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -3391,6 +3420,7 @@
 					"$(inherited)",
 					"$(SRCROOT)",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.japaneseinaflash.jflash;
 				PRODUCT_NAME = jFlash;
 				PROVISIONING_PROFILE_SPECIFIER = "";
