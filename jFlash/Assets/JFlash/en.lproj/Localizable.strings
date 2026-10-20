@@ -44,6 +44,21 @@
 /* ActionBar.ShowAnswerSubline  (ActionBarViewController.m) */
 "Then mark it Wrong or Right" = "Then mark it Wrong or Right";
 
+/* StudyViewController.ProgressAccessibility: VoiceOver name of the progress strip at the top of the study screen (it opens the progress sheet)  (StudyViewController.m) */
+"Study progress" = "Study progress";
+
+/* StudyViewController.ProgressAccessibilityHint: VoiceOver hint for the progress strip  (StudyViewController.m) */
+"Shows your progress in this set" = "Shows your progress in this set";
+
+/* MoodIcon.SessionScoreAccessibility: VoiceOver name of the score bubble (the face) on the card  (MoodIcon.m) */
+"Session score" = "Session score";
+
+/* MoodIcon.PercentRightAccessibility: VoiceOver value of the score bubble: share of cards answered right this session  (MoodIcon.m) */
+"%ld%% right" = "%ld%% right";
+
+/* MoodIcon.ToggleHint: VoiceOver hint; tapping the face shows or hides the percentage bubble  (MoodIcon.m) */
+"Shows or hides the score" = "Shows or hides the score";
+
 /* ActionBarViewController.ActionSheetRemoveFromFavorites  (ActionBarViewController.m) */
 "Remove from Starred" = "Remove from Starred";
 

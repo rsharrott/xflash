@@ -15,6 +15,9 @@
 - (void) updateMoodIcon:(CGFloat)percentCorrect;
 - (void) applyTheme;
 
+//! VoiceOver value for the score bubble: "100% right" (localized)
++ (NSString *) accessibilityValueForPercentCorrect:(CGFloat)percentCorrect;
+
 - (IBAction) doTogglePercentCorrectBtn;
 
 - (void) turnPercentCorrectOff;

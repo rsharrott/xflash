@@ -96,6 +96,20 @@
   }
 }
 
+- (NSString *) accessibilitySummary
+{
+  NSMutableArray *names = [NSMutableArray arrayWithCapacity:5];
+  NSMutableArray *counts = [NSMutableArray arrayWithCapacity:5];
+  for (NSInteger i = 1; i < 6; i++)
+  {
+    UILabel *headerLabel = (UILabel *)[self.view viewWithTag:(i + 300)];
+    UILabel *countLabel = (UILabel *)[self.view viewWithTag:(i + PROGRESS_LABEL_TAG)];
+    [names addObject:([headerLabel isKindOfClass:[UILabel class]] ? (headerLabel.text ?: @"") : @"")];
+    [counts addObject:([countLabel isKindOfClass:[UILabel class]] ? (countLabel.text ?: @"") : @"")];
+  }
+  return LWEProgressAccessibilitySummary(names, counts);
+}
+
 - (void)viewDidLayoutSubviews
 {
   [super viewDidLayoutSubviews];

@@ -418,7 +418,7 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
     f.size.width = self.progressBarView.bounds.size.width;
     self.progressBarViewController.view.frame = f;
     if (self.progressBarViewController.tag) {
-      [self.progressBarViewController drawProgressBar];
+      [self _drawProgressBar];
     }
   }
 
@@ -555,6 +555,13 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   [self.progressBarView addSubview:tmpPBVC.view];
   self.progressBarViewController = tmpPBVC;
 	[tmpPBVC release];
+  // VoiceOver: the strip is one "Study progress" button (it opens the progress sheet) whose value
+  // reads the level counts; the strip's own labels and inner button are not separate elements.
+  self.progressBarView.accessibilityElementsHidden = YES;
+  self.showProgressModalBtn.isAccessibilityElement = YES;
+  self.showProgressModalBtn.accessibilityTraits = UIAccessibilityTraitButton;
+  self.showProgressModalBtn.accessibilityLabel = NSLocalizedString(@"Study progress", @"StudyViewController.ProgressAccessibility");
+  self.showProgressModalBtn.accessibilityHint = NSLocalizedString(@"Shows your progress in this set", @"StudyViewController.ProgressAccessibilityHint");
 
   // Initialize the scroll view
   [self _setupScrollView];
@@ -661,7 +668,7 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
     }
     if (self.progressBarViewController.tag)
     {
-      [self.progressBarViewController drawProgressBar];
+      [self _drawProgressBar];
     }
     [self _setupSubviews];
     [self doChangeCard:self.currentCard direction:nil];
@@ -757,14 +764,26 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   // If no direction, don't animate transition
   if (directionOrNil != nil)
   {
-    [LWEViewAnimationUtils doViewTransition:kCATransitionPush direction:directionOrNil duration:0.15f objectToTransition:self];
+    // Reduce Motion: cross-fade instead of sliding the card in
+    BOOL reduceMotion = UIAccessibilityIsReduceMotionEnabled();
+    [LWEViewAnimationUtils doViewTransition:LWECardTransitionType(reduceMotion)
+                                  direction:LWECardTransitionSubtype(reduceMotion, directionOrNil)
+                                   duration:(reduceMotion ? 0.2f : 0.15f)
+                         objectToTransition:self];
   }
   
   // Finally, update the progress bar
-  [self.progressBarViewController drawProgressBar];
+  [self _drawProgressBar];
 
   // The card's headword size varies per card, so the reveal area moves too.
   [self.view setNeedsLayout];
+}
+
+//! Redraws the progress strip and refreshes what VoiceOver reads for it
+- (void) _drawProgressBar
+{
+  [self.progressBarViewController drawProgressBar];
+  self.showProgressModalBtn.accessibilityValue = [self.progressBarViewController accessibilitySummary];
 }
 
 - (IBAction)doCardBtn:(id)sender

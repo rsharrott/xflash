@@ -17,7 +17,27 @@
 - (void) awakeFromNib
 {
   [[NSBundle mainBundle] loadNibNamed:@"MoodIcon" owner:self options:nil];
+  // VoiceOver: one "Session score, 100% right" element (the face); the bubble's "100%" is not read twice
+  self.moodIconBtn.isAccessibilityElement = YES;
+  self.moodIconBtn.accessibilityLabel = NSLocalizedString(@"Session score", @"MoodIcon.SessionScoreAccessibility");
+  self.percentCorrectLabel.isAccessibilityElement = NO;
+  self.percentCorrectLabel.accessibilityElementsHidden = YES;
+  self.talkBubble.isAccessibilityElement = NO;
+  [self _updateAccessibilityTraits];
   [self applyTheme];
+}
+
++ (NSString *) accessibilityValueForPercentCorrect:(CGFloat)percentCorrect
+{
+  return [NSString stringWithFormat:NSLocalizedString(@"%ld%% right", @"MoodIcon.PercentRightAccessibility"), (long)lroundf(percentCorrect)];
+}
+
+//! Practice mode: tapping the face shows / hides the bubble, so it is a button; otherwise plain text
+//! (not a "dimmed" button).
+- (void) _updateAccessibilityTraits
+{
+  self.moodIconBtn.accessibilityTraits = self.moodIconBtn.enabled ? UIAccessibilityTraitButton : UIAccessibilityTraitStaticText;
+  self.moodIconBtn.accessibilityHint = self.moodIconBtn.enabled ? NSLocalizedString(@"Shows or hides the score", @"MoodIcon.ToggleHint") : nil;
 }
 
 //! Themes v2: the 67% bubble fill follows the card (fire-wash on Paper/Fire, paper on Water)
@@ -42,6 +62,7 @@
 - (void) setButtonEnabled:(BOOL)enable
 {
   self.moodIconBtn.enabled = enable;
+  [self _updateAccessibilityTraits];
 }
 
 /**
@@ -77,6 +98,7 @@
 - (void) updateMoodIcon:(CGFloat)percentCorrect
 {
   self.percentCorrectLabel.text = [NSString stringWithFormat:@"%.0f%%",percentCorrect];
+  self.moodIconBtn.accessibilityValue = [MoodIcon accessibilityValueForPercentCorrect:percentCorrect];
 
   // TODO: iPad customization!
   NSArray *hotHeadsArray = [[NSArray alloc] initWithObjects:

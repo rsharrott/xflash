@@ -608,8 +608,17 @@ static NSInteger LWELiveCardCount(Tag *tag)
 {
   [super viewDidAppear:animated];
   [FirstRunWelcomeViewController markWelcomeShown];
-  // Hint that there's more below when large text pushes content off the sheet.
+  // Hint that there's more below when the content is taller than the sheet (large text, or an
+  // iPhone SE at the default size).  Flash again once the sheet has settled: the first flash can
+  // finish while the sheet is still sliding up, and is easy to miss.
   [_scroll flashScrollIndicators];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    CGFloat visibleH = _scroll.bounds.size.height - _scroll.adjustedContentInset.top - _scroll.adjustedContentInset.bottom;
+    if (_scroll.window != nil && _scroll.contentSize.height > visibleH + 1.0)
+    {
+      [_scroll flashScrollIndicators];
+    }
+  });
 #if defined(LWE_DEBUG)
   // Screenshot hook (Debug builds only): `simctl launch <udid> <bundle> -LWEDebugAutoStartWelcome YES`
   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"LWEDebugAutoStartWelcome"])

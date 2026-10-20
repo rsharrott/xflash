@@ -12,6 +12,11 @@
 #import "PracticeModeCardViewDelegate.h"
 #import "JapaneseCard.h"
 #import "Constants.h"
+#import "MoodIcon.h"
+#import "ActionBarViewController.h"
+#import "StudyViewController.h"
+#import "ProgressBarViewController.h"
+#import "ThemeManager.h"
 
 @interface CardReadingTest : XCTestCase
 @end
@@ -215,10 +220,20 @@
   XCTAssertTrue(LWEReadingIsKanaOnlyHeadword(@"テレビ", @"テレビ", 1, NO));
 }
 
+- (void)testKanaReadingEqualToHeadwordIsSkippedWithMoreReadings
+{
+  // QA: ゴールデンウィーク showed ゴールデンウィーク again above itself (it has a second reading,
+  // ゴールデン・ウィーク, which the "+1 reading" pill still offers)
+  XCTAssertTrue(LWEReadingIsKanaOnlyHeadword(@"ゴールデンウィーク", @"ゴールデンウィーク", 2, NO));
+  XCTAssertTrue(LWEReadingIsKanaOnlyHeadword(@"これ", @"これ", 2, NO));
+  NSDictionary *rows = LWEReadingRows(SET_READING_BOTH, @"ゴールデンウィーク", @"go-rudenui-ku", YES);
+  XCTAssertNil(rows[LWEReadingRowTopKey], @"No duplicate katakana row above the headword");
+  XCTAssertEqualObjects(rows[LWEReadingRowBelowKey], @"go-rudenui-ku");
+}
+
 - (void)testNotKanaOnlyWhenReadingDiffersOrListed
 {
   XCTAssertFalse(LWEReadingIsKanaOnlyHeadword(@"べんきょう", @"勉強", 1, NO));
-  XCTAssertFalse(LWEReadingIsKanaOnlyHeadword(@"これ", @"これ", 2, NO), @"Several readings: the list still shows");
   XCTAssertFalse(LWEReadingIsKanaOnlyHeadword(@"これ", @"これ", 1, YES), @"Expanded +N readings list");
   XCTAssertFalse(LWEReadingIsKanaOnlyHeadword(nil, @"これ", 0, NO));
 }
@@ -476,6 +491,126 @@
   CGSize tiny = LWEMeaningCornerSize(YES, 0, CGSizeMake(40, 30));
   XCTAssertEqualWithAccuracy(tiny.width, 40, 0.001, @"Clipped to the area");
   XCTAssertEqualWithAccuracy(tiny.height, 30, 0.001);
+}
+
+#pragma mark - QA a11y fixes (iPhone SE, VoiceOver, Reduce Motion, contrast)
+
+- (void)testShortMeaningBandKeepsAFade
+{
+  XCTAssertEqualWithAccuracy(LWEMeaningFadeHeightFor(206), LWEMeaningFadeHeight, 0.001, @"Regular cards keep the 24pt fade");
+  XCTAssertEqualWithAccuracy(LWEMeaningFadeHeightFor(48), LWEMeaningFadeHeight, 0.001);
+  XCTAssertEqualWithAccuracy(LWEMeaningFadeHeightFor(90), LWEMeaningFadeHeight, 0.001, @"iPhone SE at the default text size");
+  // A band under 48pt (iPhone SE at larger text sizes) used to get no fade at all
+  CGFloat shortBand = LWEMeaningFadeHeightFor(40);
+  XCTAssertGreaterThanOrEqual(shortBand, 12.0);
+  XCTAssertLessThan(shortBand, LWEMeaningFadeHeight);
+  XCTAssertLessThanOrEqual(LWEMeaningFadeHeightFor(20), 10.0, @"Never more than half the band");
+  XCTAssertEqualWithAccuracy(LWEMeaningFadeHeightFor(0), 0, 0.001);
+}
+
+- (void)testRegularCardSpacingIsUnchanged
+{
+  // iPhone 17 Pro's card area is ~507pt: the design spacing, as before
+  LWECardSpacing s = LWECardSpacingFor(507);
+  XCTAssertFalse(LWECardIsCompact(507));
+  XCTAssertEqualWithAccuracy(s.headwordScale, 1.0, 0.001);
+  XCTAssertEqualWithAccuracy(s.rowY, 59.0, 0.001, @"MAX(12, round(507 x 0.117))");
+  XCTAssertEqualWithAccuracy(s.romajiGap, 8.0, 0.001);
+  XCTAssertEqualWithAccuracy(s.moreReadingsGap, 12.0, 0.001);
+  XCTAssertEqualWithAccuracy(s.meaningGap, 14.0, 0.001);
+}
+
+- (void)testCompactCardSpacingLeavesTheMeaningMoreRoom
+{
+  // iPhone SE (3rd gen): ~342pt card area
+  XCTAssertTrue(LWECardIsCompact(342));
+  LWECardSpacing s = LWECardSpacingFor(342);
+  XCTAssertLessThan(s.headwordScale, 342.0 / 420.0, @"Smaller headword than the old linear scale");
+  XCTAssertGreaterThanOrEqual(s.headwordScale, 0.55);
+  XCTAssertLessThan(s.rowY, round(342 * 0.06), @"Reading row nearer the top");
+  XCTAssertLessThan(s.romajiGap, 8.0);
+  XCTAssertLessThan(s.meaningGap, 10.0);
+  XCTAssertEqualWithAccuracy(LWECardSpacingFor(200).headwordScale, 0.55, 0.001, @"Floor");
+  XCTAssertFalse(LWECardIsCompact(0), @"Not laid out yet");
+}
+
+- (void)testCardTransitionHonoursReduceMotion
+{
+  XCTAssertEqualObjects(LWECardTransitionType(NO), kCATransitionPush);
+  XCTAssertEqualObjects(LWECardTransitionSubtype(NO, kCATransitionFromRight), kCATransitionFromRight);
+  XCTAssertEqualObjects(LWECardTransitionType(YES), kCATransitionFade, @"Reduce Motion: cross-fade, no slide");
+  XCTAssertNil(LWECardTransitionSubtype(YES, kCATransitionFromRight));
+}
+
+- (void)testProgressStripAccessibilitySummary
+{
+  NSArray *names = @[@"Studying", @"Right 1x", @"Right 2x", @"Right 3x", @"Learned"];
+  NSArray *counts = @[@"3", @"15", @"0", @"0", @"2"];
+  XCTAssertEqualObjects(LWEProgressAccessibilitySummary(names, counts),
+                        @"Studying 3, Right 1x 15, Right 2x 0, Right 3x 0, Learned 2");
+  NSArray *jaNames = @[@"学習中", @""];
+  NSArray *jaCounts = @[@"3", @"4"];
+  XCTAssertEqualObjects(LWEProgressAccessibilitySummary(jaNames, jaCounts), @"学習中 3", @"Unnamed levels are skipped");
+  XCTAssertEqualObjects(LWEProgressAccessibilitySummary(@[@"Studying"], @[]), @"Studying");
+}
+
+- (void)testScoreBubbleAccessibilityValue
+{
+  NSString *expected = [NSString stringWithFormat:NSLocalizedString(@"%ld%% right", nil), 100L];
+  XCTAssertEqualObjects([MoodIcon accessibilityValueForPercentCorrect:100.0f], expected);
+  NSString *v = [MoodIcon accessibilityValueForPercentCorrect:66.6f];
+  XCTAssertTrue([v rangeOfString:@"67"].location != NSNotFound, @"Rounded like the bubble: %@", v);
+}
+
+- (void)testLearnedButtonLabelMatchesItsTitle
+{
+  // Voice Control: "Tap Learned" needs the accessibility label to contain the visible title (WCAG 2.5.3)
+  ActionBarViewController *bar = [[[ActionBarViewController alloc] initWithNibName:@"ActionBarViewController" bundle:nil] autorelease];
+  [bar view];
+  UIButton *learned = bar.buryCardBtn;
+  XCTAssertNotNil(learned);
+  NSString *title = learned.configuration.title ?: learned.configuration.attributedTitle.string ?: learned.currentTitle;
+  XCTAssertEqualObjects(title, NSLocalizedString(@"Learned", nil));
+  XCTAssertEqualObjects(learned.accessibilityLabel, title);
+  XCTAssertEqualObjects(learned.accessibilityHint, NSLocalizedString(@"Mark as learned", nil));
+  XCTAssertTrue([learned.accessibilityUserInputLabels containsObject:title]);
+}
+
+static CGFloat LWETestRelativeLuminance(UIColor *color)
+{
+  CGFloat rgb[4] = {0, 0, 0, 1};
+  [color getRed:&rgb[0] green:&rgb[1] blue:&rgb[2] alpha:&rgb[3]];
+  CGFloat lin[3];
+  for (int i = 0; i < 3; i++)
+  {
+    lin[i] = (rgb[i] <= 0.03928) ? rgb[i] / 12.92 : pow((rgb[i] + 0.055) / 1.055, 2.4);
+  }
+  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+}
+
+static CGFloat LWETestContrast(UIColor *a, UIColor *b)
+{
+  CGFloat la = LWETestRelativeLuminance(a), lb = LWETestRelativeLuminance(b);
+  return (MAX(la, lb) + 0.05) / (MIN(la, lb) + 0.05);
+}
+
+- (void)testListSubtitleInkMeetsAAInEveryTheme
+{
+  // "4 Sets" / "7546 Words" (Study Sets) and search-result readings use cellValueInk
+  ThemeManager *tm = [ThemeManager sharedThemeManager];
+  NSArray *keys = [tm themeKeysList];
+  XCTAssertEqual([keys count], (NSUInteger)5);
+  for (NSString *key in keys)
+  {
+    UIColor *ink = [tm colorForSlot:@"cellValueInk" themeKey:key];
+    XCTAssertNotNil(ink, @"%@", key);
+    for (UIColor *fill in @[[UIColor whiteColor], ([tm colorForSlot:@"cellFill" themeKey:key] ?: [UIColor whiteColor])])
+    {
+      CGFloat ratio = LWETestContrast(ink, fill);
+      XCTAssertGreaterThanOrEqual(ratio, 4.5, @"%@: %.2f:1", key, ratio);
+    }
+  }
+  XCTAssertLessThan(LWETestContrast([UIColor grayColor], [UIColor whiteColor]), 4.5, @"The grey it replaces fails AA");
 }
 
 @end

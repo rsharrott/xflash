@@ -94,6 +94,8 @@
   // Show this card's reading with its answer, but keep the user's show/hide choice for the next
   // card (readingVisible), as the original app did; tapping the reading still changes the choice.
   [cardViewController turnReadingOn];
+  // A long meaning on a short card: hint that it scrolls
+  [cardViewController flashMeaningScrollIndicatorIfScrollable];
 }
 
 

@@ -22,7 +22,7 @@ static const CGFloat kLWEHeadwordMaxPointSize = 88.0;
 static const CGFloat kLWEHeadwordMinPointSize = 34.0;
 static const CGFloat kLWESpeakBtnSize         = 44.0;
 static const CGFloat kLWESpeakBtnGap          = 14.0;
-static const CGFloat kLWECompactCardHeight    = 420.0; // card areas shorter than this use the compact layout
+static const CGFloat kLWECompactCardHeight    = 420.0; // = LWECompactCardHeight: card areas shorter than this use the compact layout
 
 // Maps iOS system text size category to a CSS font-size string for WKWebView/UIWebView HTML.
 static NSString *LWEDynamicTypeCSSFontSize(void)
@@ -86,8 +86,6 @@ static const CGFloat kLWEPillHitInset = 7.0;
 static const CGFloat kLWEReadingLineFactor     = 1.4;  // line box = type size x 1.4 (20pt -> 28pt row)
 #if defined(LWE_JFLASH)
 static const CGFloat kLWEReadingHeadwordGap    = 6.0;  // reading row bottom -> headword em-box top
-static const CGFloat kLWERomajiHeadwordGap     = 8.0;  // headword em-box bottom -> romaji line top
-static const CGFloat kLWEMeaningGap            = 14.0; // romaji (or headword) -> the meaning's rule
 static const CGFloat kLWEToggleRowOutset       = 8.0;  // the toggle reaches this far above and below the row
 #endif
 static const CGFloat kLWEToggleMinHeight       = 44.0; // the toggle's hit area
@@ -208,6 +206,7 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   CGFloat _lastLayoutHeight;
   LWEMeaningInsets _meaningInsets;
   NSUInteger _meaningMeasureToken;
+  BOOL _meaningFlashPending;
   BOOL _observingMeaningScroll;
 }
 
@@ -691,7 +690,9 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   // Short card: scale the headword with the available height (not below 48pt) and tighten the
   // spacing, so reading, pill and meaning still fit above the answer bar.
   BOOL compact = (h < kLWECompactCardHeight);
-  CGFloat compactScale = compact ? MAX(0.55f, h / kLWECompactCardHeight) : 1.0f;
+  // Short cards (iPhone SE): a smaller headword and tighter gaps leave the meaning more room
+  LWECardSpacing spacing = LWECardSpacingFor(h);
+  CGFloat compactScale = compact ? spacing.headwordScale : 1.0f;
 
   // Re-flow the reading when the width or height changed (the reading size depends on both).
   if (fabs(w - _lastLayoutWidth) > 0.5 || fabs(h - _lastLayoutHeight) > 0.5)
@@ -718,7 +719,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
   // ---- Reading row above the headword (spec §2, §4): 20pt on a 28pt line, one line over the
   // whole word.  Too wide for max(headword + 24, 120): shrink to 15pt, then 2 balanced lines.
-  CGFloat rowY = compact ? MAX(8.0, roundf(h * 0.06)) : MAX(12.0, roundf(h * 0.117));
+  CGFloat rowY = spacing.rowY;
   CGFloat rowH = 0;
   CGFloat baseSize = 0, minSize = 0;
   LWEReadingMetrics(compact, &baseSize, &minSize);
@@ -806,7 +807,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   if ([self.romajiLabel.attributedText length] > 0)
   {
     CGFloat romajiH = MAX(22.0, LWETextHeight(self.romajiLabel.attributedText, contentW));
-    self.romajiLabel.frame = CGRectMake(hPad, roundf(emBottom + kLWERomajiHeadwordGap), contentW, romajiH);
+    self.romajiLabel.frame = CGRectMake(hPad, roundf(emBottom + spacing.romajiGap), contentW, romajiH);
     bottom = CGRectGetMaxY(self.romajiLabel.frame);
   }
   else
@@ -837,12 +838,12 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     // 44pt-tall button around the 30pt pill (iOS 15+ draws the pill inset); the layout uses the visible pill.
     CGFloat inset = 0.0;
     if (@available(iOS 15.0, *)) { if (self.moreReadingsBtn.configuration != nil) inset = kLWEPillHitInset; }
-    self.moreReadingsBtn.frame = CGRectMake(roundf((w - pillW) / 2.0), bottom + (compact ? 6.0 : 12.0) - inset, pillW, 30.0 + 2.0 * inset);
+    self.moreReadingsBtn.frame = CGRectMake(roundf((w - pillW) / 2.0), bottom + spacing.moreReadingsGap - inset, pillW, 30.0 + 2.0 * inset);
     bottom = CGRectGetMaxY(self.moreReadingsBtn.frame) - inset;
   }
 
   // ---- Meaning: a short rule, then the meaning (both drawn by the HTML template)
-  CGFloat webY = roundf(bottom + (compact ? 10.0 : kLWEMeaningGap));
+  CGFloat webY = roundf(bottom + spacing.meaningGap);
   CGFloat webH = MAX(60.0, h - webY - 8.0);
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
   [self _updateMeaningInsets];
@@ -1420,7 +1421,37 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     indicators.bottom = insets.bottomInset;
     scroll.verticalScrollIndicatorInsets = indicators;
     [self _updateMeaningFade];
+    if (_meaningFlashPending && self.meaningWebViewContainer.hidden == NO)
+    {
+      _meaningFlashPending = NO;
+      if (insets.scrolls) [self _flashMeaningScrollIndicator];
+    }
   }];
+}
+
+- (void) flashMeaningScrollIndicatorIfScrollable
+{
+  if (_meaningInsets.scrolls)
+  {
+    _meaningFlashPending = NO;
+    [self _flashMeaningScrollIndicator];
+  }
+  else
+  {
+    // Not measured yet (or it fits): flash once the measurement says it scrolls
+    _meaningFlashPending = YES;
+  }
+}
+
+- (void) _flashMeaningScrollIndicator
+{
+  // After the reveal has drawn, so the flash is seen
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    if (self.meaningWebViewContainer.hidden == NO && _meaningInsets.scrolls)
+    {
+      [_meaningWebView.scrollView flashScrollIndicators];
+    }
+  });
 }
 
 - (void) _updateMeaningFade
@@ -1435,7 +1466,9 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   }
   // Scrolling: visible down to the bubble's top, with a soft fade there while more is below
   CGFloat visibleH = LWEMeaningVisibleHeight(_meaningInsets, h);
-  BOOL fade = (visibleH > LWEMeaningFadeHeight * 2.0) &&
+  // A short band (iPhone SE) gets a shorter fade rather than none, so the cue stays
+  CGFloat fadeH = LWEMeaningFadeHeightFor(visibleH);
+  BOOL fade = (fadeH > 0.0) &&
               LWEMeaningShowsBottomFade(_meaningInsets, scroll.contentOffset.y, scroll.contentSize.height, scroll.bounds.size.height);
   CAGradientLayer *mask = [area.layer.mask isKindOfClass:[CAGradientLayer class]] ? (CAGradientLayer *)area.layer.mask : nil;
   if (mask == nil)
@@ -1445,7 +1478,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
                     (id)[UIColor clearColor].CGColor, (id)[UIColor clearColor].CGColor];
     area.layer.mask = mask;
   }
-  CGFloat fadeTop = fade ? (visibleH - LWEMeaningFadeHeight) : MAX(0.0, visibleH - 0.5);
+  CGFloat fadeTop = fade ? (visibleH - fadeH) : MAX(0.0, visibleH - 0.5);
   [CATransaction begin];
   [CATransaction setDisableActions:YES];
   mask.frame = area.bounds;
