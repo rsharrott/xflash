@@ -65,6 +65,43 @@ class ChooseLinksTest(unittest.TestCase):
         self.assertEqual(rows, [(1, 1, 1, 0)])
         self.assertEqual(used, {1})
 
+    def test_stop_cards_keep_their_own_links_but_get_no_extra_ones(self):
+        # 乃 (B-line の) and な appear in sentences other cards picked: no hidden links to them.
+        kaji, no, na = 1191980, 1469800, 2029110
+        card_links = {kaji: links(500, 501), no: links(500, 501, *range(1, 31)), na: links(500, 7)}
+        stop = {no, na}
+        rows, used = build.choose_links(card_links, usable=lambda j: True, length=lambda j: j,
+                                        is_stop=lambda c: c in stop)
+        pairs = {(c, j) for c, j, _, _ in rows}
+        self.assertNotIn((no, 500), pairs)
+        self.assertNotIn((no, 501), pairs)
+        self.assertIn((na, 500), pairs, "な's own top 20 (it has only 2 sentences) is kept")
+        self.assertEqual(len([1 for c, _, _, _ in rows if c == no]), build.LINKS_PER_CARD)
+        self.assertEqual(len(self.shown(rows, no)), build.SHOWN_PER_CARD)
+        self.assertEqual(used, {500, 501, 7} | set(range(1, 21)))
+
+
+class StopCardTest(unittest.TestCase):
+
+    def card(self, headword, reading, kana_only=0):
+        return {'headword': headword, 'reading': reading, 'kana_only': kana_only}
+
+    def test_particles_and_function_words(self):
+        for c in (self.card('乃', 'の'), self.card('な', 'な; なあ; なー; なぁ'), self.card('のに', 'のに'),
+                  self.card('彼の', 'あの', 1), self.card('何の', 'どの', 1), self.card('仕舞う', 'しまう', 1),
+                  self.card('為る', 'する', 1)):
+            self.assertTrue(build.is_stop_card(c), c)
+
+    def test_words_that_only_sound_like_one(self):
+        # 夜 (よる; よ), 名 (な), 歯 (は) are written in kanji, so their readings don't count.
+        for c in (self.card('夜', 'よる; よ'), self.card('名', 'な'), self.card('歯', 'は'),
+                  self.card('母', 'はは'), self.card('忙しい', 'いそがしい')):
+            self.assertFalse(build.is_stop_card(c), c)
+
+    def test_noni_is_a_stop_word_for_extra_links(self):
+        self.assertIn('のに', build.EXTRA_LINK_STOP_WORDS)
+        self.assertTrue(set(build.tatoeba.STOP_WORDS) <= build.EXTRA_LINK_STOP_WORDS)
+
 
 if __name__ == '__main__':
     unittest.main()

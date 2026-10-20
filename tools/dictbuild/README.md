@@ -98,7 +98,15 @@ and licence links.
   * Every shipped sentence then also links to each of its other resolved words with
     `should_show = 0`, so an expanded sentence lists all its words (母, 忙しい …) and not
     only the cards that picked it. A card's own sentence list still reads only its
-    `should_show = 1` links (at most 10). Stop words (`tatoeba.STOP_WORDS`) are never linked.
+    `should_show = 1` links (at most 10).
+  * Stop words: B-line words in `tatoeba.STOP_WORDS` (particles, function words) are
+    dropped by their surface form before linking. The extra `should_show = 0` links
+    also skip any card that resolves to a stop word (`build.EXTRA_LINK_STOP_WORDS`:
+    that list plus のに), checked on the card's headword, or on its reading when the
+    card is written in kana. The surface check alone misses most of them: the B-lines
+    write の (→ the 乃 card), な, 仕舞う, 彼の(あの) and 何の(どの), while the list has
+    乃, しまう, あの and どの. Those cards keep their own top 20 sentences, as in the
+    original build, but aren't listed under other sentences.
   * `sentence_id` = Tatoeba Japanese sentence id.
 * **Curated inputs** in `data/` hold what JMdict doesn't provide, and they are
   the source of truth for it. Edit them to change built-in sets.

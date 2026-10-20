@@ -295,9 +295,22 @@
 + (NSArray*) retrieveCardSetForExampleSentenceId:(NSInteger)sentenceId
 {	
 	LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-  // card_id keeps the order the same on every run (the links are stored in that order).
-  FMResultSet *rs = [db.dao executeQuery:@"SELECT c.* FROM card_sentence_link l, cards c WHERE l.card_id = c.card_id AND l.sentence_id = ? ORDER BY l.card_id ASC",
-                     [NSNumber numberWithInteger:sentenceId]];
+  // Words in the order they appear in the sentence: where the headword is found, else the (first)
+  // reading, else the stem without its last character (行く in 行った, おもしろい in おもしろそう; only
+  // for kanji headwords or readings of 4+ kana, so a short kana word can't match anywhere).  Words not
+  // found (katakana spellings ...) go last.  card_id breaks ties, so the order is stable.
+  NSString *sql = @"SELECT c.* FROM card_sentence_link l "
+    "JOIN cards c ON c.card_id = l.card_id JOIN sentences s ON s.sentence_id = l.sentence_id "
+    "WHERE l.sentence_id = ? ORDER BY "
+    "CASE WHEN instr(s.sentence_ja, c.headword) > 0 THEN instr(s.sentence_ja, c.headword) "
+    "WHEN instr(s.sentence_ja, substr(c.reading, 1, instr(c.reading || ';', ';') - 1)) > 0 "
+    "THEN instr(s.sentence_ja, substr(c.reading, 1, instr(c.reading || ';', ';') - 1)) "
+    "WHEN length(c.headword) > 1 AND substr(c.headword, 1, 1) > 'ヿ' AND instr(s.sentence_ja, substr(c.headword, 1, length(c.headword) - 1)) > 0 "
+    "THEN instr(s.sentence_ja, substr(c.headword, 1, length(c.headword) - 1)) "
+    "WHEN instr(c.reading || ';', ';') > 4 AND instr(s.sentence_ja, substr(c.reading, 1, instr(c.reading || ';', ';') - 2)) > 0 "
+    "THEN instr(s.sentence_ja, substr(c.reading, 1, instr(c.reading || ';', ';') - 2)) "
+    "ELSE 1000000 END ASC, l.card_id ASC";
+  FMResultSet *rs = [db.dao executeQuery:sql, [NSNumber numberWithInteger:sentenceId]];
 	        
 	NSMutableArray *cardList = [NSMutableArray array];
 	while ([rs next])
