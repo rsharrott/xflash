@@ -349,7 +349,7 @@ static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *hea
       [cardHTML appendString:@"<td class='HeadwordCell'></td>"]; 
     }
     
-    [cardHTML appendFormat:@"<td class='ContentCell'>%@</td><td><a href='http://xflash.com/%@?id=%d' class='AddToSetAnchor'><span class='button'>%@</span></a></td>",c.reading,ADD_CARD_TO_SET,c.cardId,ADD_BUTTON_TITLE];
+    [cardHTML appendString:[ExampleSentencesViewController wordCellsHTMLWithReading:c.reading cardId:c.cardId addTitle:ADD_BUTTON_TITLE]];
     [cardHTML appendString:@"</tr>"];
   }
   
@@ -368,6 +368,21 @@ static NSString *LWEExampleHighlightedSentence(NSString *sentence, NSString *hea
     if (v.quality == AVSpeechSynthesisVoiceQualityEnhanced) enhanced = v;
   }
   return enhanced ?: [AVSpeechSynthesisVoice voiceWithLanguage:@"ja-JP"];
+}
+
+#pragma mark - HTML
+
++ (NSString *)sentencesHTMLTemplate
+{
+  return LWESentencesHTML;
+}
+
++ (NSString *)wordCellsHTMLWithReading:(NSString *)reading cardId:(NSInteger)cardId addTitle:(NSString *)addTitle
+{
+  // The Add cell is .AddCell: it shrinks to its button and never wraps, so a two-character
+  // CJK label (追加) stays on one line instead of breaking 追 / 加 when the reading is long.
+  return [NSString stringWithFormat:@"<td class='ContentCell'>%@</td><td class='AddCell'><a href='http://xflash.com/%@?id=%ld' class='AddToSetAnchor'><span class='button'>%@</span></a></td>",
+          reading, ADD_CARD_TO_SET, (long)cardId, addTitle];
 }
 
 #pragma mark - Class Plumbing
@@ -414,7 +429,7 @@ NSString * const LWESentencesHTML = @""
 ".hl{ font-weight:700; border-radius:4px; padding:1px 2px; margin:0 -2px; -webkit-box-decoration-break:clone; box-decoration-break:clone; } "
 ".en{ font-size:0.92em; font-weight:400; line-height:1.4; color:rgba(255,255,255,0.88); margin-top:6px; } "
 ".showWordsDiv{ margin-top:12px; } "
-".button{ display:inline-block; font-size:0.8em; font-weight:600; line-height:1; color:#fff; background:rgba(0,0,0,0.2); border-radius:14px; padding:7px 13px; margin-right:6px; vertical-align:middle; } "
+".button{ display:inline-block; font-size:0.8em; font-weight:600; line-height:1; white-space:nowrap; color:#fff; background:rgba(0,0,0,0.2); border-radius:14px; padding:7px 13px; margin-right:6px; vertical-align:middle; } "
 ".button svg{ display:block; } "
 "dfn{ font-style:normal; font-weight:600; color:#3a2a00; font-size:0.72em; background-color:#FFD60A; border-radius:6px; padding:2px 6px; margin:0 4px 0 0; display:inline-block; } "
 "#container{ display:block; width:100%; text-align:left; } "
@@ -423,11 +438,14 @@ NSString * const LWESentencesHTML = @""
 ".HeadwordCell{ font-size:1em; font-weight:700; color:#FFD60A; width:30%; } "
 ".ContentCell{ font-size:0.88em; color:rgba(255,255,255,0.9); } "
 ".AddToSetAnchor{ float:right; } "
+// The Add column shrinks to its button and never wraps (ja 追加 must not break into 追 / 加)
+".ExpandedSentencesTable td.AddCell{ width:1%; white-space:nowrap; text-align:right; padding-right:0; } "
+".AddCell .button{ min-width:2em; text-align:center; margin-right:0; } "
 " a{ text-decoration:none; -webkit-tap-highlight-color:transparent; } "
 #else
 "body{ background-color: transparent; margin:0; padding: 0 10px; box-sizing:border-box; width:100%; text-align:left; line-height:21px; font-size:16px; font-weight:bold; font-family:Helvetica,sanserif; color:#fff; } "
 "dfn{ text-shadow:none; font-weight:normal; color:#000; position:relative; top:-1px; font-family:verdana; font-size:10.5px; background-color:#C79810; line-height:10.5px; margin:4px 4px 0px 0px; height:14px; padding:2px 3px; -webkit-border-radius:4px; border:1px solid #F9F7ED; display:inline-block;} "
-".button{ font-size:14px; margin:2px 0px 2px 0px; padding: 2px 4px 3px 4px; display: inline; background: #777; border: none; color: #fff; font-weight: bold; border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; background: rgba(0,0,0,0.3);} "
+".button{ font-size:14px; margin:2px 0px 2px 0px; padding: 2px 4px 3px 4px; display: inline; background: #777; border: none; color: #fff; font-weight: bold; border-radius: 3px; -moz-border-radius: 3px; -webkit-border-radius: 3px; background: rgba(0,0,0,0.3); white-space:nowrap;} "
 ".showWordsDiv { float: right; margin: 0px 0px 9px 9px; }"
 "#container{ display:block; width:100%; text-align:left; } "
 "ol{ color:white; text-align:left; width:100%; box-sizing:border-box; margin:0px; padding-left:0px; list-style-position:inside; } "
@@ -437,6 +455,7 @@ NSString * const LWESentencesHTML = @""
 ".headwordLabel {font-size:19px; margin:0px 0px 9px 0px;color:yellow;} "
 ".ExpandedSentencesTable { width:100%; border-collapse:collapse; margin: 10px 0px 5px 0px; } "
 ".AddToSetAnchor { float:right; } "
+".ExpandedSentencesTable td.AddCell { width:1%; white-space:nowrap; text-align:right; } "
 ".ExpandedSentencesTable td { border-bottom:1px solid #CCC; border-collapse:collapse; border-top:1px solid #CCC } "
 ".HeadwordRow { height: 45px; } "
 ".HeadwordCell { vertical-align:middle; border-right:none; font-size:15px; width:100px; } "

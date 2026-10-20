@@ -25,6 +25,12 @@ extern NSString * const LWESentencesHTML;
 }
 
 - (id) initWithExamplesPlugin:(Plugin *)plugin;
+
+//! LWESentencesHTML (unit tests reach it through the class: app symbols aren't exported to the test bundle)
++ (NSString *) sentencesHTMLTemplate;
+//! The reading + Add cells of one word row in an expanded sentence (`addTitle` is localized by the caller).
+//! The Add cell has class 'AddCell', so its button never wraps (ja 追加 must not break into 追 / 加).
++ (NSString *) wordCellsHTMLWithReading:(NSString *)reading cardId:(NSInteger)cardId addTitle:(NSString *)addTitle;
 - (void) setupWithCard:(Card*)card;
 
 @property (retain) NSMutableDictionary *sampleDecomposition;

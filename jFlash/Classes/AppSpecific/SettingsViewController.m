@@ -55,7 +55,10 @@ NSString * const APP_NEW_UPDATE = @"new_update";
   // is set (see Constants.m) both buttons stay hidden so nobody hits a dead link.
   if (LWEAppStoreURLString())
   {
-    UIBarButtonItem *rateUsBtn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Rate Us",@"SettingsViewController.RateUsButton") style:UIBarButtonItemStylePlain target:self action:@selector(_requestReview)];
+    // Icon-only (a star), like the share button opposite it: the Japanese text label
+    // (App Storeで評価) was wide enough to crowd the 設定 title, especially on a 4.7" phone.
+    // VoiceOver still reads the localized "Rate Us" / "App Storeで評価".
+    UIBarButtonItem *rateUsBtn = [SettingsViewController _newRateUsBarButtonItemWithTarget:self];
     self.navigationItem.leftBarButtonItem = rateUsBtn;
     [rateUsBtn release];
 
@@ -122,6 +125,19 @@ NSString * const APP_NEW_UPDATE = @"new_update";
 }
 
 #pragma mark - Private Methods
+
+//! The Rate Us bar item: a star image (no visible text) with a localized VoiceOver label.  Caller owns it.
++ (UIBarButtonItem *) _newRateUsBarButtonItemWithTarget:(id)target
+{
+  NSString *label = NSLocalizedString(@"Rate Us",@"SettingsViewController.RateUsButton");
+  UIImage *star = [UIImage systemImageNamed:@"star"];
+  UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithImage:star style:UIBarButtonItemStylePlain target:target action:@selector(_requestReview)];
+  // The image is what's drawn; the title is only used by VoiceOver, the large-content viewer
+  // (long-press at accessibility text sizes) and overflow menus.
+  item.title = label;
+  item.accessibilityLabel = label;
+  return item;
+}
 
 //! "Rate Us" is a user-initiated action, so open the App Store's write-a-review page directly
 //! (Apple's recommendation for buttons; SKStoreReviewController is rate-limited, may show
