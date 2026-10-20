@@ -557,6 +557,8 @@
 		691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */ = {isa = PBXBuildFile; fileRef = CF57AFED14CF4453BFD1623E /* CardModelTest.m */; };
 		909C4F4EA894C461ACAF1E8C /* PrelaunchCleanupTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */; };
 		7CC11512982F8F6DFFFD3931 /* PrelaunchCleanupTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */; };
+		E7A1C0DE5B1A4E0F9C2D3B42 /* AppBundleResourcesTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */; };
+		E7A1C0DE5B1A4E0F9C2D3B43 /* AppBundleResourcesTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */; };
 		32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
 		AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */; };
 		21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 969093541A684E73B823323F /* JapaneseCardTest.m */; };
@@ -599,7 +601,6 @@
 		91170DB411BF896F00D4A680 /* AlgorithmSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 91170DB311BF896F00D4A680 /* AlgorithmSettingsViewController.m */; };
 		91214D0911B4B9E80091AFEF /* BrowseModeCardViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 91214D0811B4B9E80091AFEF /* BrowseModeCardViewDelegate.m */; };
 		91214D6A11B4D77C0091AFEF /* PracticeModeCardViewDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 91214D6911B4D77C0091AFEF /* PracticeModeCardViewDelegate.m */; };
-		912405DA109C263D00ECA1C2 /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 912405D9109C263D00ECA1C2 /* Entitlements.plist */; };
 		913D48081353A3E0008A4649 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 913D48071353A3E0008A4649 /* Reachability.m */; };
 		913D48091353A3E0008A4649 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 913D48071353A3E0008A4649 /* Reachability.m */; };
 		913EEF8B130800F300EBCF87 /* puny.c in Sources */ = {isa = PBXBuildFile; fileRef = 913EEF71130800F300EBCF87 /* puny.c */; };
@@ -973,6 +974,7 @@
 		3D4316EACB834608A16BA825 /* CardModelTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CardModelTest.h; path = Tests/CardModelTest.h; sourceTree = SOURCE_ROOT; };
 		CF57AFED14CF4453BFD1623E /* CardModelTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardModelTest.m; path = Tests/CardModelTest.m; sourceTree = SOURCE_ROOT; };
 		E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PrelaunchCleanupTest.m; path = Tests/PrelaunchCleanupTest.m; sourceTree = SOURCE_ROOT; };
+		E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppBundleResourcesTest.m; path = Tests/AppBundleResourcesTest.m; sourceTree = SOURCE_ROOT; };
 		95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CardViewControllerNibTest.m; path = Tests/CardViewControllerNibTest.m; sourceTree = SOURCE_ROOT; };
 		07203B478DBF477887BC9B5C /* JapaneseCardTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JapaneseCardTest.h; path = Tests/jFlashTests/JapaneseCardTest.h; sourceTree = SOURCE_ROOT; };
 		969093541A684E73B823323F /* JapaneseCardTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JapaneseCardTest.m; path = Tests/jFlashTests/JapaneseCardTest.m; sourceTree = SOURCE_ROOT; };
@@ -1021,7 +1023,6 @@
 		91214D0811B4B9E80091AFEF /* BrowseModeCardViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BrowseModeCardViewDelegate.m; path = AppSpecific/BrowseModeCardViewDelegate.m; sourceTree = "<group>"; };
 		91214D6811B4D77C0091AFEF /* PracticeModeCardViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PracticeModeCardViewDelegate.h; path = AppSpecific/PracticeModeCardViewDelegate.h; sourceTree = "<group>"; };
 		91214D6911B4D77C0091AFEF /* PracticeModeCardViewDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PracticeModeCardViewDelegate.m; path = AppSpecific/PracticeModeCardViewDelegate.m; sourceTree = "<group>"; };
-		912405D9109C263D00ECA1C2 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		913D48061353A3E0008A4649 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		913D48071353A3E0008A4649 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		913EEF71130800F300EBCF87 /* puny.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = puny.c; sourceTree = "<group>"; };
@@ -1346,7 +1347,6 @@
 				A34F4595184B137400FA137C /* Images.xcassets */,
 				49195075144F1ACD00DB81F7 /* CFlash */,
 				49195074144F1AB300DB81F7 /* JFlash */,
-				912405D9109C263D00ECA1C2 /* Entitlements.plist */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1386,6 +1386,7 @@
 				CF57AFED14CF4453BFD1623E /* CardModelTest.m */,
 				95656C37A8C2C889D6E85A34 /* CardViewControllerNibTest.m */,
 				E1945EA3A91D42FC7A3BB683 /* PrelaunchCleanupTest.m */,
+				E7A1C0DE5B1A4E0F9C2D3B41 /* AppBundleResourcesTest.m */,
 				498EBDB11488D43A00BA6DE7 /* PluginTest.h */,
 				498EBDB21488D43A00BA6DE7 /* PluginTest.m */,
 				498EBDA11488AEAA00BA6DE7 /* PluginManagerTest.h */,
@@ -2288,7 +2289,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA2C001019000030000000AA /* PrivacyInfo.xcprivacy in Resources */,
-				912405DA109C263D00ECA1C2 /* Entitlements.plist in Resources */,
 				D35B077B1116456D00DB5E02 /* overlay-btn-close.png in Resources */,
 				D35B077D1116456D00DB5E02 /* practice-btn-goaway.png in Resources */,
 				D35B077E1116456D00DB5E02 /* practice-btn-last.png in Resources */,
@@ -2673,6 +2673,7 @@
 				44F6A3257BC7490FB532B615 /* CardModelTest.m in Sources */,
 				32CD1A3B5DAF6C24C79D269B /* CardViewControllerNibTest.m in Sources */,
 				909C4F4EA894C461ACAF1E8C /* PrelaunchCleanupTest.m in Sources */,
+				E7A1C0DE5B1A4E0F9C2D3B42 /* AppBundleResourcesTest.m in Sources */,
 				21CAB04CBCF745C183F8E4D7 /* JapaneseCardTest.m in Sources */,
 				3EEBD8E490A07FCF7D238971 /* CardReadingTest.m in Sources */,
 				55842A4C47F165BEBC74D0C0 /* AppIconTest.m in Sources */,
@@ -2795,6 +2796,7 @@
 				691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */,
 				AEA75B5D1B6B2855B472F2E0 /* CardViewControllerNibTest.m in Sources */,
 				7CC11512982F8F6DFFFD3931 /* PrelaunchCleanupTest.m in Sources */,
+				E7A1C0DE5B1A4E0F9C2D3B43 /* AppBundleResourcesTest.m in Sources */,
 				4926EA02148FADDE00F55D09 /* CardPeerTest.m in Sources */,
 				4944B1E51495D23700AE23BE /* CloseButtonView.m in Sources */,
 				499E56B914972A7200088BD3 /* TTTAttributedLabel.m in Sources */,
@@ -3341,7 +3343,6 @@
 		91EA2F5F1041365600AB848E /* Beta */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
@@ -3420,7 +3421,6 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
