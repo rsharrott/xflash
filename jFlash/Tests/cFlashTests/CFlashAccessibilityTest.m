@@ -72,7 +72,8 @@ static void LWEStudySetSpinMainQueue(XCTestCase *testCase)
   dispatch_async(dispatch_get_main_queue(), ^{
     [drained fulfill];
   });
-  [testCase waitForExpectationsWithTimeout:2 handler:nil];
+  // 2s was not always enough for the main queue on the Intel CI simulator.
+  [testCase waitForExpectationsWithTimeout:10 handler:nil];
 }
 
 static void LWEStudySetTestNoop(id self, SEL _cmd) {}
@@ -349,7 +350,8 @@ static CGFloat LWECFTestContrast(UIColor *a, UIColor *b)
         && fabs(alphaView.alpha - 1.0) < 0.01;
   }];
   [self expectationForPredicate:done evaluatedWithObject:cvc handler:nil];
-  [self waitForExpectationsWithTimeout:2.0 handler:nil];
+  // The fade is 120ms. On the Intel CI simulator the completion missed a 2s wait.
+  [self waitForExpectationsWithTimeout:10.0 handler:nil];
 }
 
 - (void)testShowReadingCrossfadesWithoutDissolvingTheCard
