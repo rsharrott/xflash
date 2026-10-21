@@ -297,15 +297,31 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
 }
 
-- (void)testScrollHintStaysHiddenInEnglishToJapanese
+- (void)testEnglishToJapaneseScrollHintShowsOnlyOnOverflow
 {
-  // E→J uses the legacy card (CardViewController-EtoJ), which lays the arrow at the bottom-left
-  // of the reading row. A label taller than that row used to bring the arrow back after reveal.
+  // E→J uses the legacy card. The arrow sits at the bottom-left of the reading row and
+  // shows only when that reading is visible and taller than the row, as on cFlash.
+  // It is never a VoiceOver element.
   [[NSUserDefaults standardUserDefaults] setObject:SET_E_TO_J forKey:APP_HEADWORD];
   PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
   CardViewController *cvc = [[[CardViewController alloc] initDisplayMainHeadword:NO] autorelease];
   cvc.delegate = practice;
   cvc.view.frame = CGRectMake(0, 0, 402, 494);
+
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:@"あらすじ" romaji:@"arasuji"]];
+  [cvc layoutCardSubviews];
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The question side keeps the reading hidden");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertLessThanOrEqual(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"A reading that fits shows no arrow");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
   NSString *longReading = @"あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
   [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:longReading romaji:@"arasuji"]];
   [cvc layoutCardSubviews];
@@ -315,15 +331,23 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
     frame.size.height = cvc.readingScrollContainer.frame.size.height + 36.0;
     cvc.readingLabel.frame = frame;
   }
-  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height,
-                       @"The row would have treated this reading as overflow");
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The next card starts with the reading hidden");
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The next card starts with the arrow hidden");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
 
   [cvc reveal];
-  XCTAssertFalse(cvc.readingScrollContainer.hidden, @"The answer shows the reading");
-  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
-  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"E→J keeps the scroll arrow hidden");
-  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height,
+                       @"Reveal leaves the overflowing label taller than the row");
+  XCTAssertFalse(cvc.readingMoreIcon.hidden, @"E→J shows the arrow when the visible reading overflows");
+  XCTAssertFalse(cvc.readingMoreIcon.accessibilityElementsHidden);
   XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc doToggleReadingBtn];
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"Tapping hides the reading again");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The arrow leaves with the reading");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
 }
 
 - (void)testReadingToggleHandlerDoesNotOutliveTheController

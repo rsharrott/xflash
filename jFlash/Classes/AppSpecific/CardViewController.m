@@ -1547,14 +1547,17 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   // still exposes its children (and a fade that only drops alpha).
   self.readingMoreIcon.isAccessibilityElement = NO;
 #if defined(LWE_JFLASH)
-  // J→E and E→J. The 2026 card scrolls a long reading inside its row. The old scroll-more
-  // glyph stays at its nib frame on the J→E card (top-left, on the Kimono wave) and at the
-  // bottom-left of the legacy reading row on E→J (:layoutCardSubviews). Showing the reading,
-  // which revealing the answer does, used to un-hide it whenever the label was taller than
-  // the row. It isn't tappable in either mode.
-  self.readingMoreIcon.hidden = YES;
-  self.readingMoreIcon.accessibilityElementsHidden = YES;
-  return;
+  if (_modernCard)
+  {
+    // J→E. The 2026 card scrolls a long reading inside its row. The old scroll-more glyph
+    // is still pinned to its nib frame — top-left, on the Kimono wave — and it is not
+    // tappable, so it stays hidden in every state.
+    self.readingMoreIcon.hidden = YES;
+    self.readingMoreIcon.accessibilityElementsHidden = YES;
+    return;
+  }
+  // E→J keeps the legacy row, with the arrow at its bottom-left. Same cue as cFlash:
+  // visible only when the reading is showing and does not fit.
 #endif
   BOOL noText = ([self.readingLabel.text length] == 0 && [self.readingLabel.attributedText length] == 0);
   BOOL fits = [self _shouldHideMoreIconForLabel:self.readingLabel forScrollView:self.readingScrollContainer];
