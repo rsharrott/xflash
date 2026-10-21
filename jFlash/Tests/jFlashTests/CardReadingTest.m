@@ -97,6 +97,16 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 {
   NSString *_savedHeadwordSetting;
   NSString *_savedReadingSetting;
+  NSString *_savedTheme;
+}
+
+static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
+{
+  CGFloat ar, ag, ab, aa, br, bg, bb, ba;
+  if (a == nil || b == nil) return NO;
+  if ([a getRed:&ar green:&ag blue:&ab alpha:&aa] == NO) return NO;
+  if ([b getRed:&br green:&bg blue:&bb alpha:&ba] == NO) return NO;
+  return (fabs(ar - br) < 0.02f && fabs(ag - bg) < 0.02f && fabs(ab - bb) < 0.02f && fabs(aa - ba) < 0.02f);
 }
 
 - (void)setUp
@@ -105,6 +115,7 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   _savedHeadwordSetting = [[settings objectForKey:APP_HEADWORD] retain];
   _savedReadingSetting = [[settings objectForKey:APP_READING] retain];
+  _savedTheme = [[settings objectForKey:APP_THEME] retain];
   [settings setObject:SET_J_TO_E forKey:APP_HEADWORD];
   [settings setObject:SET_READING_BOTH forKey:APP_READING];
   // Each test starts as a fresh launch: reading hidden
@@ -118,6 +129,10 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
   else [settings removeObjectForKey:APP_HEADWORD];
   if (_savedReadingSetting) [settings setObject:_savedReadingSetting forKey:APP_READING];
   else [settings removeObjectForKey:APP_READING];
+  if (_savedTheme) [settings setObject:_savedTheme forKey:APP_THEME];
+  else [settings removeObjectForKey:APP_THEME];
+  [_savedTheme release];
+  _savedTheme = nil;
   [_savedHeadwordSetting release];
   _savedHeadwordSetting = nil;
   [_savedReadingSetting release];
@@ -195,6 +210,79 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 
   [cvc setupWithCard:[self _cardWithHeadword:@"海" reading:@"うみ" romaji:@"umi"]];
   XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The next card starts hidden again");
+}
+
+- (void)testScrollHintStaysHiddenAfterReveal
+{
+  // あらすじ is kana-only: no reading row above the headword. Revealing shows that (empty) row
+  // and used to un-hide the nib's scroll-more arrow at the top-left of the card.
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"あらすじ" reading:@"あらすじ" romaji:@"arasuji"]];
+  [cvc layoutCardSubviews];
+
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"Question side keeps the reading hidden");
+  XCTAssertFalse(cvc.toggleReadingBtn.hidden, @"Question side still has Show Reading");
+  XCTAssertEqualObjects(cvc.toggleReadingBtn.accessibilityLabel, NSLocalizedString(@"Show Reading", nil));
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"No scroll hint on the question side");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden, @"The answer shows this card's reading");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The corner arrow stays hidden once the answer is showing");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden, @"VoiceOver does not land on the hidden hint");
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+  XCTAssertFalse(cvc.toggleReadingBtn.hidden, @"The blank toggle still covers the reading");
+
+  // A reading long enough to scroll used to un-hide the same nib-positioned glyph.
+  NSString *longReading = @"あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:longReading romaji:@"benkyou"]];
+  [cvc reveal];
+  XCTAssertTrue(cvc.readingMoreIcon.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+}
+
+- (void)testShowReadingPressDoesNotDarkenThePill
+{
+  // Pressed, the pill keeps readingToggleFill and its insets. A highlighted configuration used to
+  // darken the fill and drop the insets, so the whole hit area flashed — worst on Kimono.
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  NSArray *themes = [NSArray arrayWithObjects:SET_THEME_PAPER, SET_THEME_FIRE, SET_THEME_WATER, SET_THEME_KIMONO, SET_THEME_KUTANI, nil];
+  for (NSString *theme in themes)
+  {
+    [CardViewController setSessionReadingVisible:NO];
+    [settings setObject:theme forKey:APP_THEME];
+    PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+    CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+    [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+    [cvc layoutCardSubviews];
+
+    UIButton *button = cvc.toggleReadingBtn;
+    XCTAssertTrue(cvc.readingScrollContainer.hidden, @"%@ question side", theme);
+    XCTAssertNotNil(button.configuration, @"%@ pill configuration", theme);
+    UIColor *fill = [[ThemeManager sharedThemeManager] colorForSlot:@"readingToggleFill"];
+    XCTAssertTrue(LWETestColorsClose(button.configuration.background.backgroundColor, fill), @"%@ pill fill", theme);
+    NSDirectionalEdgeInsets insets = button.configuration.background.backgroundInsets;
+    XCTAssertGreaterThan(insets.leading, 0.0, @"%@ pill is inset in the hit area", theme);
+    XCTAssertGreaterThan(insets.top, 0.0, @"%@ pill is inset in the hit area", theme);
+
+    button.highlighted = YES;
+    [button updateConfiguration];
+    XCTAssertTrue(LWETestColorsClose(button.configuration.background.backgroundColor, fill), @"%@ press keeps the pill fill", theme);
+    NSDirectionalEdgeInsets pressed = button.configuration.background.backgroundInsets;
+    XCTAssertGreaterThan(pressed.leading, 0.0, @"%@ press does not fill the whole button", theme);
+    XCTAssertGreaterThan(pressed.top, 0.0, @"%@ press does not fill the whole button", theme);
+    XCTAssertEqualWithAccuracy(button.configuration.background.strokeWidth, 0.0, 0.01, @"%@ no stroke", theme);
+
+    [cvc doToggleReadingBtn];
+    CGFloat r, g, b, a;
+    UIColor *shown = button.configuration.background.backgroundColor;
+    XCTAssertTrue([shown getRed:&r green:&g blue:&b alpha:&a], @"%@ shown background", theme);
+    XCTAssertLessThan(a, 0.01, @"%@ reading up: no pill fill left to flash", theme);
+    XCTAssertTrue(cvc.readingMoreIcon.hidden, @"%@ still no corner hint", theme);
+    XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  }
 }
 
 - (void)testSessionStartsHidden

@@ -18,6 +18,7 @@
 #import "ProgressBarViewController.h"
 #import "StudySetViewController.h"
 #import "ThemeManager.h"
+#import "Constants.h"
 
 //! Stands in for a Group, so the Study Sets screen can load without the database
 @interface LWEStudySetStubGroup : NSObject
@@ -92,7 +93,38 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 @interface CFlashAccessibilityTest : XCTestCase
 @end
 
+static BOOL LWECFTestColorsClose(UIColor *a, UIColor *b)
+{
+  CGFloat ar, ag, ab, aa, br, bg, bb, ba;
+  if (a == nil || b == nil) return NO;
+  if ([a getRed:&ar green:&ag blue:&ab alpha:&aa] == NO) return NO;
+  if ([b getRed:&br green:&bg blue:&bb alpha:&ba] == NO) return NO;
+  return (fabs(ar - br) < 0.02f && fabs(ag - bg) < 0.02f && fabs(ab - bb) < 0.02f && fabs(aa - ba) < 0.02f);
+}
+
 @implementation CFlashAccessibilityTest
+{
+  NSString *_savedTheme;
+}
+
+- (void)setUp
+{
+  [super setUp];
+  _savedTheme = [[[NSUserDefaults standardUserDefaults] objectForKey:APP_THEME] retain];
+  // A previous test's Show Reading tap must not leave the next card already revealed.
+  [CardViewController setSessionReadingVisible:NO];
+}
+
+- (void)tearDown
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  if (_savedTheme) [settings setObject:_savedTheme forKey:APP_THEME];
+  else [settings removeObjectForKey:APP_THEME];
+  [_savedTheme release];
+  _savedTheme = nil;
+  [CardViewController setSessionReadingVisible:NO];
+  [super tearDown];
+}
 
 #pragma mark - Helpers
 
@@ -190,6 +222,43 @@ static CGFloat LWECFTestContrast(UIColor *a, UIColor *b)
   XCTAssertTrue(mood.moodIconBtn.isAccessibilityElement, @"Still a button, to show the score again");
   [mood doTogglePercentCorrectBtn];
   XCTAssertEqualObjects(mood.moodIconBtn.accessibilityValue, [MoodIcon accessibilityValueForPercentCorrect:67.0f]);
+}
+
+#pragma mark - Scroll hint and Show Reading press
+
+- (void)testScrollHintStaysHiddenAfterReveal
+{
+  // A short reading fits, so the scroll cue stays hidden on the question side and after the answer
+  // is revealed. VoiceOver must not find it. Kimono uses the same press as jFlash: the pill fill
+  // stays put instead of flashing a darker shape.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_THEME_KIMONO forKey:APP_THEME];
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"你好" reading:@"ni3 hao3" meaning:@"hello"]];
+  [cvc layoutCardSubviews];
+
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"Question side keeps the reading hidden");
+  XCTAssertFalse(cvc.toggleReadingBtn.hidden, @"Question side still has Show Reading");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"No scroll hint once the answer is showing");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden, @"VoiceOver does not land on the hidden hint");
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  UIButton *button = cvc.toggleReadingBtn;
+  [cvc doToggleReadingBtn]; // hide again, so the pill is what a press would darken
+  [cvc layoutCardSubviews];
+  UIColor *fill = [[ThemeManager sharedThemeManager] colorForSlot:@"readingToggleFill"];
+  XCTAssertTrue(LWECFTestColorsClose(button.configuration.background.backgroundColor, fill));
+  button.highlighted = YES;
+  [button updateConfiguration];
+  XCTAssertTrue(LWECFTestColorsClose(button.configuration.background.backgroundColor, fill), @"Kimono press keeps the pill fill");
+  XCTAssertGreaterThan(button.configuration.background.backgroundInsets.leading, 0.0);
+  XCTAssertGreaterThan(button.configuration.background.backgroundInsets.top, 0.0);
 }
 
 #pragma mark - Scroll-indicator flash
