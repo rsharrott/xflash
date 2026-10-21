@@ -11,6 +11,7 @@
 #import "LWEReadingLayout.h"
 #import "CardViewController.h"
 #import "PracticeModeCardViewDelegate.h"
+#import "BrowseModeCardViewDelegate.h"
 #import "JapaneseCard.h"
 #import "Constants.h"
 #import "MoodIcon.h"
@@ -75,6 +76,18 @@ static void LWEStudySetSpinMainQueue(XCTestCase *testCase)
   [testCase waitForExpectationsWithTimeout:2 handler:nil];
 }
 
+//! Enough kana that an E→J reading still overflows the 42pt row at 16pt, the smallest size
+//! resizeWithMinFontSize: tries (20, then 18, then 16). One gojuon still fits on two lines.
+static NSString *LWELongKanaReading(void)
+{
+  NSMutableString *reading = [NSMutableString string];
+  for (NSInteger i = 0; i < 8; i++)
+  {
+    [reading appendString:@"あいうえおかきくけこさしすせそたちつてとなにぬねの"];
+  }
+  return reading;
+}
+
 static void LWEStudySetTestNoop(id self, SEL _cmd) {}
 
 /**
@@ -99,10 +112,74 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 @interface CardReadingTest : XCTestCase
 @end
 
+#if defined(DEBUG)
+@interface CardViewController (LWEReadingToggleApplies)
++ (NSUInteger) lwe_readingToggleApplies;
++ (void) lwe_resetReadingToggleApplies;
+@end
+#endif
+
+typedef void (*LWEViewTransitionIMP)(id, SEL, UIView *, NSTimeInterval, UIViewAnimationOptions, id, id);
+typedef void (*LWEViewAnimateIMP)(id, SEL, NSTimeInterval, NSTimeInterval, UIViewAnimationOptions, id, id);
+
+static NSInteger LWETransitionCalls = 0;
+static NSInteger LWECrossfadeCalls = 0;
+static NSInteger LWECrossfadeCompletions = 0;
+static IMP LWESavedTransition = NULL;
+static IMP LWESavedAnimate = NULL;
+
+static void LWETestTransition(id self, SEL _cmd, UIView *view, NSTimeInterval duration, UIViewAnimationOptions options, id animations, id completion)
+{
+  LWETransitionCalls += 1;
+  ((LWEViewTransitionIMP)LWESavedTransition)(self, _cmd, view, duration, options, animations, completion);
+}
+
+static void LWETestAnimate(id self, SEL _cmd, NSTimeInterval duration, NSTimeInterval delay, UIViewAnimationOptions options, id animations, id completion)
+{
+  BOOL crossfade = fabs(duration - 0.12) < 0.001;
+  if (crossfade) LWECrossfadeCalls += 1;
+  void (^finish)(BOOL) = completion;
+  // Copy: UIKit may call this after LWETestAnimate returns, and a stack block would be gone.
+  void (^wrapped)(BOOL) = [[^(BOOL finished) {
+    if (crossfade) LWECrossfadeCompletions += 1;
+    if (finish) finish(finished);
+  } copy] autorelease];
+  ((LWEViewAnimateIMP)LWESavedAnimate)(self, _cmd, duration, delay, options, animations, crossfade ? (id)wrapped : completion);
+}
+
+static void LWEInstallFadeSwizzles(void)
+{
+  LWETransitionCalls = 0;
+  LWECrossfadeCalls = 0;
+  LWECrossfadeCompletions = 0;
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  LWESavedTransition = method_setImplementation(transition, (IMP)LWETestTransition);
+  LWESavedAnimate = method_setImplementation(animate, (IMP)LWETestAnimate);
+}
+
+static void LWERestoreFadeSwizzles(void)
+{
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  method_setImplementation(transition, LWESavedTransition);
+  method_setImplementation(animate, LWESavedAnimate);
+}
+
 @implementation CardReadingTest
 {
   NSString *_savedHeadwordSetting;
   NSString *_savedReadingSetting;
+  NSString *_savedTheme;
+}
+
+static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
+{
+  CGFloat ar, ag, ab, aa, br, bg, bb, ba;
+  if (a == nil || b == nil) return NO;
+  if ([a getRed:&ar green:&ag blue:&ab alpha:&aa] == NO) return NO;
+  if ([b getRed:&br green:&bg blue:&bb alpha:&ba] == NO) return NO;
+  return (fabs(ar - br) < 0.02f && fabs(ag - bg) < 0.02f && fabs(ab - bb) < 0.02f && fabs(aa - ba) < 0.02f);
 }
 
 - (void)setUp
@@ -111,6 +188,7 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   _savedHeadwordSetting = [[settings objectForKey:APP_HEADWORD] retain];
   _savedReadingSetting = [[settings objectForKey:APP_READING] retain];
+  _savedTheme = [[settings objectForKey:APP_THEME] retain];
   [settings setObject:SET_J_TO_E forKey:APP_HEADWORD];
   [settings setObject:SET_READING_BOTH forKey:APP_READING];
   // Each test starts as a fresh launch: reading hidden
@@ -124,6 +202,10 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
   else [settings removeObjectForKey:APP_HEADWORD];
   if (_savedReadingSetting) [settings setObject:_savedReadingSetting forKey:APP_READING];
   else [settings removeObjectForKey:APP_READING];
+  if (_savedTheme) [settings setObject:_savedTheme forKey:APP_THEME];
+  else [settings removeObjectForKey:APP_THEME];
+  [_savedTheme release];
+  _savedTheme = nil;
   [_savedHeadwordSetting release];
   _savedHeadwordSetting = nil;
   [_savedReadingSetting release];
@@ -201,6 +283,292 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 
   [cvc setupWithCard:[self _cardWithHeadword:@"海" reading:@"うみ" romaji:@"umi"]];
   XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The next card starts hidden again");
+}
+
+- (void)testScrollHintStaysHiddenAfterReveal
+{
+  // あらすじ is kana-only: no reading row above the headword. Revealing shows that (empty) row
+  // and used to un-hide the nib's scroll-more arrow at the top-left of the card.
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"あらすじ" reading:@"あらすじ" romaji:@"arasuji"]];
+  [cvc layoutCardSubviews];
+
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"Question side keeps the reading hidden");
+  XCTAssertFalse(cvc.toggleReadingBtn.hidden, @"Question side still has Show Reading");
+  XCTAssertEqualObjects(cvc.toggleReadingBtn.accessibilityLabel, NSLocalizedString(@"Show Reading", nil));
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"No scroll hint on the question side");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden, @"The answer shows this card's reading");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The corner arrow stays hidden once the answer is showing");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden, @"VoiceOver does not land on the hidden hint");
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+  XCTAssertFalse(cvc.toggleReadingBtn.hidden, @"The blank toggle still covers the reading");
+
+  // A reading long enough to scroll used to un-hide the same nib-positioned glyph.
+  NSString *longReading = @"あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:longReading romaji:@"benkyou"]];
+  [cvc reveal];
+  XCTAssertTrue(cvc.readingMoreIcon.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+}
+
+- (void)testEnglishToJapaneseScrollHintShowsOnlyOnOverflow
+{
+  // E→J uses the legacy card. The arrow sits at the bottom-left of the reading row and
+  // shows only when that reading is visible and taller than the row, as on cFlash.
+  // It is never a VoiceOver element.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_E_TO_J forKey:APP_HEADWORD];
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [[[CardViewController alloc] initDisplayMainHeadword:NO] autorelease];
+  cvc.delegate = practice;
+  cvc.view.frame = CGRectMake(0, 0, 402, 494);
+
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:@"あらすじ" romaji:@"arasuji"]];
+  [cvc layoutCardSubviews];
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The question side keeps the reading hidden");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertLessThanOrEqual(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"A reading that fits shows no arrow");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:LWELongKanaReading() romaji:@"arasuji"]];
+  [cvc layoutCardSubviews];
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The next card starts with the reading hidden");
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The next card starts with the arrow hidden");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height,
+                       @"Reveal leaves the overflowing label taller than the row");
+  XCTAssertFalse(cvc.readingMoreIcon.hidden, @"E→J shows the arrow when the visible reading overflows");
+  XCTAssertFalse(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc doToggleReadingBtn];
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"Tapping hides the reading again");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The arrow leaves with the reading");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+}
+
+- (void)testBrowseModeEnglishToJapaneseArrowFollowsEachCard
+{
+  // Browse turns the reading on in cardViewWillSetup:, and that lays out and checks the arrow
+  // before the new reading is loaded. Nothing here lays the card out again between cards, so a
+  // long reading then a short one must clear the arrow, and a short one then a long one must
+  // bring it back, from setup alone.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_E_TO_J forKey:APP_HEADWORD];
+  BrowseModeCardViewDelegate *browse = [[[BrowseModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [[[CardViewController alloc] initDisplayMainHeadword:NO] autorelease];
+  cvc.delegate = browse;
+  cvc.view.frame = CGRectMake(0, 0, 402, 494);
+  [cvc studyViewModeDidChange:nil];
+
+  NSString *longReading = LWELongKanaReading();
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:longReading romaji:@"arasuji"]];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden, @"Browse shows the reading");
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height,
+                       @"The long reading is actually taller than the row");
+  XCTAssertFalse(cvc.readingMoreIcon.hidden, @"A long reading shows the arrow");
+  XCTAssertFalse(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:@"あらすじ" romaji:@"arasuji"]];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertLessThanOrEqual(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"A short reading after a long one clears the arrow");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:longReading romaji:@"arasuji"]];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertFalse(cvc.readingMoreIcon.hidden, @"A long reading after a short one brings the arrow back");
+  XCTAssertFalse(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+}
+
+- (void)testReadingToggleHandlerDoesNotOutliveTheController
+{
+  // Theme, text size, and mode replace the card controller while the button can still be retained
+  // by its view. The handler must be gone before that, or the next configuration update messages
+  // a freed controller. The pool drains anything UIKit autoreleased while loading the view, so
+  // the controller is actually freed before the nil check.
+  UIButton *button = nil;
+  @autoreleasepool {
+    CardViewController *cvc = [[CardViewController alloc] initDisplayMainHeadword:YES];
+    (void)cvc.view;
+    button = [cvc.toggleReadingBtn retain];
+    XCTAssertNotNil(button.configurationUpdateHandler);
+    [cvc release];
+  }
+  XCTAssertNil(button.configurationUpdateHandler);
+  button.highlighted = YES;
+  [button updateConfiguration];
+  [button release];
+}
+
+- (void)testShowReadingPressDoesNotDarkenThePill
+{
+  // The configuration handed to UIKit keeps readingToggleFill and its insets while highlighted.
+  // This does not render the button. -testShowReadingCrossfadesWithoutDissolvingTheCard covers
+  // the transition that used to flash a dark shape.
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  NSArray *themes = [NSArray arrayWithObjects:SET_THEME_PAPER, SET_THEME_FIRE, SET_THEME_WATER, SET_THEME_KIMONO, SET_THEME_KUTANI, nil];
+  for (NSString *theme in themes)
+  {
+    [CardViewController setSessionReadingVisible:NO];
+    [settings setObject:theme forKey:APP_THEME];
+    PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+    CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+    [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+    [cvc layoutCardSubviews];
+
+    UIButton *button = cvc.toggleReadingBtn;
+    XCTAssertTrue(cvc.readingScrollContainer.hidden, @"%@ question side", theme);
+    XCTAssertNotNil(button.configuration, @"%@ pill configuration", theme);
+    UIColor *fill = [[ThemeManager sharedThemeManager] colorForSlot:@"readingToggleFill"];
+    XCTAssertTrue(LWETestColorsClose(button.configuration.background.backgroundColor, fill), @"%@ pill fill", theme);
+    NSDirectionalEdgeInsets insets = button.configuration.background.backgroundInsets;
+    XCTAssertGreaterThan(insets.leading, 0.0, @"%@ pill is inset in the hit area", theme);
+    XCTAssertGreaterThan(insets.top, 0.0, @"%@ pill is inset in the hit area", theme);
+
+    button.highlighted = YES;
+    [button updateConfiguration];
+    XCTAssertTrue(LWETestColorsClose(button.configuration.background.backgroundColor, fill), @"%@ press keeps the pill fill", theme);
+    NSDirectionalEdgeInsets pressed = button.configuration.background.backgroundInsets;
+    XCTAssertGreaterThan(pressed.leading, 0.0, @"%@ press does not fill the whole button", theme);
+    XCTAssertGreaterThan(pressed.top, 0.0, @"%@ press does not fill the whole button", theme);
+    XCTAssertEqualWithAccuracy(button.configuration.background.strokeWidth, 0.0, 0.01, @"%@ no stroke", theme);
+
+    [cvc doToggleReadingBtn];
+    CGFloat r, g, b, a;
+    UIColor *shown = button.configuration.background.backgroundColor;
+    XCTAssertTrue([shown getRed:&r green:&g blue:&b alpha:&a], @"%@ shown background", theme);
+    XCTAssertLessThan(a, 0.01, @"%@ reading up: no pill fill left to flash", theme);
+    XCTAssertTrue(cvc.readingMoreIcon.hidden, @"%@ still no corner hint", theme);
+    XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  }
+}
+
+#if defined(DEBUG)
+- (void)testShowReadingPressRebuildsThePillAtMostTwice
+{
+  // One highlight callback assigns the dimmed pill once (laying out from inside the handler used
+  // to assign it again). Showing the reading assigns the empty button once. Finger-up assigns
+  // again only when the button is no longer holding that empty configuration.
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+  [cvc layoutCardSubviews];
+  UIButton *button = cvc.toggleReadingBtn;
+  button.highlighted = YES;
+  // setHighlighted: may already have updated the configuration. Measure one callback from here.
+  [CardViewController lwe_resetReadingToggleApplies];
+  [button updateConfiguration];
+  XCTAssertLessThanOrEqual([CardViewController lwe_readingToggleApplies], (NSUInteger)1,
+                           @"one highlight callback rebuilds the pill at most once");
+  NSUInteger afterHighlight = [CardViewController lwe_readingToggleApplies];
+
+  [cvc doToggleReadingBtn];
+  XCTAssertEqual([CardViewController lwe_readingToggleApplies], afterHighlight + 1,
+                 @"showing the reading rebuilds it once more");
+
+  button.highlighted = NO;
+  [button updateConfiguration];
+  // Finger-up writes again only when the button is no longer holding the empty configuration
+  // we just set, so a highlighted fill cannot stick. That is at most one more assign.
+  XCTAssertLessThanOrEqual([CardViewController lwe_readingToggleApplies], afterHighlight + 2);
+}
+#endif
+
+//! The card's view has to be in a window or Show Reading updates in place and the fade never runs.
+- (UIWindow *)_windowHostingCardView:(CardViewController *)cvc
+{
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 402, 494)] autorelease];
+  [window addSubview:cvc.view];
+  window.hidden = NO;
+  [cvc.view layoutIfNeeded];
+  return window;
+}
+
+//! Spins the run loop until the 120ms fade's completion has run and its stand-in is gone.
+- (void)_waitForReadingFadeOnCard:(CardViewController *)cvc alphaOfView:(UIView *)alphaView
+{
+  NSPredicate *done = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+    return LWECrossfadeCompletions > 0
+        && [cvc.view viewWithTag:9104] == nil
+        && fabs(alphaView.alpha - 1.0) < 0.01;
+  }];
+  [self expectationForPredicate:done evaluatedWithObject:cvc handler:nil];
+  [self waitForExpectationsWithTimeout:2.0 handler:nil];
+}
+
+- (void)testShowReadingCrossfadesWithoutDissolvingTheCard
+{
+  // Hosted in a window, tapping Show Reading runs the 120ms fade and does not call
+  // transitionWithView: (that snapshot composites the clear card onto black). A fade
+  // stand-in, when the view can be snapshotted, is not a control and comes back off.
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+  [cvc layoutCardSubviews];
+  UIWindow *window = [[self _windowHostingCardView:cvc] retain];
+  XCTAssertNotNil(cvc.view.window);
+
+  LWEInstallFadeSwizzles();
+  @try
+  {
+    [cvc doToggleReadingBtn];
+    XCTAssertEqual(LWETransitionCalls, 0, @"Show Reading does not cross-dissolve the clear card");
+    if (UIAccessibilityIsReduceMotionEnabled())
+    {
+      XCTAssertEqual(LWECrossfadeCalls, 0, @"Reduce Motion switches in place");
+      XCTAssertFalse(cvc.readingScrollContainer.hidden);
+    }
+    else
+    {
+      XCTAssertEqual(LWECrossfadeCalls, 1, @"the reading fades in over 120ms");
+      UIView *snap = [cvc.view viewWithTag:9104];
+      if (snap != nil)
+      {
+        XCTAssertFalse(snap.userInteractionEnabled);
+        XCTAssertTrue(snap.accessibilityElementsHidden);
+        XCTAssertFalse(snap.isAccessibilityElement);
+      }
+      [self _waitForReadingFadeOnCard:cvc alphaOfView:cvc.readingScrollContainer];
+      XCTAssertNil([cvc.view viewWithTag:9104], @"the fade stand-in is removed");
+      XCTAssertFalse(cvc.readingScrollContainer.hidden);
+
+      LWETransitionCalls = 0;
+      LWECrossfadeCalls = 0;
+      LWECrossfadeCompletions = 0;
+      [cvc doToggleReadingBtn];
+      XCTAssertEqual(LWETransitionCalls, 0);
+      XCTAssertEqual(LWECrossfadeCalls, 1, @"the pill fades back in as the reading fades out");
+      [self _waitForReadingFadeOnCard:cvc alphaOfView:cvc.toggleReadingBtn];
+      XCTAssertNil([cvc.view viewWithTag:9104]);
+      XCTAssertTrue(cvc.readingScrollContainer.hidden);
+    }
+  }
+  @finally
+  {
+    LWERestoreFadeSwizzles();
+    window.hidden = YES;
+    [cvc.view removeFromSuperview];
+    [window release];
+  }
 }
 
 - (void)testSessionStartsHidden
