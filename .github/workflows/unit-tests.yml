@@ -14,13 +14,13 @@ concurrency:
 jobs:
   test:
     name: ${{ matrix.scheme }}
-    runs-on: macos-26
+    # macos-26-intel is the same Xcode 26.6 / iOS 26.5 image as macos-26, on the
+    # Intel pool. The arm64 pool cancelled a queued job ("not acquired by Runner
+    # even after multiple attempts") while the other target was still running.
+    runs-on: macos-26-intel
     timeout-minutes: 60
     strategy:
-      # One macOS runner at a time. Queuing both jobs together hit GitHub's
-      # arm64 capacity limit and the second job was cancelled before it started.
       fail-fast: false
-      max-parallel: 1
       matrix:
         scheme: [jFlash, cFlash]
     steps:
