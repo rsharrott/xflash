@@ -1,0 +1,161 @@
+name: Unit tests
+
+# jFlash and cFlash each get their own check. There are no git submodules.
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: unit-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.scheme }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        scheme: [jFlash, cFlash]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Show Xcode
+        run: |
+          xcodebuild -version
+          xcode-select -p
+
+      - name: Create simulator
+        id: sim
+        env:
+          SIM_NAME: xflash-ci-${{ matrix.scheme }}
+        run: |
+          set -euo pipefail
+          python3 << 'PY'
+          import json, os, re, subprocess, sys
+
+          def simctl_json(*args):
+              raw = subprocess.check_output(["xcrun", "simctl", *args], text=True)
+              return json.loads(raw)
+
+          runtimes = [
+              runtime for runtime in simctl_json("list", "runtimes", "available", "-j")["runtimes"]
+              if runtime.get("isAvailable") and str(runtime.get("name", "")).startswith("iOS")
+          ]
+          if not runtimes:
+              sys.exit("No available iOS simulator runtime")
+
+          def version_tuple(text):
+              numbers = []
+              for part in str(text).split("."):
+                  try:
+                      numbers.append(int(part))
+                  except ValueError:
+                      break
+              return tuple(numbers)
+
+          runtimes.sort(key=lambda runtime: version_tuple(runtime.get("version", "0")))
+          runtime = runtimes[-1]
+
+          iphones = [
+              device for device in simctl_json("list", "devicetypes", "-j")["devicetypes"]
+              if str(device.get("name", "")).startswith("iPhone")
+          ]
+          if not iphones:
+              sys.exit("No iPhone simulator device type is installed")
+
+          def rank(device):
+              name = device["name"]
+              plain = re.fullmatch(r"iPhone (\d+)", name)
+              if plain:
+                  return (2, int(plain.group(1)))
+              numbered = re.search(r"iPhone (\d+)", name)
+              if numbered:
+                  return (1, int(numbered.group(1)))
+              return (0, 0)
+
+          iphones.sort(key=rank)
+          failures = []
+          udid = None
+          chosen = None
+          for device in reversed(iphones):
+              created = subprocess.run(
+                  ["xcrun", "simctl", "create", os.environ["SIM_NAME"], device["identifier"], runtime["identifier"]],
+                  text=True,
+                  capture_output=True,
+              )
+              if created.returncode == 0:
+                  udid = created.stdout.strip()
+                  chosen = device
+                  break
+              failures.append(f"{device['name']}: {(created.stderr or created.stdout).strip()}")
+
+          if not udid:
+              sys.exit("Could not create a simulator:\n" + "\n".join(failures))
+
+          booted = subprocess.run(["xcrun", "simctl", "boot", udid], text=True, capture_output=True)
+          if booted.returncode != 0 and "Booted" not in (booted.stderr + booted.stdout):
+              sys.exit(booted.stderr or booted.stdout or "simctl boot failed")
+          subprocess.check_call(["xcrun", "simctl", "bootstatus", udid, "-b"])
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"udid={udid}\n")
+              handle.write(f"device_name={chosen['name']}\n")
+              handle.write(f"runtime_name={runtime['name']}\n")
+          print(f"Booted {chosen['name']} on {runtime['name']} ({udid})", file=sys.stderr)
+          PY
+
+      - name: Run tests
+        env:
+          SCHEME: ${{ matrix.scheme }}
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          set -euo pipefail
+          mkdir -p ci-results
+          # The project pins SDKROOT to iphoneos and signs with a development team.
+          # Override both for a simulator run that does not need a signing identity.
+          # The sources are manual reference counting; keep ARC off so retain/release still compile.
+          xcodebuild test \
+            -project jFlash/xFlash.xcodeproj \
+            -scheme "$SCHEME" \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=${UDID}" \
+            -resultBundlePath "$PWD/ci-results/${SCHEME}.xcresult" \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            CODE_SIGN_STYLE=Manual \
+            ENABLE_TESTABILITY=YES \
+            CLANG_ENABLE_OBJC_ARC=NO \
+            SDKROOT=iphonesimulator \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            | tee "ci-results/${SCHEME}.log"
+
+      - name: Print test summary
+        if: always()
+        env:
+          SCHEME: ${{ matrix.scheme }}
+        run: |
+          set -euo pipefail
+          bundle="ci-results/${SCHEME}.xcresult"
+          if [ ! -d "$bundle" ]; then
+            echo "No xcresult bundle was produced."
+            exit 0
+          fi
+          xcrun xcresulttool get test-results summary --path "$bundle" || true
+          xcrun xcresulttool get test-results tests --path "$bundle" || true
+
+      - name: Upload results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.scheme }}-test-results
+          path: ci-results/
+          if-no-files-found: warn
+          retention-days: 14
