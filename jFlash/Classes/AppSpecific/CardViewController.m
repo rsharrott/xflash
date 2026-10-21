@@ -93,7 +93,48 @@ static const CGFloat kLWEReadingPillHeight     = 24.0; // the hidden-state pill
 static const CGFloat kLWEReadingPillLabelSize  = 13.0;
 static const NSTimeInterval kLWEReadingCrossfade = 0.12;
 //! Fading stand-in for the pill or the reading during the crossfade. Not a real control.
+//! CardReadingTest and CFlashAccessibilityTest look for this tag.
 static const NSInteger kLWEReadingFadeSnapshotTag = 9104;
+//! Times the Show Reading pill configuration was actually assigned. A press should not
+//! rebuild it in a loop; the reading tests read this.
+static NSUInteger sLWEReadingToggleApplies = 0;
+
+//! Enough of a colour to tell one pill from the next. Clear matches clear.
+static void LWEReadingToggleColorParts(UIColor *color, CGFloat *r, CGFloat *g, CGFloat *b, CGFloat *a)
+{
+  *r = 0; *g = 0; *b = 0; *a = 0;
+  if (color == nil) return;
+  if ([color getRed:r green:g blue:b alpha:a]) return;
+  CGFloat white = 0;
+  if ([color getWhite:&white alpha:a]) { *r = *g = *b = white; return; }
+  if (color.CGColor) *a = CGColorGetAlpha(color.CGColor);
+}
+
+//! YES when `current` already shows the pill `intended` describes, so assigning it again would
+//! only rebuild the same button. A highlighted configuration UIKit swapped in (darker fill, or
+//! insets dropped so the fill covers the hit area) does not match.
+API_AVAILABLE(ios(15.0))
+static BOOL LWEReadingToggleVisibleMatch(UIButtonConfiguration *current, UIButtonConfiguration *intended, BOOL readingHidden)
+{
+  if (current == nil || intended == nil) return NO;
+  if (fabs(current.background.strokeWidth - intended.background.strokeWidth) > 0.01) return NO;
+  NSString *currentTitle = current.title ?: @"";
+  NSString *intendedTitle = intended.title ?: @"";
+  if ([currentTitle isEqualToString:intendedTitle] == NO) return NO;
+  if ((current.image != nil) != (intended.image != nil)) return NO;
+  CGFloat cr, cg, cb, ca, ir, ig, ib, ia;
+  LWEReadingToggleColorParts(current.background.backgroundColor, &cr, &cg, &cb, &ca);
+  LWEReadingToggleColorParts(intended.background.backgroundColor, &ir, &ig, &ib, &ia);
+  if (fabs(cr - ir) > 0.02 || fabs(cg - ig) > 0.02 || fabs(cb - ib) > 0.02 || fabs(ca - ia) > 0.02) return NO;
+  if (readingHidden)
+  {
+    NSDirectionalEdgeInsets cInsets = current.background.backgroundInsets;
+    NSDirectionalEdgeInsets iInsets = intended.background.backgroundInsets;
+    if (fabs(cInsets.top - iInsets.top) > 0.5 || fabs(cInsets.leading - iInsets.leading) > 0.5 ||
+        fabs(cInsets.bottom - iInsets.bottom) > 0.5 || fabs(cInsets.trailing - iInsets.trailing) > 0.5) return NO;
+  }
+  return YES;
+}
 
 //! Reading shown/hidden for this run of the app (furigana spec §1, DD review of PR #21): new card views
 //! (theme, direction, mode or text-size changes) pick it up; it starts hidden at launch and is never saved.
@@ -215,6 +256,8 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   NSUInteger _meaningFlashToken; // bumped on every card setup: a flash queued for the last card is dropped
   BOOL _observingMeaningScroll;
   BOOL _applyingReadingToggle; // the configuration handler calls back into -_updateReadingToggleAppearance
+  NSUInteger _readingFadeToken; // a newer fade or a new card drops a stale crossfade completion
+  NSString *_readingToggleSignature; // last pill we assigned; an identical press does not assign again
 }
 
 + (BOOL) sessionReadingVisible
@@ -225,6 +268,16 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
 + (void) setSessionReadingVisible:(BOOL)visible
 {
   sLWESessionReadingVisible = visible;
+}
+
++ (NSUInteger) lwe_readingToggleApplies
+{
+  return sLWEReadingToggleApplies;
+}
+
++ (void) lwe_resetReadingToggleApplies
+{
+  sLWEReadingToggleApplies = 0;
 }
 
 @synthesize delegate;
@@ -405,16 +458,16 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   // The nib button is a system (rounded-rect) button. Its highlighted state, and a configuration
   // copied from that state, paints a darker fill — on Kimono, across the pill or the whole hit
   // area. Press only dims the ink; -_updateReadingToggleAppearance rebuilds the pill from scratch.
-  self.toggleReadingBtn.adjustsImageWhenHighlighted = NO;
-  self.toggleReadingBtn.showsTouchWhenHighlighted = NO;
   [self.toggleReadingBtn setBackgroundImage:nil forState:UIControlStateHighlighted];
   self.toggleReadingBtn.backgroundColor = [UIColor clearColor];
   if (@available(iOS 15.0, *))
   {
-    // MRC: __block does not retain self (the button's handler would otherwise cycle with us).
+    // MRC: __block does not retain self, so the button's handler does not cycle with us.
+    // The pointer is not zeroed when we go away — -dealloc and -viewDidUnload clear the handler
+    // before the button can outlive this controller (theme, text size, and mode replace the card).
     __block CardViewController *unretainedSelf = self;
     self.toggleReadingBtn.configurationUpdateHandler = ^(UIButton *button) {
-      if (unretainedSelf == nil || unretainedSelf->_applyingReadingToggle) return;
+      if (button == nil || unretainedSelf->_applyingReadingToggle) return;
       [unretainedSelf _updateReadingToggleAppearance];
     };
   }
@@ -1096,7 +1149,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     sLWESessionReadingVisible = show;
   };
   // 120ms crossfade between the pill and the reading (both states are the same height, so
-  // nothing moves); instant under Reduce Motion, and in tests (no window).
+  // nothing moves). Instant under Reduce Motion, and when the view has no window (most unit tests).
   if (UIAccessibilityIsReduceMotionEnabled() || self.view.window == nil)
   {
     change();
@@ -1130,6 +1183,8 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 //! button (other themes get the same flash, lighter where the pill fill is white). Fading a
 //! snapshot of the pill itself keeps the real alpha. The pill's background view is not animated:
 //! inside a transition it grew from the pill to the full 44pt hit area for a frame.
+//! Hiding fades the pill back in while the reading snapshot fades out, so the two don't sit
+//! on screen together at full opacity.
 - (void) _crossfadeReadingChange:(void (^)(void))change showing:(BOOL)show
 {
   NSMutableArray *snapshots = [NSMutableArray array];
@@ -1147,6 +1202,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     if (romaji) [snapshots addObject:romaji];
 #endif
   }
+  NSUInteger token = ++_readingFadeToken;
   [UIView performWithoutAnimation:^{
     change();
     if (show)
@@ -1155,6 +1211,11 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 #if defined(LWE_JFLASH)
       self.romajiLabel.alpha = 0.0;
 #endif
+      self.toggleReadingBtn.alpha = 1.0;
+    }
+    else
+    {
+      self.toggleReadingBtn.alpha = 0.0;
     }
   }];
   [UIView animateWithDuration:kLWEReadingCrossfade
@@ -1169,9 +1230,15 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
       self.romajiLabel.alpha = 1.0;
 #endif
     }
+    else
+    {
+      self.toggleReadingBtn.alpha = 1.0;
+    }
   } completion:^(BOOL finished) {
     for (UIView *snap in snapshots) [snap removeFromSuperview];
+    if (token != _readingFadeToken) return;
     self.readingScrollContainer.alpha = 1.0;
+    self.toggleReadingBtn.alpha = 1.0;
 #if defined(LWE_JFLASH)
     self.romajiLabel.alpha = 1.0;
 #endif
@@ -1316,6 +1383,7 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
       CGFloat alpha = CGColorGetAlpha(ink.CGColor);
       ink = [ink colorWithAlphaComponent:alpha * 0.6];
     }
+    NSString *signature = @"shown";
     if (readingHidden)
     {
       // 24pt pill (readingToggleFill), eye.slash 15pt semibold, 5pt gap, 13pt semibold label in
@@ -1349,17 +1417,32 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
       CGSize bounds = button.bounds.size;
       CGFloat vInset = MAX(0, roundf((bounds.height - pillH) / 2.0));
       CGFloat hInset = MAX(0, floorf((bounds.width - pillW) / 2.0));
-      config.background.backgroundColor = [tm colorForSlot:@"readingToggleFill"];
+      UIColor *fill = [tm colorForSlot:@"readingToggleFill"];
+      config.background.backgroundColor = fill;
       config.background.cornerRadius = pillH / 2.0;
       config.background.backgroundInsets = NSDirectionalEdgeInsetsMake(vInset, hInset, vInset, hInset);
       config.cornerStyle = UIButtonConfigurationCornerStyleFixed;
+      CGFloat ir, ig, ib, ia, fr, fg, fb, fa;
+      LWEReadingToggleColorParts(ink, &ir, &ig, &ib, &ia);
+      LWEReadingToggleColorParts(fill, &fr, &fg, &fb, &fa);
+      // Highlight changes the ink, so it is part of the signature. Bounds change the insets.
+      signature = [NSString stringWithFormat:@"hidden|%.0f|%.0f|%.0f|%.0f|%.3f|%.3f|%.3f|%.3f|%.3f|%.3f|%.3f|%.3f|%@",
+                   bounds.width, bounds.height, pillW, pillH, ir, ig, ib, ia, fr, fg, fb, fa, title];
     }
+    // Same pill as last time, and still the one on the button (the handler, layout, and
+    // -_updateReadingToggle can all ask). Assigning again would rebuild it. A press that
+    // shows the reading assigns the highlighted pill, then the empty button.
+    if ([signature isEqualToString:_readingToggleSignature] &&
+        LWEReadingToggleVisibleMatch(button.configuration, config, readingHidden)) return;
     // Shown: no title, no image, no background -- but the button stays over the reading, tappable.
     // Assigning the configuration calls the update handler; the flag stops that from rebuilding.
+    // No layoutIfNeeded here: laying out from inside the handler was a third rebuild on one press.
+    [_readingToggleSignature release];
+    _readingToggleSignature = [signature retain];
+    sLWEReadingToggleApplies++;
     _applyingReadingToggle = YES;
     [UIView performWithoutAnimation:^{
       button.configuration = config;
-      [button layoutIfNeeded];
     }];
     _applyingReadingToggle = NO;
   }
@@ -1375,8 +1458,11 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 - (void) _prepareView:(Card*)card
 {
   // A reading fade from the previous card must not leave this one transparent, or leave its snapshot up.
+  _readingFadeToken++;
   [self.readingScrollContainer.layer removeAllAnimations];
   self.readingScrollContainer.alpha = 1.0;
+  [self.toggleReadingBtn.layer removeAllAnimations];
+  self.toggleReadingBtn.alpha = 1.0;
 #if defined(LWE_JFLASH)
   [self.romajiLabel.layer removeAllAnimations];
   self.romajiLabel.alpha = 1.0;
@@ -1455,17 +1541,14 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   // still exposes its children (and a fade that only drops alpha).
   self.readingMoreIcon.isAccessibilityElement = NO;
 #if defined(LWE_JFLASH)
-  if (_modernCard)
-  {
-    // The 2026 card scrolls a long reading inside its row. The old scroll-more glyph is
-    // still pinned to its nib frame — top-left of the card, on the Kimono wave — and
-    // showing the reading (which revealing the answer does) used to un-hide it whenever
-    // the label was taller than the row. A kana-only word such as あらすじ has a 0pt row
-    // and used to keep the nib's 42pt label, so the arrow always came back. It isn't tappable.
-    self.readingMoreIcon.hidden = YES;
-    self.readingMoreIcon.accessibilityElementsHidden = YES;
-    return;
-  }
+  // J→E and E→J. The 2026 card scrolls a long reading inside its row. The old scroll-more
+  // glyph stays at its nib frame on the J→E card (top-left, on the Kimono wave) and at the
+  // bottom-left of the legacy reading row on E→J (:layoutCardSubviews). Showing the reading,
+  // which revealing the answer does, used to un-hide it whenever the label was taller than
+  // the row. It isn't tappable in either mode.
+  self.readingMoreIcon.hidden = YES;
+  self.readingMoreIcon.accessibilityElementsHidden = YES;
+  return;
 #endif
   BOOL noText = ([self.readingLabel.text length] == 0 && [self.readingLabel.attributedText length] == 0);
   BOOL fits = [self _shouldHideMoreIconForLabel:self.readingLabel forScrollView:self.readingScrollContainer];
@@ -1660,6 +1743,10 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
 - (void)viewDidUnload
 {
+  if (@available(iOS 15.0, *))
+  {
+    self.toggleReadingBtn.configurationUpdateHandler = nil;
+  }
   [super viewDidUnload];
   self.readingScrollContainer = nil;
   self.headwordScrollContainer = nil;
@@ -1681,6 +1768,14 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
 
 - (void)dealloc
 {
+  // The update handler does not retain us. Clear it before releasing the button or the view,
+  // so a configuration update during teardown — or a button that outlives this controller when
+  // the study view swaps cards — cannot message a freed CardViewController.
+  if (@available(iOS 15.0, *))
+  {
+    toggleReadingBtn.configurationUpdateHandler = nil;
+  }
+  [_readingToggleSignature release];
   [moodIcon release];
 
   [baseHtml release];

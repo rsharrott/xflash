@@ -93,6 +93,49 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 @interface CardReadingTest : XCTestCase
 @end
 
+@interface CardViewController (LWEReadingToggleApplies)
++ (NSUInteger) lwe_readingToggleApplies;
++ (void) lwe_resetReadingToggleApplies;
+@end
+
+typedef void (*LWEViewTransitionIMP)(id, SEL, UIView *, NSTimeInterval, UIViewAnimationOptions, id, id);
+typedef void (*LWEViewAnimateIMP)(id, SEL, NSTimeInterval, NSTimeInterval, UIViewAnimationOptions, id, id);
+
+static NSInteger LWETransitionCalls = 0;
+static NSInteger LWECrossfadeCalls = 0;
+static IMP LWESavedTransition = NULL;
+static IMP LWESavedAnimate = NULL;
+
+static void LWETestTransition(id self, SEL _cmd, UIView *view, NSTimeInterval duration, UIViewAnimationOptions options, id animations, id completion)
+{
+  LWETransitionCalls += 1;
+  ((LWEViewTransitionIMP)LWESavedTransition)(self, _cmd, view, duration, options, animations, completion);
+}
+
+static void LWETestAnimate(id self, SEL _cmd, NSTimeInterval duration, NSTimeInterval delay, UIViewAnimationOptions options, id animations, id completion)
+{
+  if (fabs(duration - 0.12) < 0.001) LWECrossfadeCalls += 1;
+  ((LWEViewAnimateIMP)LWESavedAnimate)(self, _cmd, duration, delay, options, animations, completion);
+}
+
+static void LWEInstallFadeSwizzles(void)
+{
+  LWETransitionCalls = 0;
+  LWECrossfadeCalls = 0;
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  LWESavedTransition = method_setImplementation(transition, (IMP)LWETestTransition);
+  LWESavedAnimate = method_setImplementation(animate, (IMP)LWETestAnimate);
+}
+
+static void LWERestoreFadeSwizzles(void)
+{
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  method_setImplementation(transition, LWESavedTransition);
+  method_setImplementation(animate, LWESavedAnimate);
+}
+
 @implementation CardReadingTest
 {
   NSString *_savedHeadwordSetting;
@@ -243,10 +286,56 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
 }
 
+- (void)testScrollHintStaysHiddenInEnglishToJapanese
+{
+  // E→J uses the legacy card (CardViewController-EtoJ), which lays the arrow at the bottom-left
+  // of the reading row. A label taller than that row used to bring the arrow back after reveal.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_E_TO_J forKey:APP_HEADWORD];
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [[[CardViewController alloc] initDisplayMainHeadword:NO] autorelease];
+  cvc.delegate = practice;
+  cvc.view.frame = CGRectMake(0, 0, 402, 494);
+  NSString *longReading = @"あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:longReading romaji:@"arasuji"]];
+  [cvc layoutCardSubviews];
+  if (cvc.readingLabel.frame.size.height <= cvc.readingScrollContainer.frame.size.height)
+  {
+    CGRect frame = cvc.readingLabel.frame;
+    frame.size.height = cvc.readingScrollContainer.frame.size.height + 36.0;
+    cvc.readingLabel.frame = frame;
+  }
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height,
+                       @"The row would have treated this reading as overflow");
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden, @"The answer shows the reading");
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"E→J keeps the scroll arrow hidden");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+}
+
+- (void)testReadingToggleHandlerDoesNotOutliveTheController
+{
+  // Theme, text size, and mode replace the card controller while the button can still be retained
+  // by its view. The handler must be gone before that, or the next configuration update messages
+  // a freed controller.
+  CardViewController *cvc = [[CardViewController alloc] initDisplayMainHeadword:YES];
+  (void)cvc.view;
+  UIButton *button = [cvc.toggleReadingBtn retain];
+  XCTAssertNotNil(button.configurationUpdateHandler);
+  [cvc release];
+  XCTAssertNil(button.configurationUpdateHandler);
+  button.highlighted = YES;
+  [button updateConfiguration];
+  [button release];
+}
+
 - (void)testShowReadingPressDoesNotDarkenThePill
 {
-  // Pressed, the pill keeps readingToggleFill and its insets. A highlighted configuration used to
-  // darken the fill and drop the insets, so the whole hit area flashed — worst on Kimono.
+  // The configuration handed to UIKit keeps readingToggleFill and its insets while highlighted.
+  // This does not render the button. -testShowReadingCrossfadesWithoutDissolvingTheCard covers
+  // the transition that used to flash a dark shape.
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   NSArray *themes = [NSArray arrayWithObjects:SET_THEME_PAPER, SET_THEME_FIRE, SET_THEME_WATER, SET_THEME_KIMONO, SET_THEME_KUTANI, nil];
   for (NSString *theme in themes)
@@ -283,6 +372,100 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
     XCTAssertTrue(cvc.readingMoreIcon.hidden, @"%@ still no corner hint", theme);
     XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
   }
+}
+
+- (void)testShowReadingPressRebuildsThePillAtMostTwice
+{
+  // One highlight callback assigns the dimmed pill once (laying out from inside the handler used
+  // to assign it again). Showing the reading assigns the empty button once. Finger-up assigns
+  // again only when the button is no longer holding that empty configuration.
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+  [cvc layoutCardSubviews];
+  UIButton *button = cvc.toggleReadingBtn;
+  button.highlighted = YES;
+  // setHighlighted: may already have updated the configuration. Measure one callback from here.
+  [CardViewController lwe_resetReadingToggleApplies];
+  [button updateConfiguration];
+  XCTAssertLessThanOrEqual([CardViewController lwe_readingToggleApplies], (NSUInteger)1,
+                           @"one highlight callback rebuilds the pill at most once");
+  NSUInteger afterHighlight = [CardViewController lwe_readingToggleApplies];
+
+  [cvc doToggleReadingBtn];
+  XCTAssertEqual([CardViewController lwe_readingToggleApplies], afterHighlight + 1,
+                 @"showing the reading rebuilds it once more");
+
+  button.highlighted = NO;
+  [button updateConfiguration];
+  // Finger-up writes again only when the button is no longer holding the empty configuration
+  // we just set, so a highlighted fill cannot stick. That is at most one more assign.
+  XCTAssertLessThanOrEqual([CardViewController lwe_readingToggleApplies], afterHighlight + 2);
+}
+
+//! The card's view has to be in a window or Show Reading updates in place and the fade never runs.
+- (UIWindow *)_windowHostingCardView:(CardViewController *)cvc
+{
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 402, 494)] autorelease];
+  [window addSubview:cvc.view];
+  window.hidden = NO;
+  [cvc.view layoutIfNeeded];
+  return window;
+}
+
+- (void)testShowReadingCrossfadesWithoutDissolvingTheCard
+{
+  // Hosted in a window, tapping Show Reading runs the 120ms fade and does not call
+  // transitionWithView: (that snapshot composites the clear card onto black). A fade
+  // stand-in, when the view can be snapshotted, is not a control and comes back off.
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
+  [cvc layoutCardSubviews];
+  UIWindow *window = [self _windowHostingCardView:cvc];
+  XCTAssertNotNil(cvc.view.window);
+
+  LWEInstallFadeSwizzles();
+  @try
+  {
+    [cvc doToggleReadingBtn];
+    XCTAssertEqual(LWETransitionCalls, 0, @"Show Reading does not cross-dissolve the clear card");
+    if (UIAccessibilityIsReduceMotionEnabled())
+    {
+      XCTAssertEqual(LWECrossfadeCalls, 0, @"Reduce Motion switches in place");
+      XCTAssertFalse(cvc.readingScrollContainer.hidden);
+    }
+    else
+    {
+      XCTAssertEqual(LWECrossfadeCalls, 1, @"the reading fades in over 120ms");
+      UIView *snap = [cvc.view viewWithTag:9104];
+      if (snap != nil)
+      {
+        XCTAssertFalse(snap.userInteractionEnabled);
+        XCTAssertTrue(snap.accessibilityElementsHidden);
+        XCTAssertFalse(snap.isAccessibilityElement);
+      }
+      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+      XCTAssertNil([cvc.view viewWithTag:9104], @"the fade stand-in is removed");
+      XCTAssertEqualWithAccuracy(cvc.readingScrollContainer.alpha, 1.0, 0.01);
+      XCTAssertFalse(cvc.readingScrollContainer.hidden);
+
+      LWETransitionCalls = 0;
+      LWECrossfadeCalls = 0;
+      [cvc doToggleReadingBtn];
+      XCTAssertEqual(LWETransitionCalls, 0);
+      XCTAssertEqual(LWECrossfadeCalls, 1, @"the pill fades back in as the reading fades out");
+      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+      XCTAssertNil([cvc.view viewWithTag:9104]);
+      XCTAssertEqualWithAccuracy(cvc.toggleReadingBtn.alpha, 1.0, 0.01);
+      XCTAssertTrue(cvc.readingScrollContainer.hidden);
+    }
+  }
+  @finally
+  {
+    LWERestoreFadeSwizzles();
+  }
+  XCTAssertNotNil(window);
 }
 
 - (void)testSessionStartsHidden

@@ -93,6 +93,44 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 @interface CFlashAccessibilityTest : XCTestCase
 @end
 
+typedef void (*LWECFViewTransitionIMP)(id, SEL, UIView *, NSTimeInterval, UIViewAnimationOptions, id, id);
+typedef void (*LWECFViewAnimateIMP)(id, SEL, NSTimeInterval, NSTimeInterval, UIViewAnimationOptions, id, id);
+
+static NSInteger LWECFTransitionCalls = 0;
+static NSInteger LWECFCrossfadeCalls = 0;
+static IMP LWECFSavedTransition = NULL;
+static IMP LWECFSavedAnimate = NULL;
+
+static void LWECFTestTransition(id self, SEL _cmd, UIView *view, NSTimeInterval duration, UIViewAnimationOptions options, id animations, id completion)
+{
+  LWECFTransitionCalls += 1;
+  ((LWECFViewTransitionIMP)LWECFSavedTransition)(self, _cmd, view, duration, options, animations, completion);
+}
+
+static void LWECFTestAnimate(id self, SEL _cmd, NSTimeInterval duration, NSTimeInterval delay, UIViewAnimationOptions options, id animations, id completion)
+{
+  if (fabs(duration - 0.12) < 0.001) LWECFCrossfadeCalls += 1;
+  ((LWECFViewAnimateIMP)LWECFSavedAnimate)(self, _cmd, duration, delay, options, animations, completion);
+}
+
+static void LWECFInstallFadeSwizzles(void)
+{
+  LWECFTransitionCalls = 0;
+  LWECFCrossfadeCalls = 0;
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  LWECFSavedTransition = method_setImplementation(transition, (IMP)LWECFTestTransition);
+  LWECFSavedAnimate = method_setImplementation(animate, (IMP)LWECFTestAnimate);
+}
+
+static void LWECFRestoreFadeSwizzles(void)
+{
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  method_setImplementation(transition, LWECFSavedTransition);
+  method_setImplementation(animate, LWECFSavedAnimate);
+}
+
 static BOOL LWECFTestColorsClose(UIColor *a, UIColor *b)
 {
   CGFloat ar, ag, ab, aa, br, bg, bb, ba;
@@ -229,8 +267,9 @@ static CGFloat LWECFTestContrast(UIColor *a, UIColor *b)
 - (void)testScrollHintStaysHiddenAfterReveal
 {
   // A short reading fits, so the scroll cue stays hidden on the question side and after the answer
-  // is revealed. VoiceOver must not find it. Kimono uses the same press as jFlash: the pill fill
-  // stays put instead of flashing a darker shape.
+  // is revealed. VoiceOver must not find it. The Kimono checks lock the pill configuration
+  // (fill and insets) handed to UIKit. -testShowReadingCrossfadesWithoutDissolvingTheCard
+  // covers the transition.
   [[NSUserDefaults standardUserDefaults] setObject:SET_THEME_KIMONO forKey:APP_THEME];
   PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
   CardViewController *cvc = [self _newCardViewWithDelegate:practice];
@@ -259,6 +298,81 @@ static CGFloat LWECFTestContrast(UIColor *a, UIColor *b)
   XCTAssertTrue(LWECFTestColorsClose(button.configuration.background.backgroundColor, fill), @"Kimono press keeps the pill fill");
   XCTAssertGreaterThan(button.configuration.background.backgroundInsets.leading, 0.0);
   XCTAssertGreaterThan(button.configuration.background.backgroundInsets.top, 0.0);
+}
+
+- (void)testReadingToggleHandlerDoesNotOutliveTheController
+{
+  CardViewController *cvc = [[CardViewController alloc] initDisplayMainHeadword:YES];
+  (void)cvc.view;
+  UIButton *button = [cvc.toggleReadingBtn retain];
+  XCTAssertNotNil(button.configurationUpdateHandler);
+  [cvc release];
+  XCTAssertNil(button.configurationUpdateHandler);
+  button.highlighted = YES;
+  [button updateConfiguration];
+  [button release];
+}
+
+- (UIWindow *)_windowHostingCardView:(CardViewController *)cvc
+{
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 402, 494)] autorelease];
+  [window addSubview:cvc.view];
+  window.hidden = NO;
+  [cvc.view layoutIfNeeded];
+  return window;
+}
+
+- (void)testShowReadingCrossfadesWithoutDissolvingTheCard
+{
+  // Same fade as jFlash: in a window, Show Reading runs the 120ms crossfade and does not
+  // cross-dissolve the clear card. The configuration checks above do not render that transition.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_THEME_KIMONO forKey:APP_THEME];
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"你好" reading:@"ni3 hao3" meaning:@"hello"]];
+  [cvc layoutCardSubviews];
+  UIWindow *window = [self _windowHostingCardView:cvc];
+  XCTAssertNotNil(cvc.view.window);
+
+  LWECFInstallFadeSwizzles();
+  @try
+  {
+    [cvc doToggleReadingBtn];
+    XCTAssertEqual(LWECFTransitionCalls, 0, @"Show Reading does not cross-dissolve the clear card");
+    if (UIAccessibilityIsReduceMotionEnabled())
+    {
+      XCTAssertEqual(LWECFCrossfadeCalls, 0);
+      XCTAssertFalse(cvc.readingScrollContainer.hidden);
+    }
+    else
+    {
+      XCTAssertEqual(LWECFCrossfadeCalls, 1, @"the reading fades in over 120ms");
+      UIView *snap = [cvc.view viewWithTag:9104];
+      if (snap != nil)
+      {
+        XCTAssertFalse(snap.userInteractionEnabled);
+        XCTAssertTrue(snap.accessibilityElementsHidden);
+        XCTAssertFalse(snap.isAccessibilityElement);
+      }
+      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+      XCTAssertNil([cvc.view viewWithTag:9104]);
+      XCTAssertEqualWithAccuracy(cvc.readingScrollContainer.alpha, 1.0, 0.01);
+
+      LWECFTransitionCalls = 0;
+      LWECFCrossfadeCalls = 0;
+      [cvc doToggleReadingBtn];
+      XCTAssertEqual(LWECFTransitionCalls, 0);
+      XCTAssertEqual(LWECFCrossfadeCalls, 1, @"the pill fades back in as the reading fades out");
+      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+      XCTAssertEqualWithAccuracy(cvc.toggleReadingBtn.alpha, 1.0, 0.01);
+      XCTAssertTrue(cvc.readingScrollContainer.hidden);
+    }
+  }
+  @finally
+  {
+    LWECFRestoreFadeSwizzles();
+  }
+  XCTAssertNotNil(window);
 }
 
 #pragma mark - Scroll-indicator flash
