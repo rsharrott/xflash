@@ -50,8 +50,11 @@ jobs:
           sudo xcode-select -s "${xcode_app}"
           echo "DEVELOPER_DIR=${xcode_app}/Contents/Developer" >> "$GITHUB_ENV"
           export DEVELOPER_DIR="${xcode_app}/Contents/Developer"
-          version="$(xcodebuild -version | head -n 1)"
-          echo "${version}"
+          # Do not pipe xcodebuild into head: it writes two lines, head closes
+          # the pipe, and xcodebuild aborts on SIGPIPE (exit 134).
+          version_output="$(xcodebuild -version)"
+          printf '%s\n' "${version_output}"
+          version="${version_output%%$'\n'*}"
           xcode-select -p
           case "${version}" in
             "Xcode 26.6"|"Xcode 26.6 "*) ;;
