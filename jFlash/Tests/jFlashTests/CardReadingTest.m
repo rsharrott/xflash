@@ -63,10 +63,16 @@ static NSMutableArray *LWEStudySetStubTags(NSInteger count)
   return tags;
 }
 
-//! Lets queued main-queue work (the one-shot re-hide reset after -viewDidAppear:) run
-static void LWEStudySetSpinMainQueue(void)
+//! Lets the one-shot re-hide reset (dispatch_async on the main queue) run.
+//! -runUntilDate: returns without servicing that block on a CI simulator, so the
+//! flag is still set. XCTest's waiter drains the main queue.
+static void LWEStudySetSpinMainQueue(XCTestCase *testCase)
 {
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  XCTestExpectation *drained = [testCase expectationWithDescription:@"main-queue one-shot"];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [drained fulfill];
+  });
+  [testCase waitForExpectationsWithTimeout:2 handler:nil];
 }
 
 static void LWEStudySetTestNoop(id self, SEL _cmd) {}
@@ -895,7 +901,7 @@ static CGFloat LWETestContrast(UIColor *a, UIColor *b)
   [vc hideSearchBar];
   XCTAssertTrue(vc.keepsSearchBarHidden);
   [vc viewDidAppear:NO];
-  LWEStudySetSpinMainQueue();
+  LWEStudySetSpinMainQueue(self);
   XCTAssertFalse(vc.keepsSearchBarHidden, @"one-shot: cleared after viewDidAppear");
 
   // The search field clears it (searching is set first so the delegate skips the all-sets query)
@@ -931,7 +937,7 @@ static CGFloat LWETestContrast(UIColor *a, UIColor *b)
   XCTAssertGreaterThan(tv.contentInset.bottom, 0, @"room back after searching");
   XCTAssertEqualWithAccuracy(maxY, hiddenY, 1.0, @"just enough room: the hidden offset is the end of the list");
   XCTAssertEqualWithAccuracy(tv.contentOffset.y, hiddenY, 0.5, @"search bar hidden again after searching");
-  LWEStudySetSpinMainQueue();
+  LWEStudySetSpinMainQueue(self);
   XCTAssertFalse(vc.keepsSearchBarHidden, @"one-shot after done searching too");
 
   window.hidden = YES;
