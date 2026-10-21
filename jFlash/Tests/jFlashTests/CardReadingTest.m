@@ -11,6 +11,7 @@
 #import "LWEReadingLayout.h"
 #import "CardViewController.h"
 #import "PracticeModeCardViewDelegate.h"
+#import "BrowseModeCardViewDelegate.h"
 #import "JapaneseCard.h"
 #import "Constants.h"
 #import "MoodIcon.h"
@@ -67,6 +68,18 @@ static NSMutableArray *LWEStudySetStubTags(NSInteger count)
 static void LWEStudySetSpinMainQueue(void)
 {
   [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+}
+
+//! Enough kana that an E→J reading still overflows the 42pt row at 16pt, the smallest size
+//! resizeWithMinFontSize: tries (20, then 18, then 16). One gojuon still fits on two lines.
+static NSString *LWELongKanaReading(void)
+{
+  NSMutableString *reading = [NSMutableString string];
+  for (NSInteger i = 0; i < 8; i++)
+  {
+    [reading appendString:@"あいうえおかきくけこさしすせそたちつてとなにぬねの"];
+  }
+  return reading;
 }
 
 static void LWEStudySetTestNoop(id self, SEL _cmd) {}
@@ -322,15 +335,8 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
   XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
 
-  NSString *longReading = @"あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん";
-  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:longReading romaji:@"arasuji"]];
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:LWELongKanaReading() romaji:@"arasuji"]];
   [cvc layoutCardSubviews];
-  if (cvc.readingLabel.frame.size.height <= cvc.readingScrollContainer.frame.size.height)
-  {
-    CGRect frame = cvc.readingLabel.frame;
-    frame.size.height = cvc.readingScrollContainer.frame.size.height + 36.0;
-    cvc.readingLabel.frame = frame;
-  }
   XCTAssertTrue(cvc.readingScrollContainer.hidden, @"The next card starts with the reading hidden");
   XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
   XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The next card starts with the arrow hidden");
@@ -348,6 +354,43 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   XCTAssertTrue(cvc.readingScrollContainer.hidden, @"Tapping hides the reading again");
   XCTAssertTrue(cvc.readingMoreIcon.hidden, @"The arrow leaves with the reading");
   XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+}
+
+- (void)testBrowseModeEnglishToJapaneseArrowFollowsEachCard
+{
+  // Browse turns the reading on in cardViewWillSetup:, and that lays out and checks the arrow
+  // before the new reading is loaded. Nothing here lays the card out again between cards, so a
+  // long reading then a short one must clear the arrow, and a short one then a long one must
+  // bring it back, from setup alone.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_E_TO_J forKey:APP_HEADWORD];
+  BrowseModeCardViewDelegate *browse = [[[BrowseModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [[[CardViewController alloc] initDisplayMainHeadword:NO] autorelease];
+  cvc.delegate = browse;
+  cvc.view.frame = CGRectMake(0, 0, 402, 494);
+  [cvc studyViewModeDidChange:nil];
+
+  NSString *longReading = LWELongKanaReading();
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:longReading romaji:@"arasuji"]];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden, @"Browse shows the reading");
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height,
+                       @"The long reading is actually taller than the row");
+  XCTAssertFalse(cvc.readingMoreIcon.hidden, @"A long reading shows the arrow");
+  XCTAssertFalse(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:@"あらすじ" romaji:@"arasuji"]];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertLessThanOrEqual(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"A short reading after a long one clears the arrow");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc setupWithCard:[self _cardWithHeadword:@"summary" reading:longReading romaji:@"arasuji"]];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertGreaterThan(cvc.readingLabel.frame.size.height, cvc.readingScrollContainer.frame.size.height);
+  XCTAssertFalse(cvc.readingMoreIcon.hidden, @"A long reading after a short one brings the arrow back");
+  XCTAssertFalse(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
 }
 
 - (void)testReadingToggleHandlerDoesNotOutliveTheController

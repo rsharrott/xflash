@@ -974,8 +974,13 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   CGFloat webH = MAX(60.0, h - webY - 8.0);
   self.meaningWebViewContainer.frame = CGRectMake(hPad, webY, contentW, webH);
 #if defined(LWE_CFLASH)
-  // Centre the fitted pinyin in the (possibly grown) row
+  // Centre the fitted pinyin in the (possibly grown) row, then re-check the arrow. The row
+  // height is only final here, so an earlier check would still be looking at the last card.
   [self.readingScrollContainer resizeScrollViewWithContentView:self.readingLabel];
+  [self _updateReadingContainer];
+#elif defined(LWE_JFLASH)
+  // E→J only (J→E returned above). The row stays 42pt, but a layout after the label is
+  // loaded has to agree with it. willSetup lays out before the new reading exists.
   [self _updateReadingContainer];
 #endif
   [self _updateMeaningInsets];
@@ -1527,11 +1532,15 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
   [self.headwordScrollContainer resizeScrollViewWithContentView:self.headwordLabel];
 #if defined(LWE_CFLASH)
   // Pinyin: 20pt regular, shrunk or wrapped to the headword (resizeWithMinFontSize: would replace
-  // the attributed fonts with the XIB's)
+  // the attributed fonts with the XIB's). The arrow is checked again in layoutCardSubviews, once
+  // the row has grown; a check on this line would still see the previous card's row.
   [self _fitLegacyReading];
+#elif defined(LWE_JFLASH)
+  // Browse calls resetReadingVisibility from cardViewWillSetup:, which lays out and checks the
+  // arrow before this card's reading is loaded. The E→J row does not grow, so the label just
+  // sized above is final. J→E already returned. A later layout checks again.
+  [self _updateReadingContainer];
 #endif
-
-  //[self _updateReadingContainer];
   self.headwordMoreIcon.hidden = [self _shouldHideMoreIconForLabel:self.headwordLabel
                                                      forScrollView:self.headwordScrollContainer];
 #if defined(LWE_JFLASH)
