@@ -18,6 +18,7 @@
 #import "ProgressBarViewController.h"
 #import "StudySetViewController.h"
 #import "ThemeManager.h"
+#import "Constants.h"
 
 //! Stands in for a Group, so the Study Sets screen can load without the database
 @interface LWEStudySetStubGroup : NSObject
@@ -92,7 +93,84 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 @interface CFlashAccessibilityTest : XCTestCase
 @end
 
+typedef void (*LWECFViewTransitionIMP)(id, SEL, UIView *, NSTimeInterval, UIViewAnimationOptions, id, id);
+typedef void (*LWECFViewAnimateIMP)(id, SEL, NSTimeInterval, NSTimeInterval, UIViewAnimationOptions, id, id);
+
+static NSInteger LWECFTransitionCalls = 0;
+static NSInteger LWECFCrossfadeCalls = 0;
+static NSInteger LWECFCrossfadeCompletions = 0;
+static IMP LWECFSavedTransition = NULL;
+static IMP LWECFSavedAnimate = NULL;
+
+static void LWECFTestTransition(id self, SEL _cmd, UIView *view, NSTimeInterval duration, UIViewAnimationOptions options, id animations, id completion)
+{
+  LWECFTransitionCalls += 1;
+  ((LWECFViewTransitionIMP)LWECFSavedTransition)(self, _cmd, view, duration, options, animations, completion);
+}
+
+static void LWECFTestAnimate(id self, SEL _cmd, NSTimeInterval duration, NSTimeInterval delay, UIViewAnimationOptions options, id animations, id completion)
+{
+  BOOL crossfade = fabs(duration - 0.12) < 0.001;
+  if (crossfade) LWECFCrossfadeCalls += 1;
+  void (^finish)(BOOL) = completion;
+  void (^wrapped)(BOOL) = [[^(BOOL finished) {
+    if (crossfade) LWECFCrossfadeCompletions += 1;
+    if (finish) finish(finished);
+  } copy] autorelease];
+  ((LWECFViewAnimateIMP)LWECFSavedAnimate)(self, _cmd, duration, delay, options, animations, crossfade ? (id)wrapped : completion);
+}
+
+static void LWECFInstallFadeSwizzles(void)
+{
+  LWECFTransitionCalls = 0;
+  LWECFCrossfadeCalls = 0;
+  LWECFCrossfadeCompletions = 0;
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  LWECFSavedTransition = method_setImplementation(transition, (IMP)LWECFTestTransition);
+  LWECFSavedAnimate = method_setImplementation(animate, (IMP)LWECFTestAnimate);
+}
+
+static void LWECFRestoreFadeSwizzles(void)
+{
+  Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
+  Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
+  method_setImplementation(transition, LWECFSavedTransition);
+  method_setImplementation(animate, LWECFSavedAnimate);
+}
+
+static BOOL LWECFTestColorsClose(UIColor *a, UIColor *b)
+{
+  CGFloat ar, ag, ab, aa, br, bg, bb, ba;
+  if (a == nil || b == nil) return NO;
+  if ([a getRed:&ar green:&ag blue:&ab alpha:&aa] == NO) return NO;
+  if ([b getRed:&br green:&bg blue:&bb alpha:&ba] == NO) return NO;
+  return (fabs(ar - br) < 0.02f && fabs(ag - bg) < 0.02f && fabs(ab - bb) < 0.02f && fabs(aa - ba) < 0.02f);
+}
+
 @implementation CFlashAccessibilityTest
+{
+  NSString *_savedTheme;
+}
+
+- (void)setUp
+{
+  [super setUp];
+  _savedTheme = [[[NSUserDefaults standardUserDefaults] objectForKey:APP_THEME] retain];
+  // A previous test's Show Reading tap must not leave the next card already revealed.
+  [CardViewController setSessionReadingVisible:NO];
+}
+
+- (void)tearDown
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  if (_savedTheme) [settings setObject:_savedTheme forKey:APP_THEME];
+  else [settings removeObjectForKey:APP_THEME];
+  [_savedTheme release];
+  _savedTheme = nil;
+  [CardViewController setSessionReadingVisible:NO];
+  [super tearDown];
+}
 
 #pragma mark - Helpers
 
@@ -190,6 +268,137 @@ static CGFloat LWECFTestContrast(UIColor *a, UIColor *b)
   XCTAssertTrue(mood.moodIconBtn.isAccessibilityElement, @"Still a button, to show the score again");
   [mood doTogglePercentCorrectBtn];
   XCTAssertEqualObjects(mood.moodIconBtn.accessibilityValue, [MoodIcon accessibilityValueForPercentCorrect:67.0f]);
+}
+
+#pragma mark - Scroll hint and Show Reading press
+
+- (void)testScrollHintStaysHiddenAfterReveal
+{
+  // A short reading fits, so the scroll cue stays hidden on the question side and after the answer
+  // is revealed. VoiceOver must not find it. The Kimono checks lock the pill configuration
+  // (fill and insets) handed to UIKit. -testShowReadingCrossfadesWithoutDissolvingTheCard
+  // covers the transition.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_THEME_KIMONO forKey:APP_THEME];
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"你好" reading:@"ni3 hao3" meaning:@"hello"]];
+  [cvc layoutCardSubviews];
+
+  XCTAssertTrue(cvc.readingScrollContainer.hidden, @"Question side keeps the reading hidden");
+  XCTAssertFalse(cvc.toggleReadingBtn.hidden, @"Question side still has Show Reading");
+  XCTAssertTrue(cvc.readingMoreIcon.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden);
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  [cvc reveal];
+  XCTAssertFalse(cvc.readingScrollContainer.hidden);
+  XCTAssertTrue(cvc.readingMoreIcon.hidden, @"No scroll hint once the answer is showing");
+  XCTAssertTrue(cvc.readingMoreIcon.accessibilityElementsHidden, @"VoiceOver does not land on the hidden hint");
+  XCTAssertFalse(cvc.readingMoreIcon.isAccessibilityElement);
+
+  UIButton *button = cvc.toggleReadingBtn;
+  [cvc doToggleReadingBtn]; // hide again, so the pill is what a press would darken
+  [cvc layoutCardSubviews];
+  UIColor *fill = [[ThemeManager sharedThemeManager] colorForSlot:@"readingToggleFill"];
+  XCTAssertTrue(LWECFTestColorsClose(button.configuration.background.backgroundColor, fill));
+  button.highlighted = YES;
+  [button updateConfiguration];
+  XCTAssertTrue(LWECFTestColorsClose(button.configuration.background.backgroundColor, fill), @"Kimono press keeps the pill fill");
+  XCTAssertGreaterThan(button.configuration.background.backgroundInsets.leading, 0.0);
+  XCTAssertGreaterThan(button.configuration.background.backgroundInsets.top, 0.0);
+}
+
+- (void)testReadingToggleHandlerDoesNotOutliveTheController
+{
+  // Drain anything UIKit autoreleased while loading the view, so the controller is freed
+  // before the handler check.
+  UIButton *button = nil;
+  @autoreleasepool {
+    CardViewController *cvc = [[CardViewController alloc] initDisplayMainHeadword:YES];
+    (void)cvc.view;
+    button = [cvc.toggleReadingBtn retain];
+    XCTAssertNotNil(button.configurationUpdateHandler);
+    [cvc release];
+  }
+  XCTAssertNil(button.configurationUpdateHandler);
+  button.highlighted = YES;
+  [button updateConfiguration];
+  [button release];
+}
+
+- (UIWindow *)_windowHostingCardView:(CardViewController *)cvc
+{
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 402, 494)] autorelease];
+  [window addSubview:cvc.view];
+  window.hidden = NO;
+  [cvc.view layoutIfNeeded];
+  return window;
+}
+
+- (void)_waitForReadingFadeOnCard:(CardViewController *)cvc alphaOfView:(UIView *)alphaView
+{
+  NSPredicate *done = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+    return LWECFCrossfadeCompletions > 0
+        && [cvc.view viewWithTag:9104] == nil
+        && fabs(alphaView.alpha - 1.0) < 0.01;
+  }];
+  [self expectationForPredicate:done evaluatedWithObject:cvc handler:nil];
+  [self waitForExpectationsWithTimeout:2.0 handler:nil];
+}
+
+- (void)testShowReadingCrossfadesWithoutDissolvingTheCard
+{
+  // Same fade as jFlash: in a window, Show Reading runs the 120ms crossfade and does not
+  // cross-dissolve the clear card. The configuration checks above do not render that transition.
+  [[NSUserDefaults standardUserDefaults] setObject:SET_THEME_KIMONO forKey:APP_THEME];
+  PracticeModeCardViewDelegate *practice = [[[PracticeModeCardViewDelegate alloc] init] autorelease];
+  CardViewController *cvc = [self _newCardViewWithDelegate:practice];
+  [cvc setupWithCard:[self _cardWithHeadword:@"你好" reading:@"ni3 hao3" meaning:@"hello"]];
+  [cvc layoutCardSubviews];
+  UIWindow *window = [[self _windowHostingCardView:cvc] retain];
+  XCTAssertNotNil(cvc.view.window);
+
+  LWECFInstallFadeSwizzles();
+  @try
+  {
+    [cvc doToggleReadingBtn];
+    XCTAssertEqual(LWECFTransitionCalls, 0, @"Show Reading does not cross-dissolve the clear card");
+    if (UIAccessibilityIsReduceMotionEnabled())
+    {
+      XCTAssertEqual(LWECFCrossfadeCalls, 0);
+      XCTAssertFalse(cvc.readingScrollContainer.hidden);
+    }
+    else
+    {
+      XCTAssertEqual(LWECFCrossfadeCalls, 1, @"the reading fades in over 120ms");
+      UIView *snap = [cvc.view viewWithTag:9104];
+      if (snap != nil)
+      {
+        XCTAssertFalse(snap.userInteractionEnabled);
+        XCTAssertTrue(snap.accessibilityElementsHidden);
+        XCTAssertFalse(snap.isAccessibilityElement);
+      }
+      [self _waitForReadingFadeOnCard:cvc alphaOfView:cvc.readingScrollContainer];
+      XCTAssertNil([cvc.view viewWithTag:9104]);
+
+      LWECFTransitionCalls = 0;
+      LWECFCrossfadeCalls = 0;
+      LWECFCrossfadeCompletions = 0;
+      [cvc doToggleReadingBtn];
+      XCTAssertEqual(LWECFTransitionCalls, 0);
+      XCTAssertEqual(LWECFCrossfadeCalls, 1, @"the pill fades back in as the reading fades out");
+      [self _waitForReadingFadeOnCard:cvc alphaOfView:cvc.toggleReadingBtn];
+      XCTAssertNil([cvc.view viewWithTag:9104]);
+      XCTAssertTrue(cvc.readingScrollContainer.hidden);
+    }
+  }
+  @finally
+  {
+    LWECFRestoreFadeSwizzles();
+    window.hidden = YES;
+    [cvc.view removeFromSuperview];
+    [window release];
+  }
 }
 
 #pragma mark - Scroll-indicator flash
