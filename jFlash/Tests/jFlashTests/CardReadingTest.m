@@ -93,16 +93,19 @@ static Class LWEStudySetControllerClassWithoutDatabase(void)
 @interface CardReadingTest : XCTestCase
 @end
 
+#if defined(DEBUG)
 @interface CardViewController (LWEReadingToggleApplies)
 + (NSUInteger) lwe_readingToggleApplies;
 + (void) lwe_resetReadingToggleApplies;
 @end
+#endif
 
 typedef void (*LWEViewTransitionIMP)(id, SEL, UIView *, NSTimeInterval, UIViewAnimationOptions, id, id);
 typedef void (*LWEViewAnimateIMP)(id, SEL, NSTimeInterval, NSTimeInterval, UIViewAnimationOptions, id, id);
 
 static NSInteger LWETransitionCalls = 0;
 static NSInteger LWECrossfadeCalls = 0;
+static NSInteger LWECrossfadeCompletions = 0;
 static IMP LWESavedTransition = NULL;
 static IMP LWESavedAnimate = NULL;
 
@@ -114,14 +117,22 @@ static void LWETestTransition(id self, SEL _cmd, UIView *view, NSTimeInterval du
 
 static void LWETestAnimate(id self, SEL _cmd, NSTimeInterval duration, NSTimeInterval delay, UIViewAnimationOptions options, id animations, id completion)
 {
-  if (fabs(duration - 0.12) < 0.001) LWECrossfadeCalls += 1;
-  ((LWEViewAnimateIMP)LWESavedAnimate)(self, _cmd, duration, delay, options, animations, completion);
+  BOOL crossfade = fabs(duration - 0.12) < 0.001;
+  if (crossfade) LWECrossfadeCalls += 1;
+  void (^finish)(BOOL) = completion;
+  // Copy: UIKit may call this after LWETestAnimate returns, and a stack block would be gone.
+  void (^wrapped)(BOOL) = [[^(BOOL finished) {
+    if (crossfade) LWECrossfadeCompletions += 1;
+    if (finish) finish(finished);
+  } copy] autorelease];
+  ((LWEViewAnimateIMP)LWESavedAnimate)(self, _cmd, duration, delay, options, animations, crossfade ? (id)wrapped : completion);
 }
 
 static void LWEInstallFadeSwizzles(void)
 {
   LWETransitionCalls = 0;
   LWECrossfadeCalls = 0;
+  LWECrossfadeCompletions = 0;
   Method transition = class_getClassMethod([UIView class], @selector(transitionWithView:duration:options:animations:completion:));
   Method animate = class_getClassMethod([UIView class], @selector(animateWithDuration:delay:options:animations:completion:));
   LWESavedTransition = method_setImplementation(transition, (IMP)LWETestTransition);
@@ -319,12 +330,16 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
 {
   // Theme, text size, and mode replace the card controller while the button can still be retained
   // by its view. The handler must be gone before that, or the next configuration update messages
-  // a freed controller.
-  CardViewController *cvc = [[CardViewController alloc] initDisplayMainHeadword:YES];
-  (void)cvc.view;
-  UIButton *button = [cvc.toggleReadingBtn retain];
-  XCTAssertNotNil(button.configurationUpdateHandler);
-  [cvc release];
+  // a freed controller. The pool drains anything UIKit autoreleased while loading the view, so
+  // the controller is actually freed before the nil check.
+  UIButton *button = nil;
+  @autoreleasepool {
+    CardViewController *cvc = [[CardViewController alloc] initDisplayMainHeadword:YES];
+    (void)cvc.view;
+    button = [cvc.toggleReadingBtn retain];
+    XCTAssertNotNil(button.configurationUpdateHandler);
+    [cvc release];
+  }
   XCTAssertNil(button.configurationUpdateHandler);
   button.highlighted = YES;
   [button updateConfiguration];
@@ -374,6 +389,7 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   }
 }
 
+#if defined(DEBUG)
 - (void)testShowReadingPressRebuildsThePillAtMostTwice
 {
   // One highlight callback assigns the dimmed pill once (laying out from inside the handler used
@@ -402,6 +418,7 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   // we just set, so a highlighted fill cannot stick. That is at most one more assign.
   XCTAssertLessThanOrEqual([CardViewController lwe_readingToggleApplies], afterHighlight + 2);
 }
+#endif
 
 //! The card's view has to be in a window or Show Reading updates in place and the fade never runs.
 - (UIWindow *)_windowHostingCardView:(CardViewController *)cvc
@@ -413,6 +430,18 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   return window;
 }
 
+//! Spins the run loop until the 120ms fade's completion has run and its stand-in is gone.
+- (void)_waitForReadingFadeOnCard:(CardViewController *)cvc alphaOfView:(UIView *)alphaView
+{
+  NSPredicate *done = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+    return LWECrossfadeCompletions > 0
+        && [cvc.view viewWithTag:9104] == nil
+        && fabs(alphaView.alpha - 1.0) < 0.01;
+  }];
+  [self expectationForPredicate:done evaluatedWithObject:cvc handler:nil];
+  [self waitForExpectationsWithTimeout:2.0 handler:nil];
+}
+
 - (void)testShowReadingCrossfadesWithoutDissolvingTheCard
 {
   // Hosted in a window, tapping Show Reading runs the 120ms fade and does not call
@@ -422,7 +451,7 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
   CardViewController *cvc = [self _newCardViewWithDelegate:practice];
   [cvc setupWithCard:[self _cardWithHeadword:@"勉強" reading:@"べんきょう" romaji:@"benkyou"]];
   [cvc layoutCardSubviews];
-  UIWindow *window = [self _windowHostingCardView:cvc];
+  UIWindow *window = [[self _windowHostingCardView:cvc] retain];
   XCTAssertNotNil(cvc.view.window);
 
   LWEInstallFadeSwizzles();
@@ -445,27 +474,28 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
         XCTAssertTrue(snap.accessibilityElementsHidden);
         XCTAssertFalse(snap.isAccessibilityElement);
       }
-      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+      [self _waitForReadingFadeOnCard:cvc alphaOfView:cvc.readingScrollContainer];
       XCTAssertNil([cvc.view viewWithTag:9104], @"the fade stand-in is removed");
-      XCTAssertEqualWithAccuracy(cvc.readingScrollContainer.alpha, 1.0, 0.01);
       XCTAssertFalse(cvc.readingScrollContainer.hidden);
 
       LWETransitionCalls = 0;
       LWECrossfadeCalls = 0;
+      LWECrossfadeCompletions = 0;
       [cvc doToggleReadingBtn];
       XCTAssertEqual(LWETransitionCalls, 0);
       XCTAssertEqual(LWECrossfadeCalls, 1, @"the pill fades back in as the reading fades out");
-      [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.3]];
+      [self _waitForReadingFadeOnCard:cvc alphaOfView:cvc.toggleReadingBtn];
       XCTAssertNil([cvc.view viewWithTag:9104]);
-      XCTAssertEqualWithAccuracy(cvc.toggleReadingBtn.alpha, 1.0, 0.01);
       XCTAssertTrue(cvc.readingScrollContainer.hidden);
     }
   }
   @finally
   {
     LWERestoreFadeSwizzles();
+    window.hidden = YES;
+    [cvc.view removeFromSuperview];
+    [window release];
   }
-  XCTAssertNotNil(window);
 }
 
 - (void)testSessionStartsHidden

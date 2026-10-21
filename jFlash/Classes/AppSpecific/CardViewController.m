@@ -95,9 +95,11 @@ static const NSTimeInterval kLWEReadingCrossfade = 0.12;
 //! Fading stand-in for the pill or the reading during the crossfade. Not a real control.
 //! CardReadingTest and CFlashAccessibilityTest look for this tag.
 static const NSInteger kLWEReadingFadeSnapshotTag = 9104;
-//! Times the Show Reading pill configuration was actually assigned. A press should not
-//! rebuild it in a loop; the reading tests read this.
+#if defined(DEBUG) || defined(LWE_DEBUG)
+//! Times the Show Reading pill configuration was actually assigned. Debug and test builds only
+//! (the app's Debug configuration defines LWE_DEBUG; the test bundle defines DEBUG).
 static NSUInteger sLWEReadingToggleApplies = 0;
+#endif
 
 //! Enough of a colour to tell one pill from the next. Clear matches clear.
 static void LWEReadingToggleColorParts(UIColor *color, CGFloat *r, CGFloat *g, CGFloat *b, CGFloat *a)
@@ -270,6 +272,7 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
   sLWESessionReadingVisible = visible;
 }
 
+#if defined(DEBUG) || defined(LWE_DEBUG)
 + (NSUInteger) lwe_readingToggleApplies
 {
   return sLWEReadingToggleApplies;
@@ -279,6 +282,7 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
 {
   sLWEReadingToggleApplies = 0;
 }
+#endif
 
 @synthesize delegate;
 @synthesize meaningWebViewContainer, headwordMoreIcon, headwordLabel, readingMoreIcon, readingLabel, toggleReadingBtn;
@@ -466,8 +470,8 @@ static void LWEFirstLineMetrics(NSAttributedString *text, CGFloat width, CGFloat
     // The pointer is not zeroed when we go away — -dealloc and -viewDidUnload clear the handler
     // before the button can outlive this controller (theme, text size, and mode replace the card).
     __block CardViewController *unretainedSelf = self;
-    self.toggleReadingBtn.configurationUpdateHandler = ^(UIButton *button) {
-      if (button == nil || unretainedSelf->_applyingReadingToggle) return;
+    self.toggleReadingBtn.configurationUpdateHandler = ^(UIButton *__unused button) {
+      if (unretainedSelf->_applyingReadingToggle) return;
       [unretainedSelf _updateReadingToggleAppearance];
     };
   }
@@ -1439,7 +1443,9 @@ static NSInteger LWEExtraReadingCount(NSArray *kana, NSArray *romaji)
     // No layoutIfNeeded here: laying out from inside the handler was a third rebuild on one press.
     [_readingToggleSignature release];
     _readingToggleSignature = [signature retain];
+#if defined(DEBUG) || defined(LWE_DEBUG)
     sLWEReadingToggleApplies++;
+#endif
     _applyingReadingToggle = YES;
     [UIView performWithoutAnimation:^{
       button.configuration = config;
