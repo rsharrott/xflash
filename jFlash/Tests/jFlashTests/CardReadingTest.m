@@ -513,8 +513,9 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
         && fabs(alphaView.alpha - 1.0) < 0.01;
   }];
   [self expectationForPredicate:done evaluatedWithObject:cvc handler:nil];
-  // The fade is 120ms. On the Intel CI simulator the completion missed a 2s wait.
-  [self waitForExpectationsWithTimeout:10.0 handler:nil];
+  // The fade is 120ms. On the Intel simulator the Japanese card's first completion
+  // missed a 10s wait; the stand-in was already gone when the next check ran.
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
 }
 
 - (void)testShowReadingCrossfadesWithoutDissolvingTheCard
