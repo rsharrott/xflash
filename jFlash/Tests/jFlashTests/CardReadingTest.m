@@ -64,10 +64,17 @@ static NSMutableArray *LWEStudySetStubTags(NSInteger count)
   return tags;
 }
 
-//! Lets queued main-queue work (the one-shot re-hide reset after -viewDidAppear:) run
-static void LWEStudySetSpinMainQueue(void)
+//! Lets the one-shot re-hide reset (dispatch_async on the main queue) run.
+//! -runUntilDate: returns without servicing that block on a CI simulator, so the
+//! flag is still set. XCTest's waiter drains the main queue.
+static void LWEStudySetSpinMainQueue(XCTestCase *testCase)
 {
-  [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+  XCTestExpectation *drained = [testCase expectationWithDescription:@"main-queue one-shot"];
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [drained fulfill];
+  });
+  // 2s was not always enough for the main queue on the Intel CI simulator.
+  [testCase waitForExpectationsWithTimeout:10 handler:nil];
 }
 
 //! Enough kana that an E→J reading still overflows the 42pt row at 16pt, the smallest size
@@ -506,7 +513,9 @@ static BOOL LWETestColorsClose(UIColor *a, UIColor *b)
         && fabs(alphaView.alpha - 1.0) < 0.01;
   }];
   [self expectationForPredicate:done evaluatedWithObject:cvc handler:nil];
-  [self waitForExpectationsWithTimeout:2.0 handler:nil];
+  // The fade is 120ms. On the Intel simulator the Japanese card's first completion
+  // missed a 10s wait; the stand-in was already gone when the next check ran.
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
 }
 
 - (void)testShowReadingCrossfadesWithoutDissolvingTheCard
@@ -1263,7 +1272,7 @@ static CGFloat LWETestContrast(UIColor *a, UIColor *b)
   [vc hideSearchBar];
   XCTAssertTrue(vc.keepsSearchBarHidden);
   [vc viewDidAppear:NO];
-  LWEStudySetSpinMainQueue();
+  LWEStudySetSpinMainQueue(self);
   XCTAssertFalse(vc.keepsSearchBarHidden, @"one-shot: cleared after viewDidAppear");
 
   // The search field clears it (searching is set first so the delegate skips the all-sets query)
@@ -1299,7 +1308,7 @@ static CGFloat LWETestContrast(UIColor *a, UIColor *b)
   XCTAssertGreaterThan(tv.contentInset.bottom, 0, @"room back after searching");
   XCTAssertEqualWithAccuracy(maxY, hiddenY, 1.0, @"just enough room: the hidden offset is the end of the list");
   XCTAssertEqualWithAccuracy(tv.contentOffset.y, hiddenY, 0.5, @"search bar hidden again after searching");
-  LWEStudySetSpinMainQueue();
+  LWEStudySetSpinMainQueue(self);
   XCTAssertFalse(vc.keepsSearchBarHidden, @"one-shot after done searching too");
 
   window.hidden = YES;

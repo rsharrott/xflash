@@ -128,7 +128,9 @@ static NSString * const kLWELongReading = @"つづける - tsuzukeru (to continu
   webView.navigationDelegate = self;
   self.loadExpectation = [self expectationWithDescription:@"load"];
   [webView loadHTMLString:html baseURL:nil];
-  [self waitForExpectationsWithTimeout:15 handler:nil];
+  // Cold WKWebView startup on the Intel CI simulator can take longer than 15s.
+  // The layout assertions below are unchanged.
+  [self waitForExpectationsWithTimeout:60 handler:nil];
 
   NSString *js = @"(function(){var out=[];var W=document.documentElement.clientWidth;"
     "var bs=document.querySelectorAll('.AddCell .button');"

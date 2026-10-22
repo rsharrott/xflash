@@ -1,0 +1,266 @@
+name: Unit tests
+
+# jFlash and cFlash each get their own check. There are no git submodules.
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+# Read-only even if the repository's default token permissions change.
+permissions:
+  contents: read
+
+concurrency:
+  group: unit-tests-${{ github.workflow }}-${{ github.ref }}
+  # A later push to master should not cancel the run that records that commit.
+  # Pull requests still cancel the previous run on the same ref.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: ${{ matrix.scheme }}
+    # macos-26-intel is the same Xcode 26.6 / iOS 26.5 image as macos-26, on the
+    # Intel pool. The arm64 pool cancelled a queued job ("not acquired by Runner
+    # even after multiple attempts") while the other target was still running.
+    # Follow-up: move to arm64 macos-26 once that pool stays available for two jobs.
+    runs-on: macos-26-intel
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        scheme: [jFlash, cFlash]
+    steps:
+      - name: Checkout
+        # v5.1.0
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+
+      - name: Select Xcode 26.6
+        run: |
+          set -euo pipefail
+          xcode_app="/Applications/Xcode_26.6.app"
+          if [ ! -d "${xcode_app}/Contents/Developer" ]; then
+            echo "::error::Xcode 26.6 is not installed at ${xcode_app}. This workflow will not fall back to another Xcode."
+            echo "Xcode apps on this runner:"
+            ls -d /Applications/Xcode*.app 2>/dev/null || echo "(none found)"
+            exit 1
+          fi
+          sudo xcode-select -s "${xcode_app}"
+          echo "DEVELOPER_DIR=${xcode_app}/Contents/Developer" >> "$GITHUB_ENV"
+          export DEVELOPER_DIR="${xcode_app}/Contents/Developer"
+          # Do not pipe xcodebuild into head: it writes two lines, head closes
+          # the pipe, and xcodebuild aborts on SIGPIPE (exit 134).
+          version_output="$(xcodebuild -version)"
+          printf '%s\n' "${version_output}"
+          version="${version_output%%$'\n'*}"
+          xcode-select -p
+          case "${version}" in
+            "Xcode 26.6"|"Xcode 26.6 "*) ;;
+            *)
+              echo "::error::Selected ${xcode_app} but xcodebuild reports '${version}', not Xcode 26.6."
+              exit 1
+              ;;
+          esac
+
+      - name: Prepare simulator
+        id: sim
+        env:
+          SIM_NAME: xflash-ci-${{ matrix.scheme }}
+        run: |
+          set -euo pipefail
+          python3 << 'PY'
+          import json, os, re, subprocess, sys
+
+          def simctl_json(*args):
+              raw = subprocess.check_output(["xcrun", "simctl", *args], text=True)
+              return json.loads(raw)
+
+          def version_tuple(text):
+              numbers = []
+              for part in str(text).split("."):
+                  try:
+                      numbers.append(int(part))
+                  except ValueError:
+                      break
+              return tuple(numbers)
+
+          def is_beta(runtime):
+              blob = " ".join(
+                  str(runtime.get(key, ""))
+                  for key in ("name", "identifier", "version", "bundlePath", "buildversion")
+              ).lower()
+              return "beta" in blob
+
+          runtimes = [
+              runtime for runtime in simctl_json("list", "runtimes", "available", "-j")["runtimes"]
+              if runtime.get("isAvailable") and str(runtime.get("name", "")).startswith("iOS")
+          ]
+          stable = [runtime for runtime in runtimes if not is_beta(runtime)]
+          if not stable:
+              sys.exit("No non-beta iOS simulator runtime is installed. Refusing to use a beta runtime.")
+
+          preferred = [
+              runtime for runtime in stable
+              if version_tuple(runtime.get("version", ""))[:2] == (26, 5)
+          ]
+          if preferred:
+              runtime = sorted(preferred, key=lambda item: version_tuple(item.get("version", "0")))[-1]
+          else:
+              runtime = sorted(stable, key=lambda item: version_tuple(item.get("version", "0")))[-1]
+              print(
+                  f"::warning::iOS 26.5 simulator runtime is not installed. "
+                  f"Using {runtime.get('name')} ({runtime.get('version')}) instead."
+              )
+
+          def rank(name):
+              plain = re.fullmatch(r"iPhone (\d+)", name)
+              if plain:
+                  return (2, int(plain.group(1)))
+              numbered = re.search(r"iPhone (\d+)", name)
+              if numbered:
+                  return (1, int(numbered.group(1)))
+              return (0, 0)
+
+          def boot(udid):
+              booted = subprocess.run(
+                  ["xcrun", "simctl", "boot", udid], text=True, capture_output=True
+              )
+              combined = (booted.stderr or "") + (booted.stdout or "")
+              if booted.returncode != 0 and "Booted" not in combined:
+                  return combined.strip() or "simctl boot failed"
+              subprocess.check_call(["xcrun", "simctl", "bootstatus", udid, "-b"])
+              return None
+
+          devices_by_runtime = simctl_json("list", "devices", "available", "-j").get("devices", {})
+          existing = list(devices_by_runtime.get(runtime.get("identifier", ""), []))
+          if not existing:
+              existing = list(devices_by_runtime.get(runtime.get("name", ""), []))
+          usable = [
+              device for device in existing
+              if device.get("isAvailable", True)
+              and str(device.get("name", "")).startswith("iPhone")
+              and device.get("state") in ("Shutdown", "Booted")
+              and device.get("udid")
+          ]
+          usable.sort(key=lambda device: rank(device["name"]))
+
+          udid = None
+          chosen_name = None
+          source = None
+          for device in reversed(usable):
+              failure = boot(device["udid"])
+              if failure is None:
+                  udid = device["udid"]
+                  chosen_name = device["name"]
+                  source = "preinstalled"
+                  break
+              print(f"::warning::Could not boot preinstalled {device['name']} ({device['udid']}): {failure}")
+
+          if not udid:
+              iphones = [
+                  device for device in simctl_json("list", "devicetypes", "-j")["devicetypes"]
+                  if str(device.get("name", "")).startswith("iPhone")
+              ]
+              if not iphones:
+                  sys.exit("No iPhone simulator device type is installed")
+              iphones.sort(key=lambda device: rank(device["name"]))
+              failures = []
+              chosen = None
+              for device in reversed(iphones):
+                  created = subprocess.run(
+                      ["xcrun", "simctl", "create", os.environ["SIM_NAME"], device["identifier"], runtime["identifier"]],
+                      text=True,
+                      capture_output=True,
+                  )
+                  if created.returncode != 0:
+                      failures.append(f"{device['name']}: {(created.stderr or created.stdout).strip()}")
+                      continue
+                  created_udid = created.stdout.strip()
+                  failure = boot(created_udid)
+                  if failure is None:
+                      udid = created_udid
+                      chosen = device
+                      chosen_name = device["name"]
+                      source = "created"
+                      break
+                  failures.append(f"{device['name']} boot: {failure}")
+              if not udid:
+                  sys.exit("Could not create a simulator:\n" + "\n".join(failures))
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"udid={udid}\n")
+              handle.write(f"device_name={chosen_name}\n")
+              handle.write(f"runtime_name={runtime['name']}\n")
+          print(
+              f"Using {source} {chosen_name} on {runtime['name']} ({runtime.get('version')}) ({udid})",
+              file=sys.stderr,
+          )
+          PY
+
+      - name: Run tests
+        env:
+          SCHEME: ${{ matrix.scheme }}
+          UDID: ${{ steps.sim.outputs.udid }}
+        run: |
+          set -euo pipefail
+          mkdir -p ci-results
+          # The project pins SDKROOT to iphoneos and signs with a development team.
+          # Override both for a simulator run that does not need a signing identity.
+          # The sources are manual reference counting; keep ARC off so retain/release still compile.
+          # The full log is saved for the failure artifact. The step output keeps
+          # errors, failed tests, and the tail so GitHub does not cut off the result.
+          set +e
+          xcodebuild test \
+            -project jFlash/xFlash.xcodeproj \
+            -scheme "$SCHEME" \
+            -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=${UDID}" \
+            -resultBundlePath "$PWD/ci-results/${SCHEME}.xcresult" \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            CODE_SIGN_STYLE=Manual \
+            ENABLE_TESTABILITY=YES \
+            CLANG_ENABLE_OBJC_ARC=NO \
+            SDKROOT=iphonesimulator \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            > "ci-results/${SCHEME}.log" 2>&1
+          status=$?
+          set -e
+          log="ci-results/${SCHEME}.log"
+          echo "xcodebuild exited ${status}. Log lines: $(wc -l < "$log")"
+          echo "Errors, failed tests, and result banners:"
+          grep -E ': error:|: fatal error:|\*\* TEST (SUCCEEDED|FAILED) \*\*|Test Case .* failed \(|Testing failed|Testing cancelled' \
+            "$log" || true
+          echo "----- log tail -----"
+          tail -n 40 "$log"
+          exit "$status"
+
+      - name: Print test summary
+        if: always()
+        env:
+          SCHEME: ${{ matrix.scheme }}
+        run: |
+          set -euo pipefail
+          bundle="ci-results/${SCHEME}.xcresult"
+          if [ ! -d "$bundle" ]; then
+            echo "No xcresult bundle was produced."
+            exit 0
+          fi
+          xcrun xcresulttool get test-results summary --path "$bundle" || true
+          xcrun xcresulttool get test-results tests --path "$bundle" || true
+
+      - name: Upload results on failure
+        # timeout-minutes cancels the job, which is not failure().
+        if: failure() || cancelled()
+        # v6.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: ${{ matrix.scheme }}-test-results
+          path: ci-results/
+          if-no-files-found: warn
+          retention-days: 14
