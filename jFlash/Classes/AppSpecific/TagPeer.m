@@ -305,7 +305,11 @@ NSString * const LWETagContentCardRemoved = @"LWETagContentCardRemoved";
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
   // This generates "%string%"; we pass the parameter binding the string w/ the like % attached
   NSString *searchString = [NSString stringWithFormat:@"%%%@%%",string];
-  FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags WHERE tag_name LIKE ? ORDER BY tag_name ASC",searchString];
+  // Tags with no group_tag_link are hidden from browse (Archaic, Rude, and the
+  // other sets removed from the list).  Search used to return every tag, so
+  // those sets reappeared as soon as you typed.  User-made sets are linked to
+  // a group when they are created.  cFlash has no ungrouped tags.
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags WHERE tag_name LIKE ? AND tag_id IN (SELECT tag_id FROM group_tag_link) ORDER BY tag_name ASC",searchString];
 	return [TagPeer _tagListWithResultSet:rs];
 }
 

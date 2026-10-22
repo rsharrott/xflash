@@ -29,6 +29,8 @@ from pathlib import Path
 
 import fetch_sources
 import jmdict
+import romaji_policy
+import study_sets
 import tatoeba
 from cards import build_card, is_kana, CARD_TYPE_DICTIONARY
 
@@ -175,6 +177,12 @@ def main():
         cards[c['card_id']] = c
     report['curated_cards'] = collections.Counter(c['card_type'] for c in curated)
     log('cards:', len(cards))
+    # Particle は/を and phrase commas.  Curated cards whose romaji was already
+    # adjusted (or hand-tuned) are left as stored; dictionary cards are still
+    # the literal converter at this point, so they get the policy applied.
+    romaji_report = romaji_policy.apply_to_cards(cards)
+    report['romaji_policy'] = romaji_report
+    log('romaji policy', romaji_report)
 
     # ---- set membership ----------------------------------------------------
     links, missing = [], collections.Counter()
@@ -313,6 +321,9 @@ def main():
         bad = [r for r in u.execute('SELECT tag_id, card_id FROM card_tag_link') if r[1] not in cards]
         bad += [('last_state', r[0]) for r in u.execute('SELECT card_id FROM last_state') if r[0] not in cards]
         assert not bad, '%s references cards that no longer exist: %s' % (path, bad[:10])
+        catalog_path = os.path.join(HERE, 'data', 'vocabulary_levels.json')
+        if os.path.basename(path) == 'jFlash.db' and os.path.exists(catalog_path):
+            study_sets.ensure_user_catalog(u, study_sets.load_catalog(catalog_path))
         user_counts = collections.Counter(t for (t,) in u.execute('SELECT tag_id FROM card_tag_link'))
         changed = 0
         for tag_id, editable, count in u.execute('SELECT tag_id, editable, count FROM tags').fetchall():

@@ -115,6 +115,17 @@ and licence links.
     145383–145912 and 150029–150039) that a set uses and JMdict can't identify,
     copied verbatim from CARD 1.1.
   * `system_sets.tsv`: built-in study set membership.
+  * `vocabulary_levels.json`: names and tag ids of the approximate vocabulary
+    levels (Beginner 1 ≈N5, Beginner 2 ≈N4, Intermediate ≈N3–N2, Advanced ≈N1).
+    They replace the old nested "JLPT Level N1–N4" tags and are not JLPT exam
+    lists.  `study_sets.py` is what split them; `build.py` only re-applies the
+    names onto `jFlash.db`.
+* **Romaji** for expressions, particles, conjunctions and hand-made phrase cards
+  goes through `romaji_policy.py` at the end of the card build: topic-particle
+  は becomes "wa" when the reading segments into dictionary words, object
+  particle を becomes "o", and an ideographic comma becomes a space.  は inside
+  a word (入る, 花, ご飯, 母, 木の葉) stays "ha".  Hand-tuned curated romaji is
+  left as stored.
 
 ## One-off 1.x → 2.0 migration
 
