@@ -101,6 +101,27 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   XCTAssertNotNil([TagPeer retrieveTagByName:[kLWEFavoriteTagName uppercaseString]], @"Lookup is case-insensitive (LIKE)");
 }
 
+#if defined(LWE_JFLASH)
+- (void)testVocabularyLevelListsFullSetBeforeTheChunks
+{
+  NSArray *names = [NSArray arrayWithObjects:
+                    @"Beginner 1 (≈N5) Full Set",
+                    @"Beginner 2 (≈N4) Full Set",
+                    @"Intermediate (≈N3–N2) Full Set",
+                    @"Advanced (≈N1) Full Set",
+                    nil];
+  NSInteger groupId = 24;
+  for (NSString *name in names)
+  {
+    NSArray *tags = [TagPeer retrieveTagListByGroupId:groupId];
+    XCTAssertTrue([tags count] > 1, @"group %ld", (long)groupId);
+    XCTAssertEqualObjects([[tags objectAtIndex:0] tagName], name, @"group %ld", (long)groupId);
+    XCTAssertTrue([[[tags objectAtIndex:1] tagName] hasSuffix:@" 01"], @"group %ld", (long)groupId);
+    groupId += 1;
+  }
+}
+#endif
+
 - (void)testRetrieveTagListByGroupIdReturnsNonEmpty
 {
   Group *topGroup = [GroupPeer topLevelGroup];

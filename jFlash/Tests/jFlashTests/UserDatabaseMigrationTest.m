@@ -193,9 +193,9 @@
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 800);
   XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 800"], 145593);
   XCTAssertEqual([self _intQuery:@"SELECT editable FROM tags WHERE tag_id = 720"], 0);
-  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 720"], @"Advanced (≈N1) 00 All");
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 720"], @"Advanced (≈N1) Full Set");
   XCTAssertEqual([self _intQuery:@"SELECT count FROM tags WHERE tag_id = 717"], 626);
-  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 717"], @"Beginner 1 (≈N5) 00 All");
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 717"], @"Beginner 1 (≈N5) Full Set");
   XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 720 AND card_id = 145580"], 0);
 
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM last_state WHERE user_id = 1"], travelId);

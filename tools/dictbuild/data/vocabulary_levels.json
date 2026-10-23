@@ -8,7 +8,7 @@
       "sets": [
         {
           "tag_id": 717,
-          "name": "Beginner 1 (≈N5) 00 All",
+          "name": "Beginner 1 (≈N5) Full Set",
           "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  All 626 cards in this level (sets 01–07 together).",
           "count": 626
         },
@@ -62,7 +62,7 @@
       "sets": [
         {
           "tag_id": 718,
-          "name": "Beginner 2 (≈N4) 00 All",
+          "name": "Beginner 2 (≈N4) Full Set",
           "description": "Unofficial beginner list, about the range of JLPT N4.  The old pre-2010 community L3 list with the easier L4 cards removed.  Not a JLPT exam list.  All 585 cards in this level (sets 01–06 together).",
           "count": 585
         },
@@ -110,7 +110,7 @@
       "sets": [
         {
           "tag_id": 719,
-          "name": "Intermediate (≈N3–N2) 00 All",
+          "name": "Intermediate (≈N3–N2) Full Set",
           "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  All 3478 cards in this level (sets 01–35 together).",
           "count": 3478
         },
@@ -332,7 +332,7 @@
       "sets": [
         {
           "tag_id": 720,
-          "name": "Advanced (≈N1) 00 All",
+          "name": "Advanced (≈N1) Full Set",
           "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  All 2857 cards in this level (sets 01–29 together).",
           "count": 2857
         },

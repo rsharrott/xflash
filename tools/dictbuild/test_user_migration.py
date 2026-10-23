@@ -189,14 +189,14 @@ class MigrateFrom20Test(unittest.TestCase):
         # 717 is the combined Beginner 1 set, not the user's set.
         self.assertEqual(
             self.conn.execute('SELECT tag_name, editable, count FROM tags WHERE tag_id = 717').fetchone(),
-            ('Beginner 1 (≈N5) 00 All', 0, 626))
+            ('Beginner 1 (≈N5) Full Set', 0, 626))
         self.assertEqual(
             self.conn.execute('SELECT count FROM tags WHERE tag_id = 718').fetchone()[0], 585)
         self.assertEqual(
             self.conn.execute('SELECT count FROM tags WHERE tag_id = 719').fetchone()[0], 3478)
         self.assertEqual(
             self.conn.execute('SELECT tag_name, count FROM tags WHERE tag_id = 720').fetchone(),
-            ('Advanced (≈N1) 00 All', 2857))
+            ('Advanced (≈N1) Full Set', 2857))
         self.assertEqual(
             self.conn.execute('SELECT tag_count FROM groups WHERE group_id = 24').fetchone()[0], 8)
         self.assertEqual(

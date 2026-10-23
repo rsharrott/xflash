@@ -118,9 +118,9 @@ and licence links.
   * `vocabulary_levels.json`: names and tag ids of the approximate vocabulary
     levels (Beginner 1 ≈N5, Beginner 2 ≈N4, Intermediate ≈N3–N2, Advanced ≈N1).
     They replace the old nested "JLPT Level N1–N4" tags and are not JLPT exam
-    lists.  Each level also has a `00 All` set, the union of that level's
-    chunks.  `study_sets.py` is what split them; `build.py` only re-applies the
-    names onto `jFlash.db`.
+    lists.  Each level also has a `Full Set`, the union of that level's
+    chunks.  The level list shows that set first.  `study_sets.py` is what
+    split them; `build.py` only re-applies the names onto `jFlash.db`.
 * **Romaji** for expressions, particles, conjunctions and hand-made phrase cards
   goes through `romaji_policy.py` at the end of the card build: topic-particle
   は becomes "wa" when the reading segments into dictionary words and the

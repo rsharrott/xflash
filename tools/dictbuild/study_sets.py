@@ -32,8 +32,11 @@ CURATED_PATH = os.path.join(HERE, 'data', 'curated_cards.jsonl')
 LEGACY_TAGS = (95, 94, 93, 92)   # L4, L3, L2, L1
 ANCHORS = (95, 94, 93, 92)       # first chunk of each new level reuses the old id
 NEW_TAG_START = 644
-# Sorts before " 01" (binary order: '0' < '1') and stays next to the chunks.
-COMBINED_NAME_SUFFIX = ' 00 All'
+# "Full Set" sorts after "01" ('F' > '0').  The browse query lists it first.
+COMBINED_NAME_SUFFIX = ' Full Set'
+# The first cut of these sets was named "00 All".  A catalog that still has
+# that name is renamed in place, same tag id.
+PREVIOUS_COMBINED_SUFFIX = ' 00 All'
 
 PARENT_GROUP = 10
 PARENT_NAME = 'Vocabulary Levels'
@@ -217,7 +220,8 @@ def assign_tag_ids(level_lists):
 
 
 def is_combined_name(name):
-    return (name or '').endswith(COMBINED_NAME_SUFFIX)
+    text = name or ''
+    return text.endswith(COMBINED_NAME_SUFFIX) or text.endswith(PREVIOUS_COMBINED_SUFFIX)
 
 
 def combined_name(set_name):
@@ -249,7 +253,8 @@ def catalog_from_assignment(assigned):
     """Build the JSON-ready catalog.  assigned is the return of assign_tag_ids.
 
     The first set in each group is the combined set (every card in the level).
-    Its name sorts before the numbered chunks.
+    The name ends in "Full Set".  Browse lists that set first; plain name order
+    would put it after the numbered chunks.
     """
     groups = []
     all_ids = combined_tag_ids(assigned)
