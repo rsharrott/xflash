@@ -6,6 +6,7 @@
 //  jFlash.db, including user sets whose ids collide with the new catalog.
 //
 
+#import <XCTest/XCTest.h>
 #import "SetupDatabaseHelper.h"
 #import "JFlashUpdateManager.h"
 #import "LWEDatabase.h"
