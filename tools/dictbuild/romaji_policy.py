@@ -501,4 +501,14 @@ def rebuild_search_bracket(content, reading, new_romaji, literal_romaji=None):
     if not inside.startswith(reading + ' / '):
         return None
     bits = [reading] + search_bracket_parts(reading, new_romaji, literal_romaji)
+    # Keep a search alias the builder does not emit (ヂ is stored as dji and
+    # is also indexed as ji).  A second copy of the romaji, or the same
+    # romaji with its spaces removed, is the old bracket shape and is dropped.
+    emitted = set(bits)
+    romaji_nospace = (new_romaji or '').replace(' ', '')
+    for token in inside.split(' / ')[1:]:
+        if token in emitted or token == romaji_nospace:
+            continue
+        bits.append(token)
+        emitted.add(token)
     return content[:start] + ' [ ' + ' / '.join(bits) + ' ] ' + content[end + 3:]

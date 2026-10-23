@@ -269,46 +269,72 @@ def apply_meaning_fixes(card_db, fts_db, curated_path):
     return changed
 
 
+def _write_public_catalog(catalog):
+    """Names and counts only.  Card ids stay in the TSV."""
+    public = {
+        'parent_group_id': catalog['parent_group_id'],
+        'parent_group_name': catalog['parent_group_name'],
+        'groups': [{
+            'group_id': g['group_id'],
+            'group_name': g['group_name'],
+            'sets': [{k: s[k] for k in ('tag_id', 'name', 'description', 'count')}
+                     for s in g['sets']],
+        } for g in catalog['groups']],
+    }
+    with open(study_sets.CATALOG_PATH, 'w', encoding='utf-8') as f:
+        json.dump(public, f, ensure_ascii=False, indent=2)
+        f.write('\n')
+
+
+def _write_tsv(members, order):
+    header = open(study_sets.TSV_PATH, encoding='utf-8').readline()
+    if not header.startswith('#'):
+        header = '# tag_id\tcard_id  (card_id = JMdict ent_seq, or a curated card_id < 1000000)\n'
+    text = study_sets.render_tsv(members, order, header if header.endswith('\n') else header + '\n')
+    with open(study_sets.TSV_PATH, 'w', encoding='utf-8') as f:
+        f.write(text)
+
+
 def apply_sets():
+    """Refresh study-set membership from the TSV and the level catalog.
+
+    main() checks the JMdict pin and exits before it calls this.  A later
+    build.py reads the TSV and vocabulary_levels.json this writes, including
+    each level's combined set.
+    """
     members, order = study_sets.load_tsv()
     legacy = study_sets.is_legacy(members)
     new_members, new_order, catalog = study_sets.rewrite_members(members, order)
     if catalog is None:
         catalog = study_sets.load_catalog()
-        written_tsv = False
     else:
-        header = open(study_sets.TSV_PATH, encoding='utf-8').readline()
-        if not header.startswith('#'):
-            header = '# tag_id\tcard_id  (card_id = JMdict ent_seq, or a curated card_id < 1000000)\n'
-        text = study_sets.render_tsv(new_members, new_order, header if header.endswith('\n') else header + '\n')
-        with open(study_sets.TSV_PATH, 'w', encoding='utf-8') as f:
-            f.write(text)
-        # Catalog on disk omits the card id lists (those are the TSV).
-        public = {
-            'parent_group_id': catalog['parent_group_id'],
-            'parent_group_name': catalog['parent_group_name'],
-            'groups': [{
-                'group_id': g['group_id'],
-                'group_name': g['group_name'],
-                'sets': [{k: s[k] for k in ('tag_id', 'name', 'description', 'count')}
-                         for s in g['sets']],
-            } for g in catalog['groups']],
-        }
-        with open(study_sets.CATALOG_PATH, 'w', encoding='utf-8') as f:
-            json.dump(public, f, ensure_ascii=False, indent=2)
-            f.write('\n')
-        members = new_members
-        written_tsv = True
+        members, order = new_members, new_order
+    changed, written_tags = study_sets.ensure_combined_membership(members, catalog)
+    wrote = legacy or changed
+    if wrote:
+        _write_tsv(members, order)
+        _write_public_catalog(catalog)
     card = sqlite3.connect(study_sets.CARD_DB)
-    nlinks = study_sets.replace_system_links(card, members)
+    if legacy:
+        # The old nested lists were replaced.  Every system link is rewritten.
+        nlinks = study_sets.replace_system_links(card, members)
+    elif written_tags:
+        nlinks = study_sets.upsert_tag_links(card, members, written_tags)
+    else:
+        nlinks = card.execute('SELECT count(*) FROM system_card_tag_link').fetchone()[0]
     user = sqlite3.connect(study_sets.USER_DB)
     study_sets.ensure_user_catalog(user, catalog)
     # ensure_user_catalog counts the level sets from the catalog.  Refresh every
     # system tag from the link tables so a hidden tag's count stays correct too.
-    changed = study_sets.refresh_system_counts(user, card)
+    counts_updated = study_sets.refresh_system_counts(user, card)
     card.close()
     user.close()
-    return {'legacy_split': legacy and written_tsv, 'tsv_links': nlinks, 'counts_updated': changed}
+    return {
+        'legacy_split': legacy and wrote,
+        'combined_tags': written_tags,
+        'tsv_links': nlinks,
+        'counts_updated': counts_updated,
+    }
 
 
 def finish_patched(path, optimize_fts=False):

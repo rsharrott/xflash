@@ -15,6 +15,10 @@
 
 @interface JFlashUpdateManager (UserDatabaseMigrationTest)
 + (BOOL) _updateSettingsTo21:(NSUserDefaults *)settings;
++ (BOOL) _migrateUserDatabase:(LWEDatabase *)db renamedTags:(NSMutableDictionary *)renames;
++ (BOOL) _giveUpOnStudySetMigration:(NSUserDefaults *)settings;
++ (BOOL) _noteMigrationFailure:(NSUserDefaults *)settings retry:(BOOL)retry;
++ (BOOL) _consumeStudySetFailureNotice:(NSUserDefaults *)settings;
 @end
 
 @interface UserDatabaseMigrationTest : XCTestCase
@@ -24,6 +28,7 @@
   NSInteger _savedTagId;
   BOOL _savedDidCopy;
   BOOL _savedFailed;
+  BOOL _saved21Failed;
   NSInteger _savedFailures;
   BOOL _hadDataVersion;
   BOOL _hadSettingsVersion;
@@ -114,7 +119,7 @@
   [self _execute:@"UPDATE tags SET count = 99 WHERE tag_id = 0"];
   [self _execute:@"UPDATE last_state SET tag_id = 644 WHERE user_id = 1"];
 
-  // 644 and 700 are system ids in the new template.  720 is not.
+  // 644 and 700 are chunk ids.  720 is a combined level set.  800 is free.
   [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (644, 'My Travel Words', 'kept', 1, 1)"];
   [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (644, 145536, 2)"];
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 644)"];
@@ -123,9 +128,12 @@
   [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (700, 145535, 3)"];
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 700)"];
   [self _execute:@"INSERT INTO tag_user_card_levels (tag_id, user_id, card_level_1_count) VALUES (700, 1, 2)"];
-  [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (720, 'My Later Words', 'kept', 1, 1)"];
+  [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (720, 'My Whole Level', 'kept', 1, 1)"];
   [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (720, 145580, 4)"];
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 720)"];
+  [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (800, 'My Later Words', 'kept', 1, 1)"];
+  [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (800, 145593, 5)"];
+  [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 800)"];
 
   // Links the 2.0 template kept for tags that do not exist.
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (18, 3)"];
@@ -149,6 +157,7 @@
   [settings setInteger:644 forKey:@"tag_id"];
   [settings setBool:YES forKey:@"db_did_finish_copying"];
   [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings setBool:YES forKey:@"study_sets_21_failed"];
   [settings synchronize];
 
   XCTAssertTrue([JFlashUpdateManager _updateSettingsTo21:settings], @"2.1 migration should succeed");
@@ -156,12 +165,16 @@
   XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_1);
   XCTAssertEqualObjects([settings objectForKey:APP_SETTINGS_VERSION], LWE_JF_VERSION_2_1);
   XCTAssertFalse([settings boolForKey:@"study_sets_update_failed"]);
+  XCTAssertFalse([settings boolForKey:@"study_sets_21_failed"]);
 
   [self _openUserDatabase];
   int travelId = [self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Travel Words'"];
   int cookingId = [self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Cooking Words'"];
-  XCTAssertGreaterThan(travelId, 720, @"Colliding sets move above the template and the user's own ids");
-  XCTAssertEqual(cookingId, travelId + 1, @"644 is renumbered before 700");
+  int wholeId = [self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Whole Level'"];
+  // User tag 800 is above the template (720), so the new ids start at 801.
+  XCTAssertEqual(travelId, 801);
+  XCTAssertEqual(cookingId, 802);
+  XCTAssertEqual(wholeId, 803, @"720 collides with the combined Advanced set");
   XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)travelId, @"The active set follows the user's set");
   XCTAssertNotEqual(travelId, 644);
   XCTAssertNotEqual(cookingId, 700);
@@ -176,9 +189,14 @@
   XCTAssertEqual([self _intQuery:@"SELECT card_level_1_count FROM tag_user_card_levels WHERE tag_id = (SELECT tag_id FROM tags WHERE tag_name = 'My Travel Words')"], 4);
   XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = (SELECT tag_id FROM tags WHERE tag_name = 'My Cooking Words')"], 145535);
 
-  // A user set that did not collide keeps its id.
-  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 720);
-  XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 720"], 145580);
+  // A user set that did not collide keeps its id.  720 is the system set.
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 800);
+  XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 800"], 145593);
+  XCTAssertEqual([self _intQuery:@"SELECT editable FROM tags WHERE tag_id = 720"], 0);
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 720"], @"Advanced (≈N1) Full Set");
+  XCTAssertEqual([self _intQuery:@"SELECT count FROM tags WHERE tag_id = 717"], 626);
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 717"], @"Beginner 1 (≈N5) Full Set");
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 720 AND card_id = 145580"], 0);
 
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM last_state WHERE user_id = 1"], travelId);
   XCTAssertEqual([self _intQuery:@"SELECT card_id FROM last_state WHERE user_id = 1"], 2065830);
@@ -202,12 +220,102 @@
   [self _openUserDatabase];
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Travel Words'"], travelId);
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Cooking Words'"], cookingId);
-  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 720);
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 800);
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Whole Level'"], wholeId);
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM last_state WHERE user_id = 1"], travelId);
   XCTAssertEqual([self _intQuery:@"SELECT right_count FROM user_history WHERE card_id = 2065830 AND user_id = 1"], 3);
   XCTAssertEqual([self _intQuery:@"SELECT count FROM tags WHERE tag_id = 0"], starredCount);
   XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 0 AND card_id = 150089"], 1);
   XCTAssertEqual([self _intQuery:@"SELECT editable FROM tags WHERE tag_id = 644"], 0);
+}
+
+- (void)testUncommittedMigrationRollsBack
+{
+  [self _rewindToDataVersion20];
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  NSString *templatePath = [LWEFile createBundlePathWithFilename:LWE_CURRENT_USER_DATABASE];
+  XCTAssertTrue([db attachDatabase:templatePath withName:@"tpl"], @"Could not attach the template");
+  XCTAssertTrue([db.dao beginDeferredTransaction], @"Could not start a transaction");
+  NSMutableDictionary *renames = [NSMutableDictionary dictionary];
+  XCTAssertTrue([JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames]);
+  XCTAssertEqual([[renames objectForKey:[NSNumber numberWithInt:644]] intValue], 801);
+  XCTAssertEqual([[renames objectForKey:[NSNumber numberWithInt:720]] intValue], 803);
+  XCTAssertTrue([db.dao rollback]);
+  XCTAssertTrue([db detachDatabase:@"tpl"]);
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 644"], @"My Travel Words");
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM groups WHERE group_id = 24"], 0);
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM tags WHERE tag_id = 717"], 0);
+  XCTAssertEqual([self _intQuery:@"SELECT card_level FROM user_history WHERE card_id = 2065830 AND user_id = 1"], 2);
+  XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 720"], 145580);
+}
+
+- (void)testGiveUpResetsAMissingActiveSetAndKeepsAMarker
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setInteger:99999 forKey:@"tag_id"];
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_SETTINGS_VERSION];
+  XCTAssertTrue([JFlashUpdateManager _giveUpOnStudySetMigration:settings]);
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)DEFAULT_TAG_ID);
+  XCTAssertTrue([settings boolForKey:@"study_sets_update_failed"]);
+  XCTAssertTrue([settings boolForKey:@"study_sets_21_failed"]);
+  XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_1);
+  XCTAssertTrue([JFlashUpdateManager _consumeStudySetFailureNotice:settings]);
+  XCTAssertFalse([settings boolForKey:@"study_sets_update_failed"]);
+  XCTAssertTrue([settings boolForKey:@"study_sets_21_failed"], @"The alert flag is one-shot; the marker stays");
+  XCTAssertFalse([JFlashUpdateManager _consumeStudySetFailureNotice:settings]);
+}
+
+- (void)testGiveUpKeepsAnActiveSetThatStillExists
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setInteger:DEFAULT_TAG_ID forKey:@"tag_id"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  XCTAssertTrue([JFlashUpdateManager _giveUpOnStudySetMigration:settings]);
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)DEFAULT_TAG_ID);
+  XCTAssertTrue([settings boolForKey:@"study_sets_21_failed"]);
+}
+
+- (void)testOpenFailuresRetryTwiceThenGiveUp
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setInteger:0 forKey:@"study_set_migration_21_failures"];
+  [settings setInteger:DEFAULT_TAG_ID forKey:@"tag_id"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
+
+  XCTAssertFalse([JFlashUpdateManager _noteMigrationFailure:settings retry:YES]);
+  XCTAssertEqual([settings integerForKey:@"study_set_migration_21_failures"], 1);
+  XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_0);
+  XCTAssertFalse([settings boolForKey:@"study_sets_21_failed"]);
+
+  XCTAssertFalse([JFlashUpdateManager _noteMigrationFailure:settings retry:YES]);
+  XCTAssertEqual([settings integerForKey:@"study_set_migration_21_failures"], 2);
+  XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_0);
+
+  XCTAssertTrue([JFlashUpdateManager _noteMigrationFailure:settings retry:YES]);
+  XCTAssertEqual([settings integerForKey:@"study_set_migration_21_failures"], 3);
+  XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_1);
+  XCTAssertTrue([settings boolForKey:@"study_sets_21_failed"]);
+  XCTAssertTrue([settings boolForKey:@"study_sets_update_failed"]);
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)DEFAULT_TAG_ID);
+}
+
+- (void)testStatementFailureGivesUpWithoutRetrying
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setInteger:1 forKey:@"study_set_migration_21_failures"];
+  [settings setInteger:DEFAULT_TAG_ID forKey:@"tag_id"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  XCTAssertTrue([JFlashUpdateManager _noteMigrationFailure:settings retry:NO]);
+  XCTAssertEqual([settings integerForKey:@"study_set_migration_21_failures"], 1, @"A bad statement is not retried");
+  XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_1);
+  XCTAssertTrue([settings boolForKey:@"study_sets_21_failed"]);
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)DEFAULT_TAG_ID);
 }
 
 - (void)setUp
@@ -221,6 +329,7 @@
   _savedTagId = [settings integerForKey:@"tag_id"];
   _savedDidCopy = [settings boolForKey:@"db_did_finish_copying"];
   _savedFailed = [settings boolForKey:@"study_sets_update_failed"];
+  _saved21Failed = [settings boolForKey:@"study_sets_21_failed"];
   _savedFailures = [settings integerForKey:@"study_set_migration_21_failures"];
 
   NSError *error = nil;
@@ -256,6 +365,7 @@
   [settings setInteger:_savedTagId forKey:@"tag_id"];
   [settings setBool:_savedDidCopy forKey:@"db_did_finish_copying"];
   [settings setBool:_savedFailed forKey:@"study_sets_update_failed"];
+  [settings setBool:_saved21Failed forKey:@"study_sets_21_failed"];
   [settings setInteger:_savedFailures forKey:@"study_set_migration_21_failures"];
   [settings synchronize];
   [_savedDataVersion release];

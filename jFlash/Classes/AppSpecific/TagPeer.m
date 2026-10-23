@@ -291,11 +291,13 @@ NSString * const LWETagContentCardRemoved = @"LWETagContentCardRemoved";
   return [TagPeer _tagListWithResultSet:rs];
 }
 
-//! Returns array of Tag objects based on Group membership
+//! Returns array of Tag objects based on Group membership.
+//! "Full Set" is every card in a vocabulary level.  The name sorts after "01"
+//! ('F' > '0'), so the level list shows it first and then the chunks by name.
 + (NSArray *) retrieveTagListByGroupId:(NSInteger)groupId
 {
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-	FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags t, group_tag_link l WHERE t.tag_id = l.tag_id AND l.group_id = ? ORDER BY t.tag_name ASC",[NSNumber numberWithInt:groupId]];
+	FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags t, group_tag_link l WHERE t.tag_id = l.tag_id AND l.group_id = ? ORDER BY CASE WHEN t.tag_name LIKE '%(≈N% Full Set' THEN 0 ELSE 1 END, t.tag_name ASC",[NSNumber numberWithInt:groupId]];
 	return [TagPeer _tagListWithResultSet:rs];
 }
 

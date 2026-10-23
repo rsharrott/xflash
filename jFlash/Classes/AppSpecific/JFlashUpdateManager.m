@@ -370,9 +370,10 @@
 {
   // The 1.0 App Store build stores exactly "2.0": a fresh install writes
   // LWE_CURRENT_VERSION, and a 1.x upgrade writes LWE_JF_VERSION_2_0.  Both
-  // constants are @"2.0" on every master commit from the #35/#36 merges through
-  // 537fb33c.  Nothing in that tree writes "2.0.0" or leaves the key empty
-  // once settings exist.  A missing or 1.x value still belongs to the reset above.
+  // constants have been @"2.0" since the dictionary refresh in #8 (b213301a).
+  // #35 and #36 did not change them.  Nothing in that tree writes "2.0.0" or
+  // leaves the key empty once settings exist.  A missing or 1.x value still
+  // belongs to the reset above.
   NSString *dataVersion = [settings objectForKey:APP_DATA_VERSION];
   if ([dataVersion isEqualToString:LWE_JF_VERSION_2_0] == NO)
   {
@@ -437,15 +438,46 @@
   return YES;
 }
 
+// The active set is saved before COMMIT.  A crash in between, then a failed retry,
+// leaves tag_id pointing at a row the rollback removed.  Point it at the default
+// set when that row is gone.  A set that is still in the database is left alone.
++ (void) _resetActiveSetIfMissing:(NSUserDefaults *)settings
+{
+  NSString *userPath = [LWEFile createDocumentPathWithFilename:LWE_CURRENT_USER_DATABASE];
+  if ([LWEFile fileExists:userPath] == NO)
+  {
+    return;
+  }
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  [db closeDatabase];
+  if ([db openDatabase:userPath] == NO)
+  {
+    return;
+  }
+  int found = 0;
+  NSString *sql = [NSString stringWithFormat:@"SELECT count(*) FROM tags WHERE tag_id = %ld",
+                   (long)[settings integerForKey:@"tag_id"]];
+  BOOL ok = [JFlashUpdateManager _migrationInt:db sql:sql into:&found];
+  [db closeDatabase];
+  if (ok && found == 0)
+  {
+    [settings setInteger:DEFAULT_TAG_ID forKey:@"tag_id"];
+  }
+}
+
 // A failed in-place update must not run again on every launch.  The user database
 // is left as it was (progress kept).  Data version moves to 2.1 so the next launch
 // continues, and the update alert says the built-in sets could not be changed.
+// study_sets_update_failed is cleared once that alert has been shown.
+// study_sets_21_failed stays set so a later build can tell this update did not land.
 + (BOOL) _giveUpOnStudySetMigration:(NSUserDefaults *)settings
 {
   LWE_LOG(@"2.1 migration stopped. Keeping the existing study sets and progress.");
+  [JFlashUpdateManager _resetActiveSetIfMissing:settings];
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_SETTINGS_VERSION];
   [settings setBool:YES forKey:@"study_sets_update_failed"];
+  [settings setBool:YES forKey:@"study_sets_21_failed"];
   [settings synchronize];
   return YES;
 }
@@ -670,7 +702,20 @@
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_SETTINGS_VERSION];
   [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
   [settings removeObjectForKey:@"study_set_migration_21_failures"];
+  [settings synchronize];
+  return YES;
+}
+
+// The alert shows the failure once.  study_sets_21_failed is not cleared here.
++ (BOOL) _consumeStudySetFailureNotice:(NSUserDefaults *)settings
+{
+  if ([settings boolForKey:@"study_sets_update_failed"] == NO)
+  {
+    return NO;
+  }
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
   [settings synchronize];
   return YES;
 }
@@ -777,9 +822,8 @@
 {
   NSString *version = [settings objectForKey:APP_SETTINGS_VERSION];
   // The 1.6.x alerts promoted Rikai Browser, which is no longer on the App Store; removed.
-  if ([settings boolForKey:@"study_sets_update_failed"])
+  if ([JFlashUpdateManager _consumeStudySetFailureNotice:settings])
   {
-    [settings setBool:NO forKey:@"study_sets_update_failed"];
     [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Couldn't update study sets",@"JFlash2.1 upgrade failed alert title")
                                        message:NSLocalizedString(@"Your study progress, starred words, and sets you created were kept. The built-in study sets are unchanged.",@"JFlash2.1 upgrade failed alert msg")];
   }

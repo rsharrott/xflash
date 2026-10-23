@@ -169,6 +169,20 @@ class PhraseRomajiTest(unittest.TestCase):
             'お風呂に入ります [ おふろにはいります / ofuronihairimasu ] enter',
             'おふろにはいります', 'ofuronihairimasu', 'ofuronihairimasu')
         self.assertEqual(same.count('ofuronihairimasu'), 1)
+        # ヂ is indexed as dji and as ji.  Rebuilding the bracket keeps ji.
+        kana = rp.rebuild_search_bracket(
+            'ヂ [ ヂ / dji / ji ] DJI', 'ヂ', 'dji', 'dji')
+        self.assertEqual(kana, 'ヂ [ ヂ / dji / ji ] DJI')
+        # A repeated romaji, or the same romaji with the spaces removed, is dropped.
+        duplicate = rp.rebuild_search_bracket(
+            'ヂ [ ヂ / dji / dji ] DJI', 'ヂ', 'dji', None)
+        self.assertEqual(duplicate, 'ヂ [ ヂ / dji ] DJI')
+        nospace = rp.rebuild_search_bracket(
+            '四本 [ よんほん; よほん / yonhon; yohon / yonhon;yohon ] 4 long objects',
+            'よんほん; よほん', 'yonhon; yohon', None)
+        self.assertEqual(
+            nospace,
+            '四本 [ よんほん; よほん / yonhon; yohon ] 4 long objects')
 
     def test_hand_tuned_romaji_is_left_alone(self):
         # Stored romaji has a space the literal converter does not produce.
@@ -303,6 +317,37 @@ class BundledRomajiTest(unittest.TestCase):
         self.assertIn('naisenXXoonegaishimasu', extension['content'])
         yes = _curated_card(path, 145459)
         self.assertIn('hai,soudesu', yes['content'])
+
+    def test_curated_aliases_match_the_search_index(self):
+        # These rows are not a repeated romaji token.  ヂ is searchable as ji,
+        # and a second reading used to be indexed again with the space removed.
+        ids = (
+            145651, 145755, 145961, 145976, 145977, 145981, 145988, 145993,
+            145998, 146003, 146004, 146017, 150099, 150125, 150132, 150139,
+            150142, 150144, 150152, 150154,
+        )
+        path = os.path.join(os.path.dirname(__file__), 'data', 'curated_cards.jsonl')
+        curated = {}
+        with open(path, encoding='utf-8') as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                card = json.loads(line)
+                if card['card_id'] in ids:
+                    curated[card['card_id']] = card['content']
+        self.assertEqual(sorted(curated), sorted(ids))
+        fts_path = os.path.join(REPO, 'jFlash', 'sql', 'plugins', 'jFlash-FTS-2.0.db')
+        fts = sqlite3.connect(fts_path)
+        try:
+            for card_id, content in curated.items():
+                row = fts.execute(
+                    'SELECT content FROM cards_search_content WHERE card_id = ?',
+                    (card_id,)).fetchone()
+                self.assertEqual(row[0], content, card_id)
+        finally:
+            fts.close()
+        self.assertIn('/ ji ', curated[145961])
+        self.assertNotIn('yonhon;yohon', curated[150099])
 
 
 if __name__ == '__main__':
