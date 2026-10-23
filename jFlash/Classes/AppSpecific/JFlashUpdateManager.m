@@ -368,6 +368,11 @@
  */
 + (BOOL) _needsUpdateTo21:(NSUserDefaults *)settings
 {
+  // The 1.0 App Store build stores exactly "2.0": a fresh install writes
+  // LWE_CURRENT_VERSION, and a 1.x upgrade writes LWE_JF_VERSION_2_0.  Both
+  // constants are @"2.0" on every master commit from the #35/#36 merges through
+  // 537fb33c.  Nothing in that tree writes "2.0.0" or leaves the key empty
+  // once settings exist.  A missing or 1.x value still belongs to the reset above.
   NSString *dataVersion = [settings objectForKey:APP_DATA_VERSION];
   if ([dataVersion isEqualToString:LWE_JF_VERSION_2_0] == NO)
   {
@@ -405,16 +410,63 @@
   return YES;
 }
 
-+ (int) _migrationInt:(LWEDatabase *)db sql:(NSString *)sql
++ (BOOL) _migrationInt:(LWEDatabase *)db sql:(NSString *)sql into:(int *)outValue
 {
   FMResultSet *rs = [db.dao executeQuery:sql];
+  if (rs == nil || [db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed: %@ (%@)", sql, [db.dao lastErrorMessage]);
+    [rs close];
+    return NO;
+  }
   int value = 0;
   if ([rs next])
   {
     value = [rs intForColumnIndex:0];
   }
   [rs close];
-  return value;
+  if ([db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed: %@ (%@)", sql, [db.dao lastErrorMessage]);
+    return NO;
+  }
+  if (outValue != NULL)
+  {
+    *outValue = value;
+  }
+  return YES;
+}
+
+// A failed in-place update must not run again on every launch.  The user database
+// is left as it was (progress kept).  Data version moves to 2.1 so the next launch
+// continues, and the update alert says the built-in sets could not be changed.
++ (BOOL) _giveUpOnStudySetMigration:(NSUserDefaults *)settings
+{
+  LWE_LOG(@"2.1 migration stopped. Keeping the existing study sets and progress.");
+  [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_SETTINGS_VERSION];
+  [settings setBool:YES forKey:@"study_sets_update_failed"];
+  [settings synchronize];
+  return YES;
+}
+
+// Open and attach can fail because the file is busy.  Retry those a few times, then
+// give up.  A statement that fails inside the transaction will not succeed next time.
++ (BOOL) _noteMigrationFailure:(NSUserDefaults *)settings retry:(BOOL)retry
+{
+  if (retry == NO)
+  {
+    return [JFlashUpdateManager _giveUpOnStudySetMigration:settings];
+  }
+  NSInteger attempts = [settings integerForKey:@"study_set_migration_21_failures"] + 1;
+  [settings setInteger:attempts forKey:@"study_set_migration_21_failures"];
+  [settings synchronize];
+  LWE_LOG(@"2.1 migration could not open the user database (attempt %ld).", (long)attempts);
+  if (attempts >= 3)
+  {
+    return [JFlashUpdateManager _giveUpOnStudySetMigration:settings];
+  }
+  return NO;
 }
 
 + (BOOL) _migrateUserDatabase:(LWEDatabase *)db renamedTags:(NSMutableDictionary *)renames
@@ -430,11 +482,17 @@
   [rs close];
   if ([db.dao hadError])
   {
+    LWE_LOG(@"2.1 migration failed while reading colliding tags: %@", [db.dao lastErrorMessage]);
     return NO;
   }
 
-  int maxUser = [JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tags"];
-  int maxTemplate = [JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tpl.tags"];
+  int maxUser = 0;
+  int maxTemplate = 0;
+  if ([JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tags" into:&maxUser] == NO ||
+      [JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tpl.tags" into:&maxTemplate] == NO)
+  {
+    return NO;
+  }
   int nextId = (maxUser > maxTemplate ? maxUser : maxTemplate) + 1;
   for (NSNumber *oldNumber in collisions)
   {
@@ -483,6 +541,13 @@
   {
     return NO;
   }
+  // The 2.0 template has group links whose tags were removed.  Readers join tags,
+  // so they were invisible, but they are not part of the catalog.
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"DELETE FROM group_tag_link WHERE tag_id NOT IN (SELECT tag_id FROM tags)"] == NO)
+  {
+    return NO;
+  }
   if ([JFlashUpdateManager _migrationUpdate:db sql:
        @"UPDATE groups SET tag_count = ("
        "SELECT count(*) FROM group_tag_link g JOIN tags t ON t.tag_id = g.tag_id "
@@ -490,29 +555,52 @@
   {
     return NO;
   }
-  int starred = [JFlashUpdateManager _migrationInt:db sql:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 0"];
+  int starred = 0;
+  if ([JFlashUpdateManager _migrationInt:db sql:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 0" into:&starred] == NO)
+  {
+    return NO;
+  }
   if ([JFlashUpdateManager _migrationUpdate:db sql:@"UPDATE tags SET count = ? WHERE tag_id = ?"
                                          withId:starred oldId:0] == NO)
   {
     return NO;
   }
-  int maxId = [JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tags"];
-  int seqRows = [JFlashUpdateManager _migrationInt:db sql:@"SELECT count(*) FROM sqlite_sequence WHERE name = 'tags'"];
+  int maxId = 0;
+  int seqRows = 0;
+  if ([JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tags" into:&maxId] == NO ||
+      [JFlashUpdateManager _migrationInt:db sql:@"SELECT count(*) FROM sqlite_sequence WHERE name = 'tags'" into:&seqRows] == NO)
+  {
+    return NO;
+  }
   if (seqRows == 0)
   {
     [db.dao executeUpdate:@"INSERT INTO sqlite_sequence (name, seq) VALUES ('tags', ?)",
      [NSNumber numberWithInt:maxId]];
+    if ([db.dao hadError])
+    {
+      LWE_LOG(@"2.1 migration failed: sqlite_sequence insert (%@)", [db.dao lastErrorMessage]);
+      return NO;
+    }
   }
   else
   {
-    int seq = [JFlashUpdateManager _migrationInt:db sql:@"SELECT seq FROM sqlite_sequence WHERE name = 'tags'"];
+    int seq = 0;
+    if ([JFlashUpdateManager _migrationInt:db sql:@"SELECT seq FROM sqlite_sequence WHERE name = 'tags'" into:&seq] == NO)
+    {
+      return NO;
+    }
     if (seq < maxId)
     {
       [db.dao executeUpdate:@"UPDATE sqlite_sequence SET seq = ? WHERE name = 'tags'",
        [NSNumber numberWithInt:maxId]];
+      if ([db.dao hadError])
+      {
+        LWE_LOG(@"2.1 migration failed: sqlite_sequence update (%@)", [db.dao lastErrorMessage]);
+        return NO;
+      }
     }
   }
-  return [db.dao hadError] == NO;
+  return YES;
 }
 
 + (BOOL) _updateSettingsTo21:(NSUserDefaults *)settings
@@ -523,43 +611,67 @@
   if ([db openDatabase:userPath] == NO)
   {
     LWE_LOG(@"2.1 migration could not open %@", userPath);
-    return NO;
+    return [JFlashUpdateManager _noteMigrationFailure:settings retry:YES];
   }
   BOOL attached = [db attachDatabase:templatePath withName:@"tpl"];
   if (attached == NO)
   {
     LWE_LOG(@"2.1 migration could not attach the template at %@", templatePath);
     [db closeDatabase];
-    return NO;
+    return [JFlashUpdateManager _noteMigrationFailure:settings retry:YES];
   }
 
-  [db.dao beginDeferredTransaction];
+  // If BEGIN failed, later statements would autocommit and rollback would do nothing.
+  if ([db.dao beginDeferredTransaction] == NO)
+  {
+    LWE_LOG(@"2.1 migration could not start a transaction: %@", [db.dao lastErrorMessage]);
+    [db detachDatabase:@"tpl"];
+    [db closeDatabase];
+    return [JFlashUpdateManager _noteMigrationFailure:settings retry:NO];
+  }
   NSMutableDictionary *renames = [NSMutableDictionary dictionary];
   BOOL ok = [JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames];
+  NSInteger previousTag = [settings integerForKey:@"tag_id"];
+  BOOL remapped = NO;
   if (ok)
   {
+    // Write the new active set before COMMIT.  A crash after this synchronize and
+    // before the commit retries the same renumbering, so the saved id still matches.
+    NSNumber *moved = [renames objectForKey:[NSNumber numberWithInteger:previousTag]];
+    if (moved != nil)
+    {
+      [settings setInteger:[moved integerValue] forKey:@"tag_id"];
+      [settings synchronize];
+      remapped = YES;
+    }
     ok = [db.dao commit];
+    if (ok == NO)
+    {
+      LWE_LOG(@"2.1 migration could not commit: %@", [db.dao lastErrorMessage]);
+    }
   }
   if (ok == NO)
   {
     [db.dao rollback];
+    if (remapped)
+    {
+      [settings setInteger:previousTag forKey:@"tag_id"];
+      [settings synchronize];
+    }
   }
   // DETACH while the transaction is still open fails with "database is locked".
   [db detachDatabase:@"tpl"];
   [db closeDatabase];
   if (ok == NO)
   {
-    return NO;
+    return [JFlashUpdateManager _noteMigrationFailure:settings retry:NO];
   }
 
-  NSInteger activeTag = [settings integerForKey:@"tag_id"];
-  NSNumber *moved = [renames objectForKey:[NSNumber numberWithInteger:activeTag]];
-  if (moved != nil)
-  {
-    [settings setInteger:[moved integerValue] forKey:@"tag_id"];
-  }
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_SETTINGS_VERSION];
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings removeObjectForKey:@"study_set_migration_21_failures"];
+  [settings synchronize];
   return YES;
 }
 
@@ -665,7 +777,13 @@
 {
   NSString *version = [settings objectForKey:APP_SETTINGS_VERSION];
   // The 1.6.x alerts promoted Rikai Browser, which is no longer on the App Store; removed.
-  if ([version isEqualToString:LWE_JF_VERSION_2_0])
+  if ([settings boolForKey:@"study_sets_update_failed"])
+  {
+    [settings setBool:NO forKey:@"study_sets_update_failed"];
+    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Couldn't update study sets",@"JFlash2.1 upgrade failed alert title")
+                                       message:NSLocalizedString(@"Your study progress, starred words, and sets you created were kept. The built-in study sets are unchanged.",@"JFlash2.1 upgrade failed alert msg")];
+  }
+  else if ([version isEqualToString:LWE_JF_VERSION_2_0])
   {
     [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Updated to Japanese in a Flash! 2.0",@"JFlash2.0 upgrade alert title")
                                        message:NSLocalizedString(@"The dictionary has been updated to the current JMdict, with new example sentences from Tatoeba. Because the cards changed, your study progress and sets from the previous version have been reset.",@"JFlash2.0 upgrade alert msg")];

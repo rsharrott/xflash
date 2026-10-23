@@ -132,6 +132,9 @@ def apply_romaji(card_db, fts_db, curated_path):
     romaji_rows = []
     fts_rows = []
     curated_romaji = {}
+    # Curated rows whose romaji is already right still need the literal token
+    # written into the source file.  _patch_curated used to skip them.
+    curated_content = set()
     bracket_misses = []
     statuses = {'unchanged': 0, 'adjusted': 0, 'left-alone': 0}
     wa_cards = 0
@@ -156,6 +159,8 @@ def apply_romaji(card_db, fts_db, curated_path):
                     bracket_misses.append(card['card_id'])
             elif rebuilt != card['content']:
                 fts_rows.append((rebuilt, card['card_id']))
+                if card['card_id'] < 1000000 and new == old:
+                    curated_content.add(card['card_id'])
         if new == old:
             continue
         if new.count('wa') > old.count('wa'):
@@ -173,7 +178,7 @@ def apply_romaji(card_db, fts_db, curated_path):
     fts.executemany('UPDATE cards_search_content SET content = ? WHERE card_id = ?', fts_rows)
     fts.commit()
     fts.close()
-    _patch_curated(curated_path, curated_romaji, {})
+    _patch_curated(curated_path, curated_romaji, {}, curated_content)
     return {
         'statuses': statuses,
         'romaji_rows': len(romaji_rows),
@@ -186,10 +191,15 @@ def apply_romaji(card_db, fts_db, curated_path):
     }
 
 
-def _patch_curated(path, romaji_by_id, extra_by_id):
-    """Rewrite only the curated lines whose romaji changed.  Other lines are copied
-    through so the file does not get a wholesale reformat.
+def _patch_curated(path, romaji_by_id, extra_by_id, content_ids=None):
+    """Rewrite curated lines whose romaji or search bracket changed.
+
+    Other lines are copied through so the file does not get a wholesale reformat.
+    content_ids are cards whose romaji is already current but whose bracket is
+    missing the literal ha/wo token.
     """
+    if content_ids is None:
+        content_ids = set()
     out = []
     with open(path, encoding='utf-8') as f:
         for line in f:
@@ -198,11 +208,11 @@ def _patch_curated(path, romaji_by_id, extra_by_id):
                 continue
             card = json.loads(line)
             cid = card['card_id']
-            if cid not in romaji_by_id and cid not in extra_by_id:
+            if cid not in romaji_by_id and cid not in extra_by_id and cid not in content_ids:
                 out.append(line if line.endswith('\n') else line + '\n')
                 continue
-            if cid in romaji_by_id:
-                new = romaji_by_id[cid]
+            if cid in romaji_by_id or cid in content_ids:
+                new = romaji_by_id.get(cid, card.get('romaji') or '')
                 content = card.get('content')
                 if content:
                     rebuilt = romaji_policy.rebuild_search_bracket(
@@ -210,7 +220,8 @@ def _patch_curated(path, romaji_by_id, extra_by_id):
                         romaji_policy.mechanical_romaji(card.get('reading') or ''))
                     if rebuilt is not None:
                         card['content'] = rebuilt
-                card['romaji'] = new
+                if cid in romaji_by_id:
+                    card['romaji'] = new
             for field, pair in extra_by_id.get(cid, {}).items():
                 old, new = pair
                 if field in card and isinstance(card[field], str):

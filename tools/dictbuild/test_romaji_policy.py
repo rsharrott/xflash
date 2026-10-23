@@ -5,6 +5,7 @@ they do not need the bundled database; the database cases run when it is there.
   cd tools/dictbuild && python3 -m unittest -v test_romaji_policy
 """
 
+import json
 import os
 import sqlite3
 import unittest
@@ -13,6 +14,17 @@ import romaji_policy as rp
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 CARD_DB = os.path.join(REPO, 'jFlash', 'sql', 'jFlash-CARD-2.0.db')
+
+
+def _curated_card(path, card_id):
+    with open(path, encoding='utf-8') as f:
+        for line in f:
+            if not line.strip():
+                continue
+            card = json.loads(line)
+            if card['card_id'] == card_id:
+                return card
+    raise AssertionError(card_id)
 
 
 def card(reading, meaning, headword, ptag=0, card_id=2000000, card_type='3', romaji=None):
@@ -269,6 +281,28 @@ class BundledRomajiTest(unittest.TestCase):
             self.assertNotIn('ofuroniwairimasu', bath)
         finally:
             fts.close()
+
+    def test_curated_source_keeps_the_literal_spelling(self):
+        path = os.path.join(os.path.dirname(__file__), 'data', 'curated_cards.jsonl')
+        missing = []
+        with open(path, encoding='utf-8') as f:
+            for line in f:
+                if not line.strip():
+                    continue
+                card = json.loads(line)
+                reading = card.get('reading') or ''
+                romaji = card.get('romaji') or ''
+                literal = rp.mechanical_romaji(reading)
+                if literal == romaji or not rp.is_particle_spelling(romaji, literal):
+                    continue
+                if literal not in (card.get('content') or ''):
+                    missing.append(card['card_id'])
+        self.assertEqual(missing, [])
+        extension = _curated_card(path, 145429)
+        self.assertIn('naisenxxwoonegaishimasu', extension['content'])
+        self.assertIn('naisenXXoonegaishimasu', extension['content'])
+        yes = _curated_card(path, 145459)
+        self.assertIn('hai,soudesu', yes['content'])
 
 
 if __name__ == '__main__':

@@ -85,6 +85,17 @@ class MigrateFrom20Test(unittest.TestCase):
         self.conn.execute('UPDATE last_state SET tag_id = 644 WHERE user_id = 1')
         self.conn.execute(
             'INSERT INTO tag_user_card_levels (tag_id, user_id, card_level_1_count) VALUES (644, 1, 4)')
+        self.conn.execute(
+            'INSERT INTO tags (tag_id, tag_name, description, editable, count) '
+            "VALUES (700, 'My Cooking Words', 'kept', 1, 1)")
+        self.conn.execute('INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (700, 145535, 3)')
+        self.conn.execute('INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 700)')
+        self.conn.execute(
+            'INSERT INTO tag_user_card_levels (tag_id, user_id, card_level_1_count) VALUES (700, 1, 2)')
+        # The 2.0 template links these tag ids even though the tag rows are gone.
+        self.conn.executemany(
+            'INSERT INTO group_tag_link (group_id, tag_id) VALUES (?, ?)',
+            [(18, 3), (18, 10), (7, 17), (6, 28)])
         self.conn.execute("UPDATE sqlite_sequence SET seq = 643 WHERE name = 'tags'")
         self.conn.commit()
 
@@ -111,7 +122,7 @@ class MigrateFrom20Test(unittest.TestCase):
         self.conn.close()
 
         mapping = user_db_migration.migrate(self.user, self.template)
-        self.assertEqual(mapping, {644: 717})
+        self.assertEqual(mapping, {644: 717, 700: 718})
 
         self.conn = sqlite3.connect(self.user)
         self.assertEqual(
@@ -153,6 +164,19 @@ class MigrateFrom20Test(unittest.TestCase):
         # 644 is the system set, not the user's set.
         self.assertEqual(
             self.conn.execute('SELECT editable FROM tags WHERE tag_id = 644').fetchone()[0], 0)
+        cooking = self.conn.execute(
+            'SELECT tag_id, tag_name, editable FROM tags WHERE tag_name = ?',
+            ('My Cooking Words',)).fetchone()
+        self.assertEqual(cooking, (718, 'My Cooking Words', 1))
+        self.assertEqual(
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 718').fetchone()[0],
+            145535)
+        self.assertEqual(
+            self.conn.execute('SELECT editable FROM tags WHERE tag_id = 700').fetchone()[0], 0)
+        dangling = self.conn.execute(
+            'SELECT count(*) FROM group_tag_link g WHERE NOT EXISTS '
+            '(SELECT 1 FROM tags t WHERE t.tag_id = g.tag_id)').fetchone()[0]
+        self.assertEqual(dangling, 0)
 
         self.assertEqual(
             self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 0').fetchone()[0],

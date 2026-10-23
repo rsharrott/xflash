@@ -11,6 +11,8 @@ database moved on.  This updates the user file from the new template:
 * a user-created tag whose id is a system id in the template (644 and up)
   is renumbered, and card_tag_link, group_tag_link, last_state and
   tag_user_card_levels follow it
+* group links whose tag row does not exist are deleted (the 2.0 template
+  has 68 of these)
 
 JFlashUpdateManager's 2.1 step runs the same statements.  Keep the two in step.
 """
@@ -27,6 +29,7 @@ def migrate(user_path, template_path):
         _copy_system_tags(conn)
         _copy_groups(conn)
         _replace_system_links(conn)
+        _drop_dangling_links(conn)
         _recount_groups(conn)
         _refresh_starred_count(conn)
         _bump_sequence(conn)
@@ -95,6 +98,11 @@ def _replace_system_links(conn):
         'INSERT INTO group_tag_link (group_id, tag_id) '
         'SELECT group_id, tag_id FROM tpl.group_tag_link WHERE tag_id IN (%s)'
         % _system_tag_ids_sql())
+
+
+def _drop_dangling_links(conn):
+    conn.execute(
+        'DELETE FROM group_tag_link WHERE tag_id NOT IN (SELECT tag_id FROM tags)')
 
 
 def _recount_groups(conn):

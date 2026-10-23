@@ -132,8 +132,10 @@ and licence links.
   a later build does not copy the template again.  Data version 2.1 updates
   that file in place (tags, groups, links) and keeps study progress, My Starred
   Words, user-created sets and `last_state`.  A user-created tag whose id is
-  one of the new system ids (644+) is renumbered.  Fresh installs and the 1.x
-  dictionary reset copy the new template and do not need that step.
+  one of the new system ids (644+) is renumbered.  Group links that point at
+  a missing tag are dropped.  Fresh installs and the 1.x dictionary reset copy
+  the new template and do not need that step.  If the in-place update fails,
+  the user file is left unchanged and the app stops retrying it.
 
 ## One-off 1.x → 2.0 migration
 

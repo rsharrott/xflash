@@ -332,6 +332,18 @@
 /* JFlash2.0 upgrade alert msg  (JFlashUpdateManager.m) */
 "The dictionary has been updated to the current JMdict, with new example sentences from Tatoeba. Because the cards changed, your study progress and sets from the previous version have been reset." = "The dictionary has been updated to the current JMdict, with new example sentences from Tatoeba. Because the cards changed, your study progress and sets from the previous version have been reset.";
 
+/* JFlash2.1 upgrade alert title  (JFlashUpdateManager.m) */
+"Updated study sets" = "Updated study sets";
+
+/* JFlash2.1 upgrade alert msg  (JFlashUpdateManager.m) */
+"The built-in study sets have been updated. Your study progress, starred words, and sets you created were kept." = "The built-in study sets have been updated. Your study progress, starred words, and sets you created were kept.";
+
+/* JFlash2.1 upgrade failed alert title  (JFlashUpdateManager.m) */
+"Couldn't update study sets" = "Couldn't update study sets";
+
+/* JFlash2.1 upgrade failed alert msg  (JFlashUpdateManager.m) */
+"Your study progress, starred words, and sets you created were kept. The built-in study sets are unchanged." = "Your study progress, starred words, and sets you created were kept. The built-in study sets are unchanged.";
+
 /* JFlash1.7 upgrade alert title  (JFlashUpdateManager.m) */
 "Updated to Japanese in a Flash! 1.7" = "Updated to Japanese in a Flash! 1.7";
 
