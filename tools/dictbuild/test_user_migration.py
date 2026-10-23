@@ -92,6 +92,12 @@ class MigrateFrom20Test(unittest.TestCase):
         self.conn.execute('INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 700)')
         self.conn.execute(
             'INSERT INTO tag_user_card_levels (tag_id, user_id, card_level_1_count) VALUES (700, 1, 2)')
+        # 717 is a combined level set in the new template.
+        self.conn.execute(
+            'INSERT INTO tags (tag_id, tag_name, description, editable, count) '
+            "VALUES (717, 'My Whole Level', 'kept', 1, 1)")
+        self.conn.execute('INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (717, 145580, 4)')
+        self.conn.execute('INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 717)')
         # The 2.0 template links these tag ids even though the tag rows are gone.
         self.conn.executemany(
             'INSERT INTO group_tag_link (group_id, tag_id) VALUES (?, ?)',
@@ -122,7 +128,9 @@ class MigrateFrom20Test(unittest.TestCase):
         self.conn.close()
 
         mapping = user_db_migration.migrate(self.user, self.template)
-        self.assertEqual(mapping, {644: 717, 700: 718})
+        # Template tags now run through 720, so the three colliding user sets
+        # move to 721 and up, in tag_id order.
+        self.assertEqual(mapping, {644: 721, 700: 722, 717: 723})
 
         self.conn = sqlite3.connect(self.user)
         self.assertEqual(
@@ -151,15 +159,15 @@ class MigrateFrom20Test(unittest.TestCase):
         moved = self.conn.execute(
             'SELECT tag_id, tag_name, description, editable FROM tags WHERE tag_name = ?',
             ('My Travel Words',)).fetchone()
-        self.assertEqual(moved, (717, 'My Travel Words', 'kept', 1))
+        self.assertEqual(moved, (721, 'My Travel Words', 'kept', 1))
         self.assertEqual(
-            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 717').fetchone()[0],
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 721').fetchone()[0],
             145536)
         self.assertEqual(
-            self.conn.execute('SELECT group_id FROM group_tag_link WHERE tag_id = 717').fetchone()[0],
+            self.conn.execute('SELECT group_id FROM group_tag_link WHERE tag_id = 721').fetchone()[0],
             0)
         self.assertEqual(
-            self.conn.execute('SELECT card_level_1_count FROM tag_user_card_levels WHERE tag_id = 717').fetchone()[0],
+            self.conn.execute('SELECT card_level_1_count FROM tag_user_card_levels WHERE tag_id = 721').fetchone()[0],
             4)
         # 644 is the system set, not the user's set.
         self.assertEqual(
@@ -167,10 +175,30 @@ class MigrateFrom20Test(unittest.TestCase):
         cooking = self.conn.execute(
             'SELECT tag_id, tag_name, editable FROM tags WHERE tag_name = ?',
             ('My Cooking Words',)).fetchone()
-        self.assertEqual(cooking, (718, 'My Cooking Words', 1))
+        self.assertEqual(cooking, (722, 'My Cooking Words', 1))
         self.assertEqual(
-            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 718').fetchone()[0],
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 722').fetchone()[0],
             145535)
+        whole = self.conn.execute(
+            'SELECT tag_id, tag_name, editable FROM tags WHERE tag_name = ?',
+            ('My Whole Level',)).fetchone()
+        self.assertEqual(whole, (723, 'My Whole Level', 1))
+        self.assertEqual(
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 723').fetchone()[0],
+            145580)
+        # 717 is the combined Beginner 1 set, not the user's set.
+        self.assertEqual(
+            self.conn.execute('SELECT tag_name, editable, count FROM tags WHERE tag_id = 717').fetchone(),
+            ('Beginner 1 (≈N5) 00 All', 0, 626))
+        self.assertEqual(
+            self.conn.execute('SELECT count FROM tags WHERE tag_id = 718').fetchone()[0], 585)
+        self.assertEqual(
+            self.conn.execute('SELECT count FROM tags WHERE tag_id = 719').fetchone()[0], 3478)
+        self.assertEqual(
+            self.conn.execute('SELECT tag_name, count FROM tags WHERE tag_id = 720').fetchone(),
+            ('Advanced (≈N1) 00 All', 2857))
+        self.assertEqual(
+            self.conn.execute('SELECT tag_count FROM groups WHERE group_id = 24').fetchone()[0], 8)
         self.assertEqual(
             self.conn.execute('SELECT editable FROM tags WHERE tag_id = 700').fetchone()[0], 0)
         dangling = self.conn.execute(
@@ -194,17 +222,18 @@ class MigrateFrom20Test(unittest.TestCase):
             self.conn.execute('SELECT card_id, user_id FROM last_state').fetchall(),
             before_state_card)
         self.assertEqual(
-            self.conn.execute('SELECT tag_id FROM last_state WHERE user_id = 1').fetchone()[0], 717)
+            self.conn.execute('SELECT tag_id FROM last_state WHERE user_id = 1').fetchone()[0], 721)
         self.assertEqual(
             self.conn.execute('SELECT user_id, nickname FROM users ORDER BY user_id').fetchall(),
             before_users)
 
         seq = self.conn.execute("SELECT seq FROM sqlite_sequence WHERE name = 'tags'").fetchone()[0]
-        self.assertGreaterEqual(seq, 717)
+        self.assertGreaterEqual(seq, 723)
         self.conn.execute("INSERT INTO tags (tag_name, description, editable) VALUES ('Next', '', 1)")
         new_id = self.conn.execute('SELECT last_insert_rowid()').fetchone()[0]
-        self.assertGreater(new_id, 716)
+        self.assertGreater(new_id, 720)
         self.assertNotEqual(new_id, 644)
+        self.assertNotEqual(new_id, 717)
 
         desc = self.conn.execute('SELECT description FROM tags WHERE tag_id = 133').fetchone()[0]
         self.assertIn('普通名詞', desc)

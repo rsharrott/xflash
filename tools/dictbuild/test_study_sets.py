@@ -48,6 +48,37 @@ class ChunkTest(unittest.TestCase):
         ids = [tag for chunks in assigned for tag, _ in chunks]
         self.assertEqual(len(ids), len(set(ids)))
         self.assertEqual([chunks[0][0] for chunks in assigned], [95, 94, 93, 92])
+        # One-card levels have no extra chunk ids, so the combined sets take 644+.
+        self.assertTrue(set(study_sets.combined_tag_ids(assigned)).isdisjoint(ids))
+
+    def test_combined_set_is_the_union_and_sorts_first(self):
+        levels = (
+            list(range(626)),
+            list(range(1000, 1000 + 585)),
+            list(range(2000, 2000 + 3478)),
+            list(range(6000, 6000 + 2857)),
+        )
+        catalog = study_sets.catalog_from_assignment(study_sets.assign_tag_ids(levels))
+        combined_ids = []
+        for group, level in zip(catalog['groups'], levels):
+            combined = [s for s in group['sets'] if study_sets.is_combined_name(s['name'])]
+            chunks = [s for s in group['sets'] if not study_sets.is_combined_name(s['name'])]
+            self.assertEqual(len(combined), 1)
+            self.assertEqual(combined[0]['card_ids'], level)
+            self.assertEqual(combined[0]['count'], len(level))
+            self.assertEqual(combined[0]['count'], sum(s['count'] for s in chunks))
+            flat = [card for s in chunks for card in s['card_ids']]
+            self.assertEqual(sorted(flat), level)
+            self.assertEqual(len(flat), len(set(flat)))
+            self.assertLess(combined[0]['name'], chunks[0]['name'])
+            self.assertIn('Not a JLPT exam list', combined[0]['description'])
+            self.assertIn('unofficial', combined[0]['description'].lower())
+            self.assertTrue(all(50 <= s['count'] <= 100 for s in chunks))
+            combined_ids.append(combined[0]['tag_id'])
+        self.assertEqual(combined_ids, [717, 718, 719, 720])
+        self.assertTrue(set(combined_ids).isdisjoint(study_sets.RECOMMENDED_ADD))
+        self.assertNotIn(study_sets.DEFAULT_TAG_ID, combined_ids)
+        self.assertTrue(all(tag not in combined_ids for _group, tag in study_sets.STARTER_SETS))
 
     def test_descriptions_do_not_call_the_lists_official(self):
         levels = ([1], [2], [3], [4])
@@ -96,33 +127,43 @@ class BundledCatalogTest(unittest.TestCase):
             parent = self.user.execute('SELECT owner_id FROM groups WHERE group_id = ?',
                                        (group['group_id'],)).fetchone()[0]
             self.assertEqual(parent, study_sets.PARENT_GROUP)
-            ids = []
+            chunks = []
+            combined = []
             for s in group['sets']:
                 row = self.user.execute(
-                    'SELECT tag_name, description, count FROM tags WHERE tag_id = ?',
+                    'SELECT tag_name, description, count, editable FROM tags WHERE tag_id = ?',
                     (s['tag_id'],)).fetchone()
                 self.assertEqual(row[0], s['name'])
                 self.assertEqual(row[1], s['description'])
                 self.assertNotIn('official jlpt', row[1].lower())
                 self.assertIn('unofficial', row[1].lower())
+                self.assertEqual(row[3], 0)
                 live = self.card.execute(
                     'SELECT count(*) FROM system_card_tag_link WHERE tag_id = ?',
                     (s['tag_id'],)).fetchone()[0]
                 self.assertEqual(live, s['count'])
                 self.assertEqual(row[2], s['count'])
-                self.assertGreaterEqual(s['count'], 50)
-                self.assertLessEqual(s['count'], 100)
-                ids.append(s['tag_id'])
                 link = self.user.execute(
                     'SELECT 1 FROM group_tag_link WHERE group_id = ? AND tag_id = ?',
                     (group['group_id'], s['tag_id'])).fetchone()
                 self.assertIsNotNone(link)
-            cards = []
-            for tag_id in ids:
-                cards.extend(cid for (cid,) in self.card.execute(
-                    'SELECT card_id FROM system_card_tag_link WHERE tag_id = ?', (tag_id,)))
-            self.assertEqual(len(cards), len(set(cards)), group['group_name'])
-            seen.extend(cards)
+                cards = [cid for (cid,) in self.card.execute(
+                    'SELECT card_id FROM system_card_tag_link WHERE tag_id = ? ORDER BY card_id',
+                    (s['tag_id'],))]
+                if study_sets.is_combined_name(s['name']):
+                    combined.append(cards)
+                else:
+                    self.assertGreaterEqual(s['count'], 50)
+                    self.assertLessEqual(s['count'], 100)
+                    chunks.append(cards)
+            self.assertEqual(len(combined), 1, group['group_name'])
+            chunk_cards = [cid for cards in chunks for cid in cards]
+            # Chunks of one level do not overlap.  The combined set is their union,
+            # so the same card is in a chunk and in the level set on purpose.
+            self.assertEqual(len(chunk_cards), len(set(chunk_cards)), group['group_name'])
+            self.assertEqual(combined[0], sorted(set(chunk_cards)))
+            self.assertEqual(len(combined[0]), sum(len(cards) for cards in chunks))
+            seen.extend(chunk_cards)
         self.assertEqual(len(seen), len(set(seen)), 'levels overlap')
 
     def test_every_visible_tag_has_a_group_and_hidden_tags_do_not(self):

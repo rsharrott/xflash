@@ -118,7 +118,8 @@ and licence links.
   * `vocabulary_levels.json`: names and tag ids of the approximate vocabulary
     levels (Beginner 1 ≈N5, Beginner 2 ≈N4, Intermediate ≈N3–N2, Advanced ≈N1).
     They replace the old nested "JLPT Level N1–N4" tags and are not JLPT exam
-    lists.  `study_sets.py` is what split them; `build.py` only re-applies the
+    lists.  Each level also has a `00 All` set, the union of that level's
+    chunks.  `study_sets.py` is what split them; `build.py` only re-applies the
     names onto `jFlash.db`.
 * **Romaji** for expressions, particles, conjunctions and hand-made phrase cards
   goes through `romaji_policy.py` at the end of the card build: topic-particle
@@ -135,7 +136,10 @@ and licence links.
   one of the new system ids (644+) is renumbered.  Group links that point at
   a missing tag are dropped.  Fresh installs and the 1.x dictionary reset copy
   the new template and do not need that step.  If the in-place update fails,
-  the user file is left unchanged and the app stops retrying it.
+  the user file is left unchanged and the app stops retrying it.  The alert's
+  one-shot flag is cleared after it is shown; `study_sets_21_failed` stays set
+  so a later build can tell the update did not land.  If the saved active set
+  points at a tag that is not in the database, it is put back on the default set.
 
 ## One-off 1.x → 2.0 migration
 

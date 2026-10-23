@@ -4,7 +4,8 @@ The old tags 92-95 are the pre-2010 four-level community lists, and each level
 contains every easier level.  This module splits them into non-overlapping
 approximate levels and chunks of 50-100 cards, and it records the browse-list
 edits (hidden sets, group fixes, renamed kana, text fixes) so they can be
-reapplied to the user-DB template.
+reapplied to the user-DB template.  Each level also has one combined set, the
+union of that level's chunks, so a learner can review the whole level.
 
 Card membership lives in data/system_sets.tsv.  Names and groups live in
 jFlash/sql/jFlash.db.  A future `build.py` reads the TSV as it stands and
@@ -31,6 +32,8 @@ CURATED_PATH = os.path.join(HERE, 'data', 'curated_cards.jsonl')
 LEGACY_TAGS = (95, 94, 93, 92)   # L4, L3, L2, L1
 ANCHORS = (95, 94, 93, 92)       # first chunk of each new level reuses the old id
 NEW_TAG_START = 644
+# Sorts before " 01" (binary order: '0' < '1') and stays next to the chunks.
+COMBINED_NAME_SUFFIX = ' 00 All'
 
 PARENT_GROUP = 10
 PARENT_NAME = 'Vocabulary Levels'
@@ -191,7 +194,11 @@ def unique_levels(members):
 
 
 def assign_tag_ids(level_lists):
-    """(list of card-id lists) -> list of (tag_id, [card_ids]) per level."""
+    """(list of card-id lists) -> list of (tag_id, [card_ids]) per level.
+
+    Chunk ids only.  The combined set for each level is assigned later, after
+    every chunk, so the chunk ids stay 644 and up in the order they were split.
+    """
     next_id = NEW_TAG_START
     assigned = []
     for anchor, cards in zip(ANCHORS, level_lists):
@@ -209,10 +216,44 @@ def assign_tag_ids(level_lists):
     return assigned
 
 
+def is_combined_name(name):
+    return (name or '').endswith(COMBINED_NAME_SUFFIX)
+
+
+def combined_name(set_name):
+    return set_name + COMBINED_NAME_SUFFIX
+
+
+def combined_description(blurb, count, n_chunks):
+    """The level blurb already says unofficial and not a JLPT exam list."""
+    return '%s  All %d cards in this level (sets 01–%02d together).' % (
+        blurb, count, n_chunks)
+
+
+def combined_tag_ids(assigned):
+    """One id per level, after the last chunk id.  Empty levels are not expected."""
+    new_ids = [tag for chunks in assigned for tag, _cards in chunks if tag >= NEW_TAG_START]
+    start = max(new_ids) + 1 if new_ids else NEW_TAG_START
+    return [start + index for index in range(len(assigned))]
+
+
+def union_card_ids(card_lists):
+    """Card ids in card_id order, each card once."""
+    seen = set()
+    for cards in card_lists:
+        seen.update(cards)
+    return sorted(seen)
+
+
 def catalog_from_assignment(assigned):
-    """Build the JSON-ready catalog.  assigned is the return of assign_tag_ids."""
+    """Build the JSON-ready catalog.  assigned is the return of assign_tag_ids.
+
+    The first set in each group is the combined set (every card in the level).
+    Its name sorts before the numbered chunks.
+    """
     groups = []
-    for level, chunks in zip(LEVELS, assigned):
+    all_ids = combined_tag_ids(assigned)
+    for level, chunks, combined_id in zip(LEVELS, assigned, all_ids):
         sets = []
         total = len(chunks)
         for index, (tag_id, cards) in enumerate(chunks, start=1):
@@ -223,6 +264,14 @@ def catalog_from_assignment(assigned):
                 'count': len(cards),
                 'card_ids': list(cards),
             })
+        every = union_card_ids(cards for _tag, cards in chunks)
+        sets.insert(0, {
+            'tag_id': combined_id,
+            'name': combined_name(level['set_name']),
+            'description': combined_description(level['blurb'], len(every), total),
+            'count': len(every),
+            'card_ids': every,
+        })
         groups.append({
             'group_id': level['group_id'],
             'group_name': level['group_name'],
@@ -233,6 +282,61 @@ def catalog_from_assignment(assigned):
         'parent_group_name': PARENT_NAME,
         'groups': groups,
     }
+
+
+def _cards_for_set(members, entry):
+    if entry.get('card_ids'):
+        return entry['card_ids']
+    return members.get(entry['tag_id'], [])
+
+
+def ensure_combined_membership(members, catalog):
+    """Give each vocabulary level a set that is the union of its chunks.
+
+    Chunk ids are left alone.  Combined ids continue after the highest chunk
+    id (717–720 for the bundled lists).  Returns (changed, tag_ids whose
+    membership was written).  Safe to run twice: the second run changes nothing
+    when the unions are already stored.
+    """
+    changed = False
+    written = []
+    by_group = {group['group_id']: group for group in catalog['groups']}
+    next_id = None
+    for level in LEVELS:
+        group = by_group[level['group_id']]
+        chunks = [s for s in group['sets'] if not is_combined_name(s.get('name'))]
+        cards = union_card_ids(_cards_for_set(members, s) for s in chunks)
+        combined = next((s for s in group['sets'] if is_combined_name(s.get('name'))), None)
+        name = combined_name(level['set_name'])
+        description = combined_description(level['blurb'], len(cards), len(chunks))
+        if combined is None:
+            if next_id is None:
+                taken = [s['tag_id'] for g in catalog['groups'] for s in g['sets']]
+                taken.extend(tag for tag in members if tag >= NEW_TAG_START)
+                next_id = max(taken) + 1 if taken else NEW_TAG_START
+            tag_id = next_id
+            next_id += 1
+            combined = {
+                'tag_id': tag_id,
+                'name': name,
+                'description': description,
+                'count': len(cards),
+            }
+            group['sets'].insert(0, combined)
+            changed = True
+        else:
+            tag_id = combined['tag_id']
+            if (combined.get('name') != name or combined.get('description') != description
+                    or combined.get('count') != len(cards)):
+                combined['name'] = name
+                combined['description'] = description
+                combined['count'] = len(cards)
+                changed = True
+        if members.get(tag_id) != cards:
+            members[tag_id] = list(cards)
+            changed = True
+            written.append(tag_id)
+    return changed, written
 
 
 def load_tsv(path=TSV_PATH):
@@ -438,5 +542,20 @@ def replace_system_links(card_conn, members):
     rows.sort()
     card_conn.execute('DELETE FROM system_card_tag_link')
     card_conn.executemany('INSERT INTO system_card_tag_link (tag_id, card_id) VALUES (?, ?)', rows)
+    card_conn.commit()
+    return len(rows)
+
+
+def upsert_tag_links(card_conn, members, tag_ids):
+    """Replace system_card_tag_link rows for these tags and leave every other tag."""
+    for tag_id in tag_ids:
+        card_conn.execute('DELETE FROM system_card_tag_link WHERE tag_id = ?', (tag_id,))
+    rows = []
+    for tag_id in tag_ids:
+        for card_id in members.get(tag_id, []):
+            rows.append((tag_id, card_id))
+    rows.sort()
+    card_conn.executemany(
+        'INSERT INTO system_card_tag_link (tag_id, card_id) VALUES (?, ?)', rows)
     card_conn.commit()
     return len(rows)
