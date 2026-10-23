@@ -15,6 +15,10 @@ extern NSString * const LWEFirstRunCardHintShownKey;
 
 #if defined(LWE_JFLASH)
 
+//! Welcome-sheet starter sets, in display order.  Each pair is group_id, tag_id.
+NSInteger LWEStarterSetCount(void);
+void LWEStarterSetAtIndex(NSInteger index, NSInteger *groupId, NSInteger *tagId);
+
 @interface FirstRunWelcomeViewController : UIViewController <UIAdaptivePresentationControllerDelegate>
 
 //! YES on a fresh install (same condition as the old welcome alert) until the sheet has been shown once.

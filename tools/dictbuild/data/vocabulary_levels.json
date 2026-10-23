@@ -1,0 +1,492 @@
+{
+  "parent_group_id": 10,
+  "parent_group_name": "Vocabulary Levels",
+  "groups": [
+    {
+      "group_id": 24,
+      "group_name": "1. Beginner 1 (≈N5)",
+      "sets": [
+        {
+          "tag_id": 95,
+          "name": "Beginner 1 (≈N5) 01",
+          "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  Set 01 of 07.",
+          "count": 90
+        },
+        {
+          "tag_id": 644,
+          "name": "Beginner 1 (≈N5) 02",
+          "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  Set 02 of 07.",
+          "count": 90
+        },
+        {
+          "tag_id": 645,
+          "name": "Beginner 1 (≈N5) 03",
+          "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  Set 03 of 07.",
+          "count": 90
+        },
+        {
+          "tag_id": 646,
+          "name": "Beginner 1 (≈N5) 04",
+          "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  Set 04 of 07.",
+          "count": 89
+        },
+        {
+          "tag_id": 647,
+          "name": "Beginner 1 (≈N5) 05",
+          "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  Set 05 of 07.",
+          "count": 89
+        },
+        {
+          "tag_id": 648,
+          "name": "Beginner 1 (≈N5) 06",
+          "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  Set 06 of 07.",
+          "count": 89
+        },
+        {
+          "tag_id": 649,
+          "name": "Beginner 1 (≈N5) 07",
+          "description": "Unofficial beginner list, about the range of JLPT N5.  Split out of the old pre-2010 community L4 list so it does not repeat inside the harder lists.  Not a JLPT exam list.  Set 07 of 07.",
+          "count": 89
+        }
+      ]
+    },
+    {
+      "group_id": 25,
+      "group_name": "2. Beginner 2 (≈N4)",
+      "sets": [
+        {
+          "tag_id": 94,
+          "name": "Beginner 2 (≈N4) 01",
+          "description": "Unofficial beginner list, about the range of JLPT N4.  The old pre-2010 community L3 list with the easier L4 cards removed.  Not a JLPT exam list.  Set 01 of 06.",
+          "count": 98
+        },
+        {
+          "tag_id": 650,
+          "name": "Beginner 2 (≈N4) 02",
+          "description": "Unofficial beginner list, about the range of JLPT N4.  The old pre-2010 community L3 list with the easier L4 cards removed.  Not a JLPT exam list.  Set 02 of 06.",
+          "count": 98
+        },
+        {
+          "tag_id": 651,
+          "name": "Beginner 2 (≈N4) 03",
+          "description": "Unofficial beginner list, about the range of JLPT N4.  The old pre-2010 community L3 list with the easier L4 cards removed.  Not a JLPT exam list.  Set 03 of 06.",
+          "count": 98
+        },
+        {
+          "tag_id": 652,
+          "name": "Beginner 2 (≈N4) 04",
+          "description": "Unofficial beginner list, about the range of JLPT N4.  The old pre-2010 community L3 list with the easier L4 cards removed.  Not a JLPT exam list.  Set 04 of 06.",
+          "count": 97
+        },
+        {
+          "tag_id": 653,
+          "name": "Beginner 2 (≈N4) 05",
+          "description": "Unofficial beginner list, about the range of JLPT N4.  The old pre-2010 community L3 list with the easier L4 cards removed.  Not a JLPT exam list.  Set 05 of 06.",
+          "count": 97
+        },
+        {
+          "tag_id": 654,
+          "name": "Beginner 2 (≈N4) 06",
+          "description": "Unofficial beginner list, about the range of JLPT N4.  The old pre-2010 community L3 list with the easier L4 cards removed.  Not a JLPT exam list.  Set 06 of 06.",
+          "count": 97
+        }
+      ]
+    },
+    {
+      "group_id": 26,
+      "group_name": "3. Intermediate (≈N3–N2)",
+      "sets": [
+        {
+          "tag_id": 93,
+          "name": "Intermediate (≈N3–N2) 01",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 01 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 655,
+          "name": "Intermediate (≈N3–N2) 02",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 02 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 656,
+          "name": "Intermediate (≈N3–N2) 03",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 03 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 657,
+          "name": "Intermediate (≈N3–N2) 04",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 04 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 658,
+          "name": "Intermediate (≈N3–N2) 05",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 05 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 659,
+          "name": "Intermediate (≈N3–N2) 06",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 06 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 660,
+          "name": "Intermediate (≈N3–N2) 07",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 07 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 661,
+          "name": "Intermediate (≈N3–N2) 08",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 08 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 662,
+          "name": "Intermediate (≈N3–N2) 09",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 09 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 663,
+          "name": "Intermediate (≈N3–N2) 10",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 10 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 664,
+          "name": "Intermediate (≈N3–N2) 11",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 11 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 665,
+          "name": "Intermediate (≈N3–N2) 12",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 12 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 666,
+          "name": "Intermediate (≈N3–N2) 13",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 13 of 35.",
+          "count": 100
+        },
+        {
+          "tag_id": 667,
+          "name": "Intermediate (≈N3–N2) 14",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 14 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 668,
+          "name": "Intermediate (≈N3–N2) 15",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 15 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 669,
+          "name": "Intermediate (≈N3–N2) 16",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 16 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 670,
+          "name": "Intermediate (≈N3–N2) 17",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 17 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 671,
+          "name": "Intermediate (≈N3–N2) 18",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 18 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 672,
+          "name": "Intermediate (≈N3–N2) 19",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 19 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 673,
+          "name": "Intermediate (≈N3–N2) 20",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 20 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 674,
+          "name": "Intermediate (≈N3–N2) 21",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 21 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 675,
+          "name": "Intermediate (≈N3–N2) 22",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 22 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 676,
+          "name": "Intermediate (≈N3–N2) 23",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 23 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 677,
+          "name": "Intermediate (≈N3–N2) 24",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 24 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 678,
+          "name": "Intermediate (≈N3–N2) 25",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 25 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 679,
+          "name": "Intermediate (≈N3–N2) 26",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 26 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 680,
+          "name": "Intermediate (≈N3–N2) 27",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 27 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 681,
+          "name": "Intermediate (≈N3–N2) 28",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 28 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 682,
+          "name": "Intermediate (≈N3–N2) 29",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 29 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 683,
+          "name": "Intermediate (≈N3–N2) 30",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 30 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 684,
+          "name": "Intermediate (≈N3–N2) 31",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 31 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 685,
+          "name": "Intermediate (≈N3–N2) 32",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 32 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 686,
+          "name": "Intermediate (≈N3–N2) 33",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 33 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 687,
+          "name": "Intermediate (≈N3–N2) 34",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 34 of 35.",
+          "count": 99
+        },
+        {
+          "tag_id": 688,
+          "name": "Intermediate (≈N3–N2) 35",
+          "description": "Unofficial intermediate list, about the range of JLPT N3 and N2.  The old pre-2010 community L2 list with the easier cards removed.  Not a JLPT exam list.  Set 35 of 35.",
+          "count": 99
+        }
+      ]
+    },
+    {
+      "group_id": 27,
+      "group_name": "4. Advanced (≈N1)",
+      "sets": [
+        {
+          "tag_id": 92,
+          "name": "Advanced (≈N1) 01",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 01 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 689,
+          "name": "Advanced (≈N1) 02",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 02 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 690,
+          "name": "Advanced (≈N1) 03",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 03 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 691,
+          "name": "Advanced (≈N1) 04",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 04 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 692,
+          "name": "Advanced (≈N1) 05",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 05 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 693,
+          "name": "Advanced (≈N1) 06",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 06 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 694,
+          "name": "Advanced (≈N1) 07",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 07 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 695,
+          "name": "Advanced (≈N1) 08",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 08 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 696,
+          "name": "Advanced (≈N1) 09",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 09 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 697,
+          "name": "Advanced (≈N1) 10",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 10 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 698,
+          "name": "Advanced (≈N1) 11",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 11 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 699,
+          "name": "Advanced (≈N1) 12",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 12 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 700,
+          "name": "Advanced (≈N1) 13",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 13 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 701,
+          "name": "Advanced (≈N1) 14",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 14 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 702,
+          "name": "Advanced (≈N1) 15",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 15 of 29.",
+          "count": 99
+        },
+        {
+          "tag_id": 703,
+          "name": "Advanced (≈N1) 16",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 16 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 704,
+          "name": "Advanced (≈N1) 17",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 17 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 705,
+          "name": "Advanced (≈N1) 18",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 18 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 706,
+          "name": "Advanced (≈N1) 19",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 19 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 707,
+          "name": "Advanced (≈N1) 20",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 20 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 708,
+          "name": "Advanced (≈N1) 21",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 21 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 709,
+          "name": "Advanced (≈N1) 22",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 22 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 710,
+          "name": "Advanced (≈N1) 23",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 23 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 711,
+          "name": "Advanced (≈N1) 24",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 24 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 712,
+          "name": "Advanced (≈N1) 25",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 25 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 713,
+          "name": "Advanced (≈N1) 26",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 26 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 714,
+          "name": "Advanced (≈N1) 27",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 27 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 715,
+          "name": "Advanced (≈N1) 28",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 28 of 29.",
+          "count": 98
+        },
+        {
+          "tag_id": 716,
+          "name": "Advanced (≈N1) 29",
+          "description": "Unofficial advanced list, about the range of JLPT N1.  The old pre-2010 community L1 list with the easier cards removed.  Not a JLPT exam list.  Set 29 of 29.",
+          "count": 98
+        }
+      ]
+    }
+  ]
+}

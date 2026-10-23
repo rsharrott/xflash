@@ -115,6 +115,27 @@ and licence links.
     145383–145912 and 150029–150039) that a set uses and JMdict can't identify,
     copied verbatim from CARD 1.1.
   * `system_sets.tsv`: built-in study set membership.
+  * `vocabulary_levels.json`: names and tag ids of the approximate vocabulary
+    levels (Beginner 1 ≈N5, Beginner 2 ≈N4, Intermediate ≈N3–N2, Advanced ≈N1).
+    They replace the old nested "JLPT Level N1–N4" tags and are not JLPT exam
+    lists.  `study_sets.py` is what split them; `build.py` only re-applies the
+    names onto `jFlash.db`.
+* **Romaji** for expressions, particles, conjunctions and hand-made phrase cards
+  goes through `romaji_policy.py` at the end of the card build: topic-particle
+  は becomes "wa" when the reading segments into dictionary words and the
+  headword itself writes that は, object particle を becomes "o", and an
+  ideographic comma becomes a space.  は inside a word (入る, 美人薄命, はまる,
+  花, ご飯, 母, 木の葉) stays "ha".  ではない and ありはしない stay "wa" even
+  when the headword uses the other spelling.  The literal ha/wo spelling is
+  kept as an extra search token.  Hand-tuned curated romaji is left as stored.
+* **User database 2.1.** A 2.0 install already has `jFlash.db` in Documents, so
+  a later build does not copy the template again.  Data version 2.1 updates
+  that file in place (tags, groups, links) and keeps study progress, My Starred
+  Words, user-created sets and `last_state`.  A user-created tag whose id is
+  one of the new system ids (644+) is renumbered.  Group links that point at
+  a missing tag are dropped.  Fresh installs and the 1.x dictionary reset copy
+  the new template and do not need that step.  If the in-place update fails,
+  the user file is left unchanged and the app stops retrying it.
 
 ## One-off 1.x → 2.0 migration
 

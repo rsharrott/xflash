@@ -114,6 +114,31 @@
   XCTAssertTrue(found, @"A kana search still finds the card by its reading (貯金)");
 }
 
+- (BOOL) _results:(NSArray *)results containCardId:(NSInteger)cardId
+{
+  for (Card *card in results)
+  {
+    if (card.cardId == cardId)
+    {
+      return YES;
+    }
+  }
+  return NO;
+}
+
+- (void)testLiteralRomajiStillFindsACard
+{
+  // Particle spellings changed (は ha→wa, を wo→o).  The old spelling stays in the index.
+  // Match on card id: 今日は is a kana-only card, so its displayed headword is the reading
+  // when that setting is on.
+  XCTAssertTrue([self _results:[self _resultsForSearchKeyword:@"konnichiha"] containCardId:1289400],
+                @"konnichiha still finds 今日は");
+  XCTAssertTrue([self _results:[self _resultsForSearchKeyword:@"sorehadoumo"] containCardId:2089520],
+                @"sorehadoumo still finds それはどうも");
+  XCTAssertTrue([self _results:[self _resultsForSearchKeyword:@"ofuronihairimasu"] containCardId:145488],
+                @"ofuronihairimasu finds お風呂に入ります");
+}
+
 - (void)testKeywordIsHeadwordWithKanji
 {
   XCTAssertFalse([CardPeer keywordIsHeadword:@"日本語"], @"jFlash searches all columns, so no keyword is column-classified");

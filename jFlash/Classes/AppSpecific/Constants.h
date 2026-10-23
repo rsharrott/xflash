@@ -96,8 +96,9 @@ extern NSString * const LWE_XFLASH_HOMEPAGE;
 
 #if defined(LWE_JFLASH)
 
-  // LWE Favorites - JFlash
-  #define DEFAULT_TAG_ID 124
+  // Hiragana (1 Basic).  A new install starts on the kana chart, not on
+  // Long Weekend Favorites (tag 124), which stays in the database as an editable set.
+  #define DEFAULT_TAG_ID 200
 
   extern NSString * const APP_READING;
   extern NSString * const SET_READING_KANA;
@@ -120,6 +121,7 @@ extern NSString * const LWE_XFLASH_HOMEPAGE;
   extern NSString * const LWE_JF_VERSION_1_8;
   extern NSString * const LWE_JF_VERSION_1_9;
   extern NSString * const LWE_JF_VERSION_2_0;
+  extern NSString * const LWE_JF_VERSION_2_1;
   extern NSString * const LWE_JF_10_USER_DATABASE;
   extern NSString * const LWE_JF_10_TO_11_SQL_FILENAME;
   extern NSString * const LWE_JF_12_TO_13_SQL_FILENAME;

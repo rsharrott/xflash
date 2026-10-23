@@ -452,6 +452,7 @@
 		497607E9147A6570000A9FC5 /* chinese-flash-splash.png in Resources */ = {isa = PBXBuildFile; fileRef = 497607E1147A6570000A9FC5 /* chinese-flash-splash.png */; };
 		497607EB147A6570000A9FC5 /* chinese-flash-splash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 497607E2147A6570000A9FC5 /* chinese-flash-splash@2x.png */; };
 		4979D7AE14949AB800625635 /* JFlashPluginMigrationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4979D7AD14949AB800625635 /* JFlashPluginMigrationTest.m */; };
+		A9E4C1D12F0A4B6E8C0D1F02 /* UserDatabaseMigrationTest.m in Sources */ = {isa = PBXBuildFile; fileRef = A9E4C1D12F0A4B6E8C0D1F01 /* UserDatabaseMigrationTest.m */; };
 		497CAF2011B90E3300558846 /* CustomCellBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = 917A5C3811AB826000016BD2 /* CustomCellBackgroundView.m */; };
 		4982292D1490A0BE009EC2CD /* SearchingTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4982292C1490A0BD009EC2CD /* SearchingTableCell.xib */; };
 		4982292E1490A0BE009EC2CD /* SearchingTableCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4982292C1490A0BD009EC2CD /* SearchingTableCell.xib */; };
@@ -909,6 +910,7 @@
 		497607E2147A6570000A9FC5 /* chinese-flash-splash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "chinese-flash-splash@2x.png"; path = "Assets/CFlash/chinese-flash-splash@2x.png"; sourceTree = "<group>"; };
 		4979D7AC14949AB800625635 /* JFlashPluginMigrationTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JFlashPluginMigrationTest.h; path = Tests/jFlashTests/JFlashPluginMigrationTest.h; sourceTree = SOURCE_ROOT; };
 		4979D7AD14949AB800625635 /* JFlashPluginMigrationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JFlashPluginMigrationTest.m; path = Tests/jFlashTests/JFlashPluginMigrationTest.m; sourceTree = SOURCE_ROOT; };
+		A9E4C1D12F0A4B6E8C0D1F01 /* UserDatabaseMigrationTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = UserDatabaseMigrationTest.m; path = Tests/jFlashTests/UserDatabaseMigrationTest.m; sourceTree = SOURCE_ROOT; };
 		4982292C1490A0BD009EC2CD /* SearchingTableCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SearchingTableCell.xib; path = XIBs/SearchingTableCell.xib; sourceTree = "<group>"; };
 		4982294F1491D02A009EC2CD /* DownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DownloadManager.h; path = AppSpecific/DownloadManager.h; sourceTree = "<group>"; };
 		498229501491D02A009EC2CD /* DownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DownloadManager.m; path = AppSpecific/DownloadManager.m; sourceTree = "<group>"; };
@@ -1413,6 +1415,7 @@
 			children = (
 				4979D7AC14949AB800625635 /* JFlashPluginMigrationTest.h */,
 				4979D7AD14949AB800625635 /* JFlashPluginMigrationTest.m */,
+				A9E4C1D12F0A4B6E8C0D1F01 /* UserDatabaseMigrationTest.m */,
 				91910048148052A1003E9A19 /* JFlashSearchTest.h */,
 				91910049148052A1003E9A19 /* JFlashSearchTest.m */,
 				07203B478DBF477887BC9B5C /* JapaneseCardTest.h */,
@@ -2696,6 +2699,7 @@
 				B4D9E00519000060000000AA /* DownloadManager.m in Sources */,
 				B4D9E00619000060000000AA /* ModalTaskViewController.m in Sources */,
 				4979D7AE14949AB800625635 /* JFlashPluginMigrationTest.m in Sources */,
+				A9E4C1D12F0A4B6E8C0D1F02 /* UserDatabaseMigrationTest.m in Sources */,
 				4944B1E41495D23700AE23BE /* CloseButtonView.m in Sources */,
 				499E56B814972A7200088BD3 /* TTTAttributedLabel.m in Sources */,
 				4964E54014A959EB00683A58 /* PracticeCardSelector.m in Sources */,

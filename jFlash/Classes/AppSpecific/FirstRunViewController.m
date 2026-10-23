@@ -17,10 +17,28 @@ NSString * const LWEFirstRunCardHintShownKey = @"firstrun_card_hint_shown";
 // (default) set.  Each entry is { group_id, tag_id } in the bundled jFlash.db.  Names and
 // card counts are read from the database at runtime; rows whose group or tag do not exist
 // (e.g. a different database) are skipped.
-//   group  9 "Survival Japanese"  -> tag 208 "Numbers"
-//   group 10 "JLPT N1~N4"         -> tag  95 "JLPT Level N4"
-//   group 23 "Recommended"        -> tag  91 "Japanglish (Wasei Eigo)"
-static const NSInteger kLWEStarterSets[][2] = { {9, 208}, {10, 95}, {23, 91} };
+//   group 16 "Kana Alphabet"         -> tag 200 "Hiragana (1 Basic)"  (also DEFAULT_TAG_ID)
+//   group  9 "Survival Japanese"     -> tag 208 "Numbers"
+//   group 21 "Common Phrases"        -> tag  73 "Greetings"
+//   group 24 "1. Beginner 1 (≈N5)"   -> tag  95 "Beginner 1 (≈N5) 01"
+static const NSInteger kLWEStarterSets[][2] = { {16, 200}, {9, 208}, {21, 73}, {24, 95} };
+
+NSInteger LWEStarterSetCount(void)
+{
+  return (NSInteger)(sizeof(kLWEStarterSets) / sizeof(kLWEStarterSets[0]));
+}
+
+void LWEStarterSetAtIndex(NSInteger index, NSInteger *groupId, NSInteger *tagId)
+{
+  if (index < 0 || index >= LWEStarterSetCount())
+  {
+    if (groupId) *groupId = 0;
+    if (tagId) *tagId = 0;
+    return;
+  }
+  if (groupId) *groupId = kLWEStarterSets[index][0];
+  if (tagId) *tagId = kLWEStarterSets[index][1];
+}
 
 static NSString *LWEWordCountString(NSInteger count)
 {
@@ -32,7 +50,7 @@ static NSString *LWEWordCountString(NSInteger count)
 }
 
 //! Live card count for a tag, from the same link table the study code reads (the cached
-//! tags.count column can be off by one for some system sets, e.g. JLPT N4 caches 631 for 630 cards).
+//! tags.count column has been wrong for some system sets in older databases).
 static NSInteger LWELiveCardCount(Tag *tag)
 {
   NSString *table = ([tag isEditable] || tag.tagId == 0) ? @"card_tag_link" : @"system_card_tag_link";
@@ -230,7 +248,7 @@ static NSInteger LWELiveCardCount(Tag *tag)
 }
 
 //! YES if the system tag is actually filed under that group (group_tag_link), so a renumbered
-//! or different database can't put e.g. a JLPT tag under the "Survival Japanese" heading.
+//! or different database can't put a tag under a heading it does not belong to.
 + (BOOL) _tag:(NSInteger)tagId isInGroup:(NSInteger)groupId
 {
   FMResultSet *rs = [[[LWEDatabase sharedLWEDatabase] dao] executeQuery:@"SELECT count(*) AS total FROM group_tag_link WHERE group_id = ? AND tag_id = ?",
@@ -249,14 +267,14 @@ static NSInteger LWELiveCardCount(Tag *tag)
 {
   NSMutableArray *sets = [NSMutableArray array];
 
-  // 1. Whatever is currently active -- on a fresh install that's DEFAULT_TAG_ID (Long Weekend Favorites).
+  // 1. Whatever is currently active -- on a fresh install that's DEFAULT_TAG_ID (Hiragana Basic).
   Tag *current = [[CurrentState sharedCurrentState] activeTag];
   if (current && current.cardCount > 0)
   {
     [sets addObject:@{ @"title": current.tagName, @"subtitle": LWEWordCountString(LWELiveCardCount(current)), @"tag": current }];
   }
 
-  // 2. A set each from Survival Japanese, JLPT and Recommended, if they exist.
+  // 2. Kana, numbers, greetings, and the first approximate-beginner set, if they exist.
   NSInteger numSets = sizeof(kLWEStarterSets) / sizeof(kLWEStarterSets[0]);
   for (NSInteger i = 0; i < numSets; i++)
   {

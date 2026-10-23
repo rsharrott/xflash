@@ -12,6 +12,8 @@
 #import "Tag.h"
 #import "GroupPeer.h"
 #import "Constants.h"
+#import "FirstRunViewController.h"
+#import "LWEDatabase.h"
 
 #import <UIKit/UIKit.h>
 
@@ -126,6 +128,54 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   
   seperatelyRetrivedFavTag = [TagPeer retrieveTagByName:kLWEFavoriteTagName];
   XCTAssertEqualObjects(favoritesTag.tagDescription, seperatelyRetrivedFavTag.tagDescription, @"The DB does not contain the saved description");
+}
+
+- (void)testBrowseSearchSkipsTagsThatAreNotInAGroup
+{
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  [db.dao executeUpdate:@"INSERT INTO tags (tag_name, description, editable) VALUES (?,?,1)",
+   @"ZZZ Ungrouped Hidden", @""];
+  XCTAssertFalse([db.dao hadError], @"Should insert an ungrouped tag");
+  NSInteger tagId = (NSInteger)db.dao.lastInsertRowId;
+
+  NSArray *hits = [TagPeer retrieveTagListLike:@"ZZZ Ungrouped"];
+  XCTAssertEqual([hits count], (NSUInteger)0, @"A tag with no group_tag_link stays out of browse search");
+
+  Tag *created = [TagPeer createTagNamed:@"ZZZ Grouped Visible" inGroup:[GroupPeer topLevelGroup]];
+  XCTAssertNotNil(created, @"A user-created set is linked to a group");
+  NSArray *visible = [TagPeer retrieveTagListLike:@"ZZZ Grouped"];
+  XCTAssertEqual([visible count], (NSUInteger)1, @"A grouped tag is still searchable");
+
+  [db.dao executeUpdate:@"DELETE FROM tags WHERE tag_id = ?", [NSNumber numberWithInteger:tagId]];
+  [TagPeer deleteTag:created];
+}
+
+- (void)testDefaultTagAndStarterSets
+{
+#if defined(LWE_JFLASH)
+  XCTAssertEqual(DEFAULT_TAG_ID, 200, @"A new install starts on Hiragana (1 Basic)");
+  XCTAssertEqual(LWEStarterSetCount(), (NSInteger)4);
+  NSInteger expected[4][2] = { {16, 200}, {9, 208}, {21, 73}, {24, 95} };
+  for (NSInteger i = 0; i < LWEStarterSetCount(); i++)
+  {
+    NSInteger groupId = 0;
+    NSInteger tagId = 0;
+    LWEStarterSetAtIndex(i, &groupId, &tagId);
+    XCTAssertEqual(groupId, expected[i][0], @"starter %ld group", (long)i);
+    XCTAssertEqual(tagId, expected[i][1], @"starter %ld tag", (long)i);
+    FMResultSet *rs = [[LWEDatabase sharedLWEDatabase].dao executeQuery:
+                       @"SELECT 1 FROM group_tag_link WHERE group_id = ? AND tag_id = ?",
+                       [NSNumber numberWithInteger:groupId], [NSNumber numberWithInteger:tagId]];
+    XCTAssertTrue([rs next], @"starter group %ld tag %ld is linked", (long)groupId, (long)tagId);
+    [rs close];
+    Tag *tag = [TagPeer retrieveTagById:tagId];
+    XCTAssertTrue([tag.tagName length] > 0, @"starter tag %ld has a name", (long)tagId);
+  }
+  Tag *hiragana = [TagPeer retrieveTagById:DEFAULT_TAG_ID];
+  XCTAssertEqualObjects(hiragana.tagName, @"Hiragana (1 Basic)");
+#else
+  XCTAssertEqual(DEFAULT_TAG_ID, 158, @"cFlash still starts on its own default set");
+#endif
 }
 
 #pragma mark -
