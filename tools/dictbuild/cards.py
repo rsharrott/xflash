@@ -6,6 +6,7 @@ import re
 
 from jmdict import COMMON_PRI
 from romaji import kana_to_romaji
+from romaji_policy import search_bracket_parts
 
 CARD_TYPE_WORD, CARD_TYPE_KANA, CARD_TYPE_DICTIONARY = 0, 1, 3
 
@@ -116,10 +117,9 @@ def build_card(e):
     # The 1.x layout is "headword [ reading / romaji / romaji-without-spaces ] glosses".
     # The space-less romaji only adds tokens for multi-word readings, so it is left out
     # when it would just repeat the romaji (same matches, ~3 MB smaller FTS index).
-    bracket = [reading_str, romaji_str]
-    nospace = '; '.join(x.replace(' ', '') for x in romaji)
-    if nospace != romaji_str:
-        bracket.append(nospace)
+    # romaji_policy.apply_to_cards rewrites this bracket after the particle pass and,
+    # when that pass changed the spelling, appends the literal ha/wo form too.
+    bracket = [reading_str] + search_bracket_parts(reading_str, romaji_str)
     content = '%s [ %s ] %s' % (headword_part, ' / '.join(bracket),
                                 remove_stop_words('; '.join(fts_items)))
     if extra_readings:

@@ -114,6 +114,37 @@
   XCTAssertTrue(found, @"A kana search still finds the card by its reading (貯金)");
 }
 
+- (void)testLiteralRomajiStillFindsACard
+{
+  // Particle spellings changed (は ha→wa, を wo→o).  The old spelling stays in the index.
+  NSArray *greeting = [self _resultsForSearchKeyword:@"konnichiha"];
+  BOOL foundGreeting = NO;
+  for (Card *card in greeting)
+  {
+    [card hydrate];
+    if ([card.headword isEqualToString:@"今日は"]) foundGreeting = YES;
+  }
+  XCTAssertTrue(foundGreeting, @"konnichiha still finds 今日は");
+
+  NSArray *topic = [self _resultsForSearchKeyword:@"sorehadoumo"];
+  BOOL foundTopic = NO;
+  for (Card *card in topic)
+  {
+    [card hydrate];
+    if ([card.headword isEqualToString:@"それはどうも"]) foundTopic = YES;
+  }
+  XCTAssertTrue(foundTopic, @"sorehadoumo still finds それはどうも");
+
+  NSArray *bath = [self _resultsForSearchKeyword:@"ofuronihairimasu"];
+  BOOL foundBath = NO;
+  for (Card *card in bath)
+  {
+    [card hydrate];
+    if ([card.headword isEqualToString:@"お風呂に入ります"]) foundBath = YES;
+  }
+  XCTAssertTrue(foundBath, @"ofuronihairimasu finds お風呂に入ります");
+}
+
 - (void)testKeywordIsHeadwordWithKanji
 {
   XCTAssertFalse([CardPeer keywordIsHeadword:@"日本語"], @"jFlash searches all columns, so no keyword is column-classified");

@@ -1,4 +1,5 @@
 # ent_seq whose sense 1 is marked vulg or X in JMdict_e 2026-10-22
+# sha256 91037607250dcc60b0f0723d229d77553d8be512a3d0ab152e4760bc1a418120
 # Used to check that starter sets do not include those cards.
 1001500
 1003780

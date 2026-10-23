@@ -6,8 +6,10 @@
 
 import os
 import sqlite3
+import tempfile
 import unittest
 
+import apply_study_data
 import study_sets
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -176,18 +178,22 @@ class BundledCatalogTest(unittest.TestCase):
         self.assertFalse(prenoun.endswith(' '))
         blob = ' '.join((n or '') + ' ' + (d or '') for n, d in self.user.execute(
             'SELECT tag_name, description FROM tags'))
-        for typo in ('Intrasitive', 'lanugage', 'Portguese', 'oridnal', 'Idomatic', 'Rude or X-Rated'):
+        for typo in ('Intrasitive', 'lanugage', 'Portguese', 'oridnal', 'Idomatic', 'Rude or X-Rated',
+                     'fukumeishi'):
             self.assertNotIn(typo, blob)
+        self.assertIn('futsuumeishi', blob)
 
     def test_starters_have_no_vulgar_or_x_rated_cards(self):
         if not os.path.exists(VULG_PATH):
             self.skipTest('sense1_vulg_x.txt is written by apply_study_data.py')
         vulg = set()
         with open(VULG_PATH, encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#'):
-                    vulg.add(int(line))
+            header = f.read()
+        self.assertIn(apply_study_data.JMDICT_SHA256, header)
+        for line in header.splitlines():
+            line = line.strip()
+            if line and not line.startswith('#'):
+                vulg.add(int(line))
         starter_tags = {study_sets.DEFAULT_TAG_ID}
         starter_tags.update(tag for _, tag in study_sets.STARTER_SETS)
         for tag_id in starter_tags:
@@ -212,6 +218,27 @@ class BundledCatalogTest(unittest.TestCase):
         row = self.user.execute(
             "SELECT editable, count FROM tags WHERE tag_name = 'Long Weekend Favorites'").fetchone()
         self.assertEqual(row, (1, 14))
+
+
+class JMdictPinTest(unittest.TestCase):
+
+    def test_missing_file_is_reported_without_patching(self):
+        err = apply_study_data.jmdict_pin_error('/tmp/no-such-jmdict-for-xflash.gz')
+        self.assertIsNotNone(err)
+        self.assertIn('missing', err)
+        self.assertIn(apply_study_data.JMDICT_SHA256, err)
+
+    def test_wrong_bytes_do_not_match_the_pin(self):
+        handle = tempfile.NamedTemporaryFile(delete=False)
+        handle.write(b'not a jmdict file')
+        handle.close()
+        try:
+            err = apply_study_data.jmdict_pin_error(handle.name)
+        finally:
+            os.remove(handle.name)
+        self.assertIsNotNone(err)
+        self.assertIn('sha256', err)
+        self.assertIn('Refusing to patch', err)
 
 
 if __name__ == '__main__':

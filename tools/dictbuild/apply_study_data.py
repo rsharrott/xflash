@@ -10,6 +10,7 @@ locked rebuild runs the same romaji policy while it writes the cards.
 Does not touch the example-sentence database.
 """
 
+import hashlib
 import json
 import os
 import sqlite3
@@ -22,6 +23,36 @@ import study_sets
 HERE = os.path.dirname(os.path.abspath(__file__))
 VULG_PATH = os.path.join(HERE, 'data', 'sense1_vulg_x.txt')
 JMDICT_FOR_FLAGS = os.environ.get('JMDICT_FOR_FLAGS', '/tmp/JMdict_e.gz')
+
+# The sense-1 vulg/X list is not the locked 2026-10-18 JMdict (that file is gone
+# from the upstream URL).  It is this later daily file.  A mismatch or a missing
+# file refuses the whole run before any database is opened.
+JMDICT_SHA256 = '91037607250dcc60b0f0723d229d77553d8be512a3d0ab152e4760bc1a418120'
+JMDICT_CREATED = '2026-10-22'
+
+
+def jmdict_pin_error(path):
+    """None when path is the pinned JMdict, otherwise a message.
+
+    Does not open the card databases.  main() exits on a message before it
+    patches anything.
+    """
+    if not path or not os.path.isfile(path):
+        return ('JMdict file is missing (%s). Expected sha256 %s (%s). '
+                'Refusing to patch databases.' % (path, JMDICT_SHA256, JMDICT_CREATED))
+    digest = hashlib.sha256()
+    with open(path, 'rb') as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b''):
+            digest.update(chunk)
+    got = digest.hexdigest()
+    if got != JMDICT_SHA256:
+        return ('JMdict sha256 %s does not match pinned %s. '
+                'Refusing to patch databases.' % (got, JMDICT_SHA256))
+    created, _ = jmdict.read_header(path)
+    if created != JMDICT_CREATED:
+        return ('JMdict created date %s does not match pinned %s. '
+                'Refusing to patch databases.' % (created, JMDICT_CREATED))
+    return None
 
 # Curated cards whose English is wrong.  The full-width digit and the typo are
 # not JMdict glosses; they were typed into the 1.x phrase/word cards.
@@ -45,6 +76,9 @@ def write_vulg_list(path=VULG_PATH, jmdict_path=JMDICT_FOR_FLAGS):
     is no longer at the upstream URL, so the flags come from a later daily
     file.  ent_seq does not move when a sense's misc flag is unchanged.
     """
+    pin_error = jmdict_pin_error(jmdict_path)
+    if pin_error:
+        raise SystemExit(pin_error)
     created, _ = jmdict.read_header(jmdict_path)
     ids = []
     for entry in jmdict.iter_entries(jmdict_path):
@@ -57,6 +91,7 @@ def write_vulg_list(path=VULG_PATH, jmdict_path=JMDICT_FOR_FLAGS):
     ids.sort()
     with open(path, 'w', encoding='utf-8') as f:
         f.write('# ent_seq whose sense 1 is marked vulg or X in JMdict_e %s\n' % created)
+        f.write('# sha256 %s\n' % JMDICT_SHA256)
         f.write('# Used to check that starter sets do not include those cards.\n')
         for seq in ids:
             f.write('%d\n' % seq)
@@ -105,6 +140,22 @@ def apply_romaji(card_db, fts_db, curated_path):
         new, status = romaji_policy.romaji_for_card(card, lex)
         statuses[status] += 1
         old = card['romaji'] or ''
+        # Left-alone cards are hand-tuned.  Everything else keeps the literal
+        # ha/wo spelling as an extra FTS token when the policy changed it.
+        literal = None
+        if status != 'left-alone':
+            literal = romaji_policy.mechanical_romaji(card['reading'] or '')
+        if card['content']:
+            rebuilt = romaji_policy.rebuild_search_bracket(
+                card['content'], card['reading'] or '', new, literal)
+            if rebuilt is None:
+                # Hand-tuned brackets (十時十五分, 退院する) do not match the
+                # reading.  Leave them.  Only report a miss when the romaji
+                # itself changed and the search row could not follow.
+                if new != old:
+                    bracket_misses.append(card['card_id'])
+            elif rebuilt != card['content']:
+                fts_rows.append((rebuilt, card['card_id']))
         if new == old:
             continue
         if new.count('wa') > old.count('wa'):
@@ -114,12 +165,6 @@ def apply_romaji(card_db, fts_db, curated_path):
         romaji_rows.append((new, card['card_id']))
         if card['card_id'] < 1000000:
             curated_romaji[card['card_id']] = new
-        if card['content']:
-            rebuilt = romaji_policy.rebuild_search_bracket(card['content'], card['reading'] or '', new)
-            if rebuilt is None:
-                bracket_misses.append(card['card_id'])
-            else:
-                fts_rows.append((rebuilt, card['card_id']))
     card = sqlite3.connect(card_db)
     card.executemany('UPDATE cards SET romaji = ? WHERE card_id = ?', romaji_rows)
     card.commit()
@@ -161,7 +206,8 @@ def _patch_curated(path, romaji_by_id, extra_by_id):
                 content = card.get('content')
                 if content:
                     rebuilt = romaji_policy.rebuild_search_bracket(
-                        content, card.get('reading') or '', new)
+                        content, card.get('reading') or '', new,
+                        romaji_policy.mechanical_romaji(card.get('reading') or ''))
                     if rebuilt is not None:
                         card['content'] = rebuilt
                 card['romaji'] = new
@@ -254,7 +300,26 @@ def apply_sets():
     return {'legacy_split': legacy and written_tsv, 'tsv_links': nlinks, 'counts_updated': changed}
 
 
+def finish_patched(path, optimize_fts=False):
+    """ANALYZE + VACUUM, and an FTS optimize when the search index was rewritten.
+
+    A raw UPDATE of every changed FTS row leaves the index about 20 MB larger
+    than a rebuild.  optimize packs it back down before VACUUM.
+    """
+    db = sqlite3.connect(path)
+    if optimize_fts:
+        db.execute("INSERT INTO cards_search_content(cards_search_content) VALUES('optimize')")
+        db.commit()
+    db.execute('ANALYZE')
+    db.commit()
+    db.execute('VACUUM')
+    db.close()
+
+
 def main():
+    pin_error = jmdict_pin_error(JMDICT_FOR_FLAGS)
+    if pin_error:
+        sys.exit(pin_error)
     print('romaji...', file=sys.stderr)
     romaji_report = apply_romaji(study_sets.CARD_DB, study_sets.FTS_DB, study_sets.CURATED_PATH)
     print(romaji_report, file=sys.stderr)
@@ -264,11 +329,16 @@ def main():
     sets_report = apply_sets()
     print('vulg flags...', file=sys.stderr)
     created, vulg_ids = write_vulg_list()
+    print('vacuum...', file=sys.stderr)
+    finish_patched(study_sets.CARD_DB)
+    finish_patched(study_sets.FTS_DB, optimize_fts=True)
+    finish_patched(study_sets.USER_DB)
     report = {
         'romaji': romaji_report,
         'meaning_cards': meanings,
         'sets': sets_report,
         'vulg_x_source': created,
+        'vulg_x_sha256': JMDICT_SHA256,
         'vulg_x_cards': len(vulg_ids),
     }
     print(json.dumps(report, indent=2, ensure_ascii=False))

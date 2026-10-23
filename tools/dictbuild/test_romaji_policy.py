@@ -54,6 +54,20 @@ def lexicon():
         card('かえり', 'return<dfn>noun</dfn>', '帰り', ptag=1),
         card('よいよい', 'fine<dfn>adverb</dfn>', 'よいよい', ptag=0),
         card('いき', 'going<dfn>noun</dfn>', '行き', ptag=0),
+        card('おふろ', 'bath<dfn>noun</dfn>', 'お風呂', ptag=1),
+        card('いります', 'to need<dfn>verb</dfn>', '要ります', ptag=1),
+        card('わく', 'frame<dfn>noun</dfn>', '枠', ptag=1),
+        card('まる', 'circle<dfn>noun</dfn>', '丸', ptag=1),
+        card('はまる', 'to fit<dfn>verb</dfn>', '嵌まる', ptag=0),
+        card('かじん', 'beauty<dfn>noun</dfn>', '佳人', ptag=0),
+        card('くめい', 'short life<dfn>noun</dfn>', 'くめい', ptag=0),
+        card('はくめい', 'short life<dfn>noun</dfn>', '薄命', ptag=0),
+        card('あり', 'existing<dfn>verb</dfn>', 'あり', ptag=1),
+        card('しない', 'does not<dfn>verb</dfn>', 'しない', ptag=1),
+        card('それどころ', 'hardly<dfn>adverb</dfn>', 'それどころ', ptag=0),
+        card('ない', 'not<dfn>suffix</dfn>', 'ない', ptag=1),
+        card('じゃない', 'is not<dfn>expression</dfn>', 'じゃない', ptag=1),
+        card('あてはまる', 'to apply<dfn>verb</dfn>', '当てはまる', ptag=1),
     ]
     return rp.build_lexicon(samples)
 
@@ -108,6 +122,42 @@ class PhraseRomajiTest(unittest.TestCase):
         self.assertIn('ha', self.romaji('くいいじがはっている', '食い意地が張っている'))
         self.assertNotIn('wa', self.romaji('くいいじがはっている', '食い意地が張っている'))
 
+    def test_ha_inside_a_word_is_not_a_particle(self):
+        # いります is longer than はいる, so the segmenter drops はいる and the
+        # leftover は used to become "wa".  The headword writes no kana は.
+        self.assertEqual(self.romaji('おふろにはいります', 'お風呂に入ります'), 'ofuronihairimasu')
+        self.assertEqual(self.romaji('かじんはくめい', '佳人薄命'), 'kajinhakumei')
+        # 枠にはまる writes は, and that は is the verb はまる, not the particle.
+        self.assertEqual(self.romaji('わくにはまる', '枠にはまる'), 'wakunihamaru')
+        # 当てはまる's は is the same verb, written in the headword.
+        self.assertEqual(self.romaji('あてはまる', '当てはまる', meaning='<dfn>verb</dfn>'), 'atehamaru')
+
+    def test_grammatical_ha_without_kana_in_the_headword(self):
+        # The other spelling of the headword is the one that writes は.
+        self.assertEqual(
+            self.romaji('ありはしない', 'ありゃしない'), 'ariwashinai')
+        self.assertEqual(
+            self.romaji('それどころではない', 'それどころじゃない'), 'soredokorodewanai')
+
+    def test_previously_adjusted_romaji_is_recomputed(self):
+        c = card('おふろにはいります', '<dfn>expression</dfn>', 'お風呂に入ります',
+                 romaji='ofuroniwairimasu')
+        self.assertEqual(rp.romaji_for_card(c, self.lex), ('ofuronihairimasu', 'adjusted'))
+        kept = card('ないせんXXをおねがいします', '<dfn>expression</dfn>',
+                    '内線番号XXをお願いします', card_id=145429, card_type='3',
+                    romaji='naisenXXoonegaishimasu')
+        self.assertEqual(rp.romaji_for_card(kept, self.lex)[0], 'naisenXXoonegaishimasu')
+
+    def test_search_bracket_keeps_literal_spelling(self):
+        content = '今日は [ こんにちは / konnichiwa ] hello'
+        rebuilt = rp.rebuild_search_bracket(content, 'こんにちは', 'konnichiwa', 'konnichiha')
+        self.assertIn('konnichiwa', rebuilt)
+        self.assertIn('konnichiha', rebuilt)
+        same = rp.rebuild_search_bracket(
+            'お風呂に入ります [ おふろにはいります / ofuronihairimasu ] enter',
+            'おふろにはいります', 'ofuronihairimasu', 'ofuronihairimasu')
+        self.assertEqual(same.count('ofuronihairimasu'), 1)
+
     def test_hand_tuned_romaji_is_left_alone(self):
         # Stored romaji has a space the literal converter does not produce.
         c = card('たいいんする', 'leave hospital<dfn>expression</dfn>', '退院する',
@@ -161,6 +211,64 @@ class BundledRomajiTest(unittest.TestCase):
         self.assertIn(('では', 'deha'), self.romaji_of('出端'))
         self.assertIn(('てにをは; テニヲハ', 'teniwoha; teniwoha'), self.romaji_of('天爾遠波'))
         self.assertIn(('みやこをどり', 'miyakowodori'), self.romaji_of('都をどり'))
+
+    def test_lexical_ha_was_put_back(self):
+        """The 23 cards whose は is part of a word, not the topic particle."""
+        expected = {
+            145488: 'ofuronihairimasu',
+            1189820: 'kajinhakumei',
+            1917360: 'wakunihamaru',
+            2006850: 'omoutsubonihamaru',
+            2032340: 'bijinhakumei',
+            2034920: 'anihakaranya',
+            2188810: 'yurikagokarahakabamade',
+            2213430: 'torihadagatatsu',
+            2238790: 'kakehashitonaru',
+            2256570: 'anagaattarahairitai',
+            2417340: 'kuchinimitsuariharanikenari',
+            2596080: 'takakashitehatotonaru; takakeshitehatotonaru',
+            2603950: 'katanihamaru',
+            2655400: 'shinzounikegahaeteiru',
+            2655420: 'shinzounikegahaeta',
+            2727860: 'tsubonihamaru',
+            2730840: 'kenohaeta',
+            2730850: 'dotsubonihamaru; dotsubonihamaru',
+            2795820: 'yokinihakarae',
+            2833702: 'yubikirigenman usotsuitaraharisenbonnomasu',
+            2835778: 'imahayari',
+            2842414: 'nanihajinai',
+            2842631: 'kegahaeta',
+        }
+        self.assertEqual(len(expected), 23)
+        for card_id, romaji in expected.items():
+            row = self.db.execute('SELECT romaji FROM cards WHERE card_id = ?', (card_id,)).fetchone()
+            self.assertEqual(row[0], romaji, card_id)
+
+    def test_real_particles_stay_wa(self):
+        kept = {
+            2062980: 'aryashinai; ariwashinai',
+            2775790: 'soredokorojanai; soredokorodewanai',
+        }
+        for card_id, romaji in kept.items():
+            row = self.db.execute('SELECT romaji FROM cards WHERE card_id = ?', (card_id,)).fetchone()
+            self.assertEqual(row[0], romaji, card_id)
+
+    def test_literal_spelling_is_in_the_search_index(self):
+        fts_path = os.path.join(REPO, 'jFlash', 'sql', 'plugins', 'jFlash-FTS-2.0.db')
+        fts = sqlite3.connect(fts_path)
+        try:
+            greeting = fts.execute(
+                "SELECT content FROM cards_search_content WHERE content LIKE '%konnichiha%'").fetchone()
+            self.assertIsNotNone(greeting)
+            topic = fts.execute(
+                "SELECT content FROM cards_search_content WHERE content LIKE '%sorehadoumo%'").fetchone()
+            self.assertIsNotNone(topic)
+            bath = fts.execute(
+                "SELECT content FROM cards_search_content WHERE card_id = 145488").fetchone()[0]
+            self.assertIn('ofuronihairimasu', bath)
+            self.assertNotIn('ofuroniwairimasu', bath)
+        finally:
+            fts.close()
 
 
 if __name__ == '__main__':

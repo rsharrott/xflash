@@ -23,6 +23,23 @@ NSString * const LWEFirstRunCardHintShownKey = @"firstrun_card_hint_shown";
 //   group 24 "1. Beginner 1 (≈N5)"   -> tag  95 "Beginner 1 (≈N5) 01"
 static const NSInteger kLWEStarterSets[][2] = { {16, 200}, {9, 208}, {21, 73}, {24, 95} };
 
+NSInteger LWEStarterSetCount(void)
+{
+  return (NSInteger)(sizeof(kLWEStarterSets) / sizeof(kLWEStarterSets[0]));
+}
+
+void LWEStarterSetAtIndex(NSInteger index, NSInteger *groupId, NSInteger *tagId)
+{
+  if (index < 0 || index >= LWEStarterSetCount())
+  {
+    if (groupId) *groupId = 0;
+    if (tagId) *tagId = 0;
+    return;
+  }
+  if (groupId) *groupId = kLWEStarterSets[index][0];
+  if (tagId) *tagId = kLWEStarterSets[index][1];
+}
+
 static NSString *LWEWordCountString(NSInteger count)
 {
   if (count == 1)

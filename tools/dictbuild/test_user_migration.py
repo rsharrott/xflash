@@ -1,0 +1,223 @@
+#!/usr/bin/env python3
+"""A 2.0 user database, updated in place, keeps study data and gains the new sets.
+
+  cd tools/dictbuild && python3 -m unittest -v test_user_migration
+"""
+
+import os
+import shutil
+import sqlite3
+import tempfile
+import unittest
+
+import user_db_migration
+
+REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+TEMPLATE = os.path.join(REPO, 'jFlash', 'sql', 'jFlash.db')
+
+# What jFlash.db looked like at data version 2.0 (master before this branch).
+LEGACY_LEVELS = (
+    (92, 'JLPT Level N1'),
+    (93, 'JLPT Level N2'),
+    (94, 'JLPT Level N3'),
+    (95, 'JLPT Level N4'),
+)
+HIDDEN_IN_EXPRESSIONS = (15, 51, 135, 136, 161, 168)
+RECOMMENDED_LEGACY = (80, 91, 170)
+RECOMMENDED_NEW = (73, 95, 200, 208)
+
+
+def rewind_to_20(path):
+    """Turn a copy of the current template back into a 2.0 user database."""
+    conn = sqlite3.connect(path)
+    conn.execute('DELETE FROM group_tag_link WHERE tag_id >= 644 OR group_id >= 24')
+    conn.execute('DELETE FROM tags WHERE tag_id >= 644')
+    conn.execute('DELETE FROM groups WHERE group_id >= 24')
+    for tag_id, name in LEGACY_LEVELS:
+        conn.execute('UPDATE tags SET tag_name = ? WHERE tag_id = ?', (name, tag_id))
+    conn.execute("UPDATE groups SET group_name = 'JLPT N1~N4' WHERE group_id = 10")
+    conn.execute('DELETE FROM group_tag_link WHERE group_id = 10')
+    conn.executemany(
+        'INSERT INTO group_tag_link (group_id, tag_id) VALUES (10, ?)',
+        [(tag_id,) for tag_id, _ in LEGACY_LEVELS])
+    conn.executemany(
+        'INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (13, ?)',
+        [(tag_id,) for tag_id in HIDDEN_IN_EXPRESSIONS])
+    conn.execute('DELETE FROM group_tag_link WHERE group_id = 23 AND tag_id IN (73, 95, 200, 208)')
+    conn.executemany(
+        'INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (23, ?)',
+        [(tag_id,) for tag_id in RECOMMENDED_LEGACY])
+    conn.executemany(
+        'INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (1, ?)',
+        [(tag_id,) for tag_id in (7, 8, 9)])
+    conn.execute("UPDATE tags SET description = 'Rude or X-Rated' WHERE tag_id = 161")
+    conn.execute(
+        "UPDATE tags SET description = replace(description, '普通名詞', '副名詞') "
+        "WHERE tag_id = 133 OR tag_id BETWEEN 620 AND 631")
+    conn.execute(
+        "UPDATE tags SET description = replace(description, 'futsuumeishi', 'fukumeishi') "
+        "WHERE tag_id = 133 OR tag_id BETWEEN 620 AND 631")
+    conn.execute("UPDATE sqlite_sequence SET seq = 643 WHERE name = 'tags'")
+    conn.commit()
+    conn.close()
+
+
+class MigrateFrom20Test(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.template = os.path.join(self.tmp.name, 'template.db')
+        self.user = os.path.join(self.tmp.name, 'user.db')
+        shutil.copy(TEMPLATE, self.template)
+        shutil.copy(TEMPLATE, self.user)
+        rewind_to_20(self.user)
+        self.conn = sqlite3.connect(self.user)
+        # Study progress, a starred card, and a user set sitting on a new system id.
+        self.conn.execute(
+            'INSERT INTO user_history (card_id, timestamp, user_id, right_count, wrong_count, '
+            'created_on, card_level) VALUES (2065830, 100, 1, 3, 1, 100, 2)')
+        self.conn.execute('INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (0, 150089, 1)')
+        self.conn.execute(
+            'INSERT INTO tags (tag_id, tag_name, description, editable, count) '
+            "VALUES (644, 'My Travel Words', 'kept', 1, 1)")
+        self.conn.execute('INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (644, 145536, 2)')
+        self.conn.execute('INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 644)')
+        self.conn.execute('UPDATE last_state SET tag_id = 644 WHERE user_id = 1')
+        self.conn.execute(
+            'INSERT INTO tag_user_card_levels (tag_id, user_id, card_level_1_count) VALUES (644, 1, 4)')
+        self.conn.execute("UPDATE sqlite_sequence SET seq = 643 WHERE name = 'tags'")
+        self.conn.commit()
+
+    def tearDown(self):
+        self.conn.close()
+        self.tmp.cleanup()
+
+    def test_legacy_fixture_is_actually_legacy(self):
+        names = dict(self.conn.execute('SELECT tag_id, tag_name FROM tags WHERE tag_id BETWEEN 92 AND 95'))
+        self.assertEqual(names[95], 'JLPT Level N4')
+        self.assertIsNone(self.conn.execute('SELECT 1 FROM tags WHERE tag_id = 645').fetchone())
+        seq = self.conn.execute("SELECT seq FROM sqlite_sequence WHERE name = 'tags'").fetchone()[0]
+        self.assertEqual(seq, 643)
+        linked = self.conn.execute('SELECT 1 FROM group_tag_link WHERE tag_id = 15').fetchone()
+        self.assertIsNotNone(linked)
+
+    def test_migration_updates_catalog_and_keeps_user_data(self):
+        before_users = self.conn.execute('SELECT user_id, nickname FROM users ORDER BY user_id').fetchall()
+        before_history = self.conn.execute(
+            'SELECT card_id, user_id, right_count, wrong_count, card_level FROM user_history').fetchall()
+        before_state_card = self.conn.execute('SELECT card_id, user_id FROM last_state').fetchall()
+        favorites = self.conn.execute(
+            'SELECT card_id FROM card_tag_link WHERE tag_id = 124 ORDER BY card_id').fetchall()
+        self.conn.close()
+
+        mapping = user_db_migration.migrate(self.user, self.template)
+        self.assertEqual(mapping, {644: 717})
+
+        self.conn = sqlite3.connect(self.user)
+        self.assertEqual(
+            self.conn.execute('SELECT tag_name FROM tags WHERE tag_id = 95').fetchone()[0],
+            'Beginner 1 (≈N5) 01')
+        self.assertEqual(
+            self.conn.execute('SELECT group_name, tag_count FROM groups WHERE group_id = 10').fetchone(),
+            ('Vocabulary Levels', 0))
+        for group_id in (24, 25, 26, 27):
+            self.assertIsNotNone(
+                self.conn.execute('SELECT 1 FROM groups WHERE group_id = ?', (group_id,)).fetchone(),
+                group_id)
+        self.assertIsNotNone(self.conn.execute('SELECT 1 FROM tags WHERE tag_id = 716').fetchone())
+        for tag_id in (15, 51, 135, 136, 161, 168):
+            self.assertIsNone(
+                self.conn.execute('SELECT 1 FROM group_tag_link WHERE tag_id = ?', (tag_id,)).fetchone(),
+                tag_id)
+        recommended = {row[0] for row in self.conn.execute(
+            'SELECT tag_id FROM group_tag_link WHERE group_id = 23')}
+        self.assertTrue(set(RECOMMENDED_NEW) <= recommended)
+        self.assertTrue(recommended.isdisjoint(RECOMMENDED_LEGACY))
+        verbs = {row[0] for row in self.conn.execute(
+            'SELECT tag_id FROM group_tag_link WHERE group_id = 1')}
+        self.assertTrue(verbs.isdisjoint({7, 8, 9}))
+
+        moved = self.conn.execute(
+            'SELECT tag_id, tag_name, description, editable FROM tags WHERE tag_name = ?',
+            ('My Travel Words',)).fetchone()
+        self.assertEqual(moved, (717, 'My Travel Words', 'kept', 1))
+        self.assertEqual(
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 717').fetchone()[0],
+            145536)
+        self.assertEqual(
+            self.conn.execute('SELECT group_id FROM group_tag_link WHERE tag_id = 717').fetchone()[0],
+            0)
+        self.assertEqual(
+            self.conn.execute('SELECT card_level_1_count FROM tag_user_card_levels WHERE tag_id = 717').fetchone()[0],
+            4)
+        # 644 is the system set, not the user's set.
+        self.assertEqual(
+            self.conn.execute('SELECT editable FROM tags WHERE tag_id = 644').fetchone()[0], 0)
+
+        self.assertEqual(
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 0').fetchone()[0],
+            150089)
+        self.assertEqual(
+            self.conn.execute('SELECT count FROM tags WHERE tag_id = 0').fetchone()[0], 1)
+        self.assertEqual(
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 124 ORDER BY card_id').fetchall(),
+            favorites)
+        self.assertEqual(
+            self.conn.execute(
+                'SELECT card_id, user_id, right_count, wrong_count, card_level FROM user_history').fetchall(),
+            before_history)
+        self.assertEqual(
+            self.conn.execute('SELECT card_id, user_id FROM last_state').fetchall(),
+            before_state_card)
+        self.assertEqual(
+            self.conn.execute('SELECT tag_id FROM last_state WHERE user_id = 1').fetchone()[0], 717)
+        self.assertEqual(
+            self.conn.execute('SELECT user_id, nickname FROM users ORDER BY user_id').fetchall(),
+            before_users)
+
+        seq = self.conn.execute("SELECT seq FROM sqlite_sequence WHERE name = 'tags'").fetchone()[0]
+        self.assertGreaterEqual(seq, 717)
+        self.conn.execute("INSERT INTO tags (tag_name, description, editable) VALUES ('Next', '', 1)")
+        new_id = self.conn.execute('SELECT last_insert_rowid()').fetchone()[0]
+        self.assertGreater(new_id, 716)
+        self.assertNotEqual(new_id, 644)
+
+        desc = self.conn.execute('SELECT description FROM tags WHERE tag_id = 133').fetchone()[0]
+        self.assertIn('普通名詞', desc)
+        self.assertIn('futsuumeishi', desc)
+        self.assertNotIn('fukumeishi', desc)
+        rude = self.conn.execute('SELECT description FROM tags WHERE tag_id = 161').fetchone()[0]
+        self.assertEqual(rude, 'Rude or impolite')
+
+    def test_second_run_changes_nothing(self):
+        self.conn.close()
+        user_db_migration.migrate(self.user, self.template)
+        snap = _snapshot(self.user)
+        again = user_db_migration.migrate(self.user, self.template)
+        self.assertEqual(again, {})
+        self.assertEqual(_snapshot(self.user), snap)
+        self.conn = sqlite3.connect(self.user)
+
+
+def _snapshot(path):
+    conn = sqlite3.connect(path)
+    try:
+        return {
+            'tags': conn.execute(
+                'SELECT tag_id, tag_name, description, editable, count FROM tags ORDER BY tag_id').fetchall(),
+            'groups': conn.execute(
+                'SELECT group_id, group_name, owner_id, tag_count, recommended FROM groups ORDER BY group_id').fetchall(),
+            'links': conn.execute(
+                'SELECT group_id, tag_id FROM group_tag_link ORDER BY group_id, tag_id').fetchall(),
+            'cards': conn.execute(
+                'SELECT tag_id, card_id FROM card_tag_link ORDER BY tag_id, card_id').fetchall(),
+            'state': conn.execute('SELECT card_id, user_id, tag_id FROM last_state').fetchall(),
+            'history': conn.execute(
+                'SELECT card_id, user_id, right_count, wrong_count, card_level FROM user_history').fetchall(),
+        }
+    finally:
+        conn.close()
+
+
+if __name__ == '__main__':
+    unittest.main()

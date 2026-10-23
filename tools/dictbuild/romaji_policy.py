@@ -8,8 +8,11 @@ the cases that can be told apart from a real "ha" / "wo":
 * を is "o" when it is not inside a dictionary word (in modern Japanese it is
   almost only the object particle).
 * は is "wa" only when the whole reading segments into dictionary words and
-  particles with nothing left over, and that は is not itself inside a word
-  (入る stays "hairu", 花 stays "hana", ご飯 stays "gohan").
+  particles with nothing left over, that は is not itself inside a word
+  (入る stays "hairu", 花 stays "hana", ご飯 stays "gohan"), and the headword
+  writes that は in kana.  A kanji compound such as 美人薄命 keeps "hakumei".
+  The verb はまる keeps "hamaru" even when the headword does write は
+  (枠にはまる).
 * こんにちは / こんばんは are "konnichiwa" / "konbanwa" even though JMdict tags
   them as interjections rather than expressions.
 * 、 in those same cards becomes a space, not a comma.
@@ -223,7 +226,21 @@ def phrase_romaji(text, lex, headword=''):
             at_edge = i == 0 or text[i - 1] in PUNCT
             # をは is を plus a word that starts with は (馳せる), not two particles.
             after_wo = i > 0 and text[i - 1] == 'を'
-            if text == 'は' or (full and not at_edge and not followed_by_sokuon and not after_wo):
+            # 美人薄命 writes no kana は, so はくめい stays "hakumei" even when
+            # the segmenter fails to swallow the word.  恋は盲目 writes は.
+            headword_writes_ha = 'は' in headword
+            # はまる is the verb, including 枠にはまる where the headword's は
+            # is this same kana and not a topic particle.
+            starts_hamaru = text.startswith('はまる', i)
+            # ではない / ありはしない are real particles even when the headword
+            # is the other spelling (じゃない, ありゃしない) and writes no は.
+            grammatical = (
+                (i > 0 and text[i - 1] == 'で')
+                or text.startswith('はしない', i))
+            if text == 'は' or (
+                    full and not at_edge and not followed_by_sokuon and not after_wo
+                    and not starts_hamaru
+                    and (headword_writes_ha or grammatical)):
                 flush()
                 out.append('wa')
             else:
@@ -326,6 +343,39 @@ def build_lexicon(cards):
     return lex
 
 
+def is_particle_spelling(stored, baseline):
+    """True when stored is baseline plus only particle spelling changes.
+
+    Allowed edits are ha→wa, wo→o, and an ideographic comma becoming a space.
+    A hand-tuned romaji (a space the converter did not emit, an empty string,
+    dji for ヂ) does not line up and is left alone.  Letter case may differ.
+    """
+    i = j = 0
+    while i < len(baseline) and j < len(stored):
+        if baseline[i:i + 2].lower() == 'ha' and stored[j:j + 2].lower() in ('ha', 'wa'):
+            i += 2
+            j += 2
+            continue
+        if baseline[i:i + 2].lower() == 'wo' and stored[j:j + 2].lower() == 'wo':
+            i += 2
+            j += 2
+            continue
+        if baseline[i:i + 2].lower() == 'wo' and stored[j:j + 1].lower() == 'o':
+            i += 2
+            j += 1
+            continue
+        if baseline[i] in (',', '、') and stored[j] in (',', ' ', '、'):
+            i += 1
+            j += 1
+            continue
+        if baseline[i].lower() == stored[j].lower():
+            i += 1
+            j += 1
+            continue
+        return False
+    return i == len(baseline) and j == len(stored)
+
+
 def transfer_case(stored, baseline, adjusted):
     """Copy ASCII case from stored onto adjusted.
 
@@ -372,6 +422,13 @@ def romaji_for_card(card, lex):
     cased = transfer_case(stored, baseline, adjusted)
     if cased is not None:
         return cased, ('adjusted' if cased != stored else 'unchanged')
+    # A previous pass of this policy (ha→wa, wo→o, comma→space) is not hand-tuned.
+    # Recompute so a corrected rule can put "ha" back.
+    if is_particle_spelling(stored, baseline):
+        # Same letters as the new spelling: keep stored, so 内線番号XX stays "XX".
+        if len(stored) == len(adjusted) and stored.lower() == adjusted.lower():
+            return stored, 'unchanged'
+        return adjusted, ('adjusted' if adjusted != stored else 'unchanged')
     return stored, 'left-alone'
 
 
@@ -395,7 +452,9 @@ def apply_to_cards(cards):
             continue
         content = card.get('content')
         if content:
-            rebuilt = rebuild_search_bracket(content, card.get('reading') or '', new)
+            literal = mechanical_romaji(card.get('reading') or '')
+            rebuilt = rebuild_search_bracket(
+                content, card.get('reading') or '', new, literal)
             if rebuilt is None:
                 misses += 1
             else:
@@ -405,11 +464,31 @@ def apply_to_cards(cards):
     return {'adjusted': adjusted, 'left_alone': left, 'bracket_misses': misses}
 
 
-def rebuild_search_bracket(content, reading, new_romaji):
+def search_bracket_parts(reading, romaji, literal_romaji=None):
+    """Tokens inside the FTS bracket after the reading.
+
+    The space-less form is included only when it differs.  When the particle
+    policy changed ha/wo/commas, the literal converter's spelling is kept as
+    an extra token so a search for the old form still finds the card.
+    """
+    parts = (romaji or '').split('; ')
+    nospace = '; '.join(part.replace(' ', '') for part in parts)
+    bits = [romaji or '']
+    if nospace != romaji:
+        bits.append(nospace)
+    literal = literal_romaji or ''
+    if literal and literal != romaji:
+        bits.append(literal)
+        literal_nospace = '; '.join(part.replace(' ', '') for part in literal.split('; '))
+        if literal_nospace not in (literal, nospace, romaji):
+            bits.append(literal_nospace)
+    return bits
+
+
+def rebuild_search_bracket(content, reading, new_romaji, literal_romaji=None):
     """Replace the romaji inside a card's FTS content, keeping the glosses.
 
     Content looks like: headword [ reading / romaji / optional-nospace ] glosses.
-    The space-less romaji is included only when it differs, matching cards.py.
     Returns None if the bracket is not the shape this builder writes.
     """
     if content is None:
@@ -421,9 +500,5 @@ def rebuild_search_bracket(content, reading, new_romaji):
     inside = content[start + 3:end]
     if not inside.startswith(reading + ' / '):
         return None
-    parts = new_romaji.split('; ')
-    nospace = '; '.join(part.replace(' ', '') for part in parts)
-    bits = [reading, new_romaji]
-    if nospace != new_romaji:
-        bits.append(nospace)
+    bits = [reading] + search_bracket_parts(reading, new_romaji, literal_romaji)
     return content[:start] + ' [ ' + ' / '.join(bits) + ' ] ' + content[end + 3:]

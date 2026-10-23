@@ -122,10 +122,18 @@ and licence links.
     names onto `jFlash.db`.
 * **Romaji** for expressions, particles, conjunctions and hand-made phrase cards
   goes through `romaji_policy.py` at the end of the card build: topic-particle
-  は becomes "wa" when the reading segments into dictionary words, object
-  particle を becomes "o", and an ideographic comma becomes a space.  は inside
-  a word (入る, 花, ご飯, 母, 木の葉) stays "ha".  Hand-tuned curated romaji is
-  left as stored.
+  は becomes "wa" when the reading segments into dictionary words and the
+  headword itself writes that は, object particle を becomes "o", and an
+  ideographic comma becomes a space.  は inside a word (入る, 美人薄命, はまる,
+  花, ご飯, 母, 木の葉) stays "ha".  ではない and ありはしない stay "wa" even
+  when the headword uses the other spelling.  The literal ha/wo spelling is
+  kept as an extra search token.  Hand-tuned curated romaji is left as stored.
+* **User database 2.1.** A 2.0 install already has `jFlash.db` in Documents, so
+  a later build does not copy the template again.  Data version 2.1 updates
+  that file in place (tags, groups, links) and keeps study progress, My Starred
+  Words, user-created sets and `last_state`.  A user-created tag whose id is
+  one of the new system ids (644+) is renumbered.  Fresh installs and the 1.x
+  dictionary reset copy the new template and do not need that step.
 
 ## One-off 1.x → 2.0 migration
 

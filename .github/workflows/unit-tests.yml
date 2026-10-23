@@ -18,6 +18,21 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  dictbuild:
+    name: dictbuild
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        # v5.1.0
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+
+      - name: Run dictbuild tests
+        working-directory: tools/dictbuild
+        run: python3 -m unittest -v
+
   test:
     name: ${{ matrix.scheme }}
     # macos-26-intel is the same Xcode 26.6 / iOS 26.5 image as macos-26, on the

@@ -320,9 +320,9 @@
 /**
  * 2.0 replaced the 2010 EDICT card data with JMdict (jFlash-CARD-2.0.db): card_ids changed, so study
  * history, sets and the last-studied card from any 1.x install point at cards that are gone or are now
- * different words.  The app never shipped, so there is no remapping: 1.x user data (dev/test installs)
- * is reset to the bundled template.  Runs after all the 1.x steps above, so any data version < 2.0
- * (including 1.8/1.9, which have no step of their own) gets here.
+ * different words.  There is no remapping: 1.x user data is reset to the bundled template.  Runs after
+ * all the 1.x steps above, so any data version < 2.0 (including 1.8/1.9, which have no step of their
+ * own) gets here.  A 2.0 install is not reset; data version 2.1 updates that user database in place.
  */
 + (BOOL) _needsUpdateTo20:(NSUserDefaults *) settings
 {
@@ -348,8 +348,219 @@
 
   // 3. The plugin registrations (jFlash-CARD-1.1.db etc.) are replaced at launch by the bundled 2.0
   //    plugins: see -[PluginManager bundledPluginsNeedRegistering:].
-  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  // The recopied template already has the new study sets, so the data version skips 2.1 (that step
+  // would open the database this one just deleted).  The settings version stays 2.0 so the alert
+  // still says study progress was reset.
+  [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];
   [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_SETTINGS_VERSION];
+}
+
+#pragma mark Version 2.1
+
+/**
+ * 2.1 changes the built-in study sets (vocabulary levels, hidden sets, names) without changing card
+ * ids.  An install that is already at data version 2.0 has its own copy of jFlash.db and will not
+ * copy the new template, so this updates that file in place.  Study progress, My Starred Words,
+ * user-created sets and last_state stay.  A user-created tag whose id collides with a new system
+ * tag (644 and up) is renumbered.
+ *
+ * Same statements as tools/dictbuild/user_db_migration.py.  Keep the two in step.
+ */
++ (BOOL) _needsUpdateTo21:(NSUserDefaults *)settings
+{
+  NSString *dataVersion = [settings objectForKey:APP_DATA_VERSION];
+  if ([dataVersion isEqualToString:LWE_JF_VERSION_2_0] == NO)
+  {
+    return NO;
+  }
+  // The 1.x → 2.0 step deletes the user database and the launch sequence copies the new template.
+  // Migrating that missing file would do nothing useful.
+  if ([settings boolForKey:@"db_did_finish_copying"] == NO)
+  {
+    return NO;
+  }
+  NSString *userDBPath = [LWEFile createDocumentPathWithFilename:LWE_CURRENT_USER_DATABASE];
+  return [LWEFile fileExists:userDBPath];
+}
+
++ (BOOL) _migrationUpdate:(LWEDatabase *)db sql:(NSString *)sql
+{
+  [db.dao executeUpdate:sql];
+  if ([db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed: %@ (%@)", sql, [db.dao lastErrorMessage]);
+    return NO;
+  }
+  return YES;
+}
+
++ (BOOL) _migrationUpdate:(LWEDatabase *)db sql:(NSString *)sql withId:(int)newId oldId:(int)oldId
+{
+  [db.dao executeUpdate:sql, [NSNumber numberWithInt:newId], [NSNumber numberWithInt:oldId]];
+  if ([db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed: %@ (%@)", sql, [db.dao lastErrorMessage]);
+    return NO;
+  }
+  return YES;
+}
+
++ (int) _migrationInt:(LWEDatabase *)db sql:(NSString *)sql
+{
+  FMResultSet *rs = [db.dao executeQuery:sql];
+  int value = 0;
+  if ([rs next])
+  {
+    value = [rs intForColumnIndex:0];
+  }
+  [rs close];
+  return value;
+}
+
++ (BOOL) _migrateUserDatabase:(LWEDatabase *)db renamedTags:(NSMutableDictionary *)renames
+{
+  NSString *systemTags = @"SELECT tag_id FROM tpl.tags WHERE editable = 0 AND tag_id != 0";
+  FMResultSet *rs = [db.dao executeQuery:
+    [NSString stringWithFormat:@"SELECT tag_id FROM tags WHERE editable = 1 AND tag_id IN (%@) ORDER BY tag_id", systemTags]];
+  NSMutableArray *collisions = [NSMutableArray array];
+  while ([rs next])
+  {
+    [collisions addObject:[NSNumber numberWithInt:[rs intForColumnIndex:0]]];
+  }
+  [rs close];
+  if ([db.dao hadError])
+  {
+    return NO;
+  }
+
+  int maxUser = [JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tags"];
+  int maxTemplate = [JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tpl.tags"];
+  int nextId = (maxUser > maxTemplate ? maxUser : maxTemplate) + 1;
+  for (NSNumber *oldNumber in collisions)
+  {
+    int oldId = [oldNumber intValue];
+    int newId = nextId;
+    nextId += 1;
+    [renames setObject:[NSNumber numberWithInt:newId] forKey:oldNumber];
+    NSArray *statements = [NSArray arrayWithObjects:
+      @"UPDATE card_tag_link SET tag_id = ? WHERE tag_id = ?",
+      @"UPDATE group_tag_link SET tag_id = ? WHERE tag_id = ?",
+      @"UPDATE last_state SET tag_id = ? WHERE tag_id = ?",
+      @"UPDATE tag_user_card_levels SET tag_id = ? WHERE tag_id = ?",
+      @"UPDATE tags SET tag_id = ? WHERE tag_id = ?",
+      nil];
+    for (NSString *sql in statements)
+    {
+      if ([JFlashUpdateManager _migrationUpdate:db sql:sql withId:newId oldId:oldId] == NO)
+      {
+        return NO;
+      }
+    }
+  }
+
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) "
+       "SELECT tag_id, tag_name, description, editable, count FROM tpl.tags "
+       "WHERE editable = 0 AND tag_id != 0"] == NO)
+  {
+    return NO;
+  }
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"INSERT OR REPLACE INTO groups (group_id, group_name, owner_id, tag_count, recommended) "
+       "SELECT group_id, group_name, owner_id, tag_count, recommended FROM tpl.groups"] == NO)
+  {
+    return NO;
+  }
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       [NSString stringWithFormat:@"DELETE FROM group_tag_link WHERE tag_id IN (%@)", systemTags]] == NO)
+  {
+    return NO;
+  }
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       [NSString stringWithFormat:
+        @"INSERT INTO group_tag_link (group_id, tag_id) "
+        "SELECT group_id, tag_id FROM tpl.group_tag_link WHERE tag_id IN (%@)", systemTags]] == NO)
+  {
+    return NO;
+  }
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"UPDATE groups SET tag_count = ("
+       "SELECT count(*) FROM group_tag_link g JOIN tags t ON t.tag_id = g.tag_id "
+       "WHERE g.group_id = groups.group_id AND g.tag_id != 0)"] == NO)
+  {
+    return NO;
+  }
+  int starred = [JFlashUpdateManager _migrationInt:db sql:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 0"];
+  if ([JFlashUpdateManager _migrationUpdate:db sql:@"UPDATE tags SET count = ? WHERE tag_id = ?"
+                                         withId:starred oldId:0] == NO)
+  {
+    return NO;
+  }
+  int maxId = [JFlashUpdateManager _migrationInt:db sql:@"SELECT COALESCE(MAX(tag_id), 0) FROM tags"];
+  int seqRows = [JFlashUpdateManager _migrationInt:db sql:@"SELECT count(*) FROM sqlite_sequence WHERE name = 'tags'"];
+  if (seqRows == 0)
+  {
+    [db.dao executeUpdate:@"INSERT INTO sqlite_sequence (name, seq) VALUES ('tags', ?)",
+     [NSNumber numberWithInt:maxId]];
+  }
+  else
+  {
+    int seq = [JFlashUpdateManager _migrationInt:db sql:@"SELECT seq FROM sqlite_sequence WHERE name = 'tags'"];
+    if (seq < maxId)
+    {
+      [db.dao executeUpdate:@"UPDATE sqlite_sequence SET seq = ? WHERE name = 'tags'",
+       [NSNumber numberWithInt:maxId]];
+    }
+  }
+  return [db.dao hadError] == NO;
+}
+
++ (BOOL) _updateSettingsTo21:(NSUserDefaults *)settings
+{
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  NSString *userPath = [LWEFile createDocumentPathWithFilename:LWE_CURRENT_USER_DATABASE];
+  NSString *templatePath = [LWEFile createBundlePathWithFilename:LWE_CURRENT_USER_DATABASE];
+  if ([db openDatabase:userPath] == NO)
+  {
+    LWE_LOG(@"2.1 migration could not open %@", userPath);
+    return NO;
+  }
+  BOOL attached = [db attachDatabase:templatePath withName:@"tpl"];
+  if (attached == NO)
+  {
+    LWE_LOG(@"2.1 migration could not attach the template at %@", templatePath);
+    [db closeDatabase];
+    return NO;
+  }
+
+  [db.dao beginDeferredTransaction];
+  NSMutableDictionary *renames = [NSMutableDictionary dictionary];
+  BOOL ok = [JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames];
+  if (ok)
+  {
+    ok = [db.dao commit];
+  }
+  if (ok == NO)
+  {
+    [db.dao rollback];
+  }
+  // DETACH while the transaction is still open fails with "database is locked".
+  [db detachDatabase:@"tpl"];
+  [db closeDatabase];
+  if (ok == NO)
+  {
+    return NO;
+  }
+
+  NSInteger activeTag = [settings integerForKey:@"tag_id"];
+  NSNumber *moved = [renames objectForKey:[NSNumber numberWithInteger:activeTag]];
+  if (moved != nil)
+  {
+    [settings setInteger:[moved integerValue] forKey:@"tag_id"];
+  }
+  [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_SETTINGS_VERSION];
+  return YES;
 }
 
 #pragma mark -
@@ -429,12 +640,22 @@
     migrated = YES;
   }
 
-  // Must stay last: it catches every pre-2.0 data version.
+  // Must stay after every 1.x step: it catches every pre-2.0 data version.
   if ([JFlashUpdateManager _needsUpdateTo20:settings])
   {
     LWE_LOG(@"[Migration Log] Updating to 2.0: new dictionary, resetting 1.x study data");
     [JFlashUpdateManager _updateSettingsTo20:settings];
     migrated = YES;
+  }
+
+  // 2.0 installs keep their user database.  Bring tags, groups and links up to the new catalog.
+  if ([JFlashUpdateManager _needsUpdateTo21:settings])
+  {
+    LWE_LOG(@"[Migration Log] Updating to 2.1: study sets, keeping study progress");
+    if ([JFlashUpdateManager _updateSettingsTo21:settings])
+    {
+      migrated = YES;
+    }
   }
 
   return migrated;
@@ -448,6 +669,11 @@
   {
     [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Updated to Japanese in a Flash! 2.0",@"JFlash2.0 upgrade alert title")
                                        message:NSLocalizedString(@"The dictionary has been updated to the current JMdict, with new example sentences from Tatoeba. Because the cards changed, your study progress and sets from the previous version have been reset.",@"JFlash2.0 upgrade alert msg")];
+  }
+  else if ([version isEqualToString:LWE_JF_VERSION_2_1])
+  {
+    [LWEUIAlertView notificationAlertWithTitle:NSLocalizedString(@"Updated study sets",@"JFlash2.1 upgrade alert title")
+                                       message:NSLocalizedString(@"The built-in study sets have been updated. Your study progress, starred words, and sets you created were kept.",@"JFlash2.1 upgrade alert msg")];
   }
   else if ([version isEqualToString:LWE_JF_VERSION_1_7])
   {

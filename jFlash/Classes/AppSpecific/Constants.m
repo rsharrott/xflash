@@ -112,7 +112,9 @@ NSString * LWEAppStoreWriteReviewURLString(void)
       NSString * const kAppStoreID               = @"6824724935";
 
       // These constants are general to the flashes
-      NSString * const LWE_CURRENT_VERSION       = @"2.0";
+      // 2.1 is the study-set catalog.  Fresh installs copy the template and start here.
+      // A 2.0 install (1.0 is in review with that data version) migrates in place.
+      NSString * const LWE_CURRENT_VERSION       = @"2.1";
       NSString * const LWE_CURRENT_USER_DATABASE = @"jFlash.db";
 
       // These constants are JF specific
@@ -137,6 +139,7 @@ NSString * LWEAppStoreWriteReviewURLString(void)
       NSString * const LWE_JF_VERSION_1_8           = @"1.8";
       NSString * const LWE_JF_VERSION_1_9           = @"1.9";
       NSString * const LWE_JF_VERSION_2_0           = @"2.0";
+      NSString * const LWE_JF_VERSION_2_1           = @"2.1";
 
       // This pertains to the plugin manager
       NSString * const LWE_AVAILABLE_PLUGIN_PLIST   = @"jFlash-available.plist";

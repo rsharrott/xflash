@@ -133,6 +133,7 @@ TEXT_REPLACEMENTS = (
     ('Idomatic', 'Idiomatic'),
     ('副指摘名詞', '副詞的名詞'),
     ('副名詞', '普通名詞'),
+    ('fukumeishi', 'futsuumeishi'),
     ('Rude or X-Rated', 'Rude or impolite'),
 )
 
