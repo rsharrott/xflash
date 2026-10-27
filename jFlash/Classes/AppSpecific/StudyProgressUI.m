@@ -10,6 +10,7 @@
 #import "StudyProgressUI.h"
 #import "LWEDesignTokens.h"
 #import "ThemeManager.h"
+#import <objc/runtime.h>
 
 #pragma mark - Ring
 
@@ -345,6 +346,11 @@ static const CGFloat kLWEProgressTipGap = 12.0;
   }];
 }
 
+- (void) clearSpotlightProvider
+{
+  self.spotlightProvider = nil;
+}
+
 - (void) dealloc
 {
   [spotlightProvider release];
@@ -355,6 +361,57 @@ static const CGFloat kLWEProgressTipGap = 12.0;
   [_titleLabel release];
   [_bodyLabel release];
   [super dealloc];
+}
+
+@end
+
+#pragma mark - Weak holder
+
+@implementation LWEWeakHolder
+{
+  id _object;
+}
+
+- (id) initWithObject:(id)object
+{
+  self = [super init];
+  if (self) objc_storeWeak(&_object, object);
+  return self;
+}
+
+- (id) object
+{
+  return objc_loadWeak(&_object);
+}
+
+- (void) dealloc
+{
+  objc_storeWeak(&_object, nil);
+  [super dealloc];
+}
+
+@end
+
+#pragma mark - Tap pill
+
+@implementation LWETapPillView
+
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  [super touchesBegan:touches withEvent:event];
+  self.alpha = 0.65;
+}
+
+- (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  [super touchesEnded:touches withEvent:event];
+  self.alpha = 1.0;
+}
+
+- (void) touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+  [super touchesCancelled:touches withEvent:event];
+  self.alpha = 1.0;
 }
 
 @end

@@ -684,7 +684,19 @@
 "Not starred" = "スターなし";
 
 /* StudyProgress.Pill: learned count / cards in the set, under the study card  (StudyProgressUI.h) */
-"%ld / %ld learned" = "%ld / %ld 覚えた";
+"%ld / %ld learned" = "%ld / %ld 語習得";
+
+/* StudyProgress.PillCompact: the same counts when the full line would cover the page dots  (StudyProgressUI.h) */
+"%ld / %ld" = "%ld / %ld語";
+
+/* StudyProgress.PillTight: counts with no spaces, last resort so the pill stays clear of the dots  (StudyProgressUI.h) */
+"%ld/%ld" = "%ld/%ld";
+
+/* StudyProgress.PillCompactComplete: shorter all-learned line  (StudyProgressUI.h) */
+"Learned ✓" = "習得 ✓";
+
+/* StudyProgress.PillTightComplete: the checkmark alone, when even the short line does not fit  (StudyProgressUI.h) */
+"✓" = "✓";
 
 /* StudyProgress.PillComplete: the pill when every card in the set is Learned  (StudyProgressUI.h) */
 "Set learned ✓" = "全部覚えた ✓";

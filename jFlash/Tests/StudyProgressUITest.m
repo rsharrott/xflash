@@ -80,6 +80,84 @@
                         @"このセットは全部覚えました");
 }
 
+#pragma mark - Compact pill text
+
+- (void) testCountsTextDropsTheWordAndThenTheSpaces
+{
+  XCTAssertEqualObjects(LWELearnedProgressCountsText(2999, 3000, @"%ld / %ld"), @"2999 / 3000");
+  XCTAssertEqualObjects(LWELearnedProgressCountsText(2999, 3000, @"%ld / %ld語"), @"2999 / 3000語");
+  XCTAssertEqualObjects(LWELearnedProgressCountsText(2999, 3000, @"%ld/%ld"), @"2999/3000");
+  XCTAssertEqualObjects(LWELearnedProgressCountsText(4, 626, @"%ld / %ld 語習得"), @"4 / 626 語習得");
+}
+
+#pragma mark - Footer: the pill stays clear of the page dots
+
+- (CGFloat) _textWidth:(NSString *)text size:(CGFloat)size
+{
+  UIFont *font = [UIFont systemFontOfSize:size weight:UIFontWeightSemibold];
+  CGSize measured = [text sizeWithAttributes:@{ NSFontAttributeName: font }];
+  return ceil(measured.width);
+}
+
+- (void) _assertPillClearsDots:(LWEStudyFooterPillFit)fit row:(CGFloat)row minX:(CGFloat)minX half:(CGFloat)half
+{
+  XCTAssertGreaterThanOrEqual(fit.pillX, minX - 0.01);
+  XCTAssertLessThanOrEqual(fit.pillX + fit.pillWidth, row + 0.01);
+  // The hit target is the pill's frame, 44pt tall, on the same row as the dots.
+  CGRect pill = CGRectMake(fit.pillX, 0, fit.pillWidth, 44);
+  CGRect dots = CGRectMake(row / 2.0 - half, 4, half * 2.0, 36);
+  XCTAssertFalse(CGRectIntersectsRect(pill, dots));
+}
+
+- (void) testFourDigitPillClearsDotsOnA375PointScreen
+{
+  CGFloat row = 375;
+  CGFloat minX = LWEStudyFooterPillMinX(row, YES, 18, 8);
+  // The reviewer's estimate: a 4-digit full pill is about 180pt and would start on the dots.
+  LWEStudyFooterPillFit estimated = LWEStudyFooterFitPill(row, 12, minX, 180, 140, 110);
+  XCTAssertNotEqual(estimated.index, (NSInteger)LWELearnedPillTextFull);
+  [self _assertPillClearsDots:estimated row:row minX:minX half:18];
+
+  // 18pt is the reserved half-width; 19pt is half of the 38pt control in StudyView.xib.
+  CGFloat halves[2] = { 18.0, 19.0 };
+  CGFloat sizes[2] = { 13.0, 20.0 };
+  NSArray *fulls = @[ @"2999 / 3000 learned", @"2999 / 3000 語習得", @"Set learned ✓", @"全部覚えた ✓" ];
+  NSArray *compacts = @[ @"2999 / 3000", @"2999 / 3000語", @"Learned ✓", @"習得 ✓" ];
+  NSArray *tights = @[ @"2999/3000", @"2999/3000", @"✓", @"✓" ];
+  for (NSInteger h = 0; h < 2; h++)
+  {
+    CGFloat half = halves[h];
+    CGFloat edge = LWEStudyFooterPillMinX(row, YES, half, 8);
+    for (NSUInteger i = 0; i < [fulls count]; i++)
+    {
+      for (NSInteger s = 0; s < 2; s++)
+      {
+        CGFloat size = sizes[s];
+        CGFloat fullW = LWELearnedPillChromeWidth(YES) + [self _textWidth:[fulls objectAtIndex:i] size:size];
+        CGFloat compactW = LWELearnedPillChromeWidth(YES) + [self _textWidth:[compacts objectAtIndex:i] size:size];
+        CGFloat tightW = LWELearnedPillChromeWidth(NO) + [self _textWidth:[tights objectAtIndex:i] size:size];
+        LWEStudyFooterPillFit fit = LWEStudyFooterFitPill(row, 12, edge, fullW, compactW, tightW);
+        if (fullW > row - 12.0 - edge) XCTAssertNotEqual(fit.index, (NSInteger)LWELearnedPillTextFull);
+        [self _assertPillClearsDots:fit row:row minX:edge half:half];
+      }
+    }
+  }
+}
+
+- (void) testPillPinsBesideTheDotsWhenNothingFits
+{
+  CGFloat row = 375;
+  CGFloat minX = LWEStudyFooterPillMinX(row, YES, 18, 8);
+  LWEStudyFooterPillFit fit = LWEStudyFooterFitPill(row, 12, minX, 400, 400, 400);
+  XCTAssertEqual(fit.index, (NSInteger)LWELearnedPillTextTight);
+  [self _assertPillClearsDots:fit row:row minX:minX half:18];
+}
+
+- (void) testPillHitTargetIsNotAControlSoASwipeCanPage
+{
+  XCTAssertFalse([LWETapPillView isSubclassOfClass:[UIControl class]]);
+}
+
 #pragma mark - Footer: the set name truncates, the pill does not
 
 - (void) testNameStopsBeforeThePill
@@ -131,6 +209,16 @@
   LWEStudyProgressTipMarkShown(nil);
 }
 
+- (void) testWeakHolderZeroesWhenTheTargetIsReleased
+{
+  NSObject *target = [[NSObject alloc] init];
+  LWEWeakHolder *holder = [[LWEWeakHolder alloc] initWithObject:target];
+  XCTAssertEqual([holder object], target);
+  [target release];
+  XCTAssertNil([holder object]);
+  [holder release];
+}
+
 #pragma mark - Strings (jFlash ships en and ja)
 
 #if defined(LWE_JFLASH)
@@ -146,7 +234,13 @@
   NSDictionary *en = [self _stringsForLocalization:@"en"];
   NSDictionary *ja = [self _stringsForLocalization:@"ja"];
   XCTAssertEqualObjects([en objectForKey:@"%ld / %ld learned"], @"%ld / %ld learned");
-  XCTAssertEqualObjects([ja objectForKey:@"%ld / %ld learned"], @"%ld / %ld 覚えた");
+  XCTAssertEqualObjects([ja objectForKey:@"%ld / %ld learned"], @"%ld / %ld 語習得");
+  XCTAssertEqualObjects([en objectForKey:@"%ld / %ld"], @"%ld / %ld");
+  XCTAssertEqualObjects([ja objectForKey:@"%ld / %ld"], @"%ld / %ld語");
+  XCTAssertEqualObjects([en objectForKey:@"%ld/%ld"], @"%ld/%ld");
+  XCTAssertEqualObjects([ja objectForKey:@"%ld/%ld"], @"%ld/%ld");
+  XCTAssertEqualObjects([en objectForKey:@"Learned ✓"], @"Learned ✓");
+  XCTAssertEqualObjects([ja objectForKey:@"Learned ✓"], @"習得 ✓");
   XCTAssertEqualObjects([en objectForKey:@"Set learned ✓"], @"Set learned ✓");
   XCTAssertEqualObjects([ja objectForKey:@"Set learned ✓"], @"全部覚えた ✓");
   XCTAssertEqualObjects([en objectForKey:@"%ld of %ld learned"], @"%ld of %ld learned");

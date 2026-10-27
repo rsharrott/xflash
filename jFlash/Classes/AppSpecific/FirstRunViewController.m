@@ -10,7 +10,6 @@
 
 NSString * const LWEFirstRunWelcomeShownKey  = @"firstrun_welcome_shown";
 NSString * const LWEFirstRunCardHintShownKey = @"firstrun_card_hint_shown";
-NSString * const LWEFirstRunCardHintDidDismissNotification = @"LWEFirstRunCardHintDidDismiss";
 
 #if defined(LWE_JFLASH)
 
@@ -1025,7 +1024,6 @@ static const CGFloat kLWEHintArrowInset   = 30.0;  // arrow stays this far insid
     self.alpha = 0.0;
   } completion:^(BOOL finished) {
     [self removeFromSuperview];
-    [[NSNotificationCenter defaultCenter] postNotificationName:LWEFirstRunCardHintDidDismissNotification object:nil];
     UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, nil);
   }];
 }

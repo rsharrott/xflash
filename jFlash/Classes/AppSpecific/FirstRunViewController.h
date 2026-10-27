@@ -12,9 +12,6 @@
 extern NSString * const LWEFirstRunWelcomeShownKey;
 //! NSUserDefaults flag: YES once the first-card coach hint has been dismissed.
 extern NSString * const LWEFirstRunCardHintShownKey;
-//! Posted after the first-card coach hint has left the screen, so the study screen can
-//! show the progress tip without covering the card hint.
-extern NSString * const LWEFirstRunCardHintDidDismissNotification;
 
 #if defined(LWE_JFLASH)
 

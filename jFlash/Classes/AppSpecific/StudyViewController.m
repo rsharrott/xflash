@@ -25,14 +25,14 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
 
 @interface StudyViewController()
 {
-  UIButton *_learnedProgressButton;
+  UIView *_learnedProgressButton;
   UIView *_learnedPill;
   LWEProgressRingView *_learnedRing;
   UILabel *_learnedLabel;
   UIImageView *_learnedChevron;
   UIImageView *_progressChevron;
+  NSTimer *_progressTipTimer;
   NSInteger _progressTipRetries;
-  BOOL _progressTipRetryScheduled;
 }
 //private methods
 - (void) _applicationDidEnterBackground:(NSNotification*)notification;
@@ -53,12 +53,13 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
 - (BOOL) _isPracticeMode;
 - (void) _showStudyProgressTipIfNeeded;
 - (void) _progressTipSpotlight:(CGRect *)spot inView:(UIView *)host;
+- (void) _invalidateProgressTipTimer;
+- (BOOL) _progressTipDeferredToNextLaunch;
 - (Card*) _getNextCardWithDirection:(NSString*)directionOrNil currentCard:(Card *)theCurrentCard;
 #if defined (LWE_JFLASH)
 - (void) _showWelcomeSheet;
 - (void) _showFirstCardHint;
 - (void) _coachHintSpotlight:(CGRect *)spot tapPoint:(CGPoint *)tap inView:(UIView *)host;
-- (BOOL) _progressTipWaitingOnFirstCardHint;
 #endif
 @end
 
@@ -313,6 +314,8 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   }
 #endif
 
+  [self _invalidateProgressTipTimer];
+  _progressTipRetries = 0;
   [self _showStudyProgressTipIfNeeded];
 }
 
@@ -586,9 +589,6 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   // (-applicationWillEnterForeground:); after a kill, the next cold launch restores it.
   [center addObserver:self selector:@selector(_applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
   [center addObserver:self selector:@selector(_contentSizeCategoryDidChange:) name:UIContentSizeCategoryDidChangeNotification object:nil];
-#if defined (LWE_JFLASH)
-  [center addObserver:self selector:@selector(_showStudyProgressTipIfNeeded) name:LWEFirstRunCardHintDidDismissNotification object:nil];
-#endif
   
   // Initialize the progressBarView
 	ProgressBarViewController *tmpPBVC = [[ProgressBarViewController alloc] init];
@@ -1283,12 +1283,22 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
 - (void) _installLearnedProgressButton
 {
   if (_learnedProgressButton) return;
-  _learnedProgressButton = [[UIButton buttonWithType:UIButtonTypeCustom] retain];
+  // A plain view, not a button. UIScrollView will not cancel a drag that starts on a
+  // UIControl, so a swipe there would never page. The tap gesture opens the sheet and
+  // fails on its own once the finger moves; it must not wait on the pan, or a tap is
+  // lost while scrolling is disabled (before the card is revealed, or with no examples).
+  LWETapPillView *pillHit = [[LWETapPillView alloc] init];
+  _learnedProgressButton = pillHit;
   _learnedProgressButton.hidden = YES;
+  _learnedProgressButton.isAccessibilityElement = YES;
+  _learnedProgressButton.accessibilityTraits = UIAccessibilityTraitButton;
   _learnedProgressButton.accessibilityHint = NSLocalizedString(@"Shows your progress in this set", @"StudyViewController.ProgressAccessibilityHint");
-  [_learnedProgressButton addTarget:self action:@selector(doShowProgressModalBtn) forControlEvents:UIControlEventTouchUpInside];
-  [_learnedProgressButton addTarget:self action:@selector(_learnedPillTouchDown) forControlEvents:UIControlEventTouchDown];
-  [_learnedProgressButton addTarget:self action:@selector(_learnedPillTouchUp) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchCancel | UIControlEventTouchDragExit];
+  // The tap fails once the finger moves, so a swipe is left to the scroll view. Requiring the
+  // pan to fail would also swallow taps while scrolling is disabled (before the card is revealed).
+  UITapGestureRecognizer *tap = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doShowProgressModalBtn)] autorelease];
+  tap.cancelsTouchesInView = NO;
+  [_learnedProgressButton addGestureRecognizer:tap];
+  self.scrollView.canCancelContentTouches = YES;
   [self.scrollView addSubview:_learnedProgressButton];
 
   _learnedPill = [[UIView alloc] init];
@@ -1383,14 +1393,11 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   self.progressBarView.alpha = 1.0;
 }
 
-- (void) _learnedPillTouchDown
+- (CGFloat) _pillTextWidth:(NSString *)text font:(UIFont *)font
 {
-  _learnedPill.alpha = 0.65;
-}
-
-- (void) _learnedPillTouchUp
-{
-  _learnedPill.alpha = 1.0;
+  if ([text length] == 0 || font == nil) return 0;
+  CGSize size = [text sizeWithAttributes:@{ NSFontAttributeName: font }];
+  return ceil(size.width);
 }
 
 - (void) _refreshFooterProgress
@@ -1402,7 +1409,6 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
 
   NSInteger learned = LWELearnedCountFromLevelCounts(self.currentCardSet.cardLevelCounts);
   NSInteger total = self.currentCardSet.cardCount;
-  _learnedLabel.text = LWELearnedProgressLocalizedPillText(learned, total);
   _learnedRing.fraction = LWELearnedProgressFraction(learned, total);
   _learnedProgressButton.accessibilityLabel = LWELearnedProgressLocalizedAccessibilityLabel(learned, total);
   [self _applyLearnedPillColors];
@@ -1434,6 +1440,11 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   CGFloat rowH = ceil(font.lineHeight) + 2.0;
   CGFloat nameX = kLWECardInset;
   BOOL dot = (self.pageControl != nil && self.pageControl.hidden == NO);
+  CGFloat dotHalf = 18.0;
+  if (dot && self.pageControl.bounds.size.width > 0)
+  {
+    dotHalf = MAX(18.0, self.pageControl.bounds.size.width / 2.0);
+  }
   if (self.pageControl)
   {
     CGPoint pc = self.pageControl.center;
@@ -1445,21 +1456,31 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   if (_learnedProgressButton != nil && _learnedProgressButton.hidden == NO)
   {
     _learnedLabel.font = font;
-    CGSize text = [_learnedLabel sizeThatFits:CGSizeMake(CGFLOAT_MAX, 80)];
-    CGFloat textW = MAX(1.0, ceil(text.width));
+    NSInteger learned = LWELearnedCountFromLevelCounts(self.currentCardSet.cardLevelCounts);
+    NSInteger total = self.currentCardSet.cardCount;
+    NSString *fullText = LWELearnedProgressLocalizedPillTextForStyle(learned, total, LWELearnedPillTextFull);
+    NSString *compactText = LWELearnedProgressLocalizedPillTextForStyle(learned, total, LWELearnedPillTextCompact);
+    NSString *tightText = LWELearnedProgressLocalizedPillTextForStyle(learned, total, LWELearnedPillTextTight);
+    CGFloat fullW = LWELearnedPillChromeWidth(YES) + [self _pillTextWidth:fullText font:font];
+    CGFloat compactW = LWELearnedPillChromeWidth(YES) + [self _pillTextWidth:compactText font:font];
+    CGFloat tightW = LWELearnedPillChromeWidth(NO) + [self _pillTextWidth:tightText font:font];
+    CGFloat minX = LWEStudyFooterPillMinX(scroll.bounds.size.width, dot, dotHalf, 8.0);
+    LWEStudyFooterPillFit fit = LWEStudyFooterFitPill(scroll.bounds.size.width, kLWECardInset, minX, fullW, compactW, tightW);
+    BOOL chevron = (fit.index != LWELearnedPillTextTight);
+    NSString *drawn = (fit.index == LWELearnedPillTextFull) ? fullText : (fit.index == LWELearnedPillTextCompact) ? compactText : tightText;
+    _learnedLabel.text = drawn;
+    _learnedChevron.hidden = (chevron == NO);
+    CGFloat hPad = chevron ? 10.0 : 8.0;
+    CGFloat gap = chevron ? 5.0 : 4.0;
     CGFloat ring = 16.0;
-    CGFloat chev = 11.0;
-    CGFloat hPad = 10.0;
-    CGFloat gap = 5.0;
+    CGFloat chev = chevron ? 11.0 : 0.0;
+    CGFloat textW = MAX(0.0, fit.pillWidth - LWELearnedPillChromeWidth(chevron));
     CGFloat visualH = MAX(30.0, ceil(font.lineHeight) + 12.0);
-    CGFloat visualW = hPad + ring + gap + textW + gap + chev + hPad;
     CGFloat hitH = MAX(44.0, visualH);
-    CGFloat pillX = scroll.bounds.size.width - kLWECardInset - visualW;
-    if (pillX < 0) pillX = 0;
-    CGFloat nameW = LWEStudyFooterNameWidth(scroll.bounds.size.width, nameX, visualW, kLWECardInset, 8.0, dot, 18.0);
+    CGFloat nameW = LWEStudyFooterNameWidth(scroll.bounds.size.width, nameX, fit.pillWidth, kLWECardInset, 8.0, dot, dotHalf);
     self.cardSetLabel.frame = CGRectMake(nameX, midY - rowH / 2.0, nameW, rowH);
-    _learnedProgressButton.frame = CGRectMake(pillX, midY - hitH / 2.0, visualW, hitH);
-    _learnedPill.frame = CGRectMake(0, (hitH - visualH) / 2.0, visualW, visualH);
+    _learnedProgressButton.frame = CGRectMake(fit.pillX, midY - hitH / 2.0, fit.pillWidth, hitH);
+    _learnedPill.frame = CGRectMake(0, (hitH - visualH) / 2.0, fit.pillWidth, visualH);
     _learnedPill.layer.cornerRadius = visualH / 2.0;
     _learnedRing.frame = CGRectMake(hPad, (visualH - ring) / 2.0, ring, ring);
     _learnedLabel.frame = CGRectMake(hPad + ring + gap, 0, textW, visualH);
@@ -1469,20 +1490,21 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   {
     [self.remainingCardsLabel sizeToFit];
     CGFloat countW = ceil(self.remainingCardsLabel.bounds.size.width);
-    CGFloat nameW = LWEStudyFooterNameWidth(scroll.bounds.size.width, nameX, countW, kLWECardInset, 8.0, dot, 18.0);
+    CGFloat nameW = LWEStudyFooterNameWidth(scroll.bounds.size.width, nameX, countW, kLWECardInset, 8.0, dot, dotHalf);
     self.cardSetLabel.frame = CGRectMake(nameX, midY - rowH / 2.0, nameW, rowH);
     self.remainingCardsLabel.frame = CGRectMake(scroll.bounds.size.width - kLWECardInset - countW, midY - rowH / 2.0, countW, rowH);
   }
   [self _bringStudyFooterToFront];
 }
 
-#if defined (LWE_JFLASH)
-- (BOOL) _progressTipWaitingOnFirstCardHint
+- (BOOL) _progressTipDeferredToNextLaunch
 {
-  // Fresh install: the card hint comes first. The tip follows once that hint is dismissed.
-  return ([CurrentState sharedCurrentState].isFirstLoad && [FirstRunCoachHintView shouldShowHint]);
+  // Fresh install already presents the welcome sheet and, in jFlash, the card hint.
+  // The progress tip waits until the next launch so those don't arrive back to back.
+  // A screenshot launch can still force it.
+  if ([[NSUserDefaults standardUserDefaults] boolForKey:@"LWEDebugShowProgressTip"]) return NO;
+  return [CurrentState sharedCurrentState].isFirstLoad;
 }
-#endif
 
 - (void) _progressTipSpotlight:(CGRect *)spot inView:(UIView *)host
 {
@@ -1490,25 +1512,48 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
   if (spot) *spot = [self.view convertRect:panel toView:host];
 }
 
+- (void) _invalidateProgressTipTimer
+{
+  NSTimer *timer = _progressTipTimer;
+  if (timer == nil) return;
+  _progressTipTimer = nil;
+  [timer invalidate];
+  [timer release];
+}
+
+- (void) _progressTipTimerFired
+{
+  NSTimer *timer = _progressTipTimer;
+  _progressTipTimer = nil;
+  // The run loop still holds this non-repeating timer until the callback returns.
+  [timer autorelease];
+  [self _showStudyProgressTipIfNeeded];
+}
+
 - (void) _scheduleProgressTipRetry
 {
-  if (_progressTipRetryScheduled || _progressTipRetries >= 40) return;
-  _progressTipRetryScheduled = YES;
+  if (_progressTipTimer != nil || _progressTipRetries >= 40) return;
   _progressTipRetries++;
-  __block StudyViewController *blockSelf = self;
-  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.4 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    blockSelf->_progressTipRetryScheduled = NO;
-    [blockSelf _showStudyProgressTipIfNeeded];
-  });
+  LWEWeakHolder *holder = [[LWEWeakHolder alloc] initWithObject:self];
+  // Do not mention the timer inside the block: the timer retains the block, so
+  // capturing the timer would keep both alive after it fires.
+  _progressTipTimer = [[NSTimer scheduledTimerWithTimeInterval:0.4 repeats:NO block:^(__unused NSTimer *timer) {
+    StudyViewController *vc = [holder object];
+    [vc _progressTipTimerFired];
+  }] retain];
+  [holder release];
 }
 
 - (void) _showStudyProgressTipIfNeeded
 {
-  if (LWEStudyProgressTipShouldShow([NSUserDefaults standardUserDefaults]) == NO) return;
+  if (LWEStudyProgressTipShouldShow([NSUserDefaults standardUserDefaults]) == NO)
+  {
+    [self _invalidateProgressTipTimer];
+    _progressTipRetries = 0;
+    return;
+  }
   if ([self _isPracticeMode] == NO) return;
-#if defined (LWE_JFLASH)
-  if ([self _progressTipWaitingOnFirstCardHint]) return;
-#endif
+  if ([self _progressTipDeferredToNextLaunch]) return;
   UIView *host = self.tabBarController.view ?: self.view;
   if ([StudyProgressTipView tipInView:host] != nil) return;
   UIViewController *presenter = self.tabBarController ?: self;
@@ -1517,11 +1562,23 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
     [self _scheduleProgressTipRetry];
     return;
   }
+  [self _invalidateProgressTipTimer];
+  _progressTipRetries = 0;
   [self.view layoutIfNeeded];
-  __block StudyViewController *blockSelf = self;
+  LWEWeakHolder *holder = [[[LWEWeakHolder alloc] initWithObject:self] autorelease];
   [StudyProgressTipView showInView:host spotlightProvider:^(CGRect *spot) {
-    [blockSelf _progressTipSpotlight:spot inView:host];
+    StudyViewController *vc = [holder object];
+    if (vc == nil) return;
+    UIView *hostView = vc.tabBarController.view ?: vc.view;
+    [vc _progressTipSpotlight:spot inView:hostView];
   }];
+}
+
+- (void) viewDidDisappear:(BOOL)animated
+{
+  [super viewDidDisappear:animated];
+  [self _invalidateProgressTipTimer];
+  _progressTipRetries = 0;
 }
 
 /** 
@@ -1646,6 +1703,8 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
 	self.remainingCardsLabel = nil;
 	self.showProgressModalBtn = nil;
   self.pronounceBtn = nil;
+  [self _invalidateProgressTipTimer];
+  _progressTipRetries = 0;
   [_learnedProgressButton removeFromSuperview];
   [_learnedProgressButton release]; _learnedProgressButton = nil;
   [_learnedPill release]; _learnedPill = nil;
@@ -1658,6 +1717,13 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
 
 - (void) dealloc
 {
+  [self _invalidateProgressTipTimer];
+  _progressTipRetries = 0;
+  UIView *tipHost = nil;
+  if (self.tabBarController != nil) tipHost = self.tabBarController.view;
+  else if ([self isViewLoaded]) tipHost = self.view;
+  [[StudyProgressTipView tipInView:tipHost] clearSpotlightProvider];
+
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
