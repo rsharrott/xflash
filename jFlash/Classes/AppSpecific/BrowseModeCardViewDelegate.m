@@ -12,18 +12,42 @@
 #import "ActionBarViewController.h"
 #import "StudyViewController.h"
 
-//! Browse stores card ids. Load the full card only for the one about to be shown.
-static Card *LWECardForBrowseEntry(id entry)
+//! The id's bucket is the level a later move has to find. A missed user_history read leaves 0.
+static void LWECarryLevelForCard(Tag *tag, Card *card)
 {
+  if (card == nil)
+  {
+    return;
+  }
+  NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
+  NSInteger count = (NSInteger)[tag.cardsByLevel count];
+  for (NSInteger level = 0; level < count; level++)
+  {
+    if ([[tag.cardsByLevel objectAtIndex:level] containsObject:cardId])
+    {
+      card.levelId = level;
+      return;
+    }
+  }
+}
+
+//! Browse stores card ids. Load the full card only for the one about to be shown.
+static Card *LWECardForBrowseEntry(Tag *tag, id entry)
+{
+  Card *card = nil;
   if ([entry isKindOfClass:[NSNumber class]])
   {
-    return [CardPeer hydratedCardWithId:[entry integerValue]];
+    card = [CardPeer hydratedCardWithId:[entry integerValue]];
   }
-  Card *card = entry;
-  if (card.isFault)
+  else
   {
-    [card hydrate];
+    card = entry;
+    if (card.isFault)
+    {
+      [card hydrate];
+    }
   }
+  LWECarryLevelForCard(tag, card);
   return card;
 }
 
@@ -102,7 +126,7 @@ static Card *LWECardForBrowseEntry(id entry)
   {
     // If currentCard == nil, this is the "first card" -- use whatever the value of currentIndex is
     LWE_ASSERT_EXC((cardSet.currentIndex < [cardSet.flattenedCardIdArray count]), @"the currentIndex is out of bounds?");
-    nextCard = LWECardForBrowseEntry([cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
+    nextCard = LWECardForBrowseEntry(cardSet, [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
   }
   else
   {
@@ -131,7 +155,7 @@ static Card *LWECardForBrowseEntry(id entry)
     }
     
     // OK, we've updated currentIndex, get the new card
-    nextCard = LWECardForBrowseEntry([cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
+    nextCard = LWECardForBrowseEntry(cardSet, [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
   }
   return nextCard;
 }

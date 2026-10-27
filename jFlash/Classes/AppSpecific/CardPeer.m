@@ -9,6 +9,7 @@
 + (NSMutableArray*) _addCardsToList:(NSMutableArray*)cardList fromResultSet:(FMResultSet*)rs hydrate:(BOOL)shouldHydrate;
 + (NSString *) _tagLinkTableName:(Tag *)tag;
 + (Card *) _cardLoadedFromCardsTable:(NSInteger)cardId;
++ (void) _applyUserHistoryToCard:(Card *)card;
 @end
 
 @implementation CardPeer
@@ -246,11 +247,31 @@
  * Card shown for one id. Opening a set stores ids only; practice and browse call this
  * for the card that actually goes on screen.
  */
++ (void) _applyUserHistoryToCard:(Card *)card
+{
+  if (card == nil || card.cardId == kLWEUninitializedCardId)
+  {
+    return;
+  }
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT card_level, user_id, wrong_count, right_count "
+                     "FROM user_history WHERE card_id = ? AND user_id = ? LIMIT 1",
+                     [NSNumber numberWithInt:card.cardId], [settings objectForKey:@"user_id"]];
+  if ([rs next])
+  {
+    card.levelId = [rs intForColumn:@"card_level"];
+    card.userId = [rs intForColumn:@"user_id"];
+    card.wrongCount = [rs intForColumn:@"wrong_count"];
+    card.rightCount = [rs intForColumn:@"right_count"];
+  }
+  [rs close];
+}
+
 + (Card *) _cardLoadedFromCardsTable:(NSInteger)cardId
 {
-  // Same columns as -hydrate, including the user_history level. Used only when the
-  // full load did not return a row, so a missed read cannot leave the card blank
-  // or at level 0 (a level of 0 fails the study-set move in a Debug build).
+  // Same columns as -hydrate, including the user_history level. A level of 0 when
+  // the card is actually in another bucket fails the study-set move in a Debug build.
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
   Card *card = [[CardPeer blankCardWithId:cardId] retain];
@@ -265,6 +286,21 @@
     [card hydrateWithResultSet:rs];
   }
   [rs close];
+  if (card.isFault)
+  {
+    // The joined read did not return a row (a disk error on the user database does
+    // this). The card text is in the attached card database, so load that on its
+    // own, then the level from its own statement.
+    FMResultSet *cardRs = [db.dao executeQuery:@"SELECT c.card_id AS card_id, c.*, ch.meaning "
+                           "FROM cards c INNER JOIN cards_html ch ON c.card_id = ch.card_id "
+                           "WHERE c.card_id = ? LIMIT 1", [NSNumber numberWithInt:cardId]];
+    while ([cardRs next])
+    {
+      [card hydrateWithResultSet:cardRs];
+    }
+    [cardRs close];
+    [CardPeer _applyUserHistoryToCard:card];
+  }
   return [card autorelease];
 }
 

@@ -394,6 +394,9 @@ static NSUInteger LWERevealGeneration = 0;
   }
   NSInteger randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel);
   // Compare ids first. A rejected card is not loaded; only the card we keep is.
+  // randomLevel is the bucket that id was taken from, so a load that misses
+  // user_history still moves the card from the right level.
+  NSInteger randomLevel = nextLevelId;
   NSInteger randomCardId = [self _cardIdForLevelEntry:[cardArray objectAtIndex:randomOffset]];
   
   // this is a simple queue of the last five cards
@@ -440,6 +443,7 @@ static NSUInteger LWERevealGeneration = 0;
       break;
     }
     randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel2);
+    randomLevel = nextLevelId;
     randomCardId = [self _cardIdForLevelEntry:[cardArray objectAtIndex:randomOffset]];
     
     i++;
@@ -456,6 +460,10 @@ static NSUInteger LWERevealGeneration = 0;
   }
 
   randomCard = [self _cardForLevelEntry:[NSNumber numberWithInteger:randomCardId]];
+  if (randomCard != nil)
+  {
+    randomCard.levelId = randomLevel;
+  }
   return randomCard;
 }
 
