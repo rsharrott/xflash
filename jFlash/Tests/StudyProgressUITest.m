@@ -19,7 +19,8 @@
 {
   XCTAssertEqualObjects(LWELearnedProgressPillText(4, 626, @"learned", @"Set learned ✓"), @"4 / 626 learned");
   XCTAssertEqualObjects(LWELearnedProgressPillText(0, 626, @"learned", @"Set learned ✓"), @"0 / 626 learned");
-  XCTAssertEqualObjects(LWELearnedProgressPillText(1, 1, @"覚えた", @"全部覚えた ✓"), @"1 / 1 覚えた");
+  // 1 of 2 is still in progress, so the localized word is used. 1 of 1 is the all-learned line.
+  XCTAssertEqualObjects(LWELearnedProgressPillText(1, 2, @"覚えた", @"全部覚えた ✓"), @"1 / 2 覚えた");
 }
 
 - (void) testPillShowsSetLearnedWhenEveryCardIsLearned
