@@ -170,9 +170,8 @@
 
 - (void) updateStudyViewLabels:(StudyViewController*)svc
 {
-  NSInteger unseen = [[svc.currentCardSet.cardLevelCounts objectAtIndex:0] intValue];
-  NSInteger total = svc.currentCardSet.cardCount;
-  svc.remainingCardsLabel.text = [NSString stringWithFormat:@"%d / %d",unseen,total];
+  // The old footer was unseen/total ("600 / 626"), which reads as cards done. The study view
+  // now draws a learned/total pill (cardLevelCounts[Learned] / cardCount) in its place.
   svc.cardSetLabel.text = [svc.currentCardSet displayName];
   
   // Update mood icon percentage (TODO: this is a hack, we have it as a 

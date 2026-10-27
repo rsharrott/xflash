@@ -26,6 +26,10 @@ static inline NSString *LWEProgressAccessibilitySummary(NSArray *names, NSArray 
 
 @interface ProgressBarViewController : UIViewController
 
+//! Height of the level strip, including the padding inside the rounded panel.
+//! Grows a little with Dynamic Type, capped so five columns still fit.
++ (CGFloat) preferredStripHeight;
+
 - (void) drawProgressBar;
 
 //! The strip as VoiceOver reads it (the level names are the localized labels on the strip)
