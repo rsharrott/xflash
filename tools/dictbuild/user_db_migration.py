@@ -11,6 +11,9 @@ database moved on.  This updates the user file from the new template:
 * a user-created tag whose id is a system id in the template (644 and up)
   is renumbered, and card_tag_link, group_tag_link, last_state and
   tag_user_card_levels follow it
+* Nouns 02–13 (tags 620–631) fold into the single Nouns set (tag 133).
+  last_state follows.  Card progress stays on user_history.  An editable
+  row at one of those ids is a user set and is left alone
 * group links whose tag row does not exist are deleted (the 2.0 template
   has 68 of these)
 
@@ -30,6 +33,7 @@ def migrate(user_path, template_path):
         _copy_system_tags(conn)
         _copy_groups(conn)
         _replace_system_links(conn)
+        mapping.update(_fold_retired_noun_tags(conn))
         _drop_dangling_links(conn)
         _copy_kept_japanese(conn)
         _recount_groups(conn)
@@ -90,6 +94,39 @@ def _renumber_collisions(conn):
             'UPDATE tags SET tag_id = ? WHERE tag_id = ?',
         ):
             conn.execute(sql, (new, old))
+    return mapping
+
+
+def _fold_retired_noun_tags(conn):
+    """Point Nouns 02–13 at tag 133.
+
+    A 2.0 file still has those system tags.  The template does not, so the
+    system-tag copy leaves them in place.  last_state moves to the single
+    Nouns set.  user_history is per card and is not touched.  Per-tag level
+    counts are not copied onto tag 133: they counted a different list.
+    Returns {old_tag_id: 133} for each system tag removed, and for a
+    last_state that still names one of these ids.
+    """
+    rows = conn.execute(
+        'SELECT tag_id FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631 '
+        'UNION SELECT tag_id FROM last_state WHERE tag_id BETWEEN 620 AND 631 '
+        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)').fetchall()
+    mapping = {row[0]: 133 for row in rows}
+    # Move the active set before the tag row disappears.  An editable row at
+    # one of these ids is a user set; its cards and last_state stay put.
+    conn.execute(
+        'UPDATE last_state SET tag_id = 133 WHERE tag_id BETWEEN 620 AND 631 '
+        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)')
+    for sql in (
+        'DELETE FROM tag_user_card_levels WHERE tag_id BETWEEN 620 AND 631 '
+        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)',
+        'DELETE FROM card_tag_link WHERE tag_id BETWEEN 620 AND 631 '
+        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)',
+        'DELETE FROM group_tag_link WHERE tag_id BETWEEN 620 AND 631 '
+        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)',
+        'DELETE FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631',
+    ):
+        conn.execute(sql)
     return mapping
 
 

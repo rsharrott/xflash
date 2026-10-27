@@ -295,7 +295,7 @@ def _write_tsv(members, order):
         f.write(text)
 
 
-def apply_sets():
+def apply_sets(noun_cards=None):
     """Refresh study-set membership from the TSV and the level catalog.
 
     main() checks the JMdict pin and exits before it calls this.  A later
@@ -311,18 +311,29 @@ def apply_sets():
         members, order = new_members, new_order
     changed, written_tags = study_sets.ensure_combined_membership(members, catalog)
     recut = False
+    collapsed = False
     chunked = None
-    if study_sets.needs_oversized_recut(members):
+    dropped = []
+    if study_sets.needs_noun_collapse(members) or study_sets.needs_oversized_recut(members):
         core_ids = study_sets.load_core_ids()
         known = {row[0] for row in sqlite3.connect(study_sets.CARD_DB).execute(
             'SELECT card_id FROM cards')}
         missing = [card_id for card_id in core_ids if card_id not in known]
         if missing:
             raise SystemExit('Core 1000 card ids are not in the card database: %s' % missing[:8])
-        members, order, chunked = study_sets.recut_oversized(
+    if study_sets.needs_noun_collapse(members):
+        members, order, chunked, dropped = study_sets.collapse_nouns(
+            members, order, study_sets.load_common_ids(), noun_cards=noun_cards)
+        collapsed = True
+    if study_sets.needs_oversized_recut(members):
+        members, order, recut_chunked = study_sets.recut_oversized(
             members, order, study_sets.load_common_ids(), core_ids)
+        if chunked is not None:
+            kept = [g for g in chunked['groups'] if g.get('base_name') == 'Common Nouns']
+            recut_chunked['groups'].extend(kept)
+        chunked = recut_chunked
         recut = True
-    wrote = legacy or changed or recut
+    wrote = legacy or changed or recut or collapsed
     if wrote:
         _write_tsv(members, order)
         _write_public_catalog(catalog)
@@ -332,11 +343,22 @@ def apply_sets():
     if legacy:
         # The old nested lists were replaced.  Every system link is rewritten.
         nlinks = study_sets.replace_system_links(card, members)
-    elif recut:
+    elif collapsed or recut:
         # upsert_tag_links sorts by card_id and would wipe the study order.
-        chunk_ids = study_sets.chunked_tag_ids(chunked)
-        nlinks = study_sets.write_links_in_order(card, members, chunk_ids)
-        extra = [tag for tag in written_tags if tag not in set(chunk_ids)]
+        # Rewrite the tags this pass owns, and drop the retired noun lists.
+        rewrite = []
+        if collapsed:
+            rewrite.append(study_sets.NOUN_ANCHOR)
+            rewrite.extend(
+                s['tag_id'] for g in chunked['groups']
+                if g.get('base_name') == 'Common Nouns' for s in g['sets'])
+        if recut and chunked is not None:
+            rewrite.extend(study_sets.chunked_tag_ids(chunked))
+        rewrite = list(dict.fromkeys(rewrite))
+        for tag_id in dropped:
+            card.execute('DELETE FROM system_card_tag_link WHERE tag_id = ?', (tag_id,))
+        nlinks = study_sets.write_links_in_order(card, members, rewrite)
+        extra = [tag for tag in written_tags if tag not in set(rewrite)]
         if extra:
             nlinks += study_sets.upsert_tag_links(card, members, extra)
     elif written_tags:

@@ -362,7 +362,9 @@
  * ids.  An install that is already at data version 2.0 has its own copy of jFlash.db and will not
  * copy the new template, so this updates that file in place.  Study progress, My Starred Words,
  * user-created sets and last_state stay.  A user-created tag whose id collides with a new system
- * tag (644 and up) is renumbered.
+ * tag (644 and up) is renumbered.  Nouns 02–13 (tags 620–631) fold into the single Nouns set
+ * (tag 133): last_state follows, and card progress on user_history stays.  An editable row at
+ * one of those ids is a user set and is left alone.
  *
  * Built-in set names also gain Japanese columns (tag_name_ja, description_ja,
  * group_name_ja).  A 2.0 file does not have those columns, so this adds them
@@ -621,6 +623,47 @@
   {
     return NO;
   }
+  // Nouns 02–13.  The template no longer has these system tags.  Point the active
+  // set at Nouns (133) and drop the old rows.  user_history is per card and stays.
+  // Same statements as user_db_migration._fold_retired_noun_tags.
+  FMResultSet *nounRs = [db.dao executeQuery:
+    @"SELECT tag_id FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631 "
+    "UNION SELECT tag_id FROM last_state WHERE tag_id BETWEEN 620 AND 631 "
+    "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)"];
+  if (nounRs == nil || [db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed while reading Nouns continuation tags: %@", [db.dao lastErrorMessage]);
+    [nounRs close];
+    return NO;
+  }
+  while ([nounRs next])
+  {
+    [renames setObject:[NSNumber numberWithInt:133] forKey:[NSNumber numberWithInt:[nounRs intForColumnIndex:0]]];
+  }
+  [nounRs close];
+  if ([db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed while reading Nouns continuation tags: %@", [db.dao lastErrorMessage]);
+    return NO;
+  }
+  NSArray *nounFold = [NSArray arrayWithObjects:
+    @"UPDATE last_state SET tag_id = 133 WHERE tag_id BETWEEN 620 AND 631 "
+     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
+    @"DELETE FROM tag_user_card_levels WHERE tag_id BETWEEN 620 AND 631 "
+     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
+    @"DELETE FROM card_tag_link WHERE tag_id BETWEEN 620 AND 631 "
+     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
+    @"DELETE FROM group_tag_link WHERE tag_id BETWEEN 620 AND 631 "
+     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
+    @"DELETE FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631",
+    nil];
+  for (NSString *sql in nounFold)
+  {
+    if ([JFlashUpdateManager _migrationUpdate:db sql:sql] == NO)
+    {
+      return NO;
+    }
+  }
   // The 2.0 template has group links whose tags were removed.  Readers join tags,
   // so they were invisible, but they are not part of the catalog.
   if ([JFlashUpdateManager _migrationUpdate:db sql:
@@ -738,6 +781,33 @@
   BOOL ok = [JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames];
   NSInteger previousTag = [settings integerForKey:@"tag_id"];
   BOOL remapped = NO;
+  if (ok && previousTag >= 620 && previousTag <= 631)
+  {
+    // The continuation row is gone.  A crash after the tag delete and before this
+    // settings write would otherwise leave the active set on a missing id.  An
+    // editable row here is a user set and keeps its id.
+    FMResultSet *tagRs = [db.dao executeQuery:@"SELECT editable FROM tags WHERE tag_id = ?",
+                          [NSNumber numberWithInteger:previousTag]];
+    if (tagRs == nil || [db.dao hadError])
+    {
+      LWE_LOG(@"2.1 migration failed while folding the active Nouns set: %@", [db.dao lastErrorMessage]);
+      [tagRs close];
+      ok = NO;
+    }
+    else
+    {
+      BOOL userOwned = NO;
+      if ([tagRs next] && [tagRs intForColumnIndex:0] == 1)
+      {
+        userOwned = YES;
+      }
+      [tagRs close];
+      if (userOwned == NO)
+      {
+        [renames setObject:[NSNumber numberWithInt:133] forKey:[NSNumber numberWithInteger:previousTag]];
+      }
+    }
+  }
   if (ok)
   {
     // Write the new active set before COMMIT.  A crash after this synchronize and

@@ -209,14 +209,19 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   XCTAssertTrue(foundFull, @"Full Set stays findable by its English name");
 
   NSArray *nouns = [TagPeer retrieveTagListByGroupId:2];
-  XCTAssertEqualObjects([[nouns objectAtIndex:0] tagName], @"Nouns Full Set");
-  XCTAssertEqualObjects([[nouns objectAtIndex:0] displayName], @"名詞全部");
-  XCTAssertGreaterThan([[nouns objectAtIndex:0] cardCount], (NSInteger)100000);
-  Tag *nounChunk = [TagPeer retrieveTagByName:@"Nouns 0001"];
+  XCTAssertEqualObjects([[nouns objectAtIndex:0] tagName], @"Common Nouns Full Set");
+  XCTAssertEqualObjects([[nouns objectAtIndex:0] displayName], @"よく使う名詞全部");
+  Tag *nounChunk = [TagPeer retrieveTagByName:@"Common Nouns 001"];
   XCTAssertNotNil(nounChunk);
-  XCTAssertEqualObjects([nounChunk displayName], @"名詞0001");
+  XCTAssertEqualObjects([nounChunk displayName], @"よく使う名詞001");
   XCTAssertGreaterThanOrEqual(nounChunk.cardCount, (NSInteger)50);
   XCTAssertLessThanOrEqual(nounChunk.cardCount, (NSInteger)100);
+  Tag *allNouns = [TagPeer retrieveTagByName:@"Nouns"];
+  XCTAssertEqual(allNouns.tagId, 133);
+  XCTAssertEqualObjects([allNouns displayName], @"名詞");
+  XCTAssertGreaterThan(allNouns.cardCount, (NSInteger)100000);
+  XCTAssertNil([TagPeer retrieveTagByName:@"Nouns Full Set"]);
+  XCTAssertNil([TagPeer retrieveTagByName:@"Nouns 0001"]);
 
   NSArray *common = [TagPeer retrieveTagListByGroupId:11];
   XCTAssertEqualObjects([[common objectAtIndex:0] tagName], @"Common Words Full Set");

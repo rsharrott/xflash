@@ -110,6 +110,31 @@
   [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (1, 8)"];
   [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (1, 9)"];
   [self _execute:@"UPDATE tags SET description = 'Rude or X-Rated' WHERE tag_id = 161"];
+  // Nouns 02–13.  The template folds these into tag 133, so the 2.0 fixture puts them back.
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (620, 'Nouns 02', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9714)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (621, 'Nouns 03', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9640)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (622, 'Nouns 04', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9717)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (623, 'Nouns 05', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9700)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (624, 'Nouns 06', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9706)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (625, 'Nouns 07', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9719)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (626, 'Nouns 08', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9696)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (627, 'Nouns 09', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9716)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (628, 'Nouns 10', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9688)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (629, 'Nouns 11', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9731)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (630, 'Nouns 12', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 9701)"];
+  [self _execute:@"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) VALUES (631, 'Nouns 13', '(cont) Common noun (普通名詞・futsuumeishi)', 0, 7256)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 620)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 621)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 622)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 623)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 624)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 625)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 626)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 627)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 628)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 629)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 630)"];
+  [self _execute:@"INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, 631)"];
   [self _execute:@"UPDATE tags SET description = replace(description, '普通名詞', '副名詞') WHERE tag_id = 133 OR tag_id BETWEEN 620 AND 631"];
   [self _execute:@"UPDATE tags SET description = replace(description, 'futsuumeishi', 'fukumeishi') WHERE tag_id = 133 OR tag_id BETWEEN 620 AND 631"];
 
@@ -235,6 +260,43 @@
   XCTAssertEqual([self _intQuery:@"SELECT count FROM tags WHERE tag_id = 0"], starredCount);
   XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 0 AND card_id = 150089"], 1);
   XCTAssertEqual([self _intQuery:@"SELECT editable FROM tags WHERE tag_id = 644"], 0);
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 133"], @"Nouns");
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM tags WHERE tag_id BETWEEN 620 AND 631"], 0);
+}
+
+- (void)testRetiredNounContinuationFoldsIntoTheSingleNounsSet
+{
+  [self _rewindToDataVersion20];
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 625"], @"Nouns 07");
+  [self _execute:@"UPDATE last_state SET tag_id = 625 WHERE user_id = 1"];
+  [self _execute:@"INSERT INTO tag_user_card_levels (tag_id, user_id, card_level_1_count) VALUES (625, 1, 9)"];
+  [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (625, 150090, 9)"];
+  [[LWEDatabase sharedLWEDatabase] closeDatabase];
+
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_SETTINGS_VERSION];
+  [settings setInteger:625 forKey:@"tag_id"];
+  [settings setBool:YES forKey:@"db_did_finish_copying"];
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  [settings synchronize];
+
+  XCTAssertTrue([JFlashUpdateManager _updateSettingsTo21:settings], @"A Nouns continuation set should fold into Nouns");
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)133, @"The active set becomes Nouns");
+  XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_1);
+
+  [self _openUserDatabase];
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 133"], @"Nouns");
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name_ja FROM tags WHERE tag_id = 133"], @"名詞");
+  XCTAssertNil([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 625"]);
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM tags WHERE tag_id BETWEEN 620 AND 631"], 0);
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM last_state WHERE user_id = 1"], 133);
+  XCTAssertEqual([self _intQuery:@"SELECT card_id FROM last_state WHERE user_id = 1"], 2065830);
+  XCTAssertEqual([self _intQuery:@"SELECT right_count FROM user_history WHERE card_id = 2065830 AND user_id = 1"], 3);
+  XCTAssertEqual([self _intQuery:@"SELECT card_level FROM user_history WHERE card_id = 2065830 AND user_id = 1"], 2);
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM tag_user_card_levels WHERE tag_id = 625"], 0);
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 625"], 0);
 }
 
 - (void)testUncommittedMigrationRollsBack
@@ -255,6 +317,7 @@
   XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM tags WHERE tag_id = 717"], 0);
   XCTAssertEqual([self _intQuery:@"SELECT card_level FROM user_history WHERE card_id = 2065830 AND user_id = 1"], 2);
   XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 720"], 145580);
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 625"], @"Nouns 07");
 }
 
 - (void)testGiveUpResetsAMissingActiveSetAndKeepsAMarker

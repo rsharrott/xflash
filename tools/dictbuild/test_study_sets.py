@@ -347,10 +347,13 @@ class JapaneseNameTest(unittest.TestCase):
         self.assertIn('626', full_desc)
         mid, _ = builtin_ja.level_japanese('mid', 'Intermediate (≈N3–N2) 10', 99, 35)
         self.assertEqual(mid, '中級（≈N3–N2）10')
-        noun, _ = builtin_ja.chunk_japanese('Nouns', 'Nouns 0001', 100, 1222, 4)
-        self.assertEqual(noun, '名詞0001')
-        noun_full, _ = builtin_ja.chunk_japanese('Nouns', 'Nouns Full Set', 122197, 1222, 4)
-        self.assertEqual(noun_full, '名詞全部')
+        noun, _ = builtin_ja.chunk_japanese('Common Nouns', 'Common Nouns 001', 100, 182, 3)
+        self.assertEqual(noun, 'よく使う名詞001')
+        noun_full, noun_desc = builtin_ja.chunk_japanese(
+            'Common Nouns', 'Common Nouns Full Set', 18142, 182, 3)
+        self.assertEqual(noun_full, 'よく使う名詞全部')
+        self.assertIn('18142', noun_desc)
+        self.assertNotIn(' ', noun_full)
         common, _ = builtin_ja.chunk_japanese('Common Words', 'Common Words 001', 100, 224, 3)
         self.assertEqual(common, 'よく使う単語001')
         common_full, _ = builtin_ja.chunk_japanese('Common Words', 'Common Words Full Set', 22325, 224, 3)
@@ -364,12 +367,13 @@ class JapaneseNameTest(unittest.TestCase):
         self.assertIn('JLPTの出題範囲そのものではありません', core_desc)
 
     def test_hand_names_do_not_use_a_generated_id(self):
-        generated = {42, 133, 617, 618} | set(range(620, 632)) | set(range(92, 96)) | set(range(644, 721))
+        generated = {42, 617, 618} | set(range(620, 632)) | set(range(92, 96)) | set(range(644, 721))
         self.assertTrue(generated.isdisjoint(builtin_ja.TAG_JA))
+        self.assertEqual(builtin_ja.TAG_JA[133][0], '名詞')
 
 
 class BundledChunkedListsTest(unittest.TestCase):
-    """Nouns, Common Words and Core 1000, after apply_sets()."""
+    """Common Nouns, Common Words and Core 1000, after apply_sets().  Nouns is one set."""
 
     @classmethod
     def setUpClass(cls):
@@ -438,6 +442,19 @@ class BundledChunkedListsTest(unittest.TestCase):
                 self.assertIsNone(self.user.execute(
                     'SELECT 1 FROM group_tag_link WHERE group_id = 23 AND tag_id = ?',
                     (combined[0]['tag_id'],)).fetchone())
+            elif group['base_name'] == 'Common Nouns':
+                self.assertEqual(group['group_id'], 2)
+                self.assertNotIn('group_name', group)
+                self.assertEqual(full_cards, sorted(full_cards))
+                self.assertTrue(set(full_cards) <= common)
+                self.assertEqual(len(chunks), 182)
+                self.assertEqual(combined[0]['count'], 18142)
+                self.assertEqual(chunks[0]['tag_id'], 2164)
+                self.assertEqual(combined[0]['tag_id'], 2346)
+                self.assertEqual(chunks[0]['count'], 100)
+                self.assertEqual(chunks[123]['count'], 100)
+                self.assertEqual(chunks[124]['count'], 99)
+                self.assertEqual(chunks[-1]['name'], 'Common Nouns 182')
             else:
                 self.assertIn(full_cards[0], common, group['base_name'])
                 seen_other = False
@@ -446,6 +463,40 @@ class BundledChunkedListsTest(unittest.TestCase):
                         seen_other = True
                     elif seen_other:
                         self.fail('%s has a common-priority card after the others' % group['base_name'])
+
+    def test_nouns_stay_one_set(self):
+        row = self.user.execute(
+            'SELECT tag_name, tag_name_ja, description_ja, count, editable FROM tags WHERE tag_id = 133'
+        ).fetchone()
+        self.assertEqual(row[0], 'Nouns')
+        self.assertEqual(row[1], '名詞')
+        self.assertIn('よく使う名詞', row[2])
+        self.assertEqual(row[3], 122197)
+        self.assertEqual(row[4], 0)
+        self.assertIsNone(self.user.execute(
+            "SELECT tag_id, tag_name FROM tags WHERE tag_name IN "
+            "('Nouns Full Set', 'Nouns 0001', 'Nouns 02') "
+            "OR tag_name LIKE 'Nouns %'").fetchone())
+        self.assertEqual(
+            self.user.execute(
+                'SELECT count(*) FROM tags WHERE tag_id BETWEEN 620 AND 631').fetchone()[0], 0)
+        self.assertEqual(
+            self.card.execute(
+                'SELECT count(*) FROM system_card_tag_link WHERE tag_id BETWEEN 620 AND 631'
+            ).fetchone()[0], 0)
+        cards = self._cards(133)
+        self.assertEqual(len(cards), 122197)
+        self.assertEqual(len(set(cards)), 122197)
+        self.assertIn(
+            (2,),
+            self.user.execute('SELECT group_id FROM group_tag_link WHERE tag_id = 133').fetchall())
+        # The Nouns group still holds the other noun lists, with Common Nouns sorted first.
+        first = self.user.execute(
+            "SELECT t.tag_name FROM tags t, group_tag_link l "
+            "WHERE t.tag_id = l.tag_id AND l.group_id = 2 "
+            "ORDER BY CASE WHEN t.tag_name LIKE '% Full Set' THEN 0 ELSE 1 END, t.tag_name ASC"
+        ).fetchone()[0]
+        self.assertEqual(first, 'Common Nouns Full Set')
 
     def test_every_builtin_has_a_japanese_name_and_user_columns_stay_empty(self):
         if self.chunked is None:

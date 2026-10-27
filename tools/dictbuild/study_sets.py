@@ -8,11 +8,11 @@ reapplied to the user-DB template.  Each level also has one combined set, the
 union of that level's chunks, so a learner can review the whole level.
 
 Card membership lives in data/system_sets.tsv.  Names and groups live in
-jFlash/sql/jFlash.db.  Nouns, Common Words and Core 1000 are cut the same way
-as the levels (50–100 cards, plus a Full Set).  Japanese names are columns on
-the tag and group rows, keyed by id.  A future `build.py` reads the TSV as it
-stands and calls ensure_user_catalog() so the template keeps these names.  It
-does not re-nest the levels.
+jFlash/sql/jFlash.db.  Common Words, Common Nouns and Core 1000 are cut the
+same way as the levels (50–100 cards, plus a Full Set).  The Nouns list stays
+one set.  Japanese names are columns on the tag and group rows, keyed by id.
+A future `build.py` reads the TSV as it stands and calls ensure_user_catalog()
+so the template keeps these names.  It does not re-nest the levels.
 
   python3 study_sets.py          # patch the TSV, the bundled DBs, and the catalog
 """
@@ -153,23 +153,30 @@ EXPRESSIONS_TAG = 147
 EXPRESSIONS_NAME = 'Expressions (set phrases)'
 EXPRESSIONS_DESCRIPTION = 'JMdict expressions (set phrases).  Not a frequency list of common phrases.'
 
-# The old common-noun and common-word tags are one list each, cut at ~10,000
-# cards.  The first id is the anchor (it becomes set 01).  The rest are reused
-# as the next chunks, then new ids start at 721 so the vocabulary sets stay put.
+# Nouns 02–13 (tags 620–631) were the rest of the old noun list.  They fold
+# into tag 133.  A 2.0 install still has them; the 2.1 migration removes them.
 NOUN_ANCHOR = 133
-NOUN_REUSE = tuple(range(620, 632))
+NOUN_NAME = 'Nouns'
+RETIRED_NOUN_TAGS = tuple(range(620, 632))
 COMMON_ANCHOR = 42
 COMMON_REUSE = (617, 618)
 CHUNKED_ID_START = 721
 CORE_GROUP_ID = 28
+NOUNS_GROUP_ID = 2
 FAVORITES_TAG = 124
 FAVORITES_NAME = 'Long Weekend Favorites'
 
 # Same priority signal the card build stores as ptag: news1 / ichi1 / spec1 /
 # spec2 / gai1.  It is a common-word mark, not a rank inside the list.
-NOUN_BLURB = (
+NOUN_DESCRIPTION = (
     'Common noun (普通名詞・futsuumeishi).  '
-    'Cards JMdict marks as common-priority are in the earlier sets.'
+    'Every card from the old Nouns lists, in one set.  '
+    'Cards JMdict marks as common-priority are also in Common Nouns.'
+)
+COMMON_NOUN_BLURB = (
+    'Nouns from the Nouns list that JMdict marks as common-priority '
+    '(news1, ichi1, spec1, spec2, or gai1).  '
+    'The mark is not a rank inside the list.'
 )
 COMMON_BLURB = (
     'Common use word.  '
@@ -181,14 +188,6 @@ CORE_BLURB = (
     'Not a JLPT exam list.'
 )
 CHUNKED_LISTS = (
-    {
-        'key': 'nouns',
-        'base_name': 'Nouns',
-        'blurb': NOUN_BLURB,
-        'anchor': NOUN_ANCHOR,
-        'reuse': NOUN_REUSE,
-        'group_id': 2,
-    },
     {
         'key': 'common',
         'base_name': 'Common Words',
@@ -526,8 +525,107 @@ def _take_ids(anchor, reuse, n_chunks, next_id):
 
 
 def needs_oversized_recut(members):
-    """True while Nouns is still one of the old ~10,000-card continuation tags."""
-    return len(members.get(NOUN_ANCHOR, ())) > 100
+    """True while Common Words is still one of the old ~10,000-card continuation tags."""
+    return len(members.get(COMMON_ANCHOR, ())) > 100
+
+
+def needs_noun_collapse(members):
+    """True while Nouns 02–13 are still their own lists.
+
+    That is the 2.0 continuation series and the numbered cut of every noun.
+    The single Nouns set does not use those tag ids.
+    """
+    return any(tag in members for tag in RETIRED_NOUN_TAGS)
+
+
+def _unique_in_order(card_ids):
+    seen = set()
+    ordered = []
+    for card_id in card_ids:
+        if card_id in seen:
+            continue
+        seen.add(card_id)
+        ordered.append(card_id)
+    return ordered
+
+
+def _noun_cards_from_members(members):
+    """Every noun card.
+
+    The old continuation lists are card_id order inside each tag, so walking
+    tag 133 and then 620–631 keeps that study order.  The numbered cut stored
+    the same cards on a Full Set and on chunk tags; the Full Set is the union.
+    """
+    if len(members.get(NOUN_ANCHOR, ())) > 1000:
+        cards = []
+        for tag in (NOUN_ANCHOR,) + RETIRED_NOUN_TAGS:
+            cards.extend(members.get(tag, ()))
+        return _unique_in_order(cards)
+    chunked = load_chunked()
+    if chunked:
+        for group in chunked['groups']:
+            if group.get('base_name') != 'Nouns':
+                continue
+            full = [s for s in group['sets'] if is_combined_name(s.get('name'))]
+            if full and full[0]['tag_id'] in members:
+                return list(members[full[0]['tag_id']])
+            cards = []
+            for entry in group['sets']:
+                cards.extend(members.get(entry['tag_id'], ()))
+            return _unique_in_order(cards)
+    cards = []
+    for tag in (NOUN_ANCHOR,) + RETIRED_NOUN_TAGS:
+        cards.extend(members.get(tag, ()))
+    return _unique_in_order(cards)
+
+
+def _noun_tags_to_drop(members):
+    """Tag ids that belonged to the split noun lists.  Tag 133 stays."""
+    drop = set(tag for tag in RETIRED_NOUN_TAGS if tag in members)
+    chunked = load_chunked()
+    if chunked:
+        for group in chunked['groups']:
+            if group.get('base_name') != 'Nouns':
+                continue
+            for entry in group['sets']:
+                if entry['tag_id'] != NOUN_ANCHOR:
+                    drop.add(entry['tag_id'])
+    return sorted(drop)
+
+
+def collapse_nouns(members, order, common_ids, noun_cards=None):
+    """One Nouns set, plus Common Nouns chunks for the common-priority cards.
+
+    Returns (members, order, chunked_catalog, dropped_tag_ids).  Common Words
+    and Core 1000 groups already in the chunked catalog are kept.  Safe to
+    call only when needs_noun_collapse is true.
+    """
+    cards = list(noun_cards) if noun_cards is not None else _noun_cards_from_members(members)
+    if len(cards) != len(set(cards)):
+        raise ValueError('Nouns card list repeats a card id')
+    have = set(_noun_cards_from_members(members))
+    if set(cards) != have:
+        raise ValueError('Nouns card list does not match the lists on disk')
+    common_cards = sorted(card_id for card_id in cards if card_id in common_ids)
+    dropped = _noun_tags_to_drop(members)
+    for tag in dropped:
+        members.pop(tag, None)
+    members[NOUN_ANCHOR] = cards
+    next_id = max(members) + 1 if members else CHUNKED_ID_START
+    n_chunks = len(chunk_sizes(len(common_cards)))
+    chunk_ids, next_id = _take_ids(None, (), n_chunks, next_id)
+    sets = _chunk_records('Common Nouns', COMMON_NOUN_BLURB, common_cards, chunk_ids)
+    sets[0]['tag_id'] = next_id
+    for entry in sets:
+        members[entry['tag_id']] = list(entry['card_ids'])
+    old = load_chunked() or {'groups': []}
+    groups = [group for group in old['groups'] if group.get('base_name') != 'Nouns']
+    groups.append({
+        'group_id': NOUNS_GROUP_ID,
+        'base_name': 'Common Nouns',
+        'sets': [{k: s[k] for k in ('tag_id', 'name', 'description', 'count')} for s in sets],
+    })
+    return members, order, {'groups': groups}, dropped
 
 
 def load_common_ids(path=FTS_DB):
@@ -560,11 +658,12 @@ def load_core_ids(path=CORE_PATH):
 
 
 def recut_oversized(members, order, common_ids, core_ids):
-    """Split Nouns and Common Words, and add Core 1000.
+    """Split Common Words and add Core 1000.
 
     Returns (members, order, chunked_catalog).  Chunk ids reuse the old
-    continuation tags, then continue after 720.  Safe to call only when
-    needs_oversized_recut is true; a second call would slice the small chunks.
+    continuation tags, then continue after 720.  Nouns is not cut here.
+    Safe to call only when needs_oversized_recut is true; a second call
+    would slice the small chunks.
     """
     next_id = max(CHUNKED_ID_START - 1, max(members) if members else 0) + 1
     groups = []
@@ -740,6 +839,9 @@ def ensure_user_catalog(conn, catalog):
         if tag_id == EXPRESSIONS_TAG:
             new_name = EXPRESSIONS_NAME
             new_desc = EXPRESSIONS_DESCRIPTION
+        if tag_id == NOUN_ANCHOR:
+            new_name = NOUN_NAME
+            new_desc = NOUN_DESCRIPTION
         if tag_id in KANA_RENAMES:
             new_name = KANA_RENAMES[tag_id]
             new_desc = KANA_RENAMES[tag_id]
@@ -799,6 +901,15 @@ def ensure_user_catalog(conn, catalog):
     if linked is None:
         cur.execute('INSERT INTO group_tag_link (group_id, tag_id) VALUES (?, ?)',
                     (PARTS_OF_SPEECH_GROUP, PRONOUNS_TAG))
+
+    # Nouns 02–13 and the numbered cut of every noun.  Tag 133 is the one list.
+    split_ids = [row[0] for row in cur.execute(
+        "SELECT tag_id FROM tags WHERE editable = 0 AND tag_id != ? AND "
+        "(tag_id BETWEEN 620 AND 631 OR tag_name LIKE 'Nouns %')",
+        (NOUN_ANCHOR,))]
+    for tag_id in split_ids:
+        cur.execute('DELETE FROM group_tag_link WHERE tag_id = ?', (tag_id,))
+        cur.execute('DELETE FROM tags WHERE tag_id = ? AND editable = 0', (tag_id,))
 
     # Links whose tag was deleted in an earlier import.
     cur.execute('DELETE FROM group_tag_link WHERE tag_id NOT IN (SELECT tag_id FROM tags)')

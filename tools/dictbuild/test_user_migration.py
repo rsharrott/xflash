@@ -25,6 +25,21 @@ LEGACY_LEVELS = (
 HIDDEN_IN_EXPRESSIONS = (15, 51, 135, 136, 161, 168)
 RECOMMENDED_LEGACY = (80, 91, 170)
 RECOMMENDED_NEW = (73, 95, 200, 208)
+# Nouns 02–13 from the 2.0 template.  2.1 folds them into tag 133.
+LEGACY_NOUNS = (
+    (620, 'Nouns 02', 9714),
+    (621, 'Nouns 03', 9640),
+    (622, 'Nouns 04', 9717),
+    (623, 'Nouns 05', 9700),
+    (624, 'Nouns 06', 9706),
+    (625, 'Nouns 07', 9719),
+    (626, 'Nouns 08', 9696),
+    (627, 'Nouns 09', 9716),
+    (628, 'Nouns 10', 9688),
+    (629, 'Nouns 11', 9731),
+    (630, 'Nouns 12', 9701),
+    (631, 'Nouns 13', 7256),
+)
 
 
 def rewind_to_20(path):
@@ -51,6 +66,13 @@ def rewind_to_20(path):
         'INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (1, ?)',
         [(tag_id,) for tag_id in (7, 8, 9)])
     conn.execute("UPDATE tags SET description = 'Rude or X-Rated' WHERE tag_id = 161")
+    conn.executemany(
+        'INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) '
+        "VALUES (?, ?, '(cont) Common noun (普通名詞・futsuumeishi)', 0, ?)",
+        list(LEGACY_NOUNS))
+    conn.executemany(
+        'INSERT OR IGNORE INTO group_tag_link (group_id, tag_id) VALUES (2, ?)',
+        [(tag_id,) for tag_id, _, _ in LEGACY_NOUNS])
     conn.execute(
         "UPDATE tags SET description = replace(description, '普通名詞', '副名詞') "
         "WHERE tag_id = 133 OR tag_id BETWEEN 620 AND 631")
@@ -125,6 +147,9 @@ class MigrateFrom20Test(unittest.TestCase):
         self.assertIsNotNone(linked)
         columns = {row[1] for row in self.conn.execute('PRAGMA table_info(tags)')}
         self.assertNotIn('tag_name_ja', columns)
+        nouns = dict(self.conn.execute(
+            'SELECT tag_id, tag_name FROM tags WHERE tag_id BETWEEN 620 AND 631'))
+        self.assertEqual(nouns, {tag_id: name for tag_id, name, _ in LEGACY_NOUNS})
 
     def test_migration_updates_catalog_and_keeps_user_data(self):
         before_users = self.conn.execute('SELECT user_id, nickname FROM users ORDER BY user_id').fetchall()
@@ -137,13 +162,15 @@ class MigrateFrom20Test(unittest.TestCase):
 
         mapping = user_db_migration.migrate(self.user, self.template)
         # Colliding user sets move to just past the higher of the user max
-        # and the template max, in tag_id order.  The template max grew when
-        # Nouns, Common Words and Core 1000 were cut, so this is not 721.
+        # and the template max, in tag_id order.  Common Nouns and Core 1000
+        # sit above 720, so this is not 721.  Nouns 02–13 fold into tag 133.
         template = sqlite3.connect(self.template)
         template_max = template.execute('SELECT MAX(tag_id) FROM tags').fetchone()[0]
         template.close()
         first_free = max(717, template_max) + 1
-        self.assertEqual(mapping, {644: first_free, 700: first_free + 1, 717: first_free + 2})
+        expected = {644: first_free, 700: first_free + 1, 717: first_free + 2}
+        expected.update({old: 133 for old in range(620, 632)})
+        self.assertEqual(mapping, expected)
         travel_id = mapping[644]
         cooking_id = mapping[700]
         whole_id = mapping[717]
@@ -272,6 +299,12 @@ class MigrateFrom20Test(unittest.TestCase):
         self.assertIn('普通名詞', desc)
         self.assertIn('futsuumeishi', desc)
         self.assertNotIn('fukumeishi', desc)
+        self.assertEqual(
+            self.conn.execute('SELECT tag_name, tag_name_ja FROM tags WHERE tag_id = 133').fetchone(),
+            ('Nouns', '名詞'))
+        self.assertEqual(
+            self.conn.execute('SELECT count(*) FROM tags WHERE tag_id BETWEEN 620 AND 631').fetchone()[0],
+            0)
         rude = self.conn.execute('SELECT description FROM tags WHERE tag_id = 161').fetchone()[0]
         self.assertEqual(rude, 'Rude or impolite')
 
@@ -295,6 +328,56 @@ class MigrateFrom20Test(unittest.TestCase):
         self.assertEqual(
             self.conn.execute('SELECT tag_name, tag_name_ja FROM tags WHERE tag_id = 717').fetchone(),
             ('Beginner 1 (≈N5) Full Set', '初級1（≈N5）全部'))
+
+    def test_retired_noun_continuation_folds_into_the_single_set(self):
+        self.conn.execute('UPDATE last_state SET tag_id = 625, card_id = 2065830 WHERE user_id = 1')
+        self.conn.execute(
+            'INSERT INTO tag_user_card_levels (tag_id, user_id, card_level_1_count) VALUES (625, 1, 9)')
+        self.conn.execute(
+            'INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (625, 150090, 9)')
+        # An editable row at a retired id is a user set.  It is not Nouns 10.
+        self.conn.execute('DELETE FROM tags WHERE tag_id = 628')
+        self.conn.execute(
+            'INSERT INTO tags (tag_id, tag_name, description, editable, count) '
+            "VALUES (628, 'My Noun Pile', 'kept', 1, 1)")
+        self.conn.execute('INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (628, 145593, 10)')
+        self.conn.commit()
+        history = self.conn.execute(
+            'SELECT card_id, user_id, right_count, wrong_count, card_level FROM user_history').fetchall()
+        self.conn.close()
+
+        mapping = user_db_migration.migrate(self.user, self.template)
+        self.assertEqual(mapping[625], 133)
+        self.assertNotIn(628, mapping)
+        for old in range(620, 632):
+            if old == 628:
+                continue
+            self.assertEqual(mapping[old], 133)
+
+        self.conn = sqlite3.connect(self.user)
+        self.assertEqual(
+            self.conn.execute('SELECT tag_id, card_id FROM last_state WHERE user_id = 1').fetchone(),
+            (133, 2065830))
+        self.assertIsNone(self.conn.execute('SELECT 1 FROM tags WHERE tag_id = 625').fetchone())
+        self.assertIsNone(self.conn.execute(
+            'SELECT 1 FROM tag_user_card_levels WHERE tag_id = 625').fetchone())
+        self.assertIsNone(self.conn.execute(
+            'SELECT 1 FROM card_tag_link WHERE tag_id = 625').fetchone())
+        self.assertIsNone(self.conn.execute(
+            'SELECT 1 FROM group_tag_link WHERE tag_id = 625').fetchone())
+        self.assertEqual(
+            self.conn.execute('SELECT tag_name, editable FROM tags WHERE tag_id = 628').fetchone(),
+            ('My Noun Pile', 1))
+        self.assertEqual(
+            self.conn.execute('SELECT card_id FROM card_tag_link WHERE tag_id = 628').fetchone()[0],
+            145593)
+        self.assertEqual(
+            self.conn.execute('SELECT tag_name, tag_name_ja FROM tags WHERE tag_id = 133').fetchone(),
+            ('Nouns', '名詞'))
+        self.assertEqual(
+            self.conn.execute(
+                'SELECT card_id, user_id, right_count, wrong_count, card_level FROM user_history').fetchall(),
+            history)
 
     def test_second_run_changes_nothing(self):
         self.conn.close()

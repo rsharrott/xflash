@@ -121,12 +121,15 @@ and licence links.
     lists.  Each level also has a `Full Set`, the union of that level's
     chunks.  The level list shows that set first.  `study_sets.py` is what
     split them; `build.py` only re-applies the names onto `jFlash.db`.
-  * `chunked_lists.json`: names and tag ids for the Nouns, Common Words and
-    Core 1000 cuts.  Each list is 50–100 cards plus a `Full Set` shown first.
-    Membership stays in `system_sets.tsv`.  Nouns and Common Words keep the
-    cards they already had.  JMdict common-priority cards are in the earlier
-    sets.  Core 1000 is the JMdict nf01 and nf02 bands (see `core1000.tsv`),
-    993 cards, not padded out to 1,000, and not a JLPT exam list.
+  * `chunked_lists.json`: names and tag ids for the Common Nouns, Common Words
+    and Core 1000 cuts.  Each list is 50–100 cards plus a `Full Set` shown
+    first.  Membership stays in `system_sets.tsv`.  Nouns stays one set (the
+    old Nouns and Nouns 02–13 lists, in that order).  Common Nouns is the
+    Nouns cards JMdict marks as common-priority, in the Nouns group, in
+    card-id order.  Common Words keeps the cards it already had, with
+    common-priority cards in the earlier sets.  Core 1000 is the JMdict nf01
+    and nf02 bands (see `core1000.tsv`), 993 cards, not padded out to 1,000,
+    and not a JLPT exam list.
   * Japanese names are `tag_name_ja`, `description_ja` and `group_name_ja`
     on the user-database template.  The English name stays the stored name,
     so browse order and name search still use it.  A set the user created

@@ -81,11 +81,11 @@ LEVEL_JA = {
 # Oversized lists that get numbered cuts.  ja_blurb is the sentence shared by
 # every chunk.  The Full Set and the set number are added by chunk_japanese.
 CHUNK_JA = {
-    'Nouns': {
-        'name': '名詞',
+    'Common Nouns': {
+        'name': 'よく使う名詞',
         'blurb': (
-            '普通名詞（ふつうめいし）です。'
-            'JMdictで「よく使う」と印の付いた語を、前のセットにまとめています。'
+            '名詞のうち、JMdictで「よく使う」と印の付いた語です。'
+            '印は、その中での順位ではありません。'
         ),
     },
     'Common Words': {
@@ -203,6 +203,11 @@ TAG_JA = {
     129: ('数学', '数学の言葉です。'),
     130: ('軍事', '軍事の言葉です。'),
     132: ('名詞の接尾辞', '名詞の後ろに付く言葉です。'),
+    133: (
+        '名詞',
+        '普通名詞（ふつうめいし）を全部まとめたセットです。'
+        'よく使う語は「よく使う名詞」にも分けてあります。',
+    ),
     134: ('数', '数の言い方です。'),
     135: ('まれな言葉', 'めったに見ない言葉です。'),
     136: ('廃語', '今は使われなくなった言葉です。'),
