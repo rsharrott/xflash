@@ -524,6 +524,7 @@ static uint64_t LWEPhysicalFootprint(void)
 - (void)testOpeningASetKeepsIdsUntilACardIsShown
 {
   Tag *tag = [TagPeer retrieveTagByName:kLWEFavoriteTagName];
+  NSInteger expectedCount = tag.cardCount;
   [tag populateCardIds];
   XCTAssertEqual([tag.cardsByLevel count], (NSUInteger)6, @"Six study levels");
 
@@ -537,21 +538,23 @@ static uint64_t LWEPhysicalFootprint(void)
       XCTAssertTrue([entry isKindOfClass:[NSNumber class]], @"A level holds card ids, not Card objects");
     }
   }
-  XCTAssertEqual(total, tag.cardCount);
-  XCTAssertEqual([tag.flattenedCardIdArray count], (NSUInteger)tag.cardCount);
+  XCTAssertEqual(total, expectedCount, @"Opening loads every card id (%ld)", (long)total);
+  XCTAssertEqual([tag.flattenedCardIdArray count], (NSUInteger)expectedCount);
   for (NSNumber *cardId in tag.flattenedCardIdArray)
   {
     XCTAssertGreaterThanOrEqual([cardId integerValue], previousId, @"Browse order is ascending card id");
     previousId = [cardId integerValue];
   }
 
+  NSInteger firstId = [[tag.flattenedCardIdArray objectAtIndex:0] integerValue];
+  XCTAssertGreaterThan(firstId, 0, @"The first browse card has a real id");
   tag.currentIndex = 0;
   BrowseModeCardViewDelegate *browse = [[BrowseModeCardViewDelegate alloc] init];
   Card *shown = [browse getNextCard:tag afterCard:nil direction:nil];
   XCTAssertNotNil(shown);
-  XCTAssertFalse(shown.isFault, @"The card on screen is loaded");
-  XCTAssertGreaterThan([[shown headwordIgnoringMode:YES] length], (NSUInteger)0);
-  XCTAssertEqual([[tag.flattenedCardIdArray objectAtIndex:0] integerValue], shown.cardId);
+  XCTAssertFalse(shown.isFault, @"The card on screen is loaded (id %ld, shown %ld)", (long)firstId, (long)shown.cardId);
+  XCTAssertGreaterThan([[shown headwordIgnoringMode:YES] length], (NSUInteger)0, @"Headword for card %ld", (long)shown.cardId);
+  XCTAssertEqual(firstId, shown.cardId);
   XCTAssertTrue([[tag.flattenedCardIdArray objectAtIndex:0] isKindOfClass:[NSNumber class]]);
   [browse release];
 

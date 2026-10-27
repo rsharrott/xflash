@@ -8,6 +8,7 @@
 + (Card*) _retrieveCardWithResultSet:(FMResultSet *)rs;
 + (NSMutableArray*) _addCardsToList:(NSMutableArray*)cardList fromResultSet:(FMResultSet*)rs hydrate:(BOOL)shouldHydrate;
 + (NSString *) _tagLinkTableName:(Tag *)tag;
++ (Card *) _cardLoadedFromCardsTable:(NSInteger)cardId;
 @end
 
 @implementation CardPeer
@@ -245,12 +246,46 @@
  * Card shown for one id. Opening a set stores ids only; practice and browse call this
  * for the card that actually goes on screen.
  */
++ (Card *) _cardLoadedFromCardsTable:(NSInteger)cardId
+{
+  // No user_history join. Used only when the full load did not return a row, so a
+  // problem reading the user database cannot leave the card on screen blank.
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  Card *card = [[CardPeer blankCardWithId:cardId] retain];
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT c.card_id AS card_id, c.*, ch.meaning "
+                     "FROM cards c INNER JOIN cards_html ch ON c.card_id = ch.card_id "
+                     "WHERE c.card_id = ? LIMIT 1", [NSNumber numberWithInt:cardId]];
+  while ([rs next])
+  {
+    [card hydrateWithResultSet:rs simpleHydrate:NO];
+  }
+  [rs close];
+  return [card autorelease];
+}
+
 + (Card *) hydratedCardWithId:(NSInteger)cardId
 {
   // Same load as the old faulted card on screen: a blank card, then -hydrate.
-  Card *card = [CardPeer blankCardWithId:cardId];
+  // Hold the card across that read. A second full load covers a first step that
+  // comes back as a disk error and leaves the card blank.
+  Card *card = [[CardPeer blankCardWithId:cardId] retain];
   [card hydrate];
-  return card;
+  if (card.isFault)
+  {
+    // A statement left open on this connection makes the next read fail as a disk error.
+    LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+    NSLog(@"LWEHydrate retry card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
+    [db.dao closeOpenResultSets];
+    [card hydrate];
+  }
+  if (card.isFault)
+  {
+    LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+    NSLog(@"LWEHydrate fallback card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
+    [card release];
+    card = [[CardPeer _cardLoadedFromCardsTable:cardId] retain];
+  }
+  return [card autorelease];
 }
 
 
