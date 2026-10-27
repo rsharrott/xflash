@@ -682,3 +682,21 @@
 
 /* SearchViewController.NotStarredAccessibilityValue  (SearchViewController.h) */
 "Not starred" = "スターなし";
+
+/* StudyProgress.Pill: learned count / cards in the set, under the study card  (StudyProgressUI.h) */
+"%ld / %ld learned" = "%ld / %ld 覚えた";
+
+/* StudyProgress.PillComplete: the pill when every card in the set is Learned  (StudyProgressUI.h) */
+"Set learned ✓" = "全部覚えた ✓";
+
+/* StudyProgress.PillAccessibility: VoiceOver for the pill; arguments are learned, then total  (StudyProgressUI.h) */
+"%ld of %ld learned" = "%2$ld枚中%1$ld枚を覚えました";
+
+/* StudyProgress.PillCompleteAccessibility: VoiceOver when every card is Learned (no checkmark)  (StudyProgressUI.h) */
+"Set learned" = "このセットは全部覚えました";
+
+/* StudyProgress.TipTitle  (StudyProgressUI.m) */
+"Your progress lives here" = "進み具合はここです";
+
+/* StudyProgress.TipBody  (StudyProgressUI.m) */
+"Tap the level bars, or the count under the card, to see how far along you are in this set." = "上のレベルバーか、カードの下の枚数をタップすると、このセットの進み具合が見られます。";
