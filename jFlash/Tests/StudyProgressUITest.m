@@ -211,10 +211,15 @@
 
 - (void) testWeakHolderZeroesWhenTheTargetIsReleased
 {
-  NSObject *target = [[NSObject alloc] init];
-  LWEWeakHolder *holder = [[LWEWeakHolder alloc] initWithObject:target];
-  XCTAssertEqual([holder object], target);
-  [target release];
+  LWEWeakHolder *holder = nil;
+  @autoreleasepool {
+    NSObject *target = [[NSObject alloc] init];
+    holder = [[LWEWeakHolder alloc] initWithObject:target];
+    // objc_loadWeak retains and autoreleases, so that hold has to drain
+    // before the last release is the one that deallocates.
+    XCTAssertEqual([holder object], target);
+    [target release];
+  }
   XCTAssertNil([holder object]);
   [holder release];
 }

@@ -209,7 +209,8 @@ static inline LWEStudyFooterPillFit LWEStudyFooterFitPill(CGFloat rowWidth, CGFl
   for (NSInteger i = 0; i < 3; i++)
   {
     CGFloat x = limit - widths[i];
-    if (x >= minX - 0.5f)
+    // No slack: half a point still puts the 44pt hit target over the reserved gap.
+    if (x >= minX)
     {
       fit.index = i;
       fit.pillX = x;
