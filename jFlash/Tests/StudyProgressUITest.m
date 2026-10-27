@@ -87,7 +87,7 @@
   XCTAssertEqualObjects(LWELearnedProgressCountsText(2999, 3000, @"%ld / %ld"), @"2999 / 3000");
   XCTAssertEqualObjects(LWELearnedProgressCountsText(2999, 3000, @"%ld / %ld語"), @"2999 / 3000語");
   XCTAssertEqualObjects(LWELearnedProgressCountsText(2999, 3000, @"%ld/%ld"), @"2999/3000");
-  XCTAssertEqualObjects(LWELearnedProgressCountsText(4, 626, @"%ld / %ld 語習得"), @"4 / 626 語習得");
+  XCTAssertEqualObjects(LWELearnedProgressCountsText(4, 626, @"%ld / %ld 覚えた"), @"4 / 626 覚えた");
 }
 
 #pragma mark - Footer: the pill stays clear of the page dots
@@ -121,8 +121,8 @@
   // 18pt is the reserved half-width; 19pt is half of the 38pt control in StudyView.xib.
   CGFloat halves[2] = { 18.0, 19.0 };
   CGFloat sizes[2] = { 13.0, 20.0 };
-  NSArray *fulls = @[ @"2999 / 3000 learned", @"2999 / 3000 語習得", @"Set learned ✓", @"全部覚えた ✓" ];
-  NSArray *compacts = @[ @"2999 / 3000", @"2999 / 3000語", @"Learned ✓", @"習得 ✓" ];
+  NSArray *fulls = @[ @"2999 / 3000 learned", @"2999 / 3000 覚えた", @"Set learned ✓", @"全部覚えた ✓" ];
+  NSArray *compacts = @[ @"2999 / 3000", @"2999 / 3000語", @"Learned ✓", @"覚えた ✓" ];
   NSArray *tights = @[ @"2999/3000", @"2999/3000", @"✓", @"✓" ];
   for (NSInteger h = 0; h < 2; h++)
   {
@@ -239,13 +239,13 @@
   NSDictionary *en = [self _stringsForLocalization:@"en"];
   NSDictionary *ja = [self _stringsForLocalization:@"ja"];
   XCTAssertEqualObjects([en objectForKey:@"%ld / %ld learned"], @"%ld / %ld learned");
-  XCTAssertEqualObjects([ja objectForKey:@"%ld / %ld learned"], @"%ld / %ld 語習得");
+  XCTAssertEqualObjects([ja objectForKey:@"%ld / %ld learned"], @"%ld / %ld 覚えた");
   XCTAssertEqualObjects([en objectForKey:@"%ld / %ld"], @"%ld / %ld");
   XCTAssertEqualObjects([ja objectForKey:@"%ld / %ld"], @"%ld / %ld語");
   XCTAssertEqualObjects([en objectForKey:@"%ld/%ld"], @"%ld/%ld");
   XCTAssertEqualObjects([ja objectForKey:@"%ld/%ld"], @"%ld/%ld");
   XCTAssertEqualObjects([en objectForKey:@"Learned ✓"], @"Learned ✓");
-  XCTAssertEqualObjects([ja objectForKey:@"Learned ✓"], @"習得 ✓");
+  XCTAssertEqualObjects([ja objectForKey:@"Learned ✓"], @"覚えた ✓");
   XCTAssertEqualObjects([en objectForKey:@"Set learned ✓"], @"Set learned ✓");
   XCTAssertEqualObjects([ja objectForKey:@"Set learned ✓"], @"全部覚えた ✓");
   XCTAssertEqualObjects([en objectForKey:@"%ld of %ld learned"], @"%ld of %ld learned");
