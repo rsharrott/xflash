@@ -65,7 +65,9 @@ void LWESetBuiltInCatalogLanguageOverride(NSString *languageOrNil);
 - (NSString *)displayName;
 //! Description to show, under the same rule as displayName.
 - (NSString *)displayDescription;
+//! Six arrays of card-id NSNumbers, one per study level (0 unseen through 5 learned).
 @property (nonatomic, retain) NSMutableArray *cardsByLevel;
+//! Every card id in the set, sorted by card id, for browse mode.
 @property (nonatomic, retain) NSMutableArray *flattenedCardIdArray;
 @property (nonatomic, retain) NSMutableArray *cardLevelCounts;
 @property (nonatomic) NSInteger tagId;

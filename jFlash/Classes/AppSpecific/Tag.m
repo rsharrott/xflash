@@ -19,6 +19,10 @@ NSInteger const kLWELearnedCardLevel       = 5;
 
 static NSString *sLWEBuiltInCatalogLanguageOverride = nil;
 
+@interface Tag ()
+- (NSNumber *)_cardIdCarriedFromRetiredNounSession;
+@end
+
 BOOL LWEBuiltInCatalogUsesJapanese(void)
 {
 #if defined(LWE_JFLASH)
@@ -217,8 +221,7 @@ static void LWEDeleteFrozenCardIds(void)
 /**
  * Unarchive plist file containing the user's last session data.
  * The plist is a dictionary: the tag and user it was saved for, and six arrays (one per level) of
- * card ids. The ids come back as blank cards, the same way CardPeer +retrieveCardsSortedByLevelForTag:
- * returns them.
+ * card ids (NSNumbers), the same way CardPeer +retrieveCardsSortedByLevelForTag: returns them.
  * Returns nil if there is no plist, it is not in that shape, it was saved for another tag or user,
  * or its card total doesn't match this tag's card count. Does not delete the file (-populateCardIds does).
  */
@@ -257,7 +260,7 @@ static void LWEDeleteFrozenCardIds(void)
       {
         return nil;
       }
-      [levelCards addObject:[CardPeer blankCardWithId:[cardId integerValue]]];
+      [levelCards addObject:cardId];
     }
     total += [levelCards count];
     [cardsByLevelTmp addObject:levelCards];
@@ -275,8 +278,8 @@ static void LWEDeleteFrozenCardIds(void)
 
 /**
  * Archive current session data to a plist so we can re-start at same place in next session.
- * cardsByLevel holds Card objects, which a plist cannot store, so write their ids, along with the
- * tag and user they belong to (see -thawCardIds).
+ * cardsByLevel holds card-id NSNumbers (see -thawCardIds). A Card left in the array is written
+ * by its id as well.
  */
 - (void) freezeCardIds
 {
@@ -292,9 +295,16 @@ static void LWEDeleteFrozenCardIds(void)
   for (NSArray *levelCards in self.cardsByLevel)
   {
     NSMutableArray *cardIds = [NSMutableArray arrayWithCapacity:[levelCards count]];
-    for (Card *card in levelCards)
+    for (id entry in levelCards)
     {
-      [cardIds addObject:[NSNumber numberWithInteger:card.cardId]];
+      if ([entry isKindOfClass:[NSNumber class]])
+      {
+        [cardIds addObject:entry];
+      }
+      else
+      {
+        [cardIds addObject:[NSNumber numberWithInteger:[(Card *)entry cardId]]];
+      }
     }
     [frozenLevels addObject:cardIds];
   }
@@ -308,16 +318,88 @@ static void LWEDeleteFrozenCardIds(void)
 }
 
 
+/**
+ * Card id at the saved browse index when this load is Nouns and the session file still
+ * belongs to Nouns 02–13. The file's ids are only that old slice, so they are not the
+ * study set; the caller loads Nouns from the database and looks this card up in it.
+ * Returns nil when there is nothing to carry.
+ */
+- (NSNumber *)_cardIdCarriedFromRetiredNounSession
+{
+#if !defined(LWE_JFLASH)
+  return nil;
+#else
+  // Nouns (tag 133) absorbed Nouns 02–13 (tags 620–631) in the 2.1 catalog.
+  static NSInteger const kLWENounsTagId = 133;
+  static NSInteger const kLWERetiredNounsTagMin = 620;
+  static NSInteger const kLWERetiredNounsTagMax = 631;
+  if (self.tagId != kLWENounsTagId)
+  {
+    return nil;
+  }
+  NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
+  NSDictionary *frozen = [NSDictionary dictionaryWithContentsOfFile:path];
+  if (frozen == nil)
+  {
+    return nil;
+  }
+  id frozenTagId = [frozen objectForKey:kLWEFrozenTagIdKey];
+  id frozenUserId = [frozen objectForKey:kLWEFrozenUserIdKey];
+  NSArray *frozenLevels = [frozen objectForKey:kLWEFrozenLevelsKey];
+  NSInteger userId = [[NSUserDefaults standardUserDefaults] integerForKey:APP_USER];
+  if ([frozenTagId isKindOfClass:[NSNumber class]] == NO ||
+      [frozenUserId isKindOfClass:[NSNumber class]] == NO ||
+      [frozenUserId integerValue] != userId ||
+      [frozenLevels isKindOfClass:[NSArray class]] == NO ||
+      [frozenLevels count] != 6)
+  {
+    return nil;
+  }
+  NSInteger retiredTag = [frozenTagId integerValue];
+  if (retiredTag < kLWERetiredNounsTagMin || retiredTag > kLWERetiredNounsTagMax)
+  {
+    return nil;
+  }
+  NSMutableArray *cardIds = [NSMutableArray array];
+  for (id frozenLevel in frozenLevels)
+  {
+    if ([frozenLevel isKindOfClass:[NSArray class]] == NO)
+    {
+      return nil;
+    }
+    for (id cardId in (NSArray *)frozenLevel)
+    {
+      if ([cardId isKindOfClass:[NSNumber class]] == NO)
+      {
+        return nil;
+      }
+      [cardIds addObject:cardId];
+    }
+  }
+  // Browse walks the ids sorted by card id, the same order -flattenCardArrays uses.
+  [cardIds sortUsingSelector:@selector(compare:)];
+  NSInteger index = [[NSUserDefaults standardUserDefaults] integerForKey:@"current_index"];
+  if (index < 0 || index >= (NSInteger)[cardIds count])
+  {
+    return nil;
+  }
+  return [cardIds objectAtIndex:index];
+#endif
+}
+
 /** Executed when loading a new set on app load */
 - (void) populateCardIds
 {
+  // Read a Nouns 02–13 session before the file is deleted. It does not match tag 133,
+  // so -thawCardIds will not use it as this set's cards.
+  NSNumber *carriedCardId = [self _cardIdCarriedFromRetiredNounSession];
   NSMutableArray *tmpCardIdsArray = [self thawCardIds];
   // The saved session is good for one load only: delete it whether it matched this tag or not,
   // so a leftover file can never be loaded into a later set.
   LWEDeleteFrozenCardIds();
   if (tmpCardIdsArray == nil)
   {
-    // No usable saved session: get the cards (and their levels) from the database
+    // No usable saved session: get the card ids (and their levels) from the database
     tmpCardIdsArray = [CardPeer retrieveCardsSortedByLevelForTag:self];
   }
   
@@ -326,6 +408,17 @@ static void LWEDeleteFrozenCardIds(void)
 
   // populate the card level counts
 	[self recacheCardCountForEachLevel];
+
+  if (carriedCardId != nil)
+  {
+    NSUInteger index = [self.flattenedCardIdArray indexOfObject:carriedCardId];
+    if (index != NSNotFound)
+    {
+      self.currentIndex = (NSInteger)index;
+      // -activeTag applies current_index from settings after this load.
+      [[NSUserDefaults standardUserDefaults] setInteger:(NSInteger)index forKey:@"current_index"];
+    }
+  }
 }
 
 //! Concatenate cardId arrays for browse mode
@@ -357,15 +450,16 @@ static void LWEDeleteFrozenCardIds(void)
     NSInteger countBeforeRemove = [thisLevelCards count];
     NSInteger countBeforeAdd = [nextLevelCards count];
 
-    // Now do the remove
-    LWE_ASSERT_EXC([thisLevelCards containsObject:card], @"Can't remove the card, it's no longer there!");
-    [thisLevelCards removeObject:card];
+    // Now do the remove. Levels store card ids, matched the same way Card -isEqual: matches.
+    NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
+    LWE_ASSERT_EXC([thisLevelCards containsObject:cardId], @"Can't remove the card, it's no longer there!");
+    [thisLevelCards removeObject:cardId];
     NSInteger countAfterRemove = [thisLevelCards count];
 
     // Only do the add if remove was successful
     if (countBeforeRemove == (countAfterRemove + 1))
     {
-      [nextLevelCards addObject:card];
+      [nextLevelCards addObject:cardId];
       
       // And now update its level ID so it stays accurate
       card.levelId = nextLevel;
@@ -386,9 +480,10 @@ static void LWEDeleteFrozenCardIds(void)
  */
 - (void) removeCardFromActiveSet:(Card *)card
 {
+  NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
   NSMutableArray *cardLevel = [self.cardsByLevel objectAtIndex:card.levelId];
-  [cardLevel removeObject:card];
-  [self.flattenedCardIdArray removeObject:card];
+  [cardLevel removeObject:cardId];
+  [self.flattenedCardIdArray removeObject:cardId];
   [self recacheCardCountForEachLevel];
 }
 
@@ -397,9 +492,10 @@ static void LWEDeleteFrozenCardIds(void)
  */
 - (void) addCardToActiveSet:(Card *)card
 {
+  NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
   NSMutableArray *cardLevel = [self.cardsByLevel objectAtIndex:card.levelId];
-  [cardLevel addObject:card];
-  [self.flattenedCardIdArray addObject:card];
+  [cardLevel addObject:cardId];
+  [self.flattenedCardIdArray addObject:cardId];
   [self recacheCardCountForEachLevel];
 }
 

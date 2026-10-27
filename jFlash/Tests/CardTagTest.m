@@ -9,19 +9,41 @@
 #import "CardTagTest.h"
 #import "SetupDatabaseHelper.h"
 #import "PracticeModeCardViewDelegate.h"
+#import "BrowseModeCardViewDelegate.h"
 #import "TagPeer.h"
 #import "PracticeCardSelector.h"
 #import "PracticeCardSelectorMath.h"
 #import "CardPeer.h"
 #import "UserHistoryPeer.h"
 
+#if defined(LWE_JFLASH)
+#import <mach/mach.h>
+#endif
+
 static NSString * const kTagTestDefaultName             = @"TestTag";
 static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
 
 @interface CardTagTest ()
 @property (retain) Tag *tag;
+#if defined(LWE_JFLASH)
+- (NSArray *)_legacyBlankCardsByLevelForTag:(Tag *)tag flattened:(NSMutableArray **)flattened;
+#endif
 @end
 
+
+#if defined(LWE_JFLASH)
+static uint64_t LWEPhysicalFootprint(void)
+{
+  task_vm_info_data_t info;
+  mach_msg_type_number_t count = TASK_VM_INFO_COUNT;
+  kern_return_t result = task_info(mach_task_self(), TASK_VM_INFO, (task_info_t)&info, &count);
+  if (result != KERN_SUCCESS)
+  {
+    return 0;
+  }
+  return info.phys_footprint;
+}
+#endif
 
 @implementation CardTagTest
 
@@ -332,7 +354,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordCorrectForCard:card inTag:tag];
 
   NSMutableArray *level2 = [[tag cardsByLevel] objectAtIndex:2];
-  XCTAssertTrue([level2 containsObject:card], @"Correct from level 0 should place card at level 2");
+  XCTAssertTrue([level2 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Correct from level 0 should place card at level 2");
   [practiceMode release];
 }
 
@@ -350,7 +372,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordCorrectForCard:card inTag:tag];
 
   NSMutableArray *level2 = [[tag cardsByLevel] objectAtIndex:2];
-  XCTAssertTrue([level2 containsObject:card], @"Correct from level 1 should place card at level 2");
+  XCTAssertTrue([level2 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Correct from level 1 should place card at level 2");
   [practiceMode release];
 }
 
@@ -368,7 +390,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordCorrectForCard:card inTag:tag];
 
   NSMutableArray *level5 = [[tag cardsByLevel] objectAtIndex:5];
-  XCTAssertTrue([level5 containsObject:card], @"Correct from level 4 should place card at level 5");
+  XCTAssertTrue([level5 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Correct from level 4 should place card at level 5");
   [practiceMode release];
 }
 
@@ -386,7 +408,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordCorrectForCard:card inTag:tag];
 
   NSMutableArray *level5 = [[tag cardsByLevel] objectAtIndex:5];
-  XCTAssertTrue([level5 containsObject:card], @"Correct from level 5 should keep card at level 5");
+  XCTAssertTrue([level5 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Correct from level 5 should keep card at level 5");
   [practiceMode release];
 }
 
@@ -404,7 +426,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordWrongForCard:card inTag:tag];
 
   NSMutableArray *level1 = [[tag cardsByLevel] objectAtIndex:1];
-  XCTAssertTrue([level1 containsObject:card], @"Wrong answer from any level should place card at level 1");
+  XCTAssertTrue([level1 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Wrong answer from any level should place card at level 1");
   [practiceMode release];
 }
 
@@ -422,7 +444,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer buryCard:card inTag:tag];
 
   NSMutableArray *level5 = [[tag cardsByLevel] objectAtIndex:5];
-  XCTAssertTrue([level5 containsObject:card], @"Buried card should be at level 5");
+  XCTAssertTrue([level5 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Buried card should be at level 5");
   [practiceMode release];
 }
 
@@ -440,7 +462,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordCorrectForCard:card inTag:tag];
 
   NSMutableArray *level3 = [[tag cardsByLevel] objectAtIndex:3];
-  XCTAssertTrue([level3 containsObject:card], @"Correct from level 2 should place card at level 3");
+  XCTAssertTrue([level3 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Correct from level 2 should place card at level 3");
   [practiceMode release];
 }
 
@@ -458,7 +480,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordCorrectForCard:card inTag:tag];
 
   NSMutableArray *level4 = [[tag cardsByLevel] objectAtIndex:4];
-  XCTAssertTrue([level4 containsObject:card], @"Correct from level 3 should place card at level 4");
+  XCTAssertTrue([level4 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Correct from level 3 should place card at level 4");
   [practiceMode release];
 }
 
@@ -476,7 +498,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordWrongForCard:card inTag:tag];
 
   NSMutableArray *level1 = [[tag cardsByLevel] objectAtIndex:1];
-  XCTAssertTrue([level1 containsObject:card], @"Wrong answer from level 0 should place card at level 1");
+  XCTAssertTrue([level1 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Wrong answer from level 0 should place card at level 1");
   [practiceMode release];
 }
 
@@ -494,9 +516,231 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [UserHistoryPeer recordWrongForCard:card inTag:tag];
 
   NSMutableArray *level1 = [[tag cardsByLevel] objectAtIndex:1];
-  XCTAssertTrue([level1 containsObject:card], @"Wrong answer from level 5 should place card at level 1");
+  XCTAssertTrue([level1 containsObject:[NSNumber numberWithInteger:card.cardId]], @"Wrong answer from level 5 should place card at level 1");
   [practiceMode release];
 }
+
+//! Opening a set keeps card ids. The card on screen is a real Card, loaded then.
+- (void)testOpeningASetKeepsIdsUntilACardIsShown
+{
+  Tag *tag = [TagPeer retrieveTagByName:kLWEFavoriteTagName];
+  [tag populateCardIds];
+  XCTAssertEqual([tag.cardsByLevel count], (NSUInteger)6, @"Six study levels");
+
+  NSInteger total = 0;
+  NSInteger previousId = -1;
+  for (NSArray *level in tag.cardsByLevel)
+  {
+    total += [level count];
+    for (id entry in level)
+    {
+      XCTAssertTrue([entry isKindOfClass:[NSNumber class]], @"A level holds card ids, not Card objects");
+    }
+  }
+  XCTAssertEqual(total, tag.cardCount);
+  XCTAssertEqual([tag.flattenedCardIdArray count], (NSUInteger)tag.cardCount);
+  for (NSNumber *cardId in tag.flattenedCardIdArray)
+  {
+    XCTAssertGreaterThanOrEqual([cardId integerValue], previousId, @"Browse order is ascending card id");
+    previousId = [cardId integerValue];
+  }
+
+  tag.currentIndex = 0;
+  BrowseModeCardViewDelegate *browse = [[BrowseModeCardViewDelegate alloc] init];
+  Card *shown = [browse getNextCard:tag afterCard:nil direction:nil];
+  XCTAssertNotNil(shown);
+  XCTAssertFalse(shown.isFault, @"The card on screen is loaded");
+  XCTAssertGreaterThan([[shown headwordIgnoringMode:YES] length], (NSUInteger)0);
+  XCTAssertEqual([[tag.flattenedCardIdArray objectAtIndex:0] integerValue], shown.cardId);
+  XCTAssertTrue([[tag.flattenedCardIdArray objectAtIndex:0] isKindOfClass:[NSNumber class]]);
+  [browse release];
+
+  [tag freezeCardIds];
+  NSMutableArray *thawed = [tag thawCardIds];
+  XCTAssertEqualObjects(thawed, tag.cardsByLevel, @"A saved session reloads the same ids and levels");
+  NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
+  if ([[NSFileManager defaultManager] fileExistsAtPath:path])
+  {
+    [LWEFile deleteFile:path];
+  }
+}
+
+#if defined(LWE_JFLASH)
+
+//! The pre-change open path: one blank Card per member, then a sort. Held so the footprint includes it.
+- (NSArray *)_legacyBlankCardsByLevelForTag:(Tag *)tag flattened:(NSMutableArray **)flattened
+{
+  NSMutableArray *levels = [NSMutableArray arrayWithCapacity:6];
+  NSInteger i = 0;
+  for (i = 0; i < 6; i++)
+  {
+    [levels addObject:[NSMutableArray array]];
+  }
+  NSString *tableName = ([tag isEditable] || tag.tagId == 0) ? @"card_tag_link" : @"system_card_tag_link";
+  NSString *sql = [NSString stringWithFormat:@"SELECT l.card_id AS card_id,u.card_level as card_level "
+                   "FROM %@ l LEFT OUTER JOIN user_history u ON u.card_id = l.card_id "
+                   "AND u.user_id = ? WHERE l.tag_id = ?", tableName];
+  FMResultSet *rs = [[LWEDatabase sharedLWEDatabase].dao executeQuery:sql,
+                     [[NSUserDefaults standardUserDefaults] objectForKey:APP_USER],
+                     [NSNumber numberWithInt:tag.tagId]];
+  while ([rs next])
+  {
+    Card *card = [CardPeer blankCardWithId:[rs intForColumn:@"card_id"]];
+    NSInteger levelId = [rs intForColumn:@"card_level"];
+    [[levels objectAtIndex:levelId] addObject:card];
+  }
+  [rs close];
+
+  NSMutableArray *allCards = [NSMutableArray array];
+  for (NSArray *level in levels)
+  {
+    [allCards addObjectsFromArray:level];
+  }
+  [allCards sortUsingSelector:@selector(compare:)];
+  if (flattened != NULL)
+  {
+    *flattened = allCards;
+  }
+  return levels;
+}
+
+/**
+ * Logs how long and how much memory it takes to open the big sets, against the old
+ * "one blank Card per member" path. Nothing here asserts on time or bytes.
+ * Nouns also checks that a Nouns 02–13 session file keeps its browse card.
+ */
+- (void)testLargeSetOpenLogsIdLoadAgainstFullCardLoad
+{
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setInteger:DEFAULT_USER_ID forKey:APP_USER];
+  [settings setInteger:0 forKey:@"current_index"];
+
+  // tag id, name, card count. The largest set in 2.0 was Common Words 02 at 9,949 cards.
+  NSArray *sets = [NSArray arrayWithObjects:
+                   [NSArray arrayWithObjects:[NSNumber numberWithInteger:133], @"Nouns", [NSNumber numberWithInteger:122197], nil],
+                   [NSArray arrayWithObjects:[NSNumber numberWithInteger:2346], @"Common Nouns Full Set", [NSNumber numberWithInteger:18142], nil],
+                   [NSArray arrayWithObjects:[NSNumber numberWithInteger:2152], @"Common Words Full Set", [NSNumber numberWithInteger:22325], nil],
+                   nil];
+  for (NSArray *spec in sets)
+  {
+    NSInteger tagId = [[spec objectAtIndex:0] integerValue];
+    NSString *name = [spec objectAtIndex:1];
+    NSInteger expectedCount = [[spec objectAtIndex:2] integerValue];
+    Tag *tag = [TagPeer retrieveTagById:tagId];
+    XCTAssertEqualObjects(tag.tagName, name);
+    XCTAssertEqual(tag.cardCount, expectedCount, @"%@ membership", name);
+
+    NSInteger carriedCardId = 0;
+    if (tagId == 133)
+    {
+      FMResultSet *idRs = [[LWEDatabase sharedLWEDatabase].dao executeQuery:
+                           @"SELECT card_id FROM system_card_tag_link WHERE tag_id = 133 ORDER BY card_id LIMIT 1 OFFSET 50"];
+      XCTAssertTrue([idRs next], @"Nouns has a card past the start of the list");
+      carriedCardId = [idRs intForColumn:@"card_id"];
+      [idRs close];
+
+      NSArray *empty = [NSArray array];
+      NSArray *one = [NSArray arrayWithObject:[NSNumber numberWithInteger:carriedCardId]];
+      // Same keys as Tag's ids.plist. Tag 620 is Nouns 02, folded into 133.
+      NSDictionary *frozen = [NSDictionary dictionaryWithObjectsAndKeys:
+                              [NSNumber numberWithInteger:620], @"tagId",
+                              [NSNumber numberWithInteger:DEFAULT_USER_ID], @"userId",
+                              [NSArray arrayWithObjects:one, empty, empty, empty, empty, empty, nil], @"levels",
+                              nil];
+      NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
+      XCTAssertTrue([frozen writeToFile:path atomically:YES], @"write retired Nouns session");
+      [settings setInteger:0 forKey:@"current_index"];
+      tag.currentIndex = 7;
+    }
+
+    uint64_t beforeIds = LWEPhysicalFootprint();
+    CFAbsoluteTime idStart = CFAbsoluteTimeGetCurrent();
+    [tag populateCardIds];
+    double idsMs = (CFAbsoluteTimeGetCurrent() - idStart) * 1000.0;
+    uint64_t afterIds = LWEPhysicalFootprint();
+
+    XCTAssertEqual(tag.cardCount, expectedCount, @"%@ still has every card", name);
+    NSInteger levelTotal = 0;
+    for (NSArray *level in tag.cardsByLevel)
+    {
+      levelTotal += [level count];
+      if ([level count] > 0)
+      {
+        XCTAssertTrue([[level objectAtIndex:0] isKindOfClass:[NSNumber class]]);
+      }
+    }
+    XCTAssertEqual(levelTotal, expectedCount);
+
+    if (tagId == 133)
+    {
+      XCTAssertEqual(tag.currentIndex, (NSInteger)50, @"Browse position follows the card, not the old 9k-card index");
+      XCTAssertEqual([[tag.flattenedCardIdArray objectAtIndex:tag.currentIndex] integerValue], carriedCardId);
+      XCTAssertEqual([settings integerForKey:@"current_index"], tag.currentIndex);
+      NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
+      XCTAssertFalse([[NSFileManager defaultManager] fileExistsAtPath:path], @"The retired session file is consumed");
+    }
+
+    NSNumber *sampleId = [tag.flattenedCardIdArray objectAtIndex:0];
+    Card *shown = [CardPeer hydratedCardWithId:[sampleId integerValue]];
+    XCTAssertNotNil(shown);
+    XCTAssertFalse(shown.isFault);
+    XCTAssertGreaterThan([[shown headwordIgnoringMode:YES] length], (NSUInteger)0);
+
+    // Its own pool so the blank Cards are freed before the next set is measured.
+    NSAutoreleasePool *legacyPool = [[NSAutoreleasePool alloc] init];
+    NSMutableArray *legacyFlat = nil;
+    uint64_t beforeCards = LWEPhysicalFootprint();
+    CFAbsoluteTime cardStart = CFAbsoluteTimeGetCurrent();
+    NSArray *legacyLevels = [[self _legacyBlankCardsByLevelForTag:tag flattened:&legacyFlat] retain];
+    [legacyFlat retain];
+    double cardsMs = (CFAbsoluteTimeGetCurrent() - cardStart) * 1000.0;
+    uint64_t afterCards = LWEPhysicalFootprint();
+
+    NSLog(@"LWESetLoad tag=%ld name=%@ cards=%ld ids_ms=%.0f cards_ms=%.0f ids_delta_kb=%lld cards_delta_kb=%lld ids_footprint_kb=%llu cards_footprint_kb=%llu",
+          (long)tagId, name, (long)expectedCount, idsMs, cardsMs,
+          (long long)afterIds / 1024 - (long long)beforeIds / 1024,
+          (long long)afterCards / 1024 - (long long)beforeCards / 1024,
+          (unsigned long long)(afterIds / 1024),
+          (unsigned long long)(afterCards / 1024));
+
+    XCTAssertEqual([legacyFlat count], [tag.flattenedCardIdArray count], @"%@ old and new paths see the same cards", name);
+    for (NSUInteger index = 0; index < [legacyFlat count]; index++)
+    {
+      Card *oldCard = [legacyFlat objectAtIndex:index];
+      NSInteger newId = [[tag.flattenedCardIdArray objectAtIndex:index] integerValue];
+      if (oldCard.cardId != newId)
+      {
+        XCTFail(@"%@ browse order differs at %lu (old %ld, new %ld)", name, (unsigned long)index, (long)oldCard.cardId, (long)newId);
+        break;
+      }
+    }
+    for (NSInteger level = 0; level < 6; level++)
+    {
+      NSArray *oldLevel = [legacyLevels objectAtIndex:level];
+      NSArray *newLevel = [tag.cardsByLevel objectAtIndex:level];
+      XCTAssertEqual([oldLevel count], [newLevel count], @"%@ level %ld", name, (long)level);
+      for (NSUInteger index = 0; index < [oldLevel count]; index++)
+      {
+        NSInteger oldId = [(Card *)[oldLevel objectAtIndex:index] cardId];
+        NSInteger newId = [[newLevel objectAtIndex:index] integerValue];
+        if (oldId != newId)
+        {
+          XCTFail(@"%@ level %ld order differs at %lu (old %ld, new %ld)", name, (long)level, (unsigned long)index, (long)oldId, (long)newId);
+          break;
+        }
+      }
+    }
+
+    [legacyLevels release];
+    [legacyFlat release];
+    [legacyPool drain];
+    tag.cardsByLevel = nil;
+    tag.flattenedCardIdArray = nil;
+  }
+  [settings setInteger:0 forKey:@"current_index"];
+}
+
+#endif
 
 #pragma mark - Setting up
 

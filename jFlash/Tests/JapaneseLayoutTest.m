@@ -219,6 +219,40 @@ static NSString * const kLWELongReading = @"つづける - tsuzukeru (to continu
   }
 }
 
+- (void) testAcknowledgementsCreditCore1000Separately
+{
+  // The English paragraph is the lookup key in both files. The Japanese value is the translation.
+  NSDictionary *needles = [NSDictionary dictionaryWithObjectsAndKeys:
+                           [NSArray arrayWithObjects:@"nf01", @"nf02", @"Mainichi Shimbun", @"CC BY-SA 4.0", nil], @"en",
+                           [NSArray arrayWithObjects:@"nf01", @"nf02", @"毎日新聞", @"CC BY-SA 4.0", nil], @"ja",
+                           nil];
+  for (NSString *lang in needles)
+  {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"Localizable" ofType:@"strings" inDirectory:nil forLocalization:lang];
+    NSDictionary *strings = [NSDictionary dictionaryWithContentsOfFile:path];
+    XCTAssertNotNil(strings, @"%@ strings", lang);
+    NSString *matchedKey = nil;
+    for (NSString *key in strings)
+    {
+      if ([key rangeOfString:@"Core 1000 is not a separate word list"].location != NSNotFound)
+      {
+        matchedKey = key;
+        break;
+      }
+    }
+    XCTAssertNotNil(matchedKey, @"%@ acknowledgement key credits Core 1000", lang);
+    NSString *value = [strings objectForKey:matchedKey];
+    for (NSString *needle in [needles objectForKey:lang])
+    {
+      XCTAssertTrue([value rangeOfString:needle].location != NSNotFound, @"%@ acknowledgement missing %@", lang, needle);
+    }
+    if ([lang isEqualToString:@"ja"])
+    {
+      XCTAssertNotEqualObjects(value, matchedKey, @"Japanese acknowledgements should translate the Core 1000 credit");
+    }
+  }
+}
+
 static void LWECollectViews(UIView *view, Class cls, NSMutableArray *out)
 {
   if ([view isKindOfClass:cls] && !view.hidden && view.alpha > 0.01) [out addObject:view];

@@ -241,9 +241,27 @@
   return [CardPeer _retrieveCardWithResultSet:rs];
 }
 
+/**
+ * Card shown for one id. Opening a set stores ids only; practice and browse call this
+ * for the card that actually goes on screen.
+ */
++ (Card *) hydratedCardWithId:(NSInteger)cardId
+{
+  Card *card = [CardPeer retrieveCardByPK:cardId];
+  if (card == nil)
+  {
+    // No row: same result as the old blank card that hydrate could not fill.
+    card = [CardPeer blankCardWithId:cardId];
+  }
+  return card;
+}
+
 
 /**
- * Returns an array of Card ids for a given tagId
+ * Six arrays of card ids, bucketed by study level (0 unseen through 5 learned).
+ * A missing user_history row reads as level 0, matching FMDB's intForColumn on NULL.
+ * Within a level the order is the link table's row order. Cards themselves are loaded
+ * one at a time by +hydratedCardWithId:.
  */
 + (NSMutableArray *) retrieveCardsSortedByLevelForTag:(Tag *)tag
 {
@@ -262,9 +280,9 @@
   FMResultSet *rs = [db.dao executeQuery:sqlQuery,[settings objectForKey:@"user_id"],[NSNumber numberWithInt:tag.tagId]];
   while ([rs next])
   {
-    Card *newCard = [CardPeer blankCardWithId:[rs intForColumn:@"card_id"]];
+    NSNumber *cardId = [NSNumber numberWithInt:[rs intForColumn:@"card_id"]];
     NSInteger levelId = [rs intForColumn:@"card_level"];
-    [[cardIdList objectAtIndex:levelId] addObject:newCard];
+    [[cardIdList objectAtIndex:levelId] addObject:cardId];
   }
   [rs close];
   return cardIdList;

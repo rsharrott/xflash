@@ -17,6 +17,7 @@
 @interface PracticeModeCardViewDelegate()
 @property (nonatomic, assign) BOOL alreadyShowedLearnedAlert;
 - (Card *) _randomCardInTag:(Tag *)tag currentCard:(Card *)currentCard error:(NSError **)error;
+- (Card *) _cardForLevelEntry:(id)entry;
 @end
 
 @implementation PracticeModeCardViewDelegate
@@ -315,6 +316,21 @@ static NSUInteger LWERevealGeneration = 0;
   return -1;
 }
 
+//! The study set stores card ids. Load the full card only for the one about to be shown.
+- (Card *) _cardForLevelEntry:(id)entry
+{
+  if ([entry isKindOfClass:[NSNumber class]])
+  {
+    return [CardPeer hydratedCardWithId:[entry integerValue]];
+  }
+  Card *card = entry;
+  if (card.isFault)
+  {
+    [card hydrate];
+  }
+  return card;
+}
+
 /**
  * Returns a Card object from the database randomly
  * Accepts current cardId in an attempt to not return the last card again
@@ -354,7 +370,7 @@ static NSUInteger LWERevealGeneration = 0;
     numCardsAtLevel = [cardArray count];
   }
   NSInteger randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel);
-  randomCard = [cardArray objectAtIndex:randomOffset];
+  randomCard = [self _cardForLevelEntry:[cardArray objectAtIndex:randomOffset]];
   
   // this is a simple queue of the last five cards
   if (currentCard)
@@ -400,7 +416,7 @@ static NSUInteger LWERevealGeneration = 0;
       break;
     }
     randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel2);
-    randomCard = [cardArray objectAtIndex:randomOffset];      
+    randomCard = [self _cardForLevelEntry:[cardArray objectAtIndex:randomOffset]];
     
     i++;
     if (i > kLWETimesToRetryForNonRecentCardId)
@@ -414,10 +430,6 @@ static NSUInteger LWERevealGeneration = 0;
     }
   }
   
-  if (randomCard.isFault)
-  {
-    [randomCard hydrate];
-  }
   return randomCard;
 }
 

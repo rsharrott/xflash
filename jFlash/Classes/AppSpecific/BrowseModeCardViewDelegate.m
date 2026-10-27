@@ -12,6 +12,21 @@
 #import "ActionBarViewController.h"
 #import "StudyViewController.h"
 
+//! Browse stores card ids. Load the full card only for the one about to be shown.
+static Card *LWECardForBrowseEntry(id entry)
+{
+  if ([entry isKindOfClass:[NSNumber class]])
+  {
+    return [CardPeer hydratedCardWithId:[entry integerValue]];
+  }
+  Card *card = entry;
+  if (card.isFault)
+  {
+    [card hydrate];
+  }
+  return card;
+}
+
 @implementation BrowseModeCardViewDelegate
 
 #pragma mark - CardViewControllerDelegate Methods
@@ -87,7 +102,7 @@
   {
     // If currentCard == nil, this is the "first card" -- use whatever the value of currentIndex is
     LWE_ASSERT_EXC((cardSet.currentIndex < [cardSet.flattenedCardIdArray count]), @"the currentIndex is out of bounds?");
-    nextCard = [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex];
+    nextCard = LWECardForBrowseEntry([cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
   }
   else
   {
@@ -116,13 +131,7 @@
     }
     
     // OK, we've updated currentIndex, get the new card
-    nextCard = [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex];
-  }
-  
-  // Now, if we have a faulted card, hydrate it
-  if (nextCard.isFault)
-  {
-    [nextCard hydrate];
+    nextCard = LWECardForBrowseEntry([cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
   }
   return nextCard;
 }
