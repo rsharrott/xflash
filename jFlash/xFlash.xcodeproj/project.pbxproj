@@ -702,6 +702,10 @@
 		D8E55F12EB5869DC90AD4663 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 150BFBE91CEF5AB398F769DB /* Localizable.strings */; };
 		00CF337ED4F7AF6798912C9A /* Interface.strings in Resources */ = {isa = PBXBuildFile; fileRef = F1EBFC9FCDFD447E9F2C51ED /* Interface.strings */; };
 		1EE5CCAE823A9C2A6333A9C5 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0BBE7DC801ED7B4C70E2D99F /* InfoPlist.strings */; };
+		A7C3E1B09000100100000011 /* StudyProgressUI.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C3E1B09000100100000002 /* StudyProgressUI.m */; };
+		A7C3E1B09000100100000012 /* StudyProgressUI.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C3E1B09000100100000002 /* StudyProgressUI.m */; };
+		A7C3E1B09000100100000013 /* StudyProgressUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C3E1B09000100100000003 /* StudyProgressUITest.m */; };
+		A7C3E1B09000100100000014 /* StudyProgressUITest.m in Sources */ = {isa = PBXBuildFile; fileRef = A7C3E1B09000100100000003 /* StudyProgressUITest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -1154,6 +1158,9 @@
 		2716F902FA73FDCD01C57EC8 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Assets/JFlash/ja.lproj/Interface.strings; sourceTree = "<group>"; };
 		2F52A716F461FA5B1E65D25F /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = Assets/JFlash/ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		17AA8A9F0C3789260C019FB2 /* LWELocalization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LWELocalization.h; path = AppSpecific/LWELocalization.h; sourceTree = "<group>"; };
+		A7C3E1B09000100100000001 /* StudyProgressUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StudyProgressUI.h; path = AppSpecific/StudyProgressUI.h; sourceTree = "<group>"; };
+		A7C3E1B09000100100000002 /* StudyProgressUI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StudyProgressUI.m; path = AppSpecific/StudyProgressUI.m; sourceTree = "<group>"; };
+		A7C3E1B09000100100000003 /* StudyProgressUITest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = StudyProgressUITest.m; path = Tests/StudyProgressUITest.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1405,6 +1412,7 @@
 				4230BBFBC1ABDEE03D043FEF /* AppStoreLinkTest.m */,
 				A1B2C3D4E5F6A7B8C9D0E1F1 /* JapaneseLayoutTest.m */,
 				B4D9E00119000060000000AA /* StudySetBadgeAccessibilityTest.m */,
+				A7C3E1B09000100100000003 /* StudyProgressUITest.m */,
 				B4D9E00319000060000000AA /* DownloadManagerTabAnimationTest.m */,
 			);
 			name = Common;
@@ -2067,6 +2075,8 @@
 				91CBA67A11BB4986004BD0D0 /* ExampleSentencesViewController.m */,
 				91E1B0E511AE11E1003CCDC2 /* ProgressBarViewController.h */,
 				91E1B0E611AE11E1003CCDC2 /* ProgressBarViewController.m */,
+				A7C3E1B09000100100000001 /* StudyProgressUI.h */,
+				A7C3E1B09000100100000002 /* StudyProgressUI.m */,
 				917A5C4111AB829000016BD2 /* ProgressDetailsViewController.h */,
 				917A5C4211AB829000016BD2 /* ProgressDetailsViewController.m */,
 			);
@@ -2541,6 +2551,7 @@
 				917A5C7F11AB84EE00016BD2 /* Constants.m in Sources */,
 				917A5C8011AB84EE00016BD2 /* CurrentState.m in Sources */,
 				91E1B0E811AE11E1003CCDC2 /* ProgressBarViewController.m in Sources */,
+				A7C3E1B09000100100000011 /* StudyProgressUI.m in Sources */,
 				49F9692711AF680700DFC3C9 /* jFlashAppDelegate.m in Sources */,
 				91214D0911B4B9E80091AFEF /* BrowseModeCardViewDelegate.m in Sources */,
 				91214D6A11B4D77C0091AFEF /* PracticeModeCardViewDelegate.m in Sources */,
@@ -2695,6 +2706,7 @@
 				BEEF13401FC53B6372B214E9 /* AppStoreLinkTest.m in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* JapaneseLayoutTest.m in Sources */,
 				B4D9E00219000060000000AA /* StudySetBadgeAccessibilityTest.m in Sources */,
+				A7C3E1B09000100100000013 /* StudyProgressUITest.m in Sources */,
 				B4D9E00419000060000000AA /* DownloadManagerTabAnimationTest.m in Sources */,
 				B4D9E00519000060000000AA /* DownloadManager.m in Sources */,
 				B4D9E00619000060000000AA /* ModalTaskViewController.m in Sources */,
@@ -2803,6 +2815,7 @@
 				498EBDAA1488B96800BA6DE7 /* Plugin.m in Sources */,
 				498EBDB61488D43A00BA6DE7 /* PluginTest.m in Sources */,
 				91910157148992EC003E9A19 /* TagTest.m in Sources */,
+				A7C3E1B09000100100000014 /* StudyProgressUITest.m in Sources */,
 				D2D1BF2CDA56A9055FE7CACE /* AppStoreLinkTest.m in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F3 /* JapaneseLayoutTest.m in Sources */,
 				691BFE8994084A70BF87B858 /* CardModelTest.m in Sources */,
@@ -2893,6 +2906,7 @@
 				496C7B0C12632761004B6B90 /* ExampleSentencesViewController.m in Sources */,
 				496C7B0D12632762004B6B90 /* PracticeModeCardViewDelegate.m in Sources */,
 				496C7B0E12632763004B6B90 /* ProgressBarViewController.m in Sources */,
+				A7C3E1B09000100100000012 /* StudyProgressUI.m in Sources */,
 				496C7B0F12632764004B6B90 /* ProgressDetailsViewController.m in Sources */,
 				496C7B1012632765004B6B90 /* StudyViewController.m in Sources */,
 				652BB0BAD61C32359E7DCB41 /* FirstRunViewController.m in Sources */,
