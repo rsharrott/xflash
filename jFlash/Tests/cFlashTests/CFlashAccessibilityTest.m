@@ -31,6 +31,7 @@
 @synthesize groupName, groupId, tags;
 - (NSArray *) childTags { return tags ?: [NSArray array]; }
 - (BOOL) isTopLevelGroup { return NO; }
+- (NSString *) displayName { return self.groupName; }
 - (void) dealloc { [groupName release]; [tags release]; [super dealloc]; }
 @end
 
@@ -44,6 +45,7 @@
 @implementation LWEStudySetStubTag
 @synthesize tagName, tagId, cardCount;
 - (BOOL) isEditable { return NO; }
+- (NSString *) displayName { return self.tagName; }
 - (void) dealloc { [tagName release]; [super dealloc]; }
 @end
 
