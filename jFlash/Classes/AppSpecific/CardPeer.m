@@ -247,12 +247,9 @@
  */
 + (Card *) hydratedCardWithId:(NSInteger)cardId
 {
-  Card *card = [CardPeer retrieveCardByPK:cardId];
-  if (card == nil)
-  {
-    // No row: same result as the old blank card that hydrate could not fill.
-    card = [CardPeer blankCardWithId:cardId];
-  }
+  // Same load as the old faulted card on screen: a blank card, then -hydrate.
+  Card *card = [CardPeer blankCardWithId:cardId];
+  [card hydrate];
   return card;
 }
 
