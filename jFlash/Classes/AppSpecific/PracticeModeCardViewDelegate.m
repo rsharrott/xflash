@@ -18,6 +18,8 @@
 @property (nonatomic, assign) BOOL alreadyShowedLearnedAlert;
 - (Card *) _randomCardInTag:(Tag *)tag currentCard:(Card *)currentCard error:(NSError **)error;
 - (Card *) _cardForLevelEntry:(id)entry;
+- (NSInteger) _cardIdForLevelEntry:(id)entry;
+- (BOOL) _lastFiveCardsContainId:(NSInteger)cardId;
 @end
 
 @implementation PracticeModeCardViewDelegate
@@ -331,6 +333,27 @@ static NSUInteger LWERevealGeneration = 0;
   return card;
 }
 
+- (NSInteger) _cardIdForLevelEntry:(id)entry
+{
+  if ([entry isKindOfClass:[NSNumber class]])
+  {
+    return [entry integerValue];
+  }
+  return [(Card *)entry cardId];
+}
+
+- (BOOL) _lastFiveCardsContainId:(NSInteger)cardId
+{
+  for (Card *card in self.lastFiveCards)
+  {
+    if (card.cardId == cardId)
+    {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 /**
  * Returns a Card object from the database randomly
  * Accepts current cardId in an attempt to not return the last card again
@@ -370,7 +393,8 @@ static NSUInteger LWERevealGeneration = 0;
     numCardsAtLevel = [cardArray count];
   }
   NSInteger randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel);
-  randomCard = [self _cardForLevelEntry:[cardArray objectAtIndex:randomOffset]];
+  // Compare ids first. A rejected card is not loaded; only the card we keep is.
+  NSInteger randomCardId = [self _cardIdForLevelEntry:[cardArray objectAtIndex:randomOffset]];
   
   // this is a simple queue of the last five cards
   if (currentCard)
@@ -386,7 +410,7 @@ static NSUInteger LWERevealGeneration = 0;
   // prevent getting the same card twice.
   NSInteger i = 0; // counts how many times we whiled against the array
   NSInteger j = 0; // second iterator to count tries that return the same card as before
-  while ([self.lastFiveCards containsObject:randomCard])
+  while ([self _lastFiveCardsContainId:randomCardId])
   {
     LWE_LOG(@"Got the same card as last time");
     // If there is only one card left (this card) in the level, let's get a different level
@@ -412,24 +436,26 @@ static NSUInteger LWERevealGeneration = 0;
     LWE_ASSERT_EXC((numCardsAtLevel2 > 0),@"We've been asked for cards at level %d but there aren't any.",nextLevelId);
     if (numCardsAtLevel2 == 0)
     {
-      // Keep the card we already have rather than index into an empty level
+      // Keep the id we already have rather than index into an empty level
       break;
     }
     randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel2);
-    randomCard = [self _cardForLevelEntry:[cardArray objectAtIndex:randomOffset]];
+    randomCardId = [self _cardIdForLevelEntry:[cardArray objectAtIndex:randomOffset]];
     
     i++;
     if (i > kLWETimesToRetryForNonRecentCardId)
     {
       // the same card is worse than a card that was twice ago, so we check again that it's not that
-      if (j == kLWETimesToRetryForNonRecentCardId || ([currentCard isEqual:randomCard] == NO))
+      BOOL sameAsCurrent = (currentCard != nil && currentCard.cardId == randomCardId);
+      if (j == kLWETimesToRetryForNonRecentCardId || sameAsCurrent == NO)
       {
         break; //we tried 3 times, fuck it
       }
       j++;
     }
   }
-  
+
+  randomCard = [self _cardForLevelEntry:[NSNumber numberWithInteger:randomCardId]];
   return randomCard;
 }
 

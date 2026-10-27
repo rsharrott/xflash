@@ -248,16 +248,21 @@
  */
 + (Card *) _cardLoadedFromCardsTable:(NSInteger)cardId
 {
-  // No user_history join. Used only when the full load did not return a row, so a
-  // problem reading the user database cannot leave the card on screen blank.
+  // Same columns as -hydrate, including the user_history level. Used only when the
+  // full load did not return a row, so a missed read cannot leave the card blank
+  // or at level 0 (a level of 0 fails the study-set move in a Debug build).
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
   Card *card = [[CardPeer blankCardWithId:cardId] retain];
-  FMResultSet *rs = [db.dao executeQuery:@"SELECT c.card_id AS card_id, c.*, ch.meaning "
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT c.card_id AS card_id,u.card_level as card_level,u.user_id as user_id,"
+                     "u.wrong_count as wrong_count,u.right_count as right_count,c.*,ch.meaning "
                      "FROM cards c INNER JOIN cards_html ch ON c.card_id = ch.card_id "
-                     "WHERE c.card_id = ? LIMIT 1", [NSNumber numberWithInt:cardId]];
+                     "LEFT OUTER JOIN user_history u ON c.card_id = u.card_id AND u.user_id = ? "
+                     "WHERE c.card_id = ch.card_id AND c.card_id = ? LIMIT 1",
+                     [settings objectForKey:@"user_id"], [NSNumber numberWithInt:cardId]];
   while ([rs next])
   {
-    [card hydrateWithResultSet:rs simpleHydrate:NO];
+    [card hydrateWithResultSet:rs];
   }
   [rs close];
   return [card autorelease];
@@ -266,22 +271,21 @@
 + (Card *) hydratedCardWithId:(NSInteger)cardId
 {
   // Same load as the old faulted card on screen: a blank card, then -hydrate.
-  // Hold the card across that read. A second full load covers a first step that
-  // comes back as a disk error and leaves the card blank.
+  // Hold the card across that read. -hydrate closes its own statement. A second
+  // full load covers a first step that comes back as a disk error and leaves the
+  // card blank. This does not close any other statement on the shared connection.
   Card *card = [[CardPeer blankCardWithId:cardId] retain];
   [card hydrate];
   if (card.isFault)
   {
-    // A statement left open on this connection makes the next read fail as a disk error.
     LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-    NSLog(@"LWEHydrate retry card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
-    [db.dao closeOpenResultSets];
+    LWE_LOG(@"LWEHydrate retry card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
     [card hydrate];
   }
   if (card.isFault)
   {
     LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-    NSLog(@"LWEHydrate fallback card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
+    LWE_LOG(@"LWEHydrate fallback card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
     [card release];
     card = [[CardPeer _cardLoadedFromCardsTable:cardId] retain];
   }
@@ -318,6 +322,25 @@
   }
   [rs close];
   return cardIdList;
+}
+
+/**
+ * Card ids for a set, in the same link-table order as +retrieveFaultedCardsForTag:.
+ * The word list keeps these until a row is shown.
+ */
++ (NSArray *) retrieveCardIdsForTag:(Tag *)tag
+{
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  NSString *linkTableName = [self _tagLinkTableName:tag];
+  NSString *sqlQuery = [NSString stringWithFormat:@"SELECT card_id FROM %@ WHERE tag_id = ?", linkTableName];
+  FMResultSet *rs = [db.dao executeQuery:sqlQuery, [NSNumber numberWithInt:tag.tagId]];
+  NSMutableArray *cardIds = [NSMutableArray array];
+  while ([rs next])
+  {
+    [cardIds addObject:[NSNumber numberWithInt:[rs intForColumn:@"card_id"]]];
+  }
+  [rs close];
+  return cardIds;
 }
 
 /**
