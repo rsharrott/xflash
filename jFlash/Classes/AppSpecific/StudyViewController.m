@@ -652,7 +652,16 @@ static const CGFloat kLWEPronounceBtnInset = 12.0;
 {
   if ([keyPath isEqualToString:@"tagName"]) 
   {
-    self.cardSetLabel.text = [change objectForKey:NSKeyValueChangeNewKey];
+    // An editable set shows the name the user just typed.  A built-in set keeps
+    // its Japanese name when that is what the screen is showing.
+    if ([self.currentCardSet isEditable])
+    {
+      self.cardSetLabel.text = [change objectForKey:NSKeyValueChangeNewKey];
+    }
+    else
+    {
+      self.cardSetLabel.text = [self.currentCardSet displayName];
+    }
   }
   else if ([keyPath isEqualToString:APP_MODE])
   {

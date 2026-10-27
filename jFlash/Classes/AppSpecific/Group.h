@@ -21,7 +21,11 @@ extern NSInteger const kLWEUninitializedGroupId;
 //! Returns YES if this group is the top level group in a hierarchy.
 - (BOOL) isTopLevelGroup;
 
-@property (retain) NSString *groupName;   //! Display name
+@property (retain) NSString *groupName;   //! Stored name.  Browse sort uses this.
+@property (retain) NSString *groupNameJa; //! Japanese name for a built-in group.  Nil when there is none.
+
+//! Name to show.  Japanese when the app language is Japanese and groupNameJa is set.
+- (NSString *)displayName;
 @property NSInteger groupId;              //! groupId of the parent Group
 @property NSInteger ownerId;
 @property NSInteger tagCount;             //! cached number of Tag items in the Group

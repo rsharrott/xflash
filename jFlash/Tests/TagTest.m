@@ -171,6 +171,85 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   [TagPeer deleteTag:created];
 }
 
+- (void)testBuiltInNamesFollowTheAppLanguageAndUserSetsDoNot
+{
+  Tag *created = [TagPeer createTagNamed:@"マイセット" inGroup:[GroupPeer topLevelGroup]];
+  XCTAssertNotNil(created, @"Should create a user set");
+#if defined(LWE_JFLASH)
+  LWESetBuiltInCatalogLanguageOverride(@"en");
+  Tag *beginner = [TagPeer retrieveTagById:95];
+  XCTAssertEqualObjects(beginner.tagName, @"Beginner 1 (≈N5) 01");
+  XCTAssertEqualObjects([beginner displayName], beginner.tagName, @"English stays the stored name");
+  NSArray *englishOnly = [TagPeer retrieveTagListLike:@"初級1"];
+  XCTAssertEqual([englishOnly count], (NSUInteger)0, @"English search does not use the Japanese column");
+
+  LWESetBuiltInCatalogLanguageOverride(@"ja");
+  beginner = [TagPeer retrieveTagById:95];
+  XCTAssertEqualObjects(beginner.tagName, @"Beginner 1 (≈N5) 01", @"The stored name stays English");
+  XCTAssertEqualObjects([beginner displayName], @"初級1（≈N5）01");
+  XCTAssertTrue([[beginner displayDescription] length] > 0);
+  Tag *full = [TagPeer retrieveTagByName:@"Beginner 1 (≈N5) Full Set"];
+  XCTAssertEqualObjects([full displayName], @"初級1（≈N5）全部");
+  Group *level = [GroupPeer retrieveGroupById:24];
+  XCTAssertEqualObjects(level.groupName, @"1. Beginner 1 (≈N5)");
+  XCTAssertEqualObjects([level displayName], @"初級1（≈N5）");
+
+  NSArray *byJapanese = [TagPeer retrieveTagListLike:@"初級1"];
+  XCTAssertTrue([byJapanese count] > 1, @"Japanese search matches tag_name_ja");
+  NSArray *byEnglish = [TagPeer retrieveTagListLike:@"Beginner 1"];
+  XCTAssertTrue([byEnglish count] > 1, @"The English name still matches while the app is in Japanese");
+  BOOL foundFull = NO;
+  for (Tag *tag in byEnglish)
+  {
+    if ([tag.tagName isEqualToString:@"Beginner 1 (≈N5) Full Set"])
+    {
+      foundFull = YES;
+    }
+  }
+  XCTAssertTrue(foundFull, @"Full Set stays findable by its English name");
+
+  NSArray *nouns = [TagPeer retrieveTagListByGroupId:2];
+  XCTAssertEqualObjects([[nouns objectAtIndex:0] tagName], @"Nouns Full Set");
+  XCTAssertEqualObjects([[nouns objectAtIndex:0] displayName], @"名詞全部");
+  XCTAssertGreater([[nouns objectAtIndex:0] cardCount], (NSInteger)100000);
+  Tag *nounChunk = [TagPeer retrieveTagByName:@"Nouns 0001"];
+  XCTAssertNotNil(nounChunk);
+  XCTAssertEqualObjects([nounChunk displayName], @"名詞0001");
+  XCTAssertGreaterOrEqual(nounChunk.cardCount, (NSInteger)50);
+  XCTAssertLessOrEqual(nounChunk.cardCount, (NSInteger)100);
+
+  NSArray *common = [TagPeer retrieveTagListByGroupId:11];
+  XCTAssertEqualObjects([[common objectAtIndex:0] tagName], @"Common Words Full Set");
+  XCTAssertEqualObjects([[common objectAtIndex:0] displayName], @"よく使う単語全部");
+
+  NSArray *core = [TagPeer retrieveTagListByGroupId:28];
+  XCTAssertEqualObjects([[core objectAtIndex:0] tagName], @"Core 1000 Full Set");
+  XCTAssertEqualObjects([[core objectAtIndex:0] displayName], @"基本1000語全部");
+  XCTAssertEqual([[core objectAtIndex:0] cardCount], (NSInteger)993);
+  XCTAssertEqualObjects([[core objectAtIndex:1] tagName], @"Core 1000 01");
+  XCTAssertEqualObjects([[core objectAtIndex:1] displayName], @"基本1000語01");
+
+  Tag *mine = [TagPeer retrieveTagById:created.tagId];
+  XCTAssertEqualObjects([mine displayName], @"マイセット", @"A user-created set is never renamed");
+  XCTAssertNil(mine.tagNameJa);
+
+  Tag *favorites = [TagPeer retrieveTagByName:kLWEFavoriteTagName];
+  XCTAssertEqualObjects([favorites displayName], @"ロングウィークエンドのお気に入り");
+  favorites.tagDescription = @"renamed by the user";
+  [favorites save];
+  Tag *saved = [TagPeer retrieveTagById:favorites.tagId];
+  XCTAssertEqualObjects([saved displayName], kLWEFavoriteTagName, @"Saving an editable set clears the shipped Japanese name");
+  XCTAssertNil(saved.tagNameJa);
+#else
+  LWESetBuiltInCatalogLanguageOverride(@"ja");
+  XCTAssertFalse(LWEBuiltInCatalogUsesJapanese(), @"cFlash stays English");
+  Tag *tag = [TagPeer retrieveTagById:DEFAULT_TAG_ID];
+  XCTAssertEqualObjects([tag displayName], tag.tagName);
+  XCTAssertEqualObjects([created displayName], @"マイセット");
+#endif
+  [TagPeer deleteTag:created];
+}
+
 - (void)testDefaultTagAndStarterSets
 {
 #if defined(LWE_JFLASH)
@@ -217,6 +296,7 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
 
 - (void)tearDown
 {
+  LWESetBuiltInCatalogLanguageOverride(nil);
   JFlashDatabase *db = [JFlashDatabase sharedJFlashDatabase];
   NSError *error = nil;
   BOOL result = [db removeTestDatabaseWithError:&error];

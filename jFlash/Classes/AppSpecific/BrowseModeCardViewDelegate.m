@@ -73,7 +73,7 @@
   NSInteger currIndex = svc.currentCardSet.currentIndex + 1;
   NSInteger total = svc.currentCardSet.cardCount;
   svc.remainingCardsLabel.text = [NSString stringWithFormat:@"%d / %d",currIndex,total];
-  svc.cardSetLabel.text = svc.currentCardSet.tagName;
+  svc.cardSetLabel.text = [svc.currentCardSet displayName];
   
   // These buttons should be hidden at all times in browse mode.
   svc.tapForAnswerImage.hidden = YES;

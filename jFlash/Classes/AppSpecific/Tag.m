@@ -17,9 +17,34 @@ NSInteger const kLWEUninitializedCardCount = -1;
 NSInteger const kLWEUnseenCardLevel        = 0;
 NSInteger const kLWELearnedCardLevel       = 5;
 
+static NSString *sLWEBuiltInCatalogLanguageOverride = nil;
+
+BOOL LWEBuiltInCatalogUsesJapanese(void)
+{
+#if defined(LWE_JFLASH)
+  NSString *language = sLWEBuiltInCatalogLanguageOverride;
+  if (language == nil)
+  {
+    language = [[[NSBundle mainBundle] preferredLocalizations] firstObject];
+  }
+  return [language hasPrefix:@"ja"];
+#else
+  return NO;
+#endif
+}
+
+void LWESetBuiltInCatalogLanguageOverride(NSString *languageOrNil)
+{
+  if (sLWEBuiltInCatalogLanguageOverride != languageOrNil)
+  {
+    [sLWEBuiltInCatalogLanguageOverride release];
+    sLWEBuiltInCatalogLanguageOverride = [languageOrNil copy];
+  }
+}
+
 @implementation Tag
 
-@synthesize tagId, tagName, tagEditable, tagDescription, isFault = _isFault;
+@synthesize tagId, tagName, tagEditable, tagDescription, tagNameJa, tagDescriptionJa, isFault = _isFault;
 @synthesize cardCount, currentIndex, cardsByLevel, cardLevelCounts, flattenedCardIdArray;
 
 #pragma mark - Class Plumbing
@@ -44,6 +69,8 @@ NSInteger const kLWELearnedCardLevel       = 5;
   }
   [tagName release];
   [tagDescription release];
+  [tagNameJa release];
+  [tagDescriptionJa release];
   [flattenedCardIdArray release];
   [cardLevelCounts release];
   [cardsByLevel release];
@@ -86,6 +113,31 @@ NSInteger const kLWELearnedCardLevel       = 5;
   // TODO: all of this makes the assumption that tags are 1-1 with groups.  that was not the 
   // original design, but are we moving that direction?  MMA - Oct 19 2011
   return [GroupPeer parentGroupIdOfTag:self];
+}
+
+- (NSString *)displayName
+{
+#if defined(LWE_JFLASH)
+  // Only a stored Japanese column is shown, and only for a system row.  Editable
+  // sets (including one the user renamed) keep the name in tag_name.  Long Weekend
+  // Favorites is editable; its Japanese name is shown until a save clears the column.
+  if (LWEBuiltInCatalogUsesJapanese() && [self.tagNameJa length] > 0)
+  {
+    return self.tagNameJa;
+  }
+#endif
+  return self.tagName;
+}
+
+- (NSString *)displayDescription
+{
+#if defined(LWE_JFLASH)
+  if (LWEBuiltInCatalogUsesJapanese() && [self.tagDescriptionJa length] > 0)
+  {
+    return self.tagDescriptionJa;
+  }
+#endif
+  return self.tagDescription;
 }
 
 - (BOOL) isEditable
@@ -359,7 +411,26 @@ static void LWEDeleteFrozenCardIds(void)
 {
   LWE_ASSERT_EXC((self.tagId != kLWEUninitializedTagId),@"The tag must already exist to be saved, use createTagNamed in TagPeer to create a tag");
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-  BOOL success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ? WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+  BOOL success = NO;
+#if defined(LWE_JFLASH)
+  if ([self isEditable])
+  {
+    // Saving a name the user typed drops the shipped Japanese columns, so the
+    // set keeps the name they wrote when the app is in Japanese.
+    success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ?, tag_name_ja = NULL, description_ja = NULL WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+    if (success)
+    {
+      self.tagNameJa = nil;
+      self.tagDescriptionJa = nil;
+    }
+  }
+  else
+  {
+    success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ? WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+  }
+#else
+  success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ? WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+#endif
   if (success)
   {
     [[NSNotificationCenter defaultCenter] postNotificationName:LWETagDidSave object:self];
@@ -396,6 +467,10 @@ static void LWEDeleteFrozenCardIds(void)
   self.tagName = [rs stringForColumn:@"tag_name"];
   self.tagEditable = [rs intForColumn:@"editable"];
   self.cardCount = [rs intForColumn:@"count"];
+#if defined(LWE_JFLASH)
+  self.tagNameJa = [rs stringForColumn:@"tag_name_ja"];
+  self.tagDescriptionJa = [rs stringForColumn:@"description_ja"];
+#endif
   
   // We only care about getting new updates on data if we had data to begin with.
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tagDidSave:) name:LWETagDidSave object:nil];

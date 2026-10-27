@@ -119,7 +119,8 @@
   [self _execute:@"UPDATE tags SET count = 99 WHERE tag_id = 0"];
   [self _execute:@"UPDATE last_state SET tag_id = 644 WHERE user_id = 1"];
 
-  // 644 and 700 are chunk ids.  720 is a combined level set.  800 is free.
+  // 644 and 700 are chunk ids.  720 is a combined level set.  2000000 stays
+  // above every built-in id, including the Nouns and Core 1000 cuts.
   [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (644, 'My Travel Words', 'kept', 1, 1)"];
   [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (644, 145536, 2)"];
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 644)"];
@@ -131,9 +132,9 @@
   [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (720, 'My Whole Level', 'kept', 1, 1)"];
   [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (720, 145580, 4)"];
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 720)"];
-  [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (800, 'My Later Words', 'kept', 1, 1)"];
-  [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (800, 145593, 5)"];
-  [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 800)"];
+  [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (2000000, 'My Later Words', 'kept', 1, 1)"];
+  [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (2000000, 145593, 5)"];
+  [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (0, 2000000)"];
 
   // Links the 2.0 template kept for tags that do not exist.
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (18, 3)"];
@@ -142,6 +143,10 @@
   [self _execute:@"INSERT INTO group_tag_link (group_id, tag_id) VALUES (6, 28)"];
   // Explicit ids above bump sqlite_sequence.  A 2.0 file still says 643.
   [self _execute:@"UPDATE sqlite_sequence SET seq = 643 WHERE name = 'tags'"];
+  // A 2.0 file has no Japanese columns.  The first run has to add them.
+  [self _execute:@"ALTER TABLE tags DROP COLUMN tag_name_ja"];
+  [self _execute:@"ALTER TABLE tags DROP COLUMN description_ja"];
+  [self _execute:@"ALTER TABLE groups DROP COLUMN group_name_ja"];
 }
 
 - (void)testUpdateSettingsTo21KeepsUserDataAndRemapsCollisions
@@ -171,10 +176,10 @@
   int travelId = [self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Travel Words'"];
   int cookingId = [self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Cooking Words'"];
   int wholeId = [self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Whole Level'"];
-  // User tag 800 is above the template (720), so the new ids start at 801.
-  XCTAssertEqual(travelId, 801);
-  XCTAssertEqual(cookingId, 802);
-  XCTAssertEqual(wholeId, 803, @"720 collides with the combined Advanced set");
+  // User tag 2000000 is above the template, so the new ids start at 2000001.
+  XCTAssertEqual(travelId, 2000001);
+  XCTAssertEqual(cookingId, 2000002);
+  XCTAssertEqual(wholeId, 2000003, @"720 collides with the combined Advanced set");
   XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)travelId, @"The active set follows the user's set");
   XCTAssertNotEqual(travelId, 644);
   XCTAssertNotEqual(cookingId, 700);
@@ -190,8 +195,11 @@
   XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = (SELECT tag_id FROM tags WHERE tag_name = 'My Cooking Words')"], 145535);
 
   // A user set that did not collide keeps its id.  720 is the system set.
-  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 800);
-  XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 800"], 145593);
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 2000000);
+  XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 2000000"], 145593);
+  XCTAssertNil([self _stringQuery:@"SELECT tag_name_ja FROM tags WHERE tag_name = 'My Later Words'"]);
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name_ja FROM tags WHERE tag_id = 95"], @"初級1（≈N5）01");
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT group_name_ja FROM groups WHERE group_id = 28"], @"基本1000語");
   XCTAssertEqual([self _intQuery:@"SELECT editable FROM tags WHERE tag_id = 720"], 0);
   XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 720"], @"Advanced (≈N1) Full Set");
   XCTAssertEqual([self _intQuery:@"SELECT count FROM tags WHERE tag_id = 717"], 626);
@@ -220,7 +228,7 @@
   [self _openUserDatabase];
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Travel Words'"], travelId);
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Cooking Words'"], cookingId);
-  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 800);
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Later Words'"], 2000000);
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM tags WHERE tag_name = 'My Whole Level'"], wholeId);
   XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM last_state WHERE user_id = 1"], travelId);
   XCTAssertEqual([self _intQuery:@"SELECT right_count FROM user_history WHERE card_id = 2065830 AND user_id = 1"], 3);
@@ -238,8 +246,8 @@
   XCTAssertTrue([db.dao beginDeferredTransaction], @"Could not start a transaction");
   NSMutableDictionary *renames = [NSMutableDictionary dictionary];
   XCTAssertTrue([JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames]);
-  XCTAssertEqual([[renames objectForKey:[NSNumber numberWithInt:644]] intValue], 801);
-  XCTAssertEqual([[renames objectForKey:[NSNumber numberWithInt:720]] intValue], 803);
+  XCTAssertEqual([[renames objectForKey:[NSNumber numberWithInt:644]] intValue], 2000001);
+  XCTAssertEqual([[renames objectForKey:[NSNumber numberWithInt:720]] intValue], 2000003);
   XCTAssertTrue([db.dao rollback]);
   XCTAssertTrue([db detachDatabase:@"tpl"]);
   XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 644"], @"My Travel Words");

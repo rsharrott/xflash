@@ -310,14 +310,35 @@ def apply_sets():
     else:
         members, order = new_members, new_order
     changed, written_tags = study_sets.ensure_combined_membership(members, catalog)
-    wrote = legacy or changed
+    recut = False
+    chunked = None
+    if study_sets.needs_oversized_recut(members):
+        core_ids = study_sets.load_core_ids()
+        known = {row[0] for row in sqlite3.connect(study_sets.CARD_DB).execute(
+            'SELECT card_id FROM cards')}
+        missing = [card_id for card_id in core_ids if card_id not in known]
+        if missing:
+            raise SystemExit('Core 1000 card ids are not in the card database: %s' % missing[:8])
+        members, order, chunked = study_sets.recut_oversized(
+            members, order, study_sets.load_common_ids(), core_ids)
+        recut = True
+    wrote = legacy or changed or recut
     if wrote:
         _write_tsv(members, order)
         _write_public_catalog(catalog)
+        if chunked is not None:
+            study_sets.write_chunked(chunked)
     card = sqlite3.connect(study_sets.CARD_DB)
     if legacy:
         # The old nested lists were replaced.  Every system link is rewritten.
         nlinks = study_sets.replace_system_links(card, members)
+    elif recut:
+        # upsert_tag_links sorts by card_id and would wipe the study order.
+        chunk_ids = study_sets.chunked_tag_ids(chunked)
+        nlinks = study_sets.write_links_in_order(card, members, chunk_ids)
+        extra = [tag for tag in written_tags if tag not in set(chunk_ids)]
+        if extra:
+            nlinks += study_sets.upsert_tag_links(card, members, extra)
     elif written_tags:
         nlinks = study_sets.upsert_tag_links(card, members, written_tags)
     else:

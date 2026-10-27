@@ -25,11 +25,13 @@ def migrate(user_path, template_path):
     conn = sqlite3.connect(user_path)
     try:
         conn.execute('ATTACH DATABASE ? AS tpl', (template_path,))
+        _ensure_locale_columns(conn)
         mapping = _renumber_collisions(conn)
         _copy_system_tags(conn)
         _copy_groups(conn)
         _replace_system_links(conn)
         _drop_dangling_links(conn)
+        _copy_kept_japanese(conn)
         _recount_groups(conn)
         _refresh_starred_count(conn)
         _bump_sequence(conn)
@@ -46,6 +48,20 @@ def migrate(user_path, template_path):
         raise
     finally:
         conn.close()
+
+
+def _column_names(conn, table):
+    return {row[1] for row in conn.execute('PRAGMA table_info(%s)' % table)}
+
+
+def _ensure_locale_columns(conn):
+    """A 2.0 user file has no Japanese columns.  Adding them is idempotent."""
+    if 'tag_name_ja' not in _column_names(conn, 'tags'):
+        conn.execute('ALTER TABLE tags ADD COLUMN tag_name_ja TEXT')
+    if 'description_ja' not in _column_names(conn, 'tags'):
+        conn.execute('ALTER TABLE tags ADD COLUMN description_ja TEXT')
+    if 'group_name_ja' not in _column_names(conn, 'groups'):
+        conn.execute('ALTER TABLE groups ADD COLUMN group_name_ja TEXT')
 
 
 def _system_tag_ids_sql():
@@ -79,16 +95,42 @@ def _renumber_collisions(conn):
 
 def _copy_system_tags(conn):
     # Tag 0 (My Starred Words) is editable = 0 but its cards live in this file.
+    # Its Japanese columns are copied in _copy_kept_japanese, without touching count.
     conn.execute(
-        'INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) '
-        'SELECT tag_id, tag_name, description, editable, count FROM tpl.tags '
-        'WHERE editable = 0 AND tag_id != 0')
+        'INSERT OR REPLACE INTO tags '
+        '(tag_id, tag_name, description, tag_name_ja, description_ja, editable, count) '
+        'SELECT tag_id, tag_name, description, tag_name_ja, description_ja, editable, count '
+        'FROM tpl.tags WHERE editable = 0 AND tag_id != 0')
 
 
 def _copy_groups(conn):
     conn.execute(
-        'INSERT OR REPLACE INTO groups (group_id, group_name, owner_id, tag_count, recommended) '
-        'SELECT group_id, group_name, owner_id, tag_count, recommended FROM tpl.groups')
+        'INSERT OR REPLACE INTO groups '
+        '(group_id, group_name, group_name_ja, owner_id, tag_count, recommended) '
+        'SELECT group_id, group_name, group_name_ja, owner_id, tag_count, recommended '
+        'FROM tpl.groups')
+
+
+def _copy_kept_japanese(conn):
+    """Japanese names for rows the system-tag copy deliberately skips.
+
+    Tag 0 keeps its card count.  An editable built-in (Long Weekend Favorites)
+    keeps a Japanese name only while its English name still matches the
+    template.  A renamed set, and every user-created set, is left as named.
+    """
+    conn.execute(
+        'UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags WHERE tag_id = 0), '
+        'description_ja = (SELECT description_ja FROM tpl.tags WHERE tag_id = 0) '
+        'WHERE tag_id = 0')
+    conn.execute(
+        'UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id), '
+        'description_ja = (SELECT description_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id) '
+        'WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) '
+        'AND tag_name = (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)')
+    conn.execute(
+        'UPDATE tags SET tag_name_ja = NULL, description_ja = NULL '
+        'WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) '
+        'AND tag_name != (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)')
 
 
 def _replace_system_links(conn):

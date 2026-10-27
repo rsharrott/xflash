@@ -70,7 +70,7 @@
   
   // We do this on viewWillAppear instead of viewDidLoad because the tagName could change
   // when the user edits it after tapping "Edit" on this VC
-  self.navigationItem.title = self.tag.tagName;
+  self.navigationItem.title = [self.tag displayName];
 }
 
 #pragma mark - KVO

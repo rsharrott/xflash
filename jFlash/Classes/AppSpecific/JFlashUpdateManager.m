@@ -364,6 +364,10 @@
  * user-created sets and last_state stay.  A user-created tag whose id collides with a new system
  * tag (644 and up) is renumbered.
  *
+ * Built-in set names also gain Japanese columns (tag_name_ja, description_ja,
+ * group_name_ja).  A 2.0 file does not have those columns, so this adds them
+ * before copying.  User-created sets are not given a Japanese name.
+ *
  * Same statements as tools/dictbuild/user_db_migration.py.  Keep the two in step.
  */
 + (BOOL) _needsUpdateTo21:(NSUserDefaults *)settings
@@ -501,8 +505,52 @@
   return NO;
 }
 
++ (BOOL) _column:(NSString *)column existsOn:(NSString *)table db:(LWEDatabase *)db
+{
+  FMResultSet *rs = [db.dao executeQuery:[NSString stringWithFormat:@"PRAGMA table_info(%@)", table]];
+  BOOL found = NO;
+  while ([rs next])
+  {
+    if ([[rs stringForColumn:@"name"] isEqualToString:column])
+    {
+      found = YES;
+    }
+  }
+  [rs close];
+  return found;
+}
+
++ (BOOL) _ensureLocaleColumns:(LWEDatabase *)db
+{
+  // A 2.0 user file has none of these.  A second run finds them and skips the ALTER.
+  NSArray *columns = [NSArray arrayWithObjects:
+                      [NSArray arrayWithObjects:@"tags", @"tag_name_ja", nil],
+                      [NSArray arrayWithObjects:@"tags", @"description_ja", nil],
+                      [NSArray arrayWithObjects:@"groups", @"group_name_ja", nil],
+                      nil];
+  for (NSArray *pair in columns)
+  {
+    NSString *table = [pair objectAtIndex:0];
+    NSString *column = [pair objectAtIndex:1];
+    if ([JFlashUpdateManager _column:column existsOn:table db:db])
+    {
+      continue;
+    }
+    NSString *sql = [NSString stringWithFormat:@"ALTER TABLE %@ ADD COLUMN %@ TEXT", table, column];
+    if ([JFlashUpdateManager _migrationUpdate:db sql:sql] == NO)
+    {
+      return NO;
+    }
+  }
+  return YES;
+}
+
 + (BOOL) _migrateUserDatabase:(LWEDatabase *)db renamedTags:(NSMutableDictionary *)renames
 {
+  if ([JFlashUpdateManager _ensureLocaleColumns:db] == NO)
+  {
+    return NO;
+  }
   NSString *systemTags = @"SELECT tag_id FROM tpl.tags WHERE editable = 0 AND tag_id != 0";
   FMResultSet *rs = [db.dao executeQuery:
     [NSString stringWithFormat:@"SELECT tag_id FROM tags WHERE editable = 1 AND tag_id IN (%@) ORDER BY tag_id", systemTags]];
@@ -549,15 +597,15 @@
   }
 
   if ([JFlashUpdateManager _migrationUpdate:db sql:
-       @"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) "
-       "SELECT tag_id, tag_name, description, editable, count FROM tpl.tags "
+       @"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, tag_name_ja, description_ja, editable, count) "
+       "SELECT tag_id, tag_name, description, tag_name_ja, description_ja, editable, count FROM tpl.tags "
        "WHERE editable = 0 AND tag_id != 0"] == NO)
   {
     return NO;
   }
   if ([JFlashUpdateManager _migrationUpdate:db sql:
-       @"INSERT OR REPLACE INTO groups (group_id, group_name, owner_id, tag_count, recommended) "
-       "SELECT group_id, group_name, owner_id, tag_count, recommended FROM tpl.groups"] == NO)
+       @"INSERT OR REPLACE INTO groups (group_id, group_name, group_name_ja, owner_id, tag_count, recommended) "
+       "SELECT group_id, group_name, group_name_ja, owner_id, tag_count, recommended FROM tpl.groups"] == NO)
   {
     return NO;
   }
@@ -577,6 +625,31 @@
   // so they were invisible, but they are not part of the catalog.
   if ([JFlashUpdateManager _migrationUpdate:db sql:
        @"DELETE FROM group_tag_link WHERE tag_id NOT IN (SELECT tag_id FROM tags)"] == NO)
+  {
+    return NO;
+  }
+  // Tag 0 keeps its card count.  Copy only the Japanese columns.
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags WHERE tag_id = 0), "
+       "description_ja = (SELECT description_ja FROM tpl.tags WHERE tag_id = 0) "
+       "WHERE tag_id = 0"] == NO)
+  {
+    return NO;
+  }
+  // An editable built-in keeps a Japanese name only while its English name still
+  // matches the template.  A renamed set, and every user-created set, stays as named.
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id), "
+       "description_ja = (SELECT description_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id) "
+       "WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) "
+       "AND tag_name = (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)"] == NO)
+  {
+    return NO;
+  }
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"UPDATE tags SET tag_name_ja = NULL, description_ja = NULL "
+       "WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) "
+       "AND tag_name != (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)"] == NO)
   {
     return NO;
   }

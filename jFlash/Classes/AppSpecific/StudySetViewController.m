@@ -85,7 +85,7 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
   if (self)
   {
     self.group = aGroup;
-    self.title = aGroup.groupName;
+    self.title = [aGroup displayName];
     [self _commonInit];
   }
   return self;
@@ -484,11 +484,11 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
         tmpView.image = LWEStudySetRowSymbol(@"tag");
       }
       // VoiceOver: the star badge is only drawn, so say it too (cleared on rows without it)
-      LWEStudySetApplyBadgeAccessibility(cell, starred, tmpTag.tagName, @"Starred",
+      LWEStudySetApplyBadgeAccessibility(cell, starred, [tmpTag displayName], @"Starred",
                                          NSLocalizedString(@"Starred", @"StudySetViewController.StarredBadgeAccessibility"));
       
       cell.textLabel.numberOfLines = 0;
-      cell.textLabel.text = tmpTag.tagName;
+      cell.textLabel.text = [tmpTag displayName];
       cell.selectionStyle = UITableViewCellSelectionStyleNone;
       NSString *tmpDetailText = [NSString stringWithFormat:NSLocalizedString(@"%d Words",@"StudySetViewController.WordCount"), [tmpTag cardCount]];
       cell.detailTextLabel.font = [UIFont boldSystemFontOfSize:12];
@@ -528,7 +528,7 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
     // This is for groups?
     Group *tmpGroup = [self.subgroupArray objectAtIndex:indexPath.row];
     cell.textLabel.numberOfLines = 0;
-    cell.textLabel.text = tmpGroup.groupName;
+    cell.textLabel.text = [tmpGroup displayName];
     cell.selectionStyle = UITableViewCellSelectionStyleGray;
 
     NSMutableArray *descItems = [NSMutableArray arrayWithCapacity:2];
@@ -556,7 +556,7 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
       tmpView.image = LWEStudySetRowSymbol(@"folder");
     }
     // VoiceOver: the star badge is only drawn, so say it too (cleared on rows without it)
-    LWEStudySetApplyBadgeAccessibility(cell, (tmpGroup.recommended != 0), tmpGroup.groupName, @"Recommended",
+    LWEStudySetApplyBadgeAccessibility(cell, (tmpGroup.recommended != 0), [tmpGroup displayName], @"Recommended",
                                        NSLocalizedString(@"Recommended", @"StudySetViewController.RecommendedBadgeAccessibility"));
     
     cell.accessoryType = UITableViewCellAccessoryNone;
@@ -673,7 +673,7 @@ static UIImage *LWEStudySetStarredRowSymbol(NSString *name, CGPoint starCenter)
       if (numCards > 0)
       {
         self.selectedTagId = indexPath.row;
-        NSString *tagName = [[self.tagArray objectAtIndex:indexPath.row] tagName];
+        NSString *tagName = [[self.tagArray objectAtIndex:indexPath.row] displayName];
         [LWEUIAlertView confirmationAlertWithTitle:tagName
                                            message:NSLocalizedString(@"Do you want to start this set?  Progress on your last set will be saved.",@"StudySetViewController.StartStudy_AlertViewMessage")
                                           delegate:self];

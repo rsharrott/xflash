@@ -368,7 +368,7 @@ enum EntrySectionRows
       cell.selectionStyle = UITableViewCellSelectionStyleNone;
       cell.accessoryType = UITableViewCellAccessoryNone;
     }
-    cell.textLabel.text = tmpTag.tagName;
+    cell.textLabel.text = [tmpTag displayName];
   }
   
   return cell;
