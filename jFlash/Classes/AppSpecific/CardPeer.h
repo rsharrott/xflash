@@ -12,9 +12,14 @@
 //! Card methods
 + (Card*) retrieveCardByPK:(NSInteger)cardId;
 
-//! Array of cards methods
+//! Six arrays of card-id NSNumbers, one per study level. A full Card is loaded later, for the card on screen.
 + (NSMutableArray*) retrieveCardsSortedByLevelForTag:(Tag *)tag;
+//! Card ids for a set's word list, in link-table order. A row is loaded when it is shown.
++ (NSArray*) retrieveCardIdsForTag:(Tag *)tag;
+//! Blank cards (id only). Search uses these for its starred-set cache.
 + (NSArray*) retrieveFaultedCardsForTag:(Tag *)tag;
+//! The card to show for an id stored on a study set. A missing row comes back as a blank card.
++ (Card *) hydratedCardWithId:(NSInteger)cardId;
 
 //! Example sentences
 + (NSArray*) retrieveCardSetForExampleSentenceId:(NSInteger)sentenceID;

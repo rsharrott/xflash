@@ -8,6 +8,8 @@
 + (Card*) _retrieveCardWithResultSet:(FMResultSet *)rs;
 + (NSMutableArray*) _addCardsToList:(NSMutableArray*)cardList fromResultSet:(FMResultSet*)rs hydrate:(BOOL)shouldHydrate;
 + (NSString *) _tagLinkTableName:(Tag *)tag;
++ (Card *) _cardLoadedFromCardsTable:(NSInteger)cardId;
++ (void) _applyUserHistoryToCard:(Card *)card;
 @end
 
 @implementation CardPeer
@@ -241,9 +243,97 @@
   return [CardPeer _retrieveCardWithResultSet:rs];
 }
 
+/**
+ * Card shown for one id. Opening a set stores ids only; practice and browse call this
+ * for the card that actually goes on screen.
+ */
++ (void) _applyUserHistoryToCard:(Card *)card
+{
+  if (card == nil || card.cardId == kLWEUninitializedCardId)
+  {
+    return;
+  }
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT card_level, user_id, wrong_count, right_count "
+                     "FROM user_history WHERE card_id = ? AND user_id = ? LIMIT 1",
+                     [NSNumber numberWithInt:card.cardId], [settings objectForKey:@"user_id"]];
+  if ([rs next])
+  {
+    card.levelId = [rs intForColumn:@"card_level"];
+    card.userId = [rs intForColumn:@"user_id"];
+    card.wrongCount = [rs intForColumn:@"wrong_count"];
+    card.rightCount = [rs intForColumn:@"right_count"];
+  }
+  [rs close];
+}
+
++ (Card *) _cardLoadedFromCardsTable:(NSInteger)cardId
+{
+  // Same columns as -hydrate, including the user_history level. A level of 0 when
+  // the card is actually in another bucket fails the study-set move in a Debug build.
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  Card *card = [[CardPeer blankCardWithId:cardId] retain];
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT c.card_id AS card_id,u.card_level as card_level,u.user_id as user_id,"
+                     "u.wrong_count as wrong_count,u.right_count as right_count,c.*,ch.meaning "
+                     "FROM cards c INNER JOIN cards_html ch ON c.card_id = ch.card_id "
+                     "LEFT OUTER JOIN user_history u ON c.card_id = u.card_id AND u.user_id = ? "
+                     "WHERE c.card_id = ch.card_id AND c.card_id = ? LIMIT 1",
+                     [settings objectForKey:@"user_id"], [NSNumber numberWithInt:cardId]];
+  while ([rs next])
+  {
+    [card hydrateWithResultSet:rs];
+  }
+  [rs close];
+  if (card.isFault)
+  {
+    // The joined read did not return a row (a disk error on the user database does
+    // this). The card text is in the attached card database, so load that on its
+    // own, then the level from its own statement.
+    FMResultSet *cardRs = [db.dao executeQuery:@"SELECT c.card_id AS card_id, c.*, ch.meaning "
+                           "FROM cards c INNER JOIN cards_html ch ON c.card_id = ch.card_id "
+                           "WHERE c.card_id = ? LIMIT 1", [NSNumber numberWithInt:cardId]];
+    while ([cardRs next])
+    {
+      [card hydrateWithResultSet:cardRs];
+    }
+    [cardRs close];
+    [CardPeer _applyUserHistoryToCard:card];
+  }
+  return [card autorelease];
+}
+
++ (Card *) hydratedCardWithId:(NSInteger)cardId
+{
+  // Same load as the old faulted card on screen: a blank card, then -hydrate.
+  // Hold the card across that read. -hydrate closes its own statement. A second
+  // full load covers a first step that comes back as a disk error and leaves the
+  // card blank. This does not close any other statement on the shared connection.
+  Card *card = [[CardPeer blankCardWithId:cardId] retain];
+  [card hydrate];
+  if (card.isFault)
+  {
+    LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+    LWE_LOG(@"LWEHydrate retry card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
+    [card hydrate];
+  }
+  if (card.isFault)
+  {
+    LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+    LWE_LOG(@"LWEHydrate fallback card=%ld err=%d msg=%@", (long)cardId, [db.dao lastErrorCode], [db.dao lastErrorMessage]);
+    [card release];
+    card = [[CardPeer _cardLoadedFromCardsTable:cardId] retain];
+  }
+  return [card autorelease];
+}
+
 
 /**
- * Returns an array of Card ids for a given tagId
+ * Six arrays of card ids, bucketed by study level (0 unseen through 5 learned).
+ * A missing user_history row reads as level 0, matching FMDB's intForColumn on NULL.
+ * Within a level the order is the link table's row order. Cards themselves are loaded
+ * one at a time by +hydratedCardWithId:.
  */
 + (NSMutableArray *) retrieveCardsSortedByLevelForTag:(Tag *)tag
 {
@@ -262,12 +352,31 @@
   FMResultSet *rs = [db.dao executeQuery:sqlQuery,[settings objectForKey:@"user_id"],[NSNumber numberWithInt:tag.tagId]];
   while ([rs next])
   {
-    Card *newCard = [CardPeer blankCardWithId:[rs intForColumn:@"card_id"]];
+    NSNumber *cardId = [NSNumber numberWithInt:[rs intForColumn:@"card_id"]];
     NSInteger levelId = [rs intForColumn:@"card_level"];
-    [[cardIdList objectAtIndex:levelId] addObject:newCard];
+    [[cardIdList objectAtIndex:levelId] addObject:cardId];
   }
   [rs close];
   return cardIdList;
+}
+
+/**
+ * Card ids for a set, in the same link-table order as +retrieveFaultedCardsForTag:.
+ * The word list keeps these until a row is shown.
+ */
++ (NSArray *) retrieveCardIdsForTag:(Tag *)tag
+{
+  LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
+  NSString *linkTableName = [self _tagLinkTableName:tag];
+  NSString *sqlQuery = [NSString stringWithFormat:@"SELECT card_id FROM %@ WHERE tag_id = ?", linkTableName];
+  FMResultSet *rs = [db.dao executeQuery:sqlQuery, [NSNumber numberWithInt:tag.tagId]];
+  NSMutableArray *cardIds = [NSMutableArray array];
+  while ([rs next])
+  {
+    [cardIds addObject:[NSNumber numberWithInt:[rs intForColumn:@"card_id"]]];
+  }
+  [rs close];
+  return cardIds;
 }
 
 /**

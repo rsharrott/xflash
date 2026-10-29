@@ -8,9 +8,12 @@ reapplied to the user-DB template.  Each level also has one combined set, the
 union of that level's chunks, so a learner can review the whole level.
 
 Card membership lives in data/system_sets.tsv.  Names and groups live in
-jFlash/sql/jFlash.db.  A future `build.py` reads the TSV as it stands and
-calls ensure_user_catalog() so the template keeps these names.  It does not
-re-nest the levels.
+jFlash/sql/jFlash.db.  Common Words, Common Nouns and Core 1000 are cut the
+same way as the levels (50–100 cards, plus a Full Set).  The full Nouns list
+is not a built-in set.  Japanese names are columns on the tag and group rows,
+keyed by id.
+A future `build.py` reads the TSV as it stands and calls ensure_user_catalog()
+so the template keeps these names.  It does not re-nest the levels.
 
   python3 study_sets.py          # patch the TSV, the bundled DBs, and the catalog
 """
@@ -19,10 +22,14 @@ import json
 import os
 import sqlite3
 
+import builtin_ja
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..'))
 TSV_PATH = os.path.join(HERE, 'data', 'system_sets.tsv')
 CATALOG_PATH = os.path.join(HERE, 'data', 'vocabulary_levels.json')
+CHUNKED_PATH = os.path.join(HERE, 'data', 'chunked_lists.json')
+CORE_PATH = os.path.join(HERE, 'data', 'core1000.tsv')
 CARD_DB = os.path.join(REPO, 'jFlash', 'sql', 'jFlash-CARD-2.0.db')
 FTS_DB = os.path.join(REPO, 'jFlash', 'sql', 'plugins', 'jFlash-FTS-2.0.db')
 USER_DB = os.path.join(REPO, 'jFlash', 'sql', 'jFlash.db')
@@ -146,6 +153,47 @@ TEXT_REPLACEMENTS = (
 EXPRESSIONS_TAG = 147
 EXPRESSIONS_NAME = 'Expressions (set phrases)'
 EXPRESSIONS_DESCRIPTION = 'JMdict expressions (set phrases).  Not a frequency list of common phrases.'
+
+# Tag 133 was the full noun list (and, before that, Nouns plus Nouns 02–13 at
+# 620–631).  It is not a built-in set.  A 2.0 install still has those rows;
+# the 2.1 migration removes the system ones and points the active set at
+# Common Nouns Full Set.  Common Nouns is the common-priority slice.
+NOUN_ANCHOR = 133
+RETIRED_NOUN_TAGS = tuple(range(620, 632))
+COMMON_ANCHOR = 42
+COMMON_REUSE = (617, 618)
+CHUNKED_ID_START = 721
+CORE_GROUP_ID = 28
+NOUNS_GROUP_ID = 2
+FAVORITES_TAG = 124
+FAVORITES_NAME = 'Long Weekend Favorites'
+
+# Same priority signal the card build stores as ptag: news1 / ichi1 / spec1 /
+# spec2 / gai1.  It is a common-word mark, not a rank inside the list.
+COMMON_NOUN_BLURB = (
+    'Nouns from the Nouns list that JMdict marks as common-priority '
+    '(news1, ichi1, spec1, spec2, or gai1).  '
+    'The mark is not a rank inside the list.'
+)
+COMMON_BLURB = (
+    'Common use word.  '
+    'Cards JMdict marks as common-priority are in the earlier sets.'
+)
+CORE_BLURB = (
+    'The first two JMdict frequency bands (nf01 and nf02), about the 1,000 most '
+    'frequent words in the Mainichi Shimbun list recorded in JMdict.  '
+    'Not a JLPT exam list.'
+)
+CHUNKED_LISTS = (
+    {
+        'key': 'common',
+        'base_name': 'Common Words',
+        'blurb': COMMON_BLURB,
+        'anchor': COMMON_ANCHOR,
+        'reuse': COMMON_REUSE,
+        'group_id': 11,
+    },
+)
 
 
 def chunk_sizes(n, lo=50, hi=100):
@@ -416,13 +464,367 @@ def _replace_text(value):
     return value
 
 
+def order_card_ids(card_ids, common_ids):
+    """Unique cards, common-priority first, then card_id.
+
+    common_ids is the set of cards whose JMdict priority is the common-word
+    mark (the same set stored as ptag).  Cards outside that set keep card_id
+    order.  Duplicates across the old continuation tags collapse to one card.
+    """
+    return sorted(set(card_ids), key=lambda card_id: (card_id not in common_ids, card_id))
+
+
+def _pad(number, width):
+    return '%0*d' % (width, number)
+
+
+def _chunk_records(base_name, blurb, cards, tag_ids):
+    """One Full Set plus numbered chunks.  tag_ids has one id per chunk."""
+    width = max(2, len(str(len(tag_ids))))
+    total = len(tag_ids)
+    sets = []
+    offset = 0
+    sizes = chunk_sizes(len(cards))
+    for index, (tag_id, size) in enumerate(zip(tag_ids, sizes), start=1):
+        label = _pad(index, width)
+        sets.append({
+            'tag_id': tag_id,
+            'name': '%s %s' % (base_name, label),
+            'description': '%s  Set %s of %s.' % (blurb, label, _pad(total, width)),
+            'count': size,
+            'card_ids': list(cards[offset:offset + size]),
+        })
+        offset += size
+    sets.insert(0, {
+        'tag_id': None,  # filled by the caller once the chunk ids are known
+        'name': combined_name(base_name),
+        'description': '%s  All %d cards in this list (sets %s–%s together).' % (
+            blurb, len(cards), _pad(1, width), _pad(total, width)),
+        'count': len(cards),
+        'card_ids': list(cards),
+    })
+    return sets
+
+
+def _take_ids(anchor, reuse, n_chunks, next_id):
+    ids = []
+    pool = []
+    if anchor is not None:
+        pool.append(anchor)
+    pool.extend(reuse)
+    for slot in range(n_chunks):
+        if slot < len(pool):
+            ids.append(pool[slot])
+        else:
+            ids.append(next_id)
+            next_id += 1
+    return ids, next_id
+
+
+def needs_oversized_recut(members):
+    """True while Common Words is still one of the old ~10,000-card continuation tags."""
+    return len(members.get(COMMON_ANCHOR, ())) > 100
+
+
+def needs_noun_collapse(members):
+    """True while Nouns 02–13 are still their own lists.
+
+    That is the 2.0 continuation series.  Common Nouns chunks do not use
+    those tag ids.  Tag 133, if it is still in the membership, is dropped
+    by collapse_nouns along with them.
+    """
+    return any(tag in members for tag in RETIRED_NOUN_TAGS)
+
+
+def _unique_in_order(card_ids):
+    seen = set()
+    ordered = []
+    for card_id in card_ids:
+        if card_id in seen:
+            continue
+        seen.add(card_id)
+        ordered.append(card_id)
+    return ordered
+
+
+def _noun_cards_from_members(members):
+    """Every noun card.
+
+    The old continuation lists are card_id order inside each tag, so walking
+    tag 133 and then 620–631 keeps that study order.  The numbered cut stored
+    the same cards on a Full Set and on chunk tags; the Full Set is the union.
+    """
+    if len(members.get(NOUN_ANCHOR, ())) > 1000:
+        cards = []
+        for tag in (NOUN_ANCHOR,) + RETIRED_NOUN_TAGS:
+            cards.extend(members.get(tag, ()))
+        return _unique_in_order(cards)
+    chunked = load_chunked()
+    if chunked:
+        for group in chunked['groups']:
+            if group.get('base_name') != 'Nouns':
+                continue
+            full = [s for s in group['sets'] if is_combined_name(s.get('name'))]
+            if full and full[0]['tag_id'] in members:
+                return list(members[full[0]['tag_id']])
+            cards = []
+            for entry in group['sets']:
+                cards.extend(members.get(entry['tag_id'], ()))
+            return _unique_in_order(cards)
+    cards = []
+    for tag in (NOUN_ANCHOR,) + RETIRED_NOUN_TAGS:
+        cards.extend(members.get(tag, ()))
+    return _unique_in_order(cards)
+
+
+def _noun_tags_to_drop(members):
+    """Tag ids that belonged to the full noun list.  Tag 133 goes with them."""
+    drop = set(tag for tag in RETIRED_NOUN_TAGS if tag in members)
+    if NOUN_ANCHOR in members:
+        drop.add(NOUN_ANCHOR)
+    chunked = load_chunked()
+    if chunked:
+        for group in chunked['groups']:
+            if group.get('base_name') != 'Nouns':
+                continue
+            for entry in group['sets']:
+                drop.add(entry['tag_id'])
+    return sorted(drop)
+
+
+def collapse_nouns(members, order, common_ids, noun_cards=None):
+    """Common Nouns chunks for the common-priority cards.  The full list is dropped.
+
+    Returns (members, order, chunked_catalog, dropped_tag_ids).  Common Words
+    and Core 1000 groups already in the chunked catalog are kept.  Safe to
+    call only when needs_noun_collapse is true.
+    """
+    cards = list(noun_cards) if noun_cards is not None else _noun_cards_from_members(members)
+    if len(cards) != len(set(cards)):
+        raise ValueError('Nouns card list repeats a card id')
+    have = set(_noun_cards_from_members(members))
+    if set(cards) != have:
+        raise ValueError('Nouns card list does not match the lists on disk')
+    common_cards = sorted(card_id for card_id in cards if card_id in common_ids)
+    dropped = _noun_tags_to_drop(members)
+    for tag in dropped:
+        members.pop(tag, None)
+    next_id = max(members) + 1 if members else CHUNKED_ID_START
+    n_chunks = len(chunk_sizes(len(common_cards)))
+    chunk_ids, next_id = _take_ids(None, (), n_chunks, next_id)
+    sets = _chunk_records('Common Nouns', COMMON_NOUN_BLURB, common_cards, chunk_ids)
+    sets[0]['tag_id'] = next_id
+    for entry in sets:
+        members[entry['tag_id']] = list(entry['card_ids'])
+    old = load_chunked() or {'groups': []}
+    groups = [group for group in old['groups'] if group.get('base_name') != 'Nouns']
+    groups.append({
+        'group_id': NOUNS_GROUP_ID,
+        'base_name': 'Common Nouns',
+        'sets': [{k: s[k] for k in ('tag_id', 'name', 'description', 'count')} for s in sets],
+    })
+    return members, order, {'groups': groups}, dropped
+
+
+def load_common_ids(path=FTS_DB):
+    """card_ids with the JMdict common-priority mark.  Empty if the FTS db is absent."""
+    if not os.path.exists(path):
+        return set()
+    conn = sqlite3.connect(path)
+    try:
+        return {row[0] for row in conn.execute(
+            'SELECT card_id FROM cards_search_content WHERE ptag != 0')}
+    finally:
+        conn.close()
+
+
+def load_core_ids(path=CORE_PATH):
+    """Card ids in study order: nf01 by card_id, then nf02 by card_id."""
+    ids = []
+    with open(path, encoding='utf-8') as handle:
+        for line in handle:
+            if line.startswith('#') or not line.strip():
+                continue
+            band_s, card_s = line.split('\t')
+            band, card_id = int(band_s), int(card_s)
+            if band not in (1, 2):
+                raise ValueError('core1000.tsv band must be 1 or 2, got %s' % band)
+            ids.append(card_id)
+    if len(ids) != len(set(ids)):
+        raise ValueError('core1000.tsv repeats a card id')
+    return ids
+
+
+def recut_oversized(members, order, common_ids, core_ids):
+    """Split Common Words and add Core 1000.
+
+    Returns (members, order, chunked_catalog).  Chunk ids reuse the old
+    continuation tags, then continue after 720.  Nouns is not cut here.
+    Safe to call only when needs_oversized_recut is true; a second call
+    would slice the small chunks.
+    """
+    next_id = max(CHUNKED_ID_START - 1, max(members) if members else 0) + 1
+    groups = []
+    for spec in CHUNKED_LISTS:
+        source = (spec['anchor'],) + tuple(spec['reuse'])
+        cards = order_card_ids(
+            (card for tag in source for card in members.get(tag, ())), common_ids)
+        n_chunks = len(chunk_sizes(len(cards)))
+        chunk_ids, next_id = _take_ids(spec['anchor'], spec['reuse'], n_chunks, next_id)
+        sets = _chunk_records(spec['base_name'], spec['blurb'], cards, chunk_ids)
+        sets[0]['tag_id'] = next_id
+        next_id += 1
+        for tag in source:
+            members.pop(tag, None)
+        for entry in sets:
+            members[entry['tag_id']] = list(entry['card_ids'])
+        groups.append({
+            'group_id': spec['group_id'],
+            'base_name': spec['base_name'],
+            'sets': [{k: s[k] for k in ('tag_id', 'name', 'description', 'count')} for s in sets],
+        })
+    core_cards = list(core_ids)
+    n_chunks = len(chunk_sizes(len(core_cards)))
+    chunk_ids, next_id = _take_ids(None, (), n_chunks, next_id)
+    sets = _chunk_records('Core 1000', CORE_BLURB, core_cards, chunk_ids)
+    sets[0]['tag_id'] = next_id
+    next_id += 1
+    for entry in sets:
+        members[entry['tag_id']] = list(entry['card_ids'])
+    groups.append({
+        'group_id': CORE_GROUP_ID,
+        'group_name': 'Core 1000',
+        'owner_id': 0,
+        'base_name': 'Core 1000',
+        'sets': [{k: s[k] for k in ('tag_id', 'name', 'description', 'count')} for s in sets],
+    })
+    # New tag ids are not in `order`.  render_tsv appends those, sorted.
+    return members, order, {'groups': groups}
+
+
+def chunked_tag_ids(chunked):
+    return [s['tag_id'] for group in chunked['groups'] for s in group['sets']]
+
+
+def load_chunked(path=CHUNKED_PATH):
+    if not os.path.exists(path):
+        return None
+    with open(path, encoding='utf-8') as handle:
+        return json.load(handle)
+
+
+def write_chunked(chunked, path=CHUNKED_PATH):
+    with open(path, 'w', encoding='utf-8') as handle:
+        json.dump(chunked, handle, ensure_ascii=False, indent=2)
+        handle.write('\n')
+
+
+def write_links_in_order(card_conn, members, tag_ids):
+    """Replace link rows for these tags, keeping the list order.
+
+    The app reads a set with no ORDER BY, so row order is the study order.
+    build.py inserts the TSV in file order for the same reason.
+    """
+    for tag_id in tag_ids:
+        card_conn.execute('DELETE FROM system_card_tag_link WHERE tag_id = ?', (tag_id,))
+    rows = []
+    for tag_id in tag_ids:
+        for card_id in members.get(tag_id, ()):
+            rows.append((tag_id, card_id))
+    card_conn.executemany(
+        'INSERT INTO system_card_tag_link (tag_id, card_id) VALUES (?, ?)', rows)
+    card_conn.commit()
+    return len(rows)
+
+
+def _add_column(conn, table, column, declaration):
+    have = {row[1] for row in conn.execute('PRAGMA table_info(%s)' % table)}
+    if column not in have:
+        conn.execute('ALTER TABLE %s ADD COLUMN %s %s' % (table, column, declaration))
+
+
+def ensure_locale_columns(conn):
+    """Japanese name columns.  Absent on a 2.0 file; present on the 2.1 template."""
+    _add_column(conn, 'tags', 'tag_name_ja', 'TEXT')
+    _add_column(conn, 'tags', 'description_ja', 'TEXT')
+    _add_column(conn, 'groups', 'group_name_ja', 'TEXT')
+
+
+def _apply_chunked(cur, chunked):
+    for group in chunked['groups']:
+        if group.get('group_name'):
+            cur.execute(
+                'INSERT OR REPLACE INTO groups (group_id, group_name, owner_id, tag_count, recommended) '
+                'VALUES (?, ?, ?, ?, 0)',
+                (group['group_id'], group['group_name'], group.get('owner_id', 0), len(group['sets'])))
+        for s in group['sets']:
+            row = cur.execute('SELECT tag_id FROM tags WHERE tag_id = ?', (s['tag_id'],)).fetchone()
+            if row is None:
+                cur.execute(
+                    'INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (?, ?, ?, 0, ?)',
+                    (s['tag_id'], s['name'], s['description'], s['count']))
+            else:
+                cur.execute(
+                    'UPDATE tags SET tag_name = ?, description = ?, editable = 0, count = ? WHERE tag_id = ?',
+                    (s['name'], s['description'], s['count'], s['tag_id']))
+            linked = cur.execute(
+                'SELECT 1 FROM group_tag_link WHERE group_id = ? AND tag_id = ?',
+                (group['group_id'], s['tag_id'])).fetchone()
+            if linked is None:
+                cur.execute('INSERT INTO group_tag_link (group_id, tag_id) VALUES (?, ?)',
+                            (group['group_id'], s['tag_id']))
+
+
+def _japanese_by_tag(catalog, chunked):
+    """tag_id -> (ja_name, ja_description).  Hand entries win over a generated name."""
+    ja_by_id = {}
+    for group, level in zip(catalog['groups'], LEVELS):
+        chunks = [s for s in group['sets'] if not is_combined_name(s.get('name'))]
+        for s in group['sets']:
+            ja_by_id[s['tag_id']] = builtin_ja.level_japanese(
+                level['key'], s['name'], s['count'], len(chunks))
+    if chunked:
+        for group in chunked['groups']:
+            chunks = [s for s in group['sets'] if not is_combined_name(s.get('name'))]
+            width = max(2, len(str(len(chunks))))
+            for s in group['sets']:
+                ja_by_id[s['tag_id']] = builtin_ja.chunk_japanese(
+                    group['base_name'], s['name'], s['count'], len(chunks), width)
+    overlap = set(ja_by_id) & set(builtin_ja.TAG_JA)
+    if overlap:
+        raise ValueError('hand Japanese names collide with generated sets: %s' % sorted(overlap))
+    ja_by_id.update(builtin_ja.TAG_JA)
+    return ja_by_id
+
+
+def _apply_japanese(cur, catalog, chunked):
+    ja_by_id = _japanese_by_tag(catalog, chunked)
+    for tag_id, (ja_name, ja_desc) in ja_by_id.items():
+        if tag_id == FAVORITES_TAG:
+            # Editable built-in.  Keep the Japanese columns only while the
+            # English name is still the one we shipped.
+            cur.execute(
+                'UPDATE tags SET tag_name_ja = ?, description_ja = ? '
+                'WHERE tag_id = ? AND tag_name = ?',
+                (ja_name, ja_desc, tag_id, FAVORITES_NAME))
+            continue
+        cur.execute(
+            'UPDATE tags SET tag_name_ja = ?, description_ja = ? WHERE tag_id = ? AND editable = 0',
+            (ja_name, ja_desc, tag_id))
+    for group_id, ja_name in builtin_ja.GROUP_JA.items():
+        cur.execute('UPDATE groups SET group_name_ja = ? WHERE group_id = ?', (ja_name, group_id))
+
+
 def ensure_user_catalog(conn, catalog):
     """Make jFlash.db match the browse-list cleanup.  Safe to run twice.
 
-    Does not touch tag 0, user rows, card_tag_link, or last_state.  Cached
-    tag counts for the level sets are written here; other system tags are
-    recounted from system_card_tag_link by the caller when that table changed.
+    Does not touch tag 0's cards, user rows, card_tag_link, or last_state.
+    Cached tag counts for the level sets are written here; other system tags
+    are recounted from system_card_tag_link by the caller when that table changed.
+    Japanese columns are filled for built-in sets.  A user-created set has no
+    Japanese columns unless it is the untouched Long Weekend Favorites row.
     """
+    ensure_locale_columns(conn)
     cur = conn.cursor()
     # Text fixes on every tag, including ones we do not otherwise rename.
     # Fetch first: sqlite3 drops the SELECT if we UPDATE on the same connection.
@@ -495,11 +897,25 @@ def ensure_user_catalog(conn, catalog):
         cur.execute('INSERT INTO group_tag_link (group_id, tag_id) VALUES (?, ?)',
                     (PARTS_OF_SPEECH_GROUP, PRONOUNS_TAG))
 
+    # The full Nouns list (tag 133), Nouns 02–13, and any numbered cut of it.
+    # An editable row at tag 133 is a user set and is left alone.
+    split_ids = [row[0] for row in cur.execute(
+        "SELECT tag_id FROM tags WHERE editable = 0 AND "
+        "(tag_id = ? OR tag_id BETWEEN 620 AND 631 OR tag_name LIKE 'Nouns %')",
+        (NOUN_ANCHOR,))]
+    for tag_id in split_ids:
+        cur.execute('DELETE FROM group_tag_link WHERE tag_id = ?', (tag_id,))
+        cur.execute('DELETE FROM tags WHERE tag_id = ? AND editable = 0', (tag_id,))
+
     # Links whose tag was deleted in an earlier import.
     cur.execute('DELETE FROM group_tag_link WHERE tag_id NOT IN (SELECT tag_id FROM tags)')
 
-    # tag_count is the number of real sets, excluding My Starred Words (tag 0),
-    # which is how the template was counted before this cleanup.
+    chunked = load_chunked()
+    if chunked:
+        _apply_chunked(cur, chunked)
+    # tag_count is the number of real sets, excluding My Starred Words (tag 0).
+    # Count after the chunked links exist, or Nouns and Common Words stay on
+    # the old totals.
     cur.execute('''
         UPDATE groups SET tag_count = (
             SELECT count(*) FROM group_tag_link g
@@ -509,6 +925,7 @@ def ensure_user_catalog(conn, catalog):
     ''')
     # Vocabulary Levels shows its four child groups, not a set count.
     cur.execute('UPDATE groups SET tag_count = 0 WHERE group_id = ?', (PARENT_GROUP,))
+    _apply_japanese(cur, catalog, chunked)
 
     max_id = cur.execute('SELECT max(tag_id) FROM tags').fetchone()[0] or 0
     cur.execute('UPDATE sqlite_sequence SET seq = ? WHERE name = ? AND seq < ?',

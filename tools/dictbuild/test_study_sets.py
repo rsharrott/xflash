@@ -10,6 +10,7 @@ import tempfile
 import unittest
 
 import apply_study_data
+import builtin_ja
 import study_sets
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -27,10 +28,13 @@ class ChunkTest(unittest.TestCase):
         self.assertEqual(len(study_sets.chunk_sizes(3478)), 35)
         self.assertEqual(sum(study_sets.chunk_sizes(2857)), 2857)
         self.assertEqual(len(study_sets.chunk_sizes(2857)), 29)
-        for n in (626, 585, 3478, 2857):
+        for n in (626, 585, 3478, 2857, 122197, 22325, 993):
             sizes = study_sets.chunk_sizes(n)
+            self.assertEqual(sum(sizes), n)
             self.assertTrue(all(50 <= s <= 100 for s in sizes))
             self.assertLessEqual(max(sizes) - min(sizes), 1)
+            # One fewer piece would push a piece past 100.
+            self.assertGreater(n / (len(sizes) - 1), 100)
 
     def test_split_is_disjoint_and_covers_the_old_top_level(self):
         members = {
@@ -251,7 +255,7 @@ class BundledCatalogTest(unittest.TestCase):
         order_sql = (
             "SELECT t.tag_name FROM tags t, group_tag_link l "
             "WHERE t.tag_id = l.tag_id AND l.group_id = ? "
-            "ORDER BY CASE WHEN t.tag_name LIKE '%(≈N% Full Set' THEN 0 ELSE 1 END, "
+            "ORDER BY CASE WHEN t.tag_name LIKE '% Full Set' THEN 0 ELSE 1 END, "
             "t.tag_name ASC"
         )
         for group_id, full_name in full_names.items():
@@ -291,7 +295,8 @@ class BundledCatalogTest(unittest.TestCase):
         for typo in ('Intrasitive', 'lanugage', 'Portguese', 'oridnal', 'Idomatic', 'Rude or X-Rated',
                      'fukumeishi'):
             self.assertNotIn(typo, blob)
-        self.assertIn('futsuumeishi', blob)
+        self.assertIn('Common Nouns Full Set', blob)
+        self.assertNotIn('Every card from the old Nouns lists', blob)
 
     def test_starters_have_no_vulgar_or_x_rated_cards(self):
         if not os.path.exists(VULG_PATH):
@@ -328,6 +333,199 @@ class BundledCatalogTest(unittest.TestCase):
         row = self.user.execute(
             "SELECT editable, count FROM tags WHERE tag_name = 'Long Weekend Favorites'").fetchone()
         self.assertEqual(row, (1, 14))
+
+
+class JapaneseNameTest(unittest.TestCase):
+
+    def test_level_and_chunk_names(self):
+        name, desc = builtin_ja.level_japanese('b1', 'Beginner 1 (≈N5) 01', 90, 7)
+        self.assertEqual(name, '初級1（≈N5）01')
+        self.assertNotIn(' ', name)
+        self.assertIn('非公式', desc)
+        self.assertIn('JLPTの出題範囲そのものではありません', desc)
+        full, full_desc = builtin_ja.level_japanese('b1', 'Beginner 1 (≈N5) Full Set', 626, 7)
+        self.assertEqual(full, '初級1（≈N5）全部')
+        self.assertIn('626', full_desc)
+        mid, _ = builtin_ja.level_japanese('mid', 'Intermediate (≈N3–N2) 10', 99, 35)
+        self.assertEqual(mid, '中級（≈N3–N2）10')
+        noun, _ = builtin_ja.chunk_japanese('Common Nouns', 'Common Nouns 001', 100, 182, 3)
+        self.assertEqual(noun, 'よく使う名詞001')
+        noun_full, noun_desc = builtin_ja.chunk_japanese(
+            'Common Nouns', 'Common Nouns Full Set', 18142, 182, 3)
+        self.assertEqual(noun_full, 'よく使う名詞全部')
+        self.assertIn('18142', noun_desc)
+        self.assertNotIn(' ', noun_full)
+        common, _ = builtin_ja.chunk_japanese('Common Words', 'Common Words 001', 100, 224, 3)
+        self.assertEqual(common, 'よく使う単語001')
+        common_full, _ = builtin_ja.chunk_japanese('Common Words', 'Common Words Full Set', 22325, 224, 3)
+        self.assertEqual(common_full, 'よく使う単語全部')
+        core, _ = builtin_ja.chunk_japanese('Core 1000', 'Core 1000 01', 100, 10, 2)
+        self.assertEqual(core, '基本1000語01')
+        core_full, core_desc = builtin_ja.chunk_japanese('Core 1000', 'Core 1000 Full Set', 993, 10, 2)
+        self.assertEqual(core_full, '基本1000語全部')
+        self.assertIn('993', core_desc)
+        self.assertIn('nf01', core_desc)
+        self.assertIn('JLPTの出題範囲そのものではありません', core_desc)
+
+    def test_hand_names_do_not_use_a_generated_id(self):
+        generated = {42, 617, 618} | set(range(620, 632)) | set(range(92, 96)) | set(range(644, 721))
+        self.assertTrue(generated.isdisjoint(builtin_ja.TAG_JA))
+        self.assertNotIn(133, builtin_ja.TAG_JA)
+
+
+class BundledChunkedListsTest(unittest.TestCase):
+    """Common Nouns, Common Words and Core 1000, after apply_sets().  The full Nouns list is not a set."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.user = sqlite3.connect(USER_DB)
+        cls.card = sqlite3.connect(CARD_DB)
+        cls.chunked = study_sets.load_chunked()
+
+    def test_lists_are_chunked_with_a_full_set_first(self):
+        if self.chunked is None:
+            self.skipTest('chunked_lists.json is written by apply_sets()')
+        common = study_sets.load_common_ids()
+        core_ids = study_sets.load_core_ids()
+        self.assertEqual(len(core_ids), 993)
+        self.assertEqual(len(core_ids), len(set(core_ids)))
+        order_sql = (
+            "SELECT t.tag_id, t.tag_name, t.tag_name_ja, t.count FROM tags t, group_tag_link l "
+            "WHERE t.tag_id = l.tag_id AND l.group_id = ? "
+            "ORDER BY CASE WHEN t.tag_name LIKE '% Full Set' THEN 0 ELSE 1 END, t.tag_name ASC"
+        )
+        for group in self.chunked['groups']:
+            rows = self.user.execute(order_sql, (group['group_id'],)).fetchall()
+            names = [row[1] for row in rows]
+            self.assertTrue(names[0].endswith(' Full Set'), group['base_name'])
+            plain = self.user.execute(
+                "SELECT t.tag_name FROM tags t, group_tag_link l "
+                "WHERE t.tag_id = l.tag_id AND l.group_id = ? ORDER BY t.tag_name ASC",
+                (group['group_id'],)).fetchone()[0]
+            self.assertFalse(plain.endswith(' Full Set'), group['base_name'])
+            chunks = [s for s in group['sets'] if not study_sets.is_combined_name(s['name'])]
+            combined = [s for s in group['sets'] if study_sets.is_combined_name(s['name'])]
+            self.assertEqual(len(combined), 1)
+            width = max(2, len(str(len(chunks))))
+            chunk_lists = []
+            for index, entry in enumerate(chunks, start=1):
+                self.assertGreaterEqual(entry['count'], 50)
+                self.assertLessEqual(entry['count'], 100)
+                self.assertTrue(entry['name'].endswith(' ' + ('%0*d' % (width, index))))
+                cards = self._cards(entry['tag_id'])
+                self.assertEqual(len(cards), entry['count'])
+                self.assertEqual(cards, self._cards_as_the_app_reads_them(entry['tag_id']))
+                chunk_lists.append(cards)
+                ja_name, ja_desc = builtin_ja.chunk_japanese(
+                    group['base_name'], entry['name'], entry['count'], len(chunks), width)
+                stored = self.user.execute(
+                    'SELECT tag_name_ja, description_ja, editable FROM tags WHERE tag_id = ?',
+                    (entry['tag_id'],)).fetchone()
+                self.assertEqual(stored, (ja_name, ja_desc, 0))
+            flat = [card for cards in chunk_lists for card in cards]
+            self.assertEqual(len(flat), len(set(flat)), group['base_name'])
+            full_cards = self._cards(combined[0]['tag_id'])
+            self.assertEqual(full_cards, flat)
+            self.assertEqual(combined[0]['count'], len(flat))
+            ja_name, ja_desc = builtin_ja.chunk_japanese(
+                group['base_name'], combined[0]['name'], combined[0]['count'], len(chunks), width)
+            stored = self.user.execute(
+                'SELECT tag_name_ja, description_ja FROM tags WHERE tag_id = ?',
+                (combined[0]['tag_id'],)).fetchone()
+            self.assertEqual(stored, (ja_name, ja_desc))
+            if group['base_name'] == 'Core 1000':
+                self.assertEqual(full_cards, core_ids)
+                self.assertEqual(len(full_cards), 993)
+                owner = self.user.execute(
+                    'SELECT owner_id, group_name, group_name_ja FROM groups WHERE group_id = ?',
+                    (group['group_id'],)).fetchone()
+                self.assertEqual(owner, (0, 'Core 1000', '基本1000語'))
+                self.assertIsNone(self.user.execute(
+                    'SELECT 1 FROM group_tag_link WHERE group_id = 23 AND tag_id = ?',
+                    (combined[0]['tag_id'],)).fetchone())
+            elif group['base_name'] == 'Common Nouns':
+                self.assertEqual(group['group_id'], 2)
+                self.assertNotIn('group_name', group)
+                self.assertEqual(full_cards, sorted(full_cards))
+                self.assertTrue(set(full_cards) <= common)
+                self.assertEqual(len(chunks), 182)
+                self.assertEqual(combined[0]['count'], 18142)
+                self.assertEqual(chunks[0]['tag_id'], 2164)
+                self.assertEqual(combined[0]['tag_id'], 2346)
+                self.assertEqual(chunks[0]['count'], 100)
+                self.assertEqual(chunks[123]['count'], 100)
+                self.assertEqual(chunks[124]['count'], 99)
+                self.assertEqual(chunks[-1]['name'], 'Common Nouns 182')
+            else:
+                self.assertIn(full_cards[0], common, group['base_name'])
+                seen_other = False
+                for card_id in full_cards:
+                    if card_id not in common:
+                        seen_other = True
+                    elif seen_other:
+                        self.fail('%s has a common-priority card after the others' % group['base_name'])
+
+    def test_full_nouns_set_is_gone_and_common_nouns_remain(self):
+        self.assertIsNone(self.user.execute(
+            "SELECT tag_id, tag_name FROM tags WHERE tag_id = 133 OR tag_name = 'Nouns' "
+            "OR tag_name IN ('Nouns Full Set', 'Nouns 0001', 'Nouns 02') "
+            "OR tag_name LIKE 'Nouns %'").fetchone())
+        self.assertEqual(
+            self.user.execute(
+                'SELECT count(*) FROM tags WHERE tag_id BETWEEN 620 AND 631').fetchone()[0], 0)
+        self.assertEqual(
+            self.card.execute(
+                'SELECT count(*) FROM system_card_tag_link WHERE tag_id = 133 '
+                'OR tag_id BETWEEN 620 AND 631'
+            ).fetchone()[0], 0)
+        self.assertIsNone(self.user.execute(
+            'SELECT 1 FROM group_tag_link WHERE tag_id = 133').fetchone())
+        group = self.user.execute(
+            'SELECT group_name, group_name_ja FROM groups WHERE group_id = 2').fetchone()
+        self.assertEqual(group, ('Nouns', '名詞'))
+        # The Nouns group still holds the other noun lists, with Common Nouns sorted first.
+        first = self.user.execute(
+            "SELECT t.tag_name FROM tags t, group_tag_link l "
+            "WHERE t.tag_id = l.tag_id AND l.group_id = 2 "
+            "ORDER BY CASE WHEN t.tag_name LIKE '% Full Set' THEN 0 ELSE 1 END, t.tag_name ASC"
+        ).fetchone()[0]
+        self.assertEqual(first, 'Common Nouns Full Set')
+
+    def test_every_builtin_has_a_japanese_name_and_user_columns_stay_empty(self):
+        if self.chunked is None:
+            self.skipTest('chunked_lists.json is written by apply_sets()')
+        catalog = study_sets.load_catalog()
+        expected = study_sets._japanese_by_tag(catalog, self.chunked)
+        missing = self.user.execute(
+            "SELECT tag_id, tag_name FROM tags WHERE editable = 0 "
+            "AND (tag_name_ja IS NULL OR tag_name_ja = '')").fetchall()
+        self.assertEqual(missing, [])
+        for tag_id, (ja_name, ja_desc) in expected.items():
+            row = self.user.execute(
+                'SELECT tag_name_ja, description_ja FROM tags WHERE tag_id = ?', (tag_id,)).fetchone()
+            self.assertEqual(row, (ja_name, ja_desc), tag_id)
+        for group_id, ja_name in builtin_ja.GROUP_JA.items():
+            stored = self.user.execute(
+                'SELECT group_name_ja FROM groups WHERE group_id = ?', (group_id,)).fetchone()
+            self.assertEqual(stored[0], ja_name, group_id)
+        # The English group name, including the "1. Beginner" prefix, is what sorts.
+        beginner = self.user.execute(
+            'SELECT group_name, group_name_ja FROM groups WHERE group_id = 24').fetchone()
+        self.assertEqual(beginner, ('1. Beginner 1 (≈N5)', '初級1（≈N5）'))
+        favorites = self.user.execute(
+            'SELECT tag_name, tag_name_ja, editable FROM tags WHERE tag_id = 124').fetchone()
+        self.assertEqual(favorites[0], 'Long Weekend Favorites')
+        self.assertEqual(favorites[1], 'ロングウィークエンドのお気に入り')
+        self.assertEqual(favorites[2], 1)
+
+    def _cards(self, tag_id):
+        return [row[0] for row in self.card.execute(
+            'SELECT card_id FROM system_card_tag_link WHERE tag_id = ? ORDER BY rowid', (tag_id,))]
+
+    def _cards_as_the_app_reads_them(self, tag_id):
+        # CardPeer selects with no ORDER BY.  The tag_id index returns rowid order.
+        return [row[0] for row in self.card.execute(
+            'SELECT card_id FROM system_card_tag_link WHERE tag_id = ?', (tag_id,))]
 
 
 class JMdictPinTest(unittest.TestCase):

@@ -208,7 +208,12 @@ def main():
                    ((i, str(cards[i]['card_type']), cards[i]['headword'], cards[i]['headword_en'],
                      cards[i]['reading'], cards[i]['romaji'], int(cards[i]['kana_only'] or 0)) for i in ids))
     db.executemany('INSERT INTO cards_html VALUES (?,?)', ((i, cards[i]['meaning']) for i in ids))
-    db.executemany('INSERT INTO system_card_tag_link (tag_id, card_id) VALUES (?,?)', sorted(links))
+    # File order inside a tag is the study order (the app reads the link table
+    # with no ORDER BY).  Older lists are already in card_id order.  Common
+    # Words puts JMdict common-priority cards first.  Common Nouns is only
+    # those cards, in card_id order.  The full noun list is not linked.
+    # Core 1000 follows the nf01 band, then nf02.
+    db.executemany('INSERT INTO system_card_tag_link (tag_id, card_id) VALUES (?,?)', links)
     for s in INDEX_CARD:
         db.execute(s)
     finish_db(db)

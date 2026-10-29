@@ -17,9 +17,38 @@ NSInteger const kLWEUninitializedCardCount = -1;
 NSInteger const kLWEUnseenCardLevel        = 0;
 NSInteger const kLWELearnedCardLevel       = 5;
 
+static NSString *sLWEBuiltInCatalogLanguageOverride = nil;
+
+@interface Tag ()
+- (NSNumber *)_cardIdCarriedFromRetiredNounSession:(BOOL *)resetIndex;
+@end
+
+BOOL LWEBuiltInCatalogUsesJapanese(void)
+{
+#if defined(LWE_JFLASH)
+  NSString *language = sLWEBuiltInCatalogLanguageOverride;
+  if (language == nil)
+  {
+    language = [[[NSBundle mainBundle] preferredLocalizations] firstObject];
+  }
+  return [language hasPrefix:@"ja"];
+#else
+  return NO;
+#endif
+}
+
+void LWESetBuiltInCatalogLanguageOverride(NSString *languageOrNil)
+{
+  if (sLWEBuiltInCatalogLanguageOverride != languageOrNil)
+  {
+    [sLWEBuiltInCatalogLanguageOverride release];
+    sLWEBuiltInCatalogLanguageOverride = [languageOrNil copy];
+  }
+}
+
 @implementation Tag
 
-@synthesize tagId, tagName, tagEditable, tagDescription, isFault = _isFault;
+@synthesize tagId, tagName, tagEditable, tagDescription, tagNameJa, tagDescriptionJa, isFault = _isFault;
 @synthesize cardCount, currentIndex, cardsByLevel, cardLevelCounts, flattenedCardIdArray;
 
 #pragma mark - Class Plumbing
@@ -44,6 +73,8 @@ NSInteger const kLWELearnedCardLevel       = 5;
   }
   [tagName release];
   [tagDescription release];
+  [tagNameJa release];
+  [tagDescriptionJa release];
   [flattenedCardIdArray release];
   [cardLevelCounts release];
   [cardsByLevel release];
@@ -86,6 +117,31 @@ NSInteger const kLWELearnedCardLevel       = 5;
   // TODO: all of this makes the assumption that tags are 1-1 with groups.  that was not the 
   // original design, but are we moving that direction?  MMA - Oct 19 2011
   return [GroupPeer parentGroupIdOfTag:self];
+}
+
+- (NSString *)displayName
+{
+#if defined(LWE_JFLASH)
+  // Only a stored Japanese column is shown, and only for a system row.  Editable
+  // sets (including one the user renamed) keep the name in tag_name.  Long Weekend
+  // Favorites is editable; its Japanese name is shown until a save clears the column.
+  if (LWEBuiltInCatalogUsesJapanese() && [self.tagNameJa length] > 0)
+  {
+    return self.tagNameJa;
+  }
+#endif
+  return self.tagName;
+}
+
+- (NSString *)displayDescription
+{
+#if defined(LWE_JFLASH)
+  if (LWEBuiltInCatalogUsesJapanese() && [self.tagDescriptionJa length] > 0)
+  {
+    return self.tagDescriptionJa;
+  }
+#endif
+  return self.tagDescription;
 }
 
 - (BOOL) isEditable
@@ -165,8 +221,7 @@ static void LWEDeleteFrozenCardIds(void)
 /**
  * Unarchive plist file containing the user's last session data.
  * The plist is a dictionary: the tag and user it was saved for, and six arrays (one per level) of
- * card ids. The ids come back as blank cards, the same way CardPeer +retrieveCardsSortedByLevelForTag:
- * returns them.
+ * card ids (NSNumbers), the same way CardPeer +retrieveCardsSortedByLevelForTag: returns them.
  * Returns nil if there is no plist, it is not in that shape, it was saved for another tag or user,
  * or its card total doesn't match this tag's card count. Does not delete the file (-populateCardIds does).
  */
@@ -205,7 +260,7 @@ static void LWEDeleteFrozenCardIds(void)
       {
         return nil;
       }
-      [levelCards addObject:[CardPeer blankCardWithId:[cardId integerValue]]];
+      [levelCards addObject:cardId];
     }
     total += [levelCards count];
     [cardsByLevelTmp addObject:levelCards];
@@ -223,8 +278,8 @@ static void LWEDeleteFrozenCardIds(void)
 
 /**
  * Archive current session data to a plist so we can re-start at same place in next session.
- * cardsByLevel holds Card objects, which a plist cannot store, so write their ids, along with the
- * tag and user they belong to (see -thawCardIds).
+ * cardsByLevel holds card-id NSNumbers (see -thawCardIds). A Card left in the array is written
+ * by its id as well.
  */
 - (void) freezeCardIds
 {
@@ -240,9 +295,16 @@ static void LWEDeleteFrozenCardIds(void)
   for (NSArray *levelCards in self.cardsByLevel)
   {
     NSMutableArray *cardIds = [NSMutableArray arrayWithCapacity:[levelCards count]];
-    for (Card *card in levelCards)
+    for (id entry in levelCards)
     {
-      [cardIds addObject:[NSNumber numberWithInteger:card.cardId]];
+      if ([entry isKindOfClass:[NSNumber class]])
+      {
+        [cardIds addObject:entry];
+      }
+      else
+      {
+        [cardIds addObject:[NSNumber numberWithInteger:[(Card *)entry cardId]]];
+      }
     }
     [frozenLevels addObject:cardIds];
   }
@@ -256,16 +318,103 @@ static void LWEDeleteFrozenCardIds(void)
 }
 
 
+/**
+ * Card id at the saved browse index when this load is Common Nouns Full Set and
+ * the session file still belongs to the removed Nouns list (tag 133) or Nouns
+ * 02–13. Those ids are not this set. The caller looks the card up in Common
+ * Nouns, and keeps the index only when the card is in it.
+ * Returns nil when there is nothing to carry.
+ */
+- (NSNumber *)_cardIdCarriedFromRetiredNounSession:(BOOL *)resetIndex
+{
+  if (resetIndex != NULL)
+  {
+    *resetIndex = NO;
+  }
+#if !defined(LWE_JFLASH)
+  return nil;
+#else
+  // Common Nouns Full Set (tag 2346) is what an old Nouns session opens now.
+  static NSInteger const kLWECommonNounsFullSetTagId = 2346;
+  static NSInteger const kLWERetiredGiantNounsTagId = 133;
+  static NSInteger const kLWERetiredNounsTagMin = 620;
+  static NSInteger const kLWERetiredNounsTagMax = 631;
+  if (self.tagId != kLWECommonNounsFullSetTagId)
+  {
+    return nil;
+  }
+  NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
+  NSDictionary *frozen = [NSDictionary dictionaryWithContentsOfFile:path];
+  if (frozen == nil)
+  {
+    return nil;
+  }
+  id frozenTagId = [frozen objectForKey:kLWEFrozenTagIdKey];
+  id frozenUserId = [frozen objectForKey:kLWEFrozenUserIdKey];
+  NSArray *frozenLevels = [frozen objectForKey:kLWEFrozenLevelsKey];
+  NSInteger userId = [[NSUserDefaults standardUserDefaults] integerForKey:APP_USER];
+  if ([frozenTagId isKindOfClass:[NSNumber class]] == NO ||
+      [frozenUserId isKindOfClass:[NSNumber class]] == NO ||
+      [frozenUserId integerValue] != userId ||
+      [frozenLevels isKindOfClass:[NSArray class]] == NO ||
+      [frozenLevels count] != 6)
+  {
+    return nil;
+  }
+  NSInteger retiredTag = [frozenTagId integerValue];
+  BOOL retiredSlice = (retiredTag >= kLWERetiredNounsTagMin && retiredTag <= kLWERetiredNounsTagMax);
+  if (retiredTag != kLWERetiredGiantNounsTagId && retiredSlice == NO)
+  {
+    return nil;
+  }
+  // The saved index is a position in the old list.  It is not a position in
+  // Common Nouns, so the caller replaces it after this read.
+  if (resetIndex != NULL)
+  {
+    *resetIndex = YES;
+  }
+  NSMutableArray *cardIds = [NSMutableArray array];
+  for (id frozenLevel in frozenLevels)
+  {
+    if ([frozenLevel isKindOfClass:[NSArray class]] == NO)
+    {
+      return nil;
+    }
+    for (id cardId in (NSArray *)frozenLevel)
+    {
+      if ([cardId isKindOfClass:[NSNumber class]] == NO)
+      {
+        return nil;
+      }
+      [cardIds addObject:cardId];
+    }
+  }
+  // Browse walks the ids sorted by card id, the same order -flattenCardArrays uses.
+  [cardIds sortUsingSelector:@selector(compare:)];
+  NSInteger index = [[NSUserDefaults standardUserDefaults] integerForKey:@"current_index"];
+  if (index < 0 || index >= (NSInteger)[cardIds count])
+  {
+    return nil;
+  }
+  return [cardIds objectAtIndex:index];
+#endif
+}
+
 /** Executed when loading a new set on app load */
 - (void) populateCardIds
 {
+  // Read a removed Nouns session before the file is deleted. It does not match
+  // Common Nouns Full Set, so -thawCardIds will not use it as this set's cards.
+  // resetIndex means the saved browse index belonged to that old list.
+  BOOL resetIndex = NO;
+  NSNumber *carriedCardId = [self _cardIdCarriedFromRetiredNounSession:&resetIndex];
   NSMutableArray *tmpCardIdsArray = [self thawCardIds];
   // The saved session is good for one load only: delete it whether it matched this tag or not,
   // so a leftover file can never be loaded into a later set.
   LWEDeleteFrozenCardIds();
   if (tmpCardIdsArray == nil)
   {
-    // No usable saved session: get the cards (and their levels) from the database
+    // No usable saved session: get the card ids (and their levels) from the database
     tmpCardIdsArray = [CardPeer retrieveCardsSortedByLevelForTag:self];
   }
   
@@ -274,6 +423,24 @@ static void LWEDeleteFrozenCardIds(void)
 
   // populate the card level counts
 	[self recacheCardCountForEachLevel];
+
+  BOOL placed = NO;
+  if (carriedCardId != nil)
+  {
+    NSUInteger index = [self.flattenedCardIdArray indexOfObject:carriedCardId];
+    if (index != NSNotFound)
+    {
+      self.currentIndex = (NSInteger)index;
+      // -activeTag applies current_index from settings after this load.
+      [[NSUserDefaults standardUserDefaults] setInteger:(NSInteger)index forKey:@"current_index"];
+      placed = YES;
+    }
+  }
+  if (resetIndex && placed == NO)
+  {
+    self.currentIndex = 0;
+    [[NSUserDefaults standardUserDefaults] setInteger:0 forKey:@"current_index"];
+  }
 }
 
 //! Concatenate cardId arrays for browse mode
@@ -305,15 +472,16 @@ static void LWEDeleteFrozenCardIds(void)
     NSInteger countBeforeRemove = [thisLevelCards count];
     NSInteger countBeforeAdd = [nextLevelCards count];
 
-    // Now do the remove
-    LWE_ASSERT_EXC([thisLevelCards containsObject:card], @"Can't remove the card, it's no longer there!");
-    [thisLevelCards removeObject:card];
+    // Now do the remove. Levels store card ids, matched the same way Card -isEqual: matches.
+    NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
+    LWE_ASSERT_EXC([thisLevelCards containsObject:cardId], @"Can't remove the card, it's no longer there!");
+    [thisLevelCards removeObject:cardId];
     NSInteger countAfterRemove = [thisLevelCards count];
 
     // Only do the add if remove was successful
     if (countBeforeRemove == (countAfterRemove + 1))
     {
-      [nextLevelCards addObject:card];
+      [nextLevelCards addObject:cardId];
       
       // And now update its level ID so it stays accurate
       card.levelId = nextLevel;
@@ -334,9 +502,10 @@ static void LWEDeleteFrozenCardIds(void)
  */
 - (void) removeCardFromActiveSet:(Card *)card
 {
+  NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
   NSMutableArray *cardLevel = [self.cardsByLevel objectAtIndex:card.levelId];
-  [cardLevel removeObject:card];
-  [self.flattenedCardIdArray removeObject:card];
+  [cardLevel removeObject:cardId];
+  [self.flattenedCardIdArray removeObject:cardId];
   [self recacheCardCountForEachLevel];
 }
 
@@ -345,9 +514,10 @@ static void LWEDeleteFrozenCardIds(void)
  */
 - (void) addCardToActiveSet:(Card *)card
 {
+  NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
   NSMutableArray *cardLevel = [self.cardsByLevel objectAtIndex:card.levelId];
-  [cardLevel addObject:card];
-  [self.flattenedCardIdArray addObject:card];
+  [cardLevel addObject:cardId];
+  [self.flattenedCardIdArray addObject:cardId];
   [self recacheCardCountForEachLevel];
 }
 
@@ -359,7 +529,26 @@ static void LWEDeleteFrozenCardIds(void)
 {
   LWE_ASSERT_EXC((self.tagId != kLWEUninitializedTagId),@"The tag must already exist to be saved, use createTagNamed in TagPeer to create a tag");
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-  BOOL success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ? WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+  BOOL success = NO;
+#if defined(LWE_JFLASH)
+  if ([self isEditable])
+  {
+    // Saving a name the user typed drops the shipped Japanese columns, so the
+    // set keeps the name they wrote when the app is in Japanese.
+    success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ?, tag_name_ja = NULL, description_ja = NULL WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+    if (success)
+    {
+      self.tagNameJa = nil;
+      self.tagDescriptionJa = nil;
+    }
+  }
+  else
+  {
+    success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ? WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+  }
+#else
+  success = [db.dao executeUpdate:@"UPDATE tags SET tag_name = ?, description = ? WHERE tag_id = ?",self.tagName,self.tagDescription,[NSNumber numberWithInt:self.tagId]];
+#endif
   if (success)
   {
     [[NSNotificationCenter defaultCenter] postNotificationName:LWETagDidSave object:self];
@@ -396,6 +585,10 @@ static void LWEDeleteFrozenCardIds(void)
   self.tagName = [rs stringForColumn:@"tag_name"];
   self.tagEditable = [rs intForColumn:@"editable"];
   self.cardCount = [rs intForColumn:@"count"];
+#if defined(LWE_JFLASH)
+  self.tagNameJa = [rs stringForColumn:@"tag_name_ja"];
+  self.tagDescriptionJa = [rs stringForColumn:@"description_ja"];
+#endif
   
   // We only care about getting new updates on data if we had data to begin with.
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tagDidSave:) name:LWETagDidSave object:nil];

@@ -251,6 +251,8 @@ jobs:
           echo "Errors, failed tests, and result banners:"
           grep -E ': error:|: fatal error:|\*\* TEST (SUCCEEDED|FAILED) \*\*|Test Case .* failed \(|Testing failed|Testing cancelled' \
             "$log" || true
+          echo "Set and word-list measurements:"
+          grep -E 'LWESetLoad |LWEWordList ' "$log" || true
           echo "----- log tail -----"
           tail -n 40 "$log"
           exit "$status"

@@ -288,7 +288,7 @@ static UIView *LWEProgressBox(UIView *content, UIColor *fill, CGFloat radius, NS
 - (UIView *) _headerView
 {
   UILabel *title = LWEProgressLabel(LWEDesignScaledFont(UIFontTextStyleTitle2, 22, UIFontWeightBold, 0), LWEDesignInk());
-  title.text = self.tag.tagName;
+  title.text = [self.tag displayName];
   title.numberOfLines = [self _isAccessibilitySize] ? 0 : 3;
   title.lineBreakMode = NSLineBreakByTruncatingTail;
   title.accessibilityTraits = UIAccessibilityTraitHeader;

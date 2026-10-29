@@ -7,6 +7,7 @@
 //
 
 #import "Group.h"
+#import "Tag.h"
 
 NSInteger const kLWEUninitializedGroupId = -99;
 
@@ -14,7 +15,7 @@ NSInteger const kLWEUninitializedGroupId = -99;
 
 //! Group contains Tag objects for display to the user in categorical hierarchies
 @implementation Group
-@synthesize groupId, groupName, ownerId, tagCount, recommended, groupDescription;
+@synthesize groupId, groupName, groupNameJa, ownerId, tagCount, recommended, groupDescription;
 
 - (id) init
 {
@@ -37,6 +38,20 @@ NSInteger const kLWEUninitializedGroupId = -99;
   self.tagCount = [rs intForColumn:@"tag_count"];
   self.recommended = [rs intForColumn:@"recommended"];
   self.groupDescription = [rs stringForColumn:@"description"];
+#if defined(LWE_JFLASH)
+  self.groupNameJa = [rs stringForColumn:@"group_name_ja"];
+#endif
+}
+
+- (NSString *)displayName
+{
+#if defined(LWE_JFLASH)
+  if (LWEBuiltInCatalogUsesJapanese() && [self.groupNameJa length] > 0)
+  {
+    return self.groupNameJa;
+  }
+#endif
+  return self.groupName;
 }
 
 - (BOOL) isTopLevelGroup
@@ -78,6 +93,7 @@ NSInteger const kLWEUninitializedGroupId = -99;
 - (void) dealloc
 {
   [groupName release];
+  [groupNameJa release];
   [groupDescription release];
 	[super dealloc];
 }

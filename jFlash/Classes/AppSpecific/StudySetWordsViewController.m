@@ -14,13 +14,13 @@
 @interface StudySetWordsViewController ()
 - (void) _loadWordListInBackground;
 - (void) _tagContentDidChange:(NSNotification*)notification;
+- (NSInteger) _indexOfCardId:(NSInteger)cardId;
+- (Card *) _cardDisplayedAtRow:(NSInteger)row;
 @end
 
 /**
- * Grouped UITableViewController subclass - shows all words in a given set
- * Some sets may be large, so this controller will not lock the interface
- * by loading all cards into memory at first.  It will load first and then
- * put the cards onto the screen when loaded.
+ * Grouped UITableViewController subclass - shows all words in a given set.
+ * The list loads card ids, then fetches a card when its row is shown.
  */
 @implementation StudySetWordsViewController
 
@@ -70,7 +70,7 @@
   
   // We do this on viewWillAppear instead of viewDidLoad because the tagName could change
   // when the user edits it after tapping "Edit" on this VC
-  self.navigationItem.title = self.tag.tagName;
+  self.navigationItem.title = [self.tag displayName];
 }
 
 #pragma mark - KVO
@@ -113,14 +113,19 @@
   NSString *changeType = [notification.userInfo objectForKey:LWETagContentDidChangeTypeKey];
   if ([changeType isEqualToString:LWETagContentCardAdded])
   {
-    [self.cards addObject:theCard];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[self.cards indexOfObject:theCard] inSection:kWordSetListSections];
-    [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
-                          withRowAnimation:UITableViewRowAnimationRight];
+    // Keep an id until the new row is shown. Card -isEqual: does not match an NSNumber.
+    [self.cards addObject:[NSNumber numberWithInteger:theCard.cardId]];
+    NSInteger index = [self _indexOfCardId:theCard.cardId];
+    if (index != NSNotFound)
+    {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:kWordSetListSections];
+      [self.tableView insertRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
+                            withRowAnimation:UITableViewRowAnimationRight];
+    }
   }
   else if ([changeType isEqualToString:LWETagContentCardRemoved])
   {
-    NSInteger index = [self.cards indexOfObject:theCard];
+    NSInteger index = [self _indexOfCardId:theCard.cardId];
     if (index != NSNotFound)
     {
       //remove the card, reload the table
@@ -134,11 +139,45 @@
   [self.tableView endUpdates];
 }
 
-/** Run in background on init to load the word list */
+//! Row of a card id, whether that row is still an id or has been loaded.
+- (NSInteger) _indexOfCardId:(NSInteger)cardId
+{
+  NSUInteger count = [self.cards count];
+  for (NSUInteger i = 0; i < count; i++)
+  {
+    id entry = [self.cards objectAtIndex:i];
+    NSInteger entryId = [entry isKindOfClass:[NSNumber class]] ? [entry integerValue] : [(Card *)entry cardId];
+    if (entryId == cardId)
+    {
+      return (NSInteger)i;
+    }
+  }
+  return NSNotFound;
+}
+
+//! The card for a visible row. An id is loaded once and kept in the list.
+- (Card *) _cardDisplayedAtRow:(NSInteger)row
+{
+  id entry = [self.cards objectAtIndex:row];
+  if ([entry isKindOfClass:[Card class]])
+  {
+    Card *card = entry;
+    if (card.isFault)
+    {
+      [card hydrate];
+    }
+    return card;
+  }
+  Card *card = [CardPeer hydratedCardWithId:[entry integerValue]];
+  [self.cards replaceObjectAtIndex:row withObject:card];
+  return card;
+}
+
+/** Run in background on init to load the word list's card ids. */
 - (void) _loadWordListInBackground
 {
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-  self.cards = [[[CardPeer retrieveFaultedCardsForTag:self.tag] mutableCopy] autorelease];
+  self.cards = [[[CardPeer retrieveCardIdsForTag:self.tag] mutableCopy] autorelease];
   [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];
   [pool release];
 }
@@ -207,15 +246,10 @@
     }
     else
     {
-      // The actual words, once loaded
+      // The actual words, once loaded. Fetch this row; the rest stay as ids.
       cell = [LWEUITableUtils reuseCellForIdentifier:cellIdentifier onTable:lclTableView usingStyle:UITableViewCellStyleSubtitle];
       cell.selectionStyle = UITableViewCellSelectionStyleGray;
-      Card *tmpCard = [self.cards objectAtIndex:indexPath.row];
-      if (tmpCard.isFault)
-      {
-        // Lazy load & update our array
-        [tmpCard hydrate];
-      }
+      Card *tmpCard = [self _cardDisplayedAtRow:indexPath.row];
       cell.detailTextLabel.text = [tmpCard meaningWithoutMarkup];
       // Ignore = YES means we get the target language HW no matter what, no headword_en
       cell.textLabel.text = [tmpCard headwordIgnoringMode:YES];
@@ -247,7 +281,7 @@
   if (editingStyle == UITableViewCellEditingStyleDelete)
   {
     NSError *error = nil;
-    Card *card = [self.cards objectAtIndex:indexPath.row];
+    Card *card = [self _cardDisplayedAtRow:indexPath.row];
     
     // Set this to signal to the notification callback that we don't need to do anything
     BOOL result = [TagPeer cancelMembership:card fromTag:self.tag error:&error];
@@ -321,7 +355,7 @@
   // If they pressed a card, show the add to set list
   else if (indexPath.section == kWordSetListSections)
   {
-    AddTagViewController *tmpVC = [[AddTagViewController alloc] initForExampleSentencesWithCard:[self.cards objectAtIndex:indexPath.row]];
+    AddTagViewController *tmpVC = [[AddTagViewController alloc] initForExampleSentencesWithCard:[self _cardDisplayedAtRow:indexPath.row]];
     [self.navigationController pushViewController:tmpVC animated:YES];
     [tmpVC release];
   }

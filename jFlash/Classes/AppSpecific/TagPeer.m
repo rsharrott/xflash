@@ -292,12 +292,14 @@ NSString * const LWETagContentCardRemoved = @"LWETagContentCardRemoved";
 }
 
 //! Returns array of Tag objects based on Group membership.
-//! "Full Set" is every card in a vocabulary level.  The name sorts after "01"
-//! ('F' > '0'), so the level list shows it first and then the chunks by name.
+//! "Full Set" is every card in a chunked list (a vocabulary level, Common Nouns,
+//! Common Words, Core 1000).  The name sorts after "01" ('F' > '0'), so the
+//! list shows it first and then the chunks by the stored English name.
+//! Japanese display names do not change this order.
 + (NSArray *) retrieveTagListByGroupId:(NSInteger)groupId
 {
   LWEDatabase *db = [LWEDatabase sharedLWEDatabase];
-	FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags t, group_tag_link l WHERE t.tag_id = l.tag_id AND l.group_id = ? ORDER BY CASE WHEN t.tag_name LIKE '%(≈N% Full Set' THEN 0 ELSE 1 END, t.tag_name ASC",[NSNumber numberWithInt:groupId]];
+	FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags t, group_tag_link l WHERE t.tag_id = l.tag_id AND l.group_id = ? ORDER BY CASE WHEN t.tag_name LIKE '% Full Set' THEN 0 ELSE 1 END, t.tag_name ASC",[NSNumber numberWithInt:groupId]];
 	return [TagPeer _tagListWithResultSet:rs];
 }
 
@@ -311,6 +313,17 @@ NSString * const LWETagContentCardRemoved = @"LWETagContentCardRemoved";
   // other sets removed from the list).  Search used to return every tag, so
   // those sets reappeared as soon as you typed.  User-made sets are linked to
   // a group when they are created.  cFlash has no ungrouped tags.
+#if defined(LWE_JFLASH)
+  // Japanese search also matches the shipped Japanese name.  The English
+  // tag_name is still matched, so "Beginner" finds the level sets.  User-created
+  // sets have no tag_name_ja, so only their own name matches.  Result order
+  // stays the English name, which keeps a Full Set beside its chunks.
+  if (LWEBuiltInCatalogUsesJapanese())
+  {
+    FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags WHERE (tag_name LIKE ? OR tag_name_ja LIKE ?) AND tag_id IN (SELECT tag_id FROM group_tag_link) ORDER BY tag_name ASC",searchString,searchString];
+    return [TagPeer _tagListWithResultSet:rs];
+  }
+#endif
   FMResultSet *rs = [db.dao executeQuery:@"SELECT * FROM tags WHERE tag_name LIKE ? AND tag_id IN (SELECT tag_id FROM group_tag_link) ORDER BY tag_name ASC",searchString];
 	return [TagPeer _tagListWithResultSet:rs];
 }

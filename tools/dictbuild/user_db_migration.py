@@ -11,6 +11,11 @@ database moved on.  This updates the user file from the new template:
 * a user-created tag whose id is a system id in the template (644 and up)
   is renumbered, and card_tag_link, group_tag_link, last_state and
   tag_user_card_levels follow it
+* The built-in Nouns list (tag 133) and Nouns 02–13 (tags 620–631) are
+  removed.  An active set on one of them moves to Common Nouns Full Set.
+  Card progress stays on user_history, so a card that is also in Common
+  Nouns keeps its level.  An editable row at one of those ids is a user
+  set and is left alone
 * group links whose tag row does not exist are deleted (the 2.0 template
   has 68 of these)
 
@@ -19,17 +24,22 @@ JFlashUpdateManager's 2.1 step runs the same statements.  Keep the two in step.
 
 import sqlite3
 
+import study_sets
+
 
 def migrate(user_path, template_path):
     """Update user_path using template_path.  Returns {old_tag_id: new_tag_id}."""
     conn = sqlite3.connect(user_path)
     try:
         conn.execute('ATTACH DATABASE ? AS tpl', (template_path,))
+        _ensure_locale_columns(conn)
         mapping = _renumber_collisions(conn)
         _copy_system_tags(conn)
         _copy_groups(conn)
         _replace_system_links(conn)
+        mapping.update(_fold_retired_noun_tags(conn))
         _drop_dangling_links(conn)
+        _copy_kept_japanese(conn)
         _recount_groups(conn)
         _refresh_starred_count(conn)
         _bump_sequence(conn)
@@ -46,6 +56,20 @@ def migrate(user_path, template_path):
         raise
     finally:
         conn.close()
+
+
+def _column_names(conn, table):
+    return {row[1] for row in conn.execute('PRAGMA table_info(%s)' % table)}
+
+
+def _ensure_locale_columns(conn):
+    """A 2.0 user file has no Japanese columns.  Adding them is idempotent."""
+    if 'tag_name_ja' not in _column_names(conn, 'tags'):
+        conn.execute('ALTER TABLE tags ADD COLUMN tag_name_ja TEXT')
+    if 'description_ja' not in _column_names(conn, 'tags'):
+        conn.execute('ALTER TABLE tags ADD COLUMN description_ja TEXT')
+    if 'group_name_ja' not in _column_names(conn, 'groups'):
+        conn.execute('ALTER TABLE groups ADD COLUMN group_name_ja TEXT')
 
 
 def _system_tag_ids_sql():
@@ -77,18 +101,94 @@ def _renumber_collisions(conn):
     return mapping
 
 
+def _retired_noun_where():
+    """Tag 133 and Nouns 02–13.  cFlash tag 133 is a different set; this step is jFlash."""
+    return '(tag_id = %d OR tag_id BETWEEN %d AND %d)' % (
+        study_sets.NOUN_ANCHOR,
+        study_sets.RETIRED_NOUN_TAGS[0],
+        study_sets.RETIRED_NOUN_TAGS[-1])
+
+
+def _common_nouns_full_set_id(conn):
+    row = conn.execute(
+        "SELECT tag_id FROM tpl.tags WHERE tag_name = 'Common Nouns Full Set' AND editable = 0"
+    ).fetchone()
+    if row is None:
+        raise RuntimeError('template is missing Common Nouns Full Set')
+    return row[0]
+
+
+def _fold_retired_noun_tags(conn):
+    """Remove the built-in Nouns list and Nouns 02–13.
+
+    A 2.0 file still has those system tags.  The template does not, so the
+    system-tag copy leaves them in place.  last_state moves to Common Nouns
+    Full Set.  user_history is per card and is not touched, so a card that
+    is also in Common Nouns keeps its level.  Per-tag level counts counted
+    a different list and are not copied.  Returns {old_tag_id: full_set_id}
+    for each system tag removed, and for a last_state that still names one
+    of these ids.  An editable row is a user set and is left alone.
+    """
+    full_set = _common_nouns_full_set_id(conn)
+    where = _retired_noun_where()
+    not_user = 'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)'
+    rows = conn.execute(
+        'SELECT tag_id FROM tags WHERE editable = 0 AND %s '
+        'UNION SELECT tag_id FROM last_state WHERE %s %s' % (where, where, not_user)
+    ).fetchall()
+    mapping = {row[0]: full_set for row in rows}
+    # Move the active set before the tag row disappears.
+    conn.execute(
+        'UPDATE last_state SET tag_id = ? WHERE %s %s' % (where, not_user),
+        (full_set,))
+    for sql in (
+        'DELETE FROM tag_user_card_levels WHERE %s %s' % (where, not_user),
+        'DELETE FROM card_tag_link WHERE %s %s' % (where, not_user),
+        'DELETE FROM group_tag_link WHERE %s %s' % (where, not_user),
+        'DELETE FROM tags WHERE editable = 0 AND %s' % where,
+    ):
+        conn.execute(sql)
+    return mapping
+
+
 def _copy_system_tags(conn):
     # Tag 0 (My Starred Words) is editable = 0 but its cards live in this file.
+    # Its Japanese columns are copied in _copy_kept_japanese, without touching count.
     conn.execute(
-        'INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) '
-        'SELECT tag_id, tag_name, description, editable, count FROM tpl.tags '
-        'WHERE editable = 0 AND tag_id != 0')
+        'INSERT OR REPLACE INTO tags '
+        '(tag_id, tag_name, description, tag_name_ja, description_ja, editable, count) '
+        'SELECT tag_id, tag_name, description, tag_name_ja, description_ja, editable, count '
+        'FROM tpl.tags WHERE editable = 0 AND tag_id != 0')
 
 
 def _copy_groups(conn):
     conn.execute(
-        'INSERT OR REPLACE INTO groups (group_id, group_name, owner_id, tag_count, recommended) '
-        'SELECT group_id, group_name, owner_id, tag_count, recommended FROM tpl.groups')
+        'INSERT OR REPLACE INTO groups '
+        '(group_id, group_name, group_name_ja, owner_id, tag_count, recommended) '
+        'SELECT group_id, group_name, group_name_ja, owner_id, tag_count, recommended '
+        'FROM tpl.groups')
+
+
+def _copy_kept_japanese(conn):
+    """Japanese names for rows the system-tag copy deliberately skips.
+
+    Tag 0 keeps its card count.  An editable built-in (Long Weekend Favorites)
+    keeps a Japanese name only while its English name still matches the
+    template.  A renamed set, and every user-created set, is left as named.
+    """
+    conn.execute(
+        'UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags WHERE tag_id = 0), '
+        'description_ja = (SELECT description_ja FROM tpl.tags WHERE tag_id = 0) '
+        'WHERE tag_id = 0')
+    conn.execute(
+        'UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id), '
+        'description_ja = (SELECT description_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id) '
+        'WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) '
+        'AND tag_name = (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)')
+    conn.execute(
+        'UPDATE tags SET tag_name_ja = NULL, description_ja = NULL '
+        'WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) '
+        'AND tag_name != (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)')
 
 
 def _replace_system_links(conn):

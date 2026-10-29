@@ -121,6 +121,19 @@ and licence links.
     lists.  Each level also has a `Full Set`, the union of that level's
     chunks.  The level list shows that set first.  `study_sets.py` is what
     split them; `build.py` only re-applies the names onto `jFlash.db`.
+  * `chunked_lists.json`: names and tag ids for the Common Nouns, Common Words
+    and Core 1000 cuts.  Each list is 50–100 cards plus a `Full Set` shown
+    first.  Membership stays in `system_sets.tsv`.  The full Nouns list is
+    not a built-in set.  Common Nouns is the cards JMdict marks as
+    common-priority, in the Nouns group, in card-id order, with its Full
+    Set shown first.  Common Words keeps the cards it already had, with
+    common-priority cards in the earlier sets.  Core 1000 is the JMdict nf01
+    and nf02 bands (see `core1000.tsv`), 993 cards, not padded out to 1,000,
+    and not a JLPT exam list.
+  * Japanese names are `tag_name_ja`, `description_ja` and `group_name_ja`
+    on the user-database template.  The English name stays the stored name,
+    so browse order and name search still use it.  A set the user created
+    has no Japanese name.
 * **Romaji** for expressions, particles, conjunctions and hand-made phrase cards
   goes through `romaji_policy.py` at the end of the card build: topic-particle
   は becomes "wa" when the reading segments into dictionary words and the
@@ -131,10 +144,13 @@ and licence links.
   kept as an extra search token.  Hand-tuned curated romaji is left as stored.
 * **User database 2.1.** A 2.0 install already has `jFlash.db` in Documents, so
   a later build does not copy the template again.  Data version 2.1 updates
-  that file in place (tags, groups, links) and keeps study progress, My Starred
-  Words, user-created sets and `last_state`.  A user-created tag whose id is
-  one of the new system ids (644+) is renumbered.  Group links that point at
-  a missing tag are dropped.  Fresh installs and the 1.x dictionary reset copy
+  that file in place (tags, groups, links, and the Japanese name columns) and
+  keeps study progress, My Starred Words, user-created sets and `last_state`.
+  A user-created tag whose id is one of the new system ids (644+) is
+  renumbered.  Group links that point at a missing tag are dropped.  The
+  Japanese columns are filled for built-in sets only.  A renamed editable set,
+  including Long Weekend Favorites once its English name has changed, keeps
+  the name the user wrote.  Fresh installs and the 1.x dictionary reset copy
   the new template and do not need that step.  If the in-place update fails,
   the user file is left unchanged and the app stops retrying it.  The alert's
   one-shot flag is cleared after it is shown; `study_sets_21_failed` stays set

@@ -271,7 +271,7 @@ static NSInteger LWELiveCardCount(Tag *tag)
   Tag *current = [[CurrentState sharedCurrentState] activeTag];
   if (current && current.cardCount > 0)
   {
-    [sets addObject:@{ @"title": current.tagName, @"subtitle": LWEWordCountString(LWELiveCardCount(current)), @"tag": current }];
+    [sets addObject:@{ @"title": [current displayName], @"subtitle": LWEWordCountString(LWELiveCardCount(current)), @"tag": current }];
   }
 
   // 2. Kana, numbers, greetings, and the first approximate-beginner set, if they exist.
@@ -280,7 +280,7 @@ static NSInteger LWELiveCardCount(Tag *tag)
   {
     Group *group = [GroupPeer retrieveGroupById:kLWEStarterSets[i][0]];
     Tag *tag = [TagPeer retrieveTagById:kLWEStarterSets[i][1]];
-    if (group == nil || tag == nil || [tag.tagName length] == 0 || tag.tagId == current.tagId)
+    if (group == nil || tag == nil || [[tag displayName] length] == 0 || tag.tagId == current.tagId)
     {
       continue;
     }
@@ -293,8 +293,8 @@ static NSInteger LWELiveCardCount(Tag *tag)
     {
       continue;
     }
-    NSString *subtitle = [NSString stringWithFormat:@"%@ · %@", tag.tagName, LWEWordCountString(count)];
-    [sets addObject:@{ @"title": group.groupName, @"subtitle": subtitle, @"tag": tag }];
+    NSString *subtitle = [NSString stringWithFormat:@"%@ · %@", [tag displayName], LWEWordCountString(count)];
+    [sets addObject:@{ @"title": [group displayName], @"subtitle": subtitle, @"tag": tag }];
   }
   return sets;
 }

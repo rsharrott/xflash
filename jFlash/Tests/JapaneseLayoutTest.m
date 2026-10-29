@@ -128,9 +128,10 @@ static NSString * const kLWELongReading = @"つづける - tsuzukeru (to continu
   webView.navigationDelegate = self;
   self.loadExpectation = [self expectationWithDescription:@"load"];
   [webView loadHTMLString:html baseURL:nil];
-  // Cold WKWebView startup on the Intel CI simulator can take longer than 15s.
+  // Cold WKWebView startup on the Intel CI simulator can take longer than 15s,
+  // and a WebContent process that has to be relaunched can take longer than 60s.
   // The layout assertions below are unchanged.
-  [self waitForExpectationsWithTimeout:60 handler:nil];
+  [self waitForExpectationsWithTimeout:120 handler:nil];
 
   NSString *js = @"(function(){var out=[];var W=document.documentElement.clientWidth;"
     "var bs=document.querySelectorAll('.AddCell .button');"
@@ -216,6 +217,40 @@ static NSString * const kLWELongReading = @"つづける - tsuzukeru (to continu
     XCTAssertNotNil(path, @"%@ strings ship", lang);
     NSDictionary *strings = [NSDictionary dictionaryWithContentsOfFile:path];
     XCTAssertEqualObjects([strings objectForKey:@"Rate Us"], [expected objectForKey:lang]);
+  }
+}
+
+- (void) testAcknowledgementsCreditCore1000Separately
+{
+  // The English paragraph is the lookup key in both files. The Japanese value is the translation.
+  NSDictionary *needles = [NSDictionary dictionaryWithObjectsAndKeys:
+                           [NSArray arrayWithObjects:@"nf01", @"nf02", @"Mainichi Shimbun", @"CC BY-SA 4.0", nil], @"en",
+                           [NSArray arrayWithObjects:@"nf01", @"nf02", @"毎日新聞", @"CC BY-SA 4.0", nil], @"ja",
+                           nil];
+  for (NSString *lang in needles)
+  {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"Localizable" ofType:@"strings" inDirectory:nil forLocalization:lang];
+    NSDictionary *strings = [NSDictionary dictionaryWithContentsOfFile:path];
+    XCTAssertNotNil(strings, @"%@ strings", lang);
+    NSString *matchedKey = nil;
+    for (NSString *key in strings)
+    {
+      if ([key rangeOfString:@"Core 1000 is not a separate word list"].location != NSNotFound)
+      {
+        matchedKey = key;
+        break;
+      }
+    }
+    XCTAssertNotNil(matchedKey, @"%@ acknowledgement key credits Core 1000", lang);
+    NSString *value = [strings objectForKey:matchedKey];
+    for (NSString *needle in [needles objectForKey:lang])
+    {
+      XCTAssertTrue([value rangeOfString:needle].location != NSNotFound, @"%@ acknowledgement missing %@", lang, needle);
+    }
+    if ([lang isEqualToString:@"ja"])
+    {
+      XCTAssertNotEqualObjects(value, matchedKey, @"Japanese acknowledgements should translate the Core 1000 credit");
+    }
   }
 }
 

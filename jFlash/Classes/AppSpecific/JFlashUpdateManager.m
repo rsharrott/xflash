@@ -362,7 +362,14 @@
  * ids.  An install that is already at data version 2.0 has its own copy of jFlash.db and will not
  * copy the new template, so this updates that file in place.  Study progress, My Starred Words,
  * user-created sets and last_state stay.  A user-created tag whose id collides with a new system
- * tag (644 and up) is renumbered.
+ * tag (644 and up) is renumbered.  The built-in Nouns list (tag 133) and Nouns 02–13
+ * (tags 620–631) are removed.  An active set on one of them moves to Common Nouns Full Set.
+ * Card progress on user_history stays, so a card that is also in Common Nouns keeps its level.
+ * An editable row at one of those ids is a user set and is left alone.
+ *
+ * Built-in set names also gain Japanese columns (tag_name_ja, description_ja,
+ * group_name_ja).  A 2.0 file does not have those columns, so this adds them
+ * before copying.  User-created sets are not given a Japanese name.
  *
  * Same statements as tools/dictbuild/user_db_migration.py.  Keep the two in step.
  */
@@ -438,9 +445,12 @@
   return YES;
 }
 
-// The active set is saved before COMMIT.  A crash in between, then a failed retry,
-// leaves tag_id pointing at a row the rollback removed.  Point it at the default
-// set when that row is gone.  A set that is still in the database is left alone.
+// Give-up leaves the user database unchanged, so a built-in Nouns row can still
+// be there while the new card database has no cards for it.  Opening that set
+// is an empty list.  Point the active set at Common Nouns Full Set when that
+// row exists, otherwise the default set, and drop the old browse index.
+// A user-created set at one of those ids is left alone.  Any other missing id
+// still falls back to the default set.
 + (void) _resetActiveSetIfMissing:(NSUserDefaults *)settings
 {
   NSString *userPath = [LWEFile createDocumentPathWithFilename:LWE_CURRENT_USER_DATABASE];
@@ -454,15 +464,42 @@
   {
     return;
   }
-  int found = 0;
-  NSString *sql = [NSString stringWithFormat:@"SELECT count(*) FROM tags WHERE tag_id = %ld",
-                   (long)[settings integerForKey:@"tag_id"]];
-  BOOL ok = [JFlashUpdateManager _migrationInt:db sql:sql into:&found];
-  [db closeDatabase];
-  if (ok && found == 0)
+  NSInteger tagId = [settings integerForKey:@"tag_id"];
+  int editable = 0;
+  BOOL found = NO;
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT editable FROM tags WHERE tag_id = ?",
+                     [NSNumber numberWithInteger:tagId]];
+  if (rs == nil || [db.dao hadError])
   {
-    [settings setInteger:DEFAULT_TAG_ID forKey:@"tag_id"];
+    [rs close];
+    [db closeDatabase];
+    return;
   }
+  if ([rs next])
+  {
+    found = YES;
+    editable = [rs intForColumnIndex:0];
+  }
+  [rs close];
+  BOOL retiredNoun = (tagId == 133 || (tagId >= 620 && tagId <= 631));
+  BOOL userOwned = (found && editable == 1);
+  BOOL removedBuiltIn = (retiredNoun && userOwned == NO);
+  if (removedBuiltIn || found == NO)
+  {
+    NSInteger replacement = DEFAULT_TAG_ID;
+    if (removedBuiltIn)
+    {
+      int fullSet = 0;
+      if ([JFlashUpdateManager _migrationInt:db sql:
+           @"SELECT count(*) FROM tags WHERE tag_id = 2346 AND editable = 0" into:&fullSet] && fullSet > 0)
+      {
+        replacement = 2346;
+      }
+    }
+    [settings setInteger:replacement forKey:@"tag_id"];
+    [settings setInteger:0 forKey:@"current_index"];
+  }
+  [db closeDatabase];
 }
 
 // A failed in-place update must not run again on every launch.  The user database
@@ -501,8 +538,52 @@
   return NO;
 }
 
++ (BOOL) _column:(NSString *)column existsOn:(NSString *)table db:(LWEDatabase *)db
+{
+  FMResultSet *rs = [db.dao executeQuery:[NSString stringWithFormat:@"PRAGMA table_info(%@)", table]];
+  BOOL found = NO;
+  while ([rs next])
+  {
+    if ([[rs stringForColumn:@"name"] isEqualToString:column])
+    {
+      found = YES;
+    }
+  }
+  [rs close];
+  return found;
+}
+
++ (BOOL) _ensureLocaleColumns:(LWEDatabase *)db
+{
+  // A 2.0 user file has none of these.  A second run finds them and skips the ALTER.
+  NSArray *columns = [NSArray arrayWithObjects:
+                      [NSArray arrayWithObjects:@"tags", @"tag_name_ja", nil],
+                      [NSArray arrayWithObjects:@"tags", @"description_ja", nil],
+                      [NSArray arrayWithObjects:@"groups", @"group_name_ja", nil],
+                      nil];
+  for (NSArray *pair in columns)
+  {
+    NSString *table = [pair objectAtIndex:0];
+    NSString *column = [pair objectAtIndex:1];
+    if ([JFlashUpdateManager _column:column existsOn:table db:db])
+    {
+      continue;
+    }
+    NSString *sql = [NSString stringWithFormat:@"ALTER TABLE %@ ADD COLUMN %@ TEXT", table, column];
+    if ([JFlashUpdateManager _migrationUpdate:db sql:sql] == NO)
+    {
+      return NO;
+    }
+  }
+  return YES;
+}
+
 + (BOOL) _migrateUserDatabase:(LWEDatabase *)db renamedTags:(NSMutableDictionary *)renames
 {
+  if ([JFlashUpdateManager _ensureLocaleColumns:db] == NO)
+  {
+    return NO;
+  }
   NSString *systemTags = @"SELECT tag_id FROM tpl.tags WHERE editable = 0 AND tag_id != 0";
   FMResultSet *rs = [db.dao executeQuery:
     [NSString stringWithFormat:@"SELECT tag_id FROM tags WHERE editable = 1 AND tag_id IN (%@) ORDER BY tag_id", systemTags]];
@@ -549,15 +630,15 @@
   }
 
   if ([JFlashUpdateManager _migrationUpdate:db sql:
-       @"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, editable, count) "
-       "SELECT tag_id, tag_name, description, editable, count FROM tpl.tags "
+       @"INSERT OR REPLACE INTO tags (tag_id, tag_name, description, tag_name_ja, description_ja, editable, count) "
+       "SELECT tag_id, tag_name, description, tag_name_ja, description_ja, editable, count FROM tpl.tags "
        "WHERE editable = 0 AND tag_id != 0"] == NO)
   {
     return NO;
   }
   if ([JFlashUpdateManager _migrationUpdate:db sql:
-       @"INSERT OR REPLACE INTO groups (group_id, group_name, owner_id, tag_count, recommended) "
-       "SELECT group_id, group_name, owner_id, tag_count, recommended FROM tpl.groups"] == NO)
+       @"INSERT OR REPLACE INTO groups (group_id, group_name, group_name_ja, owner_id, tag_count, recommended) "
+       "SELECT group_id, group_name, group_name_ja, owner_id, tag_count, recommended FROM tpl.groups"] == NO)
   {
     return NO;
   }
@@ -573,10 +654,89 @@
   {
     return NO;
   }
+  // Built-in Nouns (133) and Nouns 02–13.  The template no longer has these system
+  // tags.  Point the active set at Common Nouns Full Set and drop the old rows.
+  // user_history is per card and stays.  Same statements as
+  // user_db_migration._fold_retired_noun_tags.  This step is jFlash only: cFlash
+  // tag 133 is a different set and does not run this migration.
+  int fullSetId = 0;
+  if ([JFlashUpdateManager _migrationInt:db sql:
+       @"SELECT tag_id FROM tpl.tags WHERE tag_name = 'Common Nouns Full Set' AND editable = 0"
+       into:&fullSetId] == NO || fullSetId == 0)
+  {
+    LWE_LOG(@"2.1 migration could not find Common Nouns Full Set");
+    return NO;
+  }
+  NSString *retiredNouns = @"(tag_id = 133 OR tag_id BETWEEN 620 AND 631)";
+  NSString *notUserOwned = @"AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)";
+  FMResultSet *nounRs = [db.dao executeQuery:[NSString stringWithFormat:
+    @"SELECT tag_id FROM tags WHERE editable = 0 AND %@ "
+    "UNION SELECT tag_id FROM last_state WHERE %@ %@",
+    retiredNouns, retiredNouns, notUserOwned]];
+  if (nounRs == nil || [db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed while reading retired Nouns tags: %@", [db.dao lastErrorMessage]);
+    [nounRs close];
+    return NO;
+  }
+  while ([nounRs next])
+  {
+    [renames setObject:[NSNumber numberWithInt:fullSetId] forKey:[NSNumber numberWithInt:[nounRs intForColumnIndex:0]]];
+  }
+  [nounRs close];
+  if ([db.dao hadError])
+  {
+    LWE_LOG(@"2.1 migration failed while reading retired Nouns tags: %@", [db.dao lastErrorMessage]);
+    return NO;
+  }
+  NSArray *nounFold = [NSArray arrayWithObjects:
+    [NSString stringWithFormat:
+     @"UPDATE last_state SET tag_id = %d WHERE %@ %@", fullSetId, retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM tag_user_card_levels WHERE %@ %@", retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM card_tag_link WHERE %@ %@", retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM group_tag_link WHERE %@ %@", retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM tags WHERE editable = 0 AND %@", retiredNouns],
+    nil];
+  for (NSString *sql in nounFold)
+  {
+    if ([JFlashUpdateManager _migrationUpdate:db sql:sql] == NO)
+    {
+      return NO;
+    }
+  }
   // The 2.0 template has group links whose tags were removed.  Readers join tags,
   // so they were invisible, but they are not part of the catalog.
   if ([JFlashUpdateManager _migrationUpdate:db sql:
        @"DELETE FROM group_tag_link WHERE tag_id NOT IN (SELECT tag_id FROM tags)"] == NO)
+  {
+    return NO;
+  }
+  // Tag 0 keeps its card count.  Copy only the Japanese columns.
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags WHERE tag_id = 0), "
+       "description_ja = (SELECT description_ja FROM tpl.tags WHERE tag_id = 0) "
+       "WHERE tag_id = 0"] == NO)
+  {
+    return NO;
+  }
+  // An editable built-in keeps a Japanese name only while its English name still
+  // matches the template.  A renamed set, and every user-created set, stays as named.
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"UPDATE tags SET tag_name_ja = (SELECT tag_name_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id), "
+       "description_ja = (SELECT description_ja FROM tpl.tags t WHERE t.tag_id = tags.tag_id) "
+       "WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) "
+       "AND tag_name = (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)"] == NO)
+  {
+    return NO;
+  }
+  if ([JFlashUpdateManager _migrationUpdate:db sql:
+       @"UPDATE tags SET tag_name_ja = NULL, description_ja = NULL "
+       "WHERE editable = 1 AND tag_id IN (SELECT tag_id FROM tpl.tags WHERE editable = 1) "
+       "AND tag_name != (SELECT tag_name FROM tpl.tags t WHERE t.tag_id = tags.tag_id)"] == NO)
   {
     return NO;
   }
@@ -664,18 +824,53 @@
   NSMutableDictionary *renames = [NSMutableDictionary dictionary];
   BOOL ok = [JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames];
   NSInteger previousTag = [settings integerForKey:@"tag_id"];
-  BOOL remapped = NO;
+  BOOL retiredNounTag = (previousTag == 133 || (previousTag >= 620 && previousTag <= 631));
+  if (ok && retiredNounTag)
+  {
+    // The continuation row is gone.  A crash after the tag delete and before this
+    // settings write would otherwise leave the active set on a missing id.  An
+    // editable row here is a user set and keeps its id.
+    FMResultSet *tagRs = [db.dao executeQuery:@"SELECT editable FROM tags WHERE tag_id = ?",
+                          [NSNumber numberWithInteger:previousTag]];
+    if (tagRs == nil || [db.dao hadError])
+    {
+      LWE_LOG(@"2.1 migration failed while folding the active Nouns set: %@", [db.dao lastErrorMessage]);
+      [tagRs close];
+      ok = NO;
+    }
+    else
+    {
+      BOOL userOwned = NO;
+      if ([tagRs next] && [tagRs intForColumnIndex:0] == 1)
+      {
+        userOwned = YES;
+      }
+      [tagRs close];
+      if (userOwned == NO)
+      {
+        int fullSetId = 0;
+        if ([JFlashUpdateManager _migrationInt:db sql:
+             @"SELECT tag_id FROM tpl.tags WHERE tag_name = 'Common Nouns Full Set' AND editable = 0"
+             into:&fullSetId] == NO || fullSetId == 0)
+        {
+          LWE_LOG(@"2.1 migration could not find Common Nouns Full Set");
+          ok = NO;
+        }
+        else
+        {
+          [renames setObject:[NSNumber numberWithInt:fullSetId] forKey:[NSNumber numberWithInteger:previousTag]];
+        }
+      }
+    }
+  }
+  // The new id is written only after the database commit.  A failed commit
+  // leaves the saved active set where it was.  current_index stays too: the
+  // session carry reads it to find the card the user was on, then stores that
+  // card's place in Common Nouns, or 0 when the card is not in the set.
+  NSNumber *moved = nil;
   if (ok)
   {
-    // Write the new active set before COMMIT.  A crash after this synchronize and
-    // before the commit retries the same renumbering, so the saved id still matches.
-    NSNumber *moved = [renames objectForKey:[NSNumber numberWithInteger:previousTag]];
-    if (moved != nil)
-    {
-      [settings setInteger:[moved integerValue] forKey:@"tag_id"];
-      [settings synchronize];
-      remapped = YES;
-    }
+    moved = [renames objectForKey:[NSNumber numberWithInteger:previousTag]];
     ok = [db.dao commit];
     if (ok == NO)
     {
@@ -685,11 +880,7 @@
   if (ok == NO)
   {
     [db.dao rollback];
-    if (remapped)
-    {
-      [settings setInteger:previousTag forKey:@"tag_id"];
-      [settings synchronize];
-    }
+    moved = nil;
   }
   // DETACH while the transaction is still open fails with "database is locked".
   [db detachDatabase:@"tpl"];
@@ -697,6 +888,10 @@
   if (ok == NO)
   {
     return [JFlashUpdateManager _noteMigrationFailure:settings retry:NO];
+  }
+  if (moved != nil)
+  {
+    [settings setInteger:[moved integerValue] forKey:@"tag_id"];
   }
 
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];

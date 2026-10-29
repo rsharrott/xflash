@@ -17,6 +17,9 @@
 @interface PracticeModeCardViewDelegate()
 @property (nonatomic, assign) BOOL alreadyShowedLearnedAlert;
 - (Card *) _randomCardInTag:(Tag *)tag currentCard:(Card *)currentCard error:(NSError **)error;
+- (Card *) _cardForLevelEntry:(id)entry;
+- (NSInteger) _cardIdForLevelEntry:(id)entry;
+- (BOOL) _lastFiveCardsContainId:(NSInteger)cardId;
 @end
 
 @implementation PracticeModeCardViewDelegate
@@ -172,7 +175,7 @@
 {
   // The old footer was unseen/total ("600 / 626"), which reads as cards done. The study view
   // now draws a learned/total pill (cardLevelCounts[Learned] / cardCount) in its place.
-  svc.cardSetLabel.text = svc.currentCardSet.tagName;
+  svc.cardSetLabel.text = [svc.currentCardSet displayName];
   
   // Update mood icon percentage (TODO: this is a hack, we have it as a 
   // local property and then update it when cardViewWillSetup: is called)
@@ -315,6 +318,42 @@ static NSUInteger LWERevealGeneration = 0;
   return -1;
 }
 
+//! The study set stores card ids. Load the full card only for the one about to be shown.
+- (Card *) _cardForLevelEntry:(id)entry
+{
+  if ([entry isKindOfClass:[NSNumber class]])
+  {
+    return [CardPeer hydratedCardWithId:[entry integerValue]];
+  }
+  Card *card = entry;
+  if (card.isFault)
+  {
+    [card hydrate];
+  }
+  return card;
+}
+
+- (NSInteger) _cardIdForLevelEntry:(id)entry
+{
+  if ([entry isKindOfClass:[NSNumber class]])
+  {
+    return [entry integerValue];
+  }
+  return [(Card *)entry cardId];
+}
+
+- (BOOL) _lastFiveCardsContainId:(NSInteger)cardId
+{
+  for (Card *card in self.lastFiveCards)
+  {
+    if (card.cardId == cardId)
+    {
+      return YES;
+    }
+  }
+  return NO;
+}
+
 /**
  * Returns a Card object from the database randomly
  * Accepts current cardId in an attempt to not return the last card again
@@ -354,7 +393,11 @@ static NSUInteger LWERevealGeneration = 0;
     numCardsAtLevel = [cardArray count];
   }
   NSInteger randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel);
-  randomCard = [cardArray objectAtIndex:randomOffset];
+  // Compare ids first. A rejected card is not loaded; only the card we keep is.
+  // randomLevel is the bucket that id was taken from, so a load that misses
+  // user_history still moves the card from the right level.
+  NSInteger randomLevel = nextLevelId;
+  NSInteger randomCardId = [self _cardIdForLevelEntry:[cardArray objectAtIndex:randomOffset]];
   
   // this is a simple queue of the last five cards
   if (currentCard)
@@ -370,7 +413,7 @@ static NSUInteger LWERevealGeneration = 0;
   // prevent getting the same card twice.
   NSInteger i = 0; // counts how many times we whiled against the array
   NSInteger j = 0; // second iterator to count tries that return the same card as before
-  while ([self.lastFiveCards containsObject:randomCard])
+  while ([self _lastFiveCardsContainId:randomCardId])
   {
     LWE_LOG(@"Got the same card as last time");
     // If there is only one card left (this card) in the level, let's get a different level
@@ -396,27 +439,30 @@ static NSUInteger LWERevealGeneration = 0;
     LWE_ASSERT_EXC((numCardsAtLevel2 > 0),@"We've been asked for cards at level %d but there aren't any.",nextLevelId);
     if (numCardsAtLevel2 == 0)
     {
-      // Keep the card we already have rather than index into an empty level
+      // Keep the id we already have rather than index into an empty level
       break;
     }
     randomOffset = (NSInteger)arc4random_uniform((uint32_t)numCardsAtLevel2);
-    randomCard = [cardArray objectAtIndex:randomOffset];      
+    randomLevel = nextLevelId;
+    randomCardId = [self _cardIdForLevelEntry:[cardArray objectAtIndex:randomOffset]];
     
     i++;
     if (i > kLWETimesToRetryForNonRecentCardId)
     {
       // the same card is worse than a card that was twice ago, so we check again that it's not that
-      if (j == kLWETimesToRetryForNonRecentCardId || ([currentCard isEqual:randomCard] == NO))
+      BOOL sameAsCurrent = (currentCard != nil && currentCard.cardId == randomCardId);
+      if (j == kLWETimesToRetryForNonRecentCardId || sameAsCurrent == NO)
       {
         break; //we tried 3 times, fuck it
       }
       j++;
     }
   }
-  
-  if (randomCard.isFault)
+
+  randomCard = [self _cardForLevelEntry:[NSNumber numberWithInteger:randomCardId]];
+  if (randomCard != nil)
   {
-    [randomCard hydrate];
+    randomCard.levelId = randomLevel;
   }
   return randomCard;
 }

@@ -31,6 +31,7 @@ enum wordsSections
 
 @property (nonatomic, retain) UIActivityIndicatorView *activityIndicator;
 @property (nonatomic, retain) Tag *tag;
+//! Card-id NSNumbers until a row is shown, then the Card for that row.
 @property (retain) NSMutableArray *cards;
 
 @end

@@ -12,6 +12,45 @@
 #import "ActionBarViewController.h"
 #import "StudyViewController.h"
 
+//! The id's bucket is the level a later move has to find. A missed user_history read leaves 0.
+static void LWECarryLevelForCard(Tag *tag, Card *card)
+{
+  if (card == nil)
+  {
+    return;
+  }
+  NSNumber *cardId = [NSNumber numberWithInteger:card.cardId];
+  NSInteger count = (NSInteger)[tag.cardsByLevel count];
+  for (NSInteger level = 0; level < count; level++)
+  {
+    if ([[tag.cardsByLevel objectAtIndex:level] containsObject:cardId])
+    {
+      card.levelId = level;
+      return;
+    }
+  }
+}
+
+//! Browse stores card ids. Load the full card only for the one about to be shown.
+static Card *LWECardForBrowseEntry(Tag *tag, id entry)
+{
+  Card *card = nil;
+  if ([entry isKindOfClass:[NSNumber class]])
+  {
+    card = [CardPeer hydratedCardWithId:[entry integerValue]];
+  }
+  else
+  {
+    card = entry;
+    if (card.isFault)
+    {
+      [card hydrate];
+    }
+  }
+  LWECarryLevelForCard(tag, card);
+  return card;
+}
+
 @implementation BrowseModeCardViewDelegate
 
 #pragma mark - CardViewControllerDelegate Methods
@@ -73,7 +112,7 @@
   NSInteger currIndex = svc.currentCardSet.currentIndex + 1;
   NSInteger total = svc.currentCardSet.cardCount;
   svc.remainingCardsLabel.text = [NSString stringWithFormat:@"%d / %d",currIndex,total];
-  svc.cardSetLabel.text = svc.currentCardSet.tagName;
+  svc.cardSetLabel.text = [svc.currentCardSet displayName];
   
   // These buttons should be hidden at all times in browse mode.
   svc.tapForAnswerImage.hidden = YES;
@@ -82,12 +121,21 @@
 
 - (Card *)getNextCard:(Tag*)cardSet afterCard:(Card*)currentCard direction:(NSString*)directionOrNil
 {
+  // An empty set, or an index left over from a longer list, must not read past the end.
+  NSUInteger count = [cardSet.flattenedCardIdArray count];
+  if (count == 0)
+  {
+    return nil;
+  }
+  if (cardSet.currentIndex < 0 || (NSUInteger)cardSet.currentIndex >= count)
+  {
+    cardSet.currentIndex = 0;
+  }
   Card *nextCard = nil;
   if (currentCard == nil)
   {
     // If currentCard == nil, this is the "first card" -- use whatever the value of currentIndex is
-    LWE_ASSERT_EXC((cardSet.currentIndex < [cardSet.flattenedCardIdArray count]), @"the currentIndex is out of bounds?");
-    nextCard = [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex];
+    nextCard = LWECardForBrowseEntry(cardSet, [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
   }
   else
   {
@@ -116,13 +164,7 @@
     }
     
     // OK, we've updated currentIndex, get the new card
-    nextCard = [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex];
-  }
-  
-  // Now, if we have a faulted card, hydrate it
-  if (nextCard.isFault)
-  {
-    [nextCard hydrate];
+    nextCard = LWECardForBrowseEntry(cardSet, [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
   }
   return nextCard;
 }
