@@ -121,11 +121,20 @@ static Card *LWECardForBrowseEntry(Tag *tag, id entry)
 
 - (Card *)getNextCard:(Tag*)cardSet afterCard:(Card*)currentCard direction:(NSString*)directionOrNil
 {
+  // An empty set, or an index left over from a longer list, must not read past the end.
+  NSUInteger count = [cardSet.flattenedCardIdArray count];
+  if (count == 0)
+  {
+    return nil;
+  }
+  if (cardSet.currentIndex < 0 || (NSUInteger)cardSet.currentIndex >= count)
+  {
+    cardSet.currentIndex = 0;
+  }
   Card *nextCard = nil;
   if (currentCard == nil)
   {
     // If currentCard == nil, this is the "first card" -- use whatever the value of currentIndex is
-    LWE_ASSERT_EXC((cardSet.currentIndex < [cardSet.flattenedCardIdArray count]), @"the currentIndex is out of bounds?");
     nextCard = LWECardForBrowseEntry(cardSet, [cardSet.flattenedCardIdArray objectAtIndex:cardSet.currentIndex]);
   }
   else

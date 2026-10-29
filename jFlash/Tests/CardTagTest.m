@@ -526,6 +526,30 @@ static uint64_t LWEPhysicalFootprint(void)
   [practiceMode release];
 }
 
+//! An empty set, and an index past the end of a short one, do not read off the list.
+- (void)testBrowseDoesNotReadPastTheEndOfASet
+{
+  BrowseModeCardViewDelegate *browse = [[BrowseModeCardViewDelegate alloc] init];
+  Tag *empty = [[Tag alloc] init];
+  empty.flattenedCardIdArray = [NSMutableArray array];
+  empty.currentIndex = 0;
+  XCTAssertNil([browse getNextCard:empty afterCard:nil direction:nil]);
+  Card *already = [[Card alloc] init];
+  XCTAssertNil([browse getNextCard:empty afterCard:already direction:nil]);
+  [already release];
+  [empty release];
+
+  Tag *one = [[Tag alloc] init];
+  one.flattenedCardIdArray = [NSMutableArray arrayWithObject:[NSNumber numberWithInteger:42]];
+  one.currentIndex = 40;
+  Card *shown = [browse getNextCard:one afterCard:nil direction:nil];
+  XCTAssertNotNil(shown);
+  XCTAssertEqual(shown.cardId, (NSInteger)42);
+  XCTAssertEqual(one.currentIndex, (NSInteger)0);
+  [one release];
+  [browse release];
+}
+
 //! Opening a set keeps card ids. The card on screen is a real Card, loaded then.
 - (void)testOpeningASetKeepsIdsUntilACardIsShown
 {
@@ -715,16 +739,21 @@ static uint64_t LWEPhysicalFootprint(void)
       [idRs close];
 
       NSArray *empty = [NSArray array];
-      NSArray *one = [NSArray arrayWithObject:[NSNumber numberWithInteger:carriedCardId]];
+      // Index 0 is a card that is not the one the user was on.  A carry that
+      // reads current_index 0 would keep the wrong card.
+      NSArray *level = [NSArray arrayWithObjects:
+                        [NSNumber numberWithInteger:1],
+                        [NSNumber numberWithInteger:carriedCardId],
+                        nil];
       // Same keys as Tag's ids.plist. Tag 133 is the removed full Nouns list.
       NSDictionary *frozen = [NSDictionary dictionaryWithObjectsAndKeys:
                               [NSNumber numberWithInteger:133], @"tagId",
                               [NSNumber numberWithInteger:DEFAULT_USER_ID], @"userId",
-                              [NSArray arrayWithObjects:one, empty, empty, empty, empty, empty, nil], @"levels",
+                              [NSArray arrayWithObjects:level, empty, empty, empty, empty, empty, nil], @"levels",
                               nil];
       NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
       XCTAssertTrue([frozen writeToFile:path atomically:YES], @"write retired Nouns session");
-      [settings setInteger:0 forKey:@"current_index"];
+      [settings setInteger:1 forKey:@"current_index"];
       tag.currentIndex = 7;
     }
 

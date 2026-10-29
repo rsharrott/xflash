@@ -445,9 +445,12 @@
   return YES;
 }
 
-// The active set is saved before COMMIT.  A crash in between, then a failed retry,
-// leaves tag_id pointing at a row the rollback removed.  Point it at the default
-// set when that row is gone.  A set that is still in the database is left alone.
+// Give-up leaves the user database unchanged, so a built-in Nouns row can still
+// be there while the new card database has no cards for it.  Opening that set
+// is an empty list.  Point the active set at Common Nouns Full Set when that
+// row exists, otherwise the default set, and drop the old browse index.
+// A user-created set at one of those ids is left alone.  Any other missing id
+// still falls back to the default set.
 + (void) _resetActiveSetIfMissing:(NSUserDefaults *)settings
 {
   NSString *userPath = [LWEFile createDocumentPathWithFilename:LWE_CURRENT_USER_DATABASE];
@@ -461,15 +464,42 @@
   {
     return;
   }
-  int found = 0;
-  NSString *sql = [NSString stringWithFormat:@"SELECT count(*) FROM tags WHERE tag_id = %ld",
-                   (long)[settings integerForKey:@"tag_id"]];
-  BOOL ok = [JFlashUpdateManager _migrationInt:db sql:sql into:&found];
-  [db closeDatabase];
-  if (ok && found == 0)
+  NSInteger tagId = [settings integerForKey:@"tag_id"];
+  int editable = 0;
+  BOOL found = NO;
+  FMResultSet *rs = [db.dao executeQuery:@"SELECT editable FROM tags WHERE tag_id = ?",
+                     [NSNumber numberWithInteger:tagId]];
+  if (rs == nil || [db.dao hadError])
   {
-    [settings setInteger:DEFAULT_TAG_ID forKey:@"tag_id"];
+    [rs close];
+    [db closeDatabase];
+    return;
   }
+  if ([rs next])
+  {
+    found = YES;
+    editable = [rs intForColumnIndex:0];
+  }
+  [rs close];
+  BOOL retiredNoun = (tagId == 133 || (tagId >= 620 && tagId <= 631));
+  BOOL userOwned = (found && editable == 1);
+  BOOL removedBuiltIn = (retiredNoun && userOwned == NO);
+  if (removedBuiltIn || found == NO)
+  {
+    NSInteger replacement = DEFAULT_TAG_ID;
+    if (removedBuiltIn)
+    {
+      int fullSet = 0;
+      if ([JFlashUpdateManager _migrationInt:db sql:
+           @"SELECT count(*) FROM tags WHERE tag_id = 2346 AND editable = 0" into:&fullSet] && fullSet > 0)
+      {
+        replacement = 2346;
+      }
+    }
+    [settings setInteger:replacement forKey:@"tag_id"];
+    [settings setInteger:0 forKey:@"current_index"];
+  }
+  [db closeDatabase];
 }
 
 // A failed in-place update must not run again on every launch.  The user database
@@ -794,9 +824,6 @@
   NSMutableDictionary *renames = [NSMutableDictionary dictionary];
   BOOL ok = [JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames];
   NSInteger previousTag = [settings integerForKey:@"tag_id"];
-  NSInteger previousIndex = [settings integerForKey:@"current_index"];
-  BOOL remapped = NO;
-  BOOL resetIndex = NO;
   BOOL retiredNounTag = (previousTag == 133 || (previousTag >= 620 && previousTag <= 631));
   if (ok && retiredNounTag)
   {
@@ -836,25 +863,14 @@
       }
     }
   }
+  // The new id is written only after the database commit.  A failed commit
+  // leaves the saved active set where it was.  current_index stays too: the
+  // session carry reads it to find the card the user was on, then stores that
+  // card's place in Common Nouns, or 0 when the card is not in the set.
+  NSNumber *moved = nil;
   if (ok)
   {
-    // Write the new active set before COMMIT.  A crash after this synchronize and
-    // before the commit retries the same renumbering, so the saved id still matches.
-    // A removed noun list can be far longer than Common Nouns, so the old browse
-    // index is not a position in the new set.  A saved card that is also a common
-    // noun is restored when that set is next opened.
-    NSNumber *moved = [renames objectForKey:[NSNumber numberWithInteger:previousTag]];
-    if (moved != nil)
-    {
-      [settings setInteger:[moved integerValue] forKey:@"tag_id"];
-      if (retiredNounTag)
-      {
-        [settings setInteger:0 forKey:@"current_index"];
-        resetIndex = YES;
-      }
-      [settings synchronize];
-      remapped = YES;
-    }
+    moved = [renames objectForKey:[NSNumber numberWithInteger:previousTag]];
     ok = [db.dao commit];
     if (ok == NO)
     {
@@ -864,15 +880,7 @@
   if (ok == NO)
   {
     [db.dao rollback];
-    if (remapped)
-    {
-      [settings setInteger:previousTag forKey:@"tag_id"];
-      if (resetIndex)
-      {
-        [settings setInteger:previousIndex forKey:@"current_index"];
-      }
-      [settings synchronize];
-    }
+    moved = nil;
   }
   // DETACH while the transaction is still open fails with "database is locked".
   [db detachDatabase:@"tpl"];
@@ -880,6 +888,10 @@
   if (ok == NO)
   {
     return [JFlashUpdateManager _noteMigrationFailure:settings retry:NO];
+  }
+  if (moved != nil)
+  {
+    [settings setInteger:[moved integerValue] forKey:@"tag_id"];
   }
 
   [settings setObject:LWE_JF_VERSION_2_1 forKey:APP_DATA_VERSION];

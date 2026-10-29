@@ -20,7 +20,7 @@ NSInteger const kLWELearnedCardLevel       = 5;
 static NSString *sLWEBuiltInCatalogLanguageOverride = nil;
 
 @interface Tag ()
-- (NSNumber *)_cardIdCarriedFromRetiredNounSession;
+- (NSNumber *)_cardIdCarriedFromRetiredNounSession:(BOOL *)resetIndex;
 @end
 
 BOOL LWEBuiltInCatalogUsesJapanese(void)
@@ -325,8 +325,12 @@ static void LWEDeleteFrozenCardIds(void)
  * Nouns, and keeps the index only when the card is in it.
  * Returns nil when there is nothing to carry.
  */
-- (NSNumber *)_cardIdCarriedFromRetiredNounSession
+- (NSNumber *)_cardIdCarriedFromRetiredNounSession:(BOOL *)resetIndex
 {
+  if (resetIndex != NULL)
+  {
+    *resetIndex = NO;
+  }
 #if !defined(LWE_JFLASH)
   return nil;
 #else
@@ -363,6 +367,12 @@ static void LWEDeleteFrozenCardIds(void)
   {
     return nil;
   }
+  // The saved index is a position in the old list.  It is not a position in
+  // Common Nouns, so the caller replaces it after this read.
+  if (resetIndex != NULL)
+  {
+    *resetIndex = YES;
+  }
   NSMutableArray *cardIds = [NSMutableArray array];
   for (id frozenLevel in frozenLevels)
   {
@@ -395,7 +405,9 @@ static void LWEDeleteFrozenCardIds(void)
 {
   // Read a removed Nouns session before the file is deleted. It does not match
   // Common Nouns Full Set, so -thawCardIds will not use it as this set's cards.
-  NSNumber *carriedCardId = [self _cardIdCarriedFromRetiredNounSession];
+  // resetIndex means the saved browse index belonged to that old list.
+  BOOL resetIndex = NO;
+  NSNumber *carriedCardId = [self _cardIdCarriedFromRetiredNounSession:&resetIndex];
   NSMutableArray *tmpCardIdsArray = [self thawCardIds];
   // The saved session is good for one load only: delete it whether it matched this tag or not,
   // so a leftover file can never be loaded into a later set.
@@ -412,6 +424,7 @@ static void LWEDeleteFrozenCardIds(void)
   // populate the card level counts
 	[self recacheCardCountForEachLevel];
 
+  BOOL placed = NO;
   if (carriedCardId != nil)
   {
     NSUInteger index = [self.flattenedCardIdArray indexOfObject:carriedCardId];
@@ -420,7 +433,13 @@ static void LWEDeleteFrozenCardIds(void)
       self.currentIndex = (NSInteger)index;
       // -activeTag applies current_index from settings after this load.
       [[NSUserDefaults standardUserDefaults] setInteger:(NSInteger)index forKey:@"current_index"];
+      placed = YES;
     }
+  }
+  if (resetIndex && placed == NO)
+  {
+    self.currentIndex = 0;
+    [[NSUserDefaults standardUserDefaults] setInteger:0 forKey:@"current_index"];
   }
 }
 

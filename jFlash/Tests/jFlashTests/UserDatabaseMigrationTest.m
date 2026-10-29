@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "SetupDatabaseHelper.h"
 #import "JFlashUpdateManager.h"
+#import "BrowseModeCardViewDelegate.h"
 #import "LWEDatabase.h"
 #import "LWEFile.h"
 #import "Constants.h"
@@ -26,6 +27,7 @@
   NSString *_savedDataVersion;
   NSString *_savedSettingsVersion;
   NSInteger _savedTagId;
+  NSInteger _savedIndex;
   BOOL _savedDidCopy;
   BOOL _savedFailed;
   BOOL _saved21Failed;
@@ -294,7 +296,7 @@
 
   XCTAssertTrue([JFlashUpdateManager _updateSettingsTo21:settings], @"A retired Nouns set should move to Common Nouns");
   XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)2346, @"The active set becomes Common Nouns Full Set");
-  XCTAssertEqual([settings integerForKey:@"current_index"], (NSInteger)0, @"The old browse index is not a position in Common Nouns");
+  XCTAssertEqual([settings integerForKey:@"current_index"], (NSInteger)4000, @"The saved position stays until the set is opened");
   XCTAssertEqualObjects([settings objectForKey:APP_DATA_VERSION], LWE_JF_VERSION_2_1);
 
   [self _openUserDatabase];
@@ -312,6 +314,101 @@
   XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM tag_user_card_levels WHERE tag_id = 133"], 0);
   XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM card_tag_link WHERE tag_id = 625"], 0);
   XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM group_tag_link WHERE tag_id = 133 OR tag_id = 625"], 0);
+}
+
+- (void)testActiveSetOnNounsFollowsSettingsToCommonNouns
+{
+  [self _rewindToDataVersion20];
+  [self _execute:@"UPDATE last_state SET tag_id = 133 WHERE user_id = 1"];
+  [[LWEDatabase sharedLWEDatabase] closeDatabase];
+
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_SETTINGS_VERSION];
+  [settings setInteger:133 forKey:@"tag_id"];
+  [settings setInteger:12 forKey:@"current_index"];
+  [settings setBool:YES forKey:@"db_did_finish_copying"];
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  [settings synchronize];
+
+  XCTAssertTrue([JFlashUpdateManager _updateSettingsTo21:settings], @"An active Nouns set should migrate");
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)2346);
+  XCTAssertEqual([settings integerForKey:@"current_index"], (NSInteger)12, @"The position is still the one in the old list");
+
+  [self _openUserDatabase];
+  XCTAssertNil([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 133"]);
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM last_state WHERE user_id = 1"], 2346);
+}
+
+- (void)testUserSetAtNounsIdIsLeftAlone
+{
+  [self _rewindToDataVersion20];
+  [self _execute:@"DELETE FROM group_tag_link WHERE tag_id = 133"];
+  [self _execute:@"DELETE FROM tags WHERE tag_id = 133"];
+  [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (133, 'My Nouns', 'kept', 1, 1)"];
+  [self _execute:@"INSERT INTO card_tag_link (tag_id, card_id, id) VALUES (133, 145594, 11)"];
+  [self _execute:@"UPDATE last_state SET tag_id = 133, card_id = 145594 WHERE user_id = 1"];
+  [[LWEDatabase sharedLWEDatabase] closeDatabase];
+
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_SETTINGS_VERSION];
+  [settings setInteger:133 forKey:@"tag_id"];
+  [settings setInteger:3 forKey:@"current_index"];
+  [settings setBool:YES forKey:@"db_did_finish_copying"];
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  [settings synchronize];
+
+  XCTAssertTrue([JFlashUpdateManager _updateSettingsTo21:settings], @"A user set at tag 133 should migrate around it");
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)133);
+  XCTAssertEqual([settings integerForKey:@"current_index"], (NSInteger)3);
+
+  [self _openUserDatabase];
+  XCTAssertEqualObjects([self _stringQuery:@"SELECT tag_name FROM tags WHERE tag_id = 133"], @"My Nouns");
+  XCTAssertEqual([self _intQuery:@"SELECT editable FROM tags WHERE tag_id = 133"], 1);
+  XCTAssertEqual([self _intQuery:@"SELECT card_id FROM card_tag_link WHERE tag_id = 133"], 145594);
+  XCTAssertEqual([self _intQuery:@"SELECT tag_id FROM last_state WHERE user_id = 1"], 133);
+  XCTAssertEqual([self _intQuery:@"SELECT count(*) FROM tags WHERE tag_id BETWEEN 620 AND 631"], 0);
+}
+
+- (void)testGiveUpMovesARemovedNounSetOffTheEmptyList
+{
+  [self _rewindToDataVersion20];
+  [[LWEDatabase sharedLWEDatabase] closeDatabase];
+
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_DATA_VERSION];
+  [settings setObject:LWE_JF_VERSION_2_0 forKey:APP_SETTINGS_VERSION];
+  [settings setInteger:133 forKey:@"tag_id"];
+  [settings setInteger:80 forKey:@"current_index"];
+  [settings setBool:NO forKey:@"study_sets_update_failed"];
+  [settings setBool:NO forKey:@"study_sets_21_failed"];
+  [settings synchronize];
+
+  XCTAssertTrue([JFlashUpdateManager _giveUpOnStudySetMigration:settings]);
+  // The 2.0 file has no Common Nouns Full Set row, so the fallback is the default set.
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)DEFAULT_TAG_ID);
+  XCTAssertEqual([settings integerForKey:@"current_index"], (NSInteger)0);
+  XCTAssertTrue([settings boolForKey:@"study_sets_21_failed"]);
+
+  [self _openUserDatabase];
+  [self _execute:@"INSERT INTO tags (tag_id, tag_name, description, editable, count) VALUES (2346, 'Common Nouns Full Set', '', 0, 18142)"];
+  [[LWEDatabase sharedLWEDatabase] closeDatabase];
+  [settings setInteger:620 forKey:@"tag_id"];
+  [settings setInteger:9 forKey:@"current_index"];
+  XCTAssertTrue([JFlashUpdateManager _giveUpOnStudySetMigration:settings]);
+  XCTAssertEqual([settings integerForKey:@"tag_id"], (NSInteger)2346);
+  XCTAssertEqual([settings integerForKey:@"current_index"], (NSInteger)0);
+
+  Tag *empty = [[Tag alloc] init];
+  empty.flattenedCardIdArray = [NSMutableArray array];
+  empty.currentIndex = 0;
+  BrowseModeCardViewDelegate *browse = [[BrowseModeCardViewDelegate alloc] init];
+  XCTAssertNil([browse getNextCard:empty afterCard:nil direction:nil]);
+  [browse release];
+  [empty release];
 }
 
 - (void)testUncommittedMigrationRollsBack
@@ -413,6 +510,7 @@
   _savedDataVersion = [[settings objectForKey:APP_DATA_VERSION] retain];
   _savedSettingsVersion = [[settings objectForKey:APP_SETTINGS_VERSION] retain];
   _savedTagId = [settings integerForKey:@"tag_id"];
+  _savedIndex = [settings integerForKey:@"current_index"];
   _savedDidCopy = [settings boolForKey:@"db_did_finish_copying"];
   _savedFailed = [settings boolForKey:@"study_sets_update_failed"];
   _saved21Failed = [settings boolForKey:@"study_sets_21_failed"];
@@ -449,6 +547,7 @@
     [settings removeObjectForKey:APP_SETTINGS_VERSION];
   }
   [settings setInteger:_savedTagId forKey:@"tag_id"];
+  [settings setInteger:_savedIndex forKey:@"current_index"];
   [settings setBool:_savedDidCopy forKey:@"db_did_finish_copying"];
   [settings setBool:_savedFailed forKey:@"study_sets_update_failed"];
   [settings setBool:_saved21Failed forKey:@"study_sets_21_failed"];
