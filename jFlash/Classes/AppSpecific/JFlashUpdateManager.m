@@ -362,9 +362,10 @@
  * ids.  An install that is already at data version 2.0 has its own copy of jFlash.db and will not
  * copy the new template, so this updates that file in place.  Study progress, My Starred Words,
  * user-created sets and last_state stay.  A user-created tag whose id collides with a new system
- * tag (644 and up) is renumbered.  Nouns 02–13 (tags 620–631) fold into the single Nouns set
- * (tag 133): last_state follows, and card progress on user_history stays.  An editable row at
- * one of those ids is a user set and is left alone.
+ * tag (644 and up) is renumbered.  The built-in Nouns list (tag 133) and Nouns 02–13
+ * (tags 620–631) are removed.  An active set on one of them moves to Common Nouns Full Set.
+ * Card progress on user_history stays, so a card that is also in Common Nouns keeps its level.
+ * An editable row at one of those ids is a user set and is left alone.
  *
  * Built-in set names also gain Japanese columns (tag_name_ja, description_ja,
  * group_name_ja).  A 2.0 file does not have those columns, so this adds them
@@ -623,39 +624,52 @@
   {
     return NO;
   }
-  // Nouns 02–13.  The template no longer has these system tags.  Point the active
-  // set at Nouns (133) and drop the old rows.  user_history is per card and stays.
-  // Same statements as user_db_migration._fold_retired_noun_tags.
-  FMResultSet *nounRs = [db.dao executeQuery:
-    @"SELECT tag_id FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631 "
-    "UNION SELECT tag_id FROM last_state WHERE tag_id BETWEEN 620 AND 631 "
-    "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)"];
+  // Built-in Nouns (133) and Nouns 02–13.  The template no longer has these system
+  // tags.  Point the active set at Common Nouns Full Set and drop the old rows.
+  // user_history is per card and stays.  Same statements as
+  // user_db_migration._fold_retired_noun_tags.  This step is jFlash only: cFlash
+  // tag 133 is a different set and does not run this migration.
+  int fullSetId = 0;
+  if ([JFlashUpdateManager _migrationInt:db sql:
+       @"SELECT tag_id FROM tpl.tags WHERE tag_name = 'Common Nouns Full Set' AND editable = 0"
+       into:&fullSetId] == NO || fullSetId == 0)
+  {
+    LWE_LOG(@"2.1 migration could not find Common Nouns Full Set");
+    return NO;
+  }
+  NSString *retiredNouns = @"(tag_id = 133 OR tag_id BETWEEN 620 AND 631)";
+  NSString *notUserOwned = @"AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)";
+  FMResultSet *nounRs = [db.dao executeQuery:[NSString stringWithFormat:
+    @"SELECT tag_id FROM tags WHERE editable = 0 AND %@ "
+    "UNION SELECT tag_id FROM last_state WHERE %@ %@",
+    retiredNouns, retiredNouns, notUserOwned]];
   if (nounRs == nil || [db.dao hadError])
   {
-    LWE_LOG(@"2.1 migration failed while reading Nouns continuation tags: %@", [db.dao lastErrorMessage]);
+    LWE_LOG(@"2.1 migration failed while reading retired Nouns tags: %@", [db.dao lastErrorMessage]);
     [nounRs close];
     return NO;
   }
   while ([nounRs next])
   {
-    [renames setObject:[NSNumber numberWithInt:133] forKey:[NSNumber numberWithInt:[nounRs intForColumnIndex:0]]];
+    [renames setObject:[NSNumber numberWithInt:fullSetId] forKey:[NSNumber numberWithInt:[nounRs intForColumnIndex:0]]];
   }
   [nounRs close];
   if ([db.dao hadError])
   {
-    LWE_LOG(@"2.1 migration failed while reading Nouns continuation tags: %@", [db.dao lastErrorMessage]);
+    LWE_LOG(@"2.1 migration failed while reading retired Nouns tags: %@", [db.dao lastErrorMessage]);
     return NO;
   }
   NSArray *nounFold = [NSArray arrayWithObjects:
-    @"UPDATE last_state SET tag_id = 133 WHERE tag_id BETWEEN 620 AND 631 "
-     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
-    @"DELETE FROM tag_user_card_levels WHERE tag_id BETWEEN 620 AND 631 "
-     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
-    @"DELETE FROM card_tag_link WHERE tag_id BETWEEN 620 AND 631 "
-     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
-    @"DELETE FROM group_tag_link WHERE tag_id BETWEEN 620 AND 631 "
-     "AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)",
-    @"DELETE FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631",
+    [NSString stringWithFormat:
+     @"UPDATE last_state SET tag_id = %d WHERE %@ %@", fullSetId, retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM tag_user_card_levels WHERE %@ %@", retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM card_tag_link WHERE %@ %@", retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM group_tag_link WHERE %@ %@", retiredNouns, notUserOwned],
+    [NSString stringWithFormat:
+     @"DELETE FROM tags WHERE editable = 0 AND %@", retiredNouns],
     nil];
   for (NSString *sql in nounFold)
   {
@@ -780,8 +794,11 @@
   NSMutableDictionary *renames = [NSMutableDictionary dictionary];
   BOOL ok = [JFlashUpdateManager _migrateUserDatabase:db renamedTags:renames];
   NSInteger previousTag = [settings integerForKey:@"tag_id"];
+  NSInteger previousIndex = [settings integerForKey:@"current_index"];
   BOOL remapped = NO;
-  if (ok && previousTag >= 620 && previousTag <= 631)
+  BOOL resetIndex = NO;
+  BOOL retiredNounTag = (previousTag == 133 || (previousTag >= 620 && previousTag <= 631));
+  if (ok && retiredNounTag)
   {
     // The continuation row is gone.  A crash after the tag delete and before this
     // settings write would otherwise leave the active set on a missing id.  An
@@ -804,7 +821,18 @@
       [tagRs close];
       if (userOwned == NO)
       {
-        [renames setObject:[NSNumber numberWithInt:133] forKey:[NSNumber numberWithInteger:previousTag]];
+        int fullSetId = 0;
+        if ([JFlashUpdateManager _migrationInt:db sql:
+             @"SELECT tag_id FROM tpl.tags WHERE tag_name = 'Common Nouns Full Set' AND editable = 0"
+             into:&fullSetId] == NO || fullSetId == 0)
+        {
+          LWE_LOG(@"2.1 migration could not find Common Nouns Full Set");
+          ok = NO;
+        }
+        else
+        {
+          [renames setObject:[NSNumber numberWithInt:fullSetId] forKey:[NSNumber numberWithInteger:previousTag]];
+        }
       }
     }
   }
@@ -812,10 +840,18 @@
   {
     // Write the new active set before COMMIT.  A crash after this synchronize and
     // before the commit retries the same renumbering, so the saved id still matches.
+    // A removed noun list can be far longer than Common Nouns, so the old browse
+    // index is not a position in the new set.  A saved card that is also a common
+    // noun is restored when that set is next opened.
     NSNumber *moved = [renames objectForKey:[NSNumber numberWithInteger:previousTag]];
     if (moved != nil)
     {
       [settings setInteger:[moved integerValue] forKey:@"tag_id"];
+      if (retiredNounTag)
+      {
+        [settings setInteger:0 forKey:@"current_index"];
+        resetIndex = YES;
+      }
       [settings synchronize];
       remapped = YES;
     }
@@ -831,6 +867,10 @@
     if (remapped)
     {
       [settings setInteger:previousTag forKey:@"tag_id"];
+      if (resetIndex)
+      {
+        [settings setInteger:previousIndex forKey:@"current_index"];
+      }
       [settings synchronize];
     }
   }

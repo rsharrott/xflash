@@ -348,7 +348,6 @@ def apply_sets(noun_cards=None):
         # Rewrite the tags this pass owns, and drop the retired noun lists.
         rewrite = []
         if collapsed:
-            rewrite.append(study_sets.NOUN_ANCHOR)
             rewrite.extend(
                 s['tag_id'] for g in chunked['groups']
                 if g.get('base_name') == 'Common Nouns' for s in g['sets'])

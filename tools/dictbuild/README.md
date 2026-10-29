@@ -123,10 +123,10 @@ and licence links.
     split them; `build.py` only re-applies the names onto `jFlash.db`.
   * `chunked_lists.json`: names and tag ids for the Common Nouns, Common Words
     and Core 1000 cuts.  Each list is 50–100 cards plus a `Full Set` shown
-    first.  Membership stays in `system_sets.tsv`.  Nouns stays one set (the
-    old Nouns and Nouns 02–13 lists, in that order).  Common Nouns is the
-    Nouns cards JMdict marks as common-priority, in the Nouns group, in
-    card-id order.  Common Words keeps the cards it already had, with
+    first.  Membership stays in `system_sets.tsv`.  The full Nouns list is
+    not a built-in set.  Common Nouns is the cards JMdict marks as
+    common-priority, in the Nouns group, in card-id order, with its Full
+    Set shown first.  Common Words keeps the cards it already had, with
     common-priority cards in the earlier sets.  Core 1000 is the JMdict nf01
     and nf02 bands (see `core1000.tsv`), 993 cards, not padded out to 1,000,
     and not a JLPT exam list.

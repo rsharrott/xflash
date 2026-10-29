@@ -11,9 +11,11 @@ database moved on.  This updates the user file from the new template:
 * a user-created tag whose id is a system id in the template (644 and up)
   is renumbered, and card_tag_link, group_tag_link, last_state and
   tag_user_card_levels follow it
-* Nouns 02–13 (tags 620–631) fold into the single Nouns set (tag 133).
-  last_state follows.  Card progress stays on user_history.  An editable
-  row at one of those ids is a user set and is left alone
+* The built-in Nouns list (tag 133) and Nouns 02–13 (tags 620–631) are
+  removed.  An active set on one of them moves to Common Nouns Full Set.
+  Card progress stays on user_history, so a card that is also in Common
+  Nouns keeps its level.  An editable row at one of those ids is a user
+  set and is left alone
 * group links whose tag row does not exist are deleted (the 2.0 template
   has 68 of these)
 
@@ -21,6 +23,8 @@ JFlashUpdateManager's 2.1 step runs the same statements.  Keep the two in step.
 """
 
 import sqlite3
+
+import study_sets
 
 
 def migrate(user_path, template_path):
@@ -97,34 +101,51 @@ def _renumber_collisions(conn):
     return mapping
 
 
+def _retired_noun_where():
+    """Tag 133 and Nouns 02–13.  cFlash tag 133 is a different set; this step is jFlash."""
+    return '(tag_id = %d OR tag_id BETWEEN %d AND %d)' % (
+        study_sets.NOUN_ANCHOR,
+        study_sets.RETIRED_NOUN_TAGS[0],
+        study_sets.RETIRED_NOUN_TAGS[-1])
+
+
+def _common_nouns_full_set_id(conn):
+    row = conn.execute(
+        "SELECT tag_id FROM tpl.tags WHERE tag_name = 'Common Nouns Full Set' AND editable = 0"
+    ).fetchone()
+    if row is None:
+        raise RuntimeError('template is missing Common Nouns Full Set')
+    return row[0]
+
+
 def _fold_retired_noun_tags(conn):
-    """Point Nouns 02–13 at tag 133.
+    """Remove the built-in Nouns list and Nouns 02–13.
 
     A 2.0 file still has those system tags.  The template does not, so the
-    system-tag copy leaves them in place.  last_state moves to the single
-    Nouns set.  user_history is per card and is not touched.  Per-tag level
-    counts are not copied onto tag 133: they counted a different list.
-    Returns {old_tag_id: 133} for each system tag removed, and for a
-    last_state that still names one of these ids.
+    system-tag copy leaves them in place.  last_state moves to Common Nouns
+    Full Set.  user_history is per card and is not touched, so a card that
+    is also in Common Nouns keeps its level.  Per-tag level counts counted
+    a different list and are not copied.  Returns {old_tag_id: full_set_id}
+    for each system tag removed, and for a last_state that still names one
+    of these ids.  An editable row is a user set and is left alone.
     """
+    full_set = _common_nouns_full_set_id(conn)
+    where = _retired_noun_where()
+    not_user = 'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)'
     rows = conn.execute(
-        'SELECT tag_id FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631 '
-        'UNION SELECT tag_id FROM last_state WHERE tag_id BETWEEN 620 AND 631 '
-        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)').fetchall()
-    mapping = {row[0]: 133 for row in rows}
-    # Move the active set before the tag row disappears.  An editable row at
-    # one of these ids is a user set; its cards and last_state stay put.
+        'SELECT tag_id FROM tags WHERE editable = 0 AND %s '
+        'UNION SELECT tag_id FROM last_state WHERE %s %s' % (where, where, not_user)
+    ).fetchall()
+    mapping = {row[0]: full_set for row in rows}
+    # Move the active set before the tag row disappears.
     conn.execute(
-        'UPDATE last_state SET tag_id = 133 WHERE tag_id BETWEEN 620 AND 631 '
-        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)')
+        'UPDATE last_state SET tag_id = ? WHERE %s %s' % (where, not_user),
+        (full_set,))
     for sql in (
-        'DELETE FROM tag_user_card_levels WHERE tag_id BETWEEN 620 AND 631 '
-        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)',
-        'DELETE FROM card_tag_link WHERE tag_id BETWEEN 620 AND 631 '
-        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)',
-        'DELETE FROM group_tag_link WHERE tag_id BETWEEN 620 AND 631 '
-        'AND tag_id NOT IN (SELECT tag_id FROM tags WHERE editable = 1)',
-        'DELETE FROM tags WHERE editable = 0 AND tag_id BETWEEN 620 AND 631',
+        'DELETE FROM tag_user_card_levels WHERE %s %s' % (where, not_user),
+        'DELETE FROM card_tag_link WHERE %s %s' % (where, not_user),
+        'DELETE FROM group_tag_link WHERE %s %s' % (where, not_user),
+        'DELETE FROM tags WHERE editable = 0 AND %s' % where,
     ):
         conn.execute(sql)
     return mapping

@@ -216,12 +216,11 @@ static NSString * const kLWEFavoriteTagName = @"Long Weekend Favorites";
   XCTAssertEqualObjects([nounChunk displayName], @"よく使う名詞001");
   XCTAssertGreaterThanOrEqual(nounChunk.cardCount, (NSInteger)50);
   XCTAssertLessThanOrEqual(nounChunk.cardCount, (NSInteger)100);
-  Tag *allNouns = [TagPeer retrieveTagByName:@"Nouns"];
-  XCTAssertEqual(allNouns.tagId, 133);
-  XCTAssertEqualObjects([allNouns displayName], @"名詞");
-  XCTAssertGreaterThan(allNouns.cardCount, (NSInteger)100000);
+  XCTAssertNil([TagPeer retrieveTagByName:@"Nouns"], @"The full Nouns list is not a built-in set");
   XCTAssertNil([TagPeer retrieveTagByName:@"Nouns Full Set"]);
   XCTAssertNil([TagPeer retrieveTagByName:@"Nouns 0001"]);
+  Group *nounGroup = [GroupPeer retrieveGroupById:2];
+  XCTAssertEqualObjects([nounGroup displayName], @"名詞");
 
   NSArray *common = [TagPeer retrieveTagListByGroupId:11];
   XCTAssertEqualObjects([[common objectAtIndex:0] tagName], @"Common Words Full Set");

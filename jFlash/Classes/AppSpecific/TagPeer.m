@@ -292,7 +292,7 @@ NSString * const LWETagContentCardRemoved = @"LWETagContentCardRemoved";
 }
 
 //! Returns array of Tag objects based on Group membership.
-//! "Full Set" is every card in a chunked list (a vocabulary level, Nouns,
+//! "Full Set" is every card in a chunked list (a vocabulary level, Common Nouns,
 //! Common Words, Core 1000).  The name sorts after "01" ('F' > '0'), so the
 //! list shows it first and then the chunks by the stored English name.
 //! Japanese display names do not change this order.

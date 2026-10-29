@@ -319,9 +319,10 @@ static void LWEDeleteFrozenCardIds(void)
 
 
 /**
- * Card id at the saved browse index when this load is Nouns and the session file still
- * belongs to Nouns 02–13. The file's ids are only that old slice, so they are not the
- * study set; the caller loads Nouns from the database and looks this card up in it.
+ * Card id at the saved browse index when this load is Common Nouns Full Set and
+ * the session file still belongs to the removed Nouns list (tag 133) or Nouns
+ * 02–13. Those ids are not this set. The caller looks the card up in Common
+ * Nouns, and keeps the index only when the card is in it.
  * Returns nil when there is nothing to carry.
  */
 - (NSNumber *)_cardIdCarriedFromRetiredNounSession
@@ -329,11 +330,12 @@ static void LWEDeleteFrozenCardIds(void)
 #if !defined(LWE_JFLASH)
   return nil;
 #else
-  // Nouns (tag 133) absorbed Nouns 02–13 (tags 620–631) in the 2.1 catalog.
-  static NSInteger const kLWENounsTagId = 133;
+  // Common Nouns Full Set (tag 2346) is what an old Nouns session opens now.
+  static NSInteger const kLWECommonNounsFullSetTagId = 2346;
+  static NSInteger const kLWERetiredGiantNounsTagId = 133;
   static NSInteger const kLWERetiredNounsTagMin = 620;
   static NSInteger const kLWERetiredNounsTagMax = 631;
-  if (self.tagId != kLWENounsTagId)
+  if (self.tagId != kLWECommonNounsFullSetTagId)
   {
     return nil;
   }
@@ -356,7 +358,8 @@ static void LWEDeleteFrozenCardIds(void)
     return nil;
   }
   NSInteger retiredTag = [frozenTagId integerValue];
-  if (retiredTag < kLWERetiredNounsTagMin || retiredTag > kLWERetiredNounsTagMax)
+  BOOL retiredSlice = (retiredTag >= kLWERetiredNounsTagMin && retiredTag <= kLWERetiredNounsTagMax);
+  if (retiredTag != kLWERetiredGiantNounsTagId && retiredSlice == NO)
   {
     return nil;
   }
@@ -390,8 +393,8 @@ static void LWEDeleteFrozenCardIds(void)
 /** Executed when loading a new set on app load */
 - (void) populateCardIds
 {
-  // Read a Nouns 02–13 session before the file is deleted. It does not match tag 133,
-  // so -thawCardIds will not use it as this set's cards.
+  // Read a removed Nouns session before the file is deleted. It does not match
+  // Common Nouns Full Set, so -thawCardIds will not use it as this set's cards.
   NSNumber *carriedCardId = [self _cardIdCarriedFromRetiredNounSession];
   NSMutableArray *tmpCardIdsArray = [self thawCardIds];
   // The saved session is good for one load only: delete it whether it matched this tag or not,

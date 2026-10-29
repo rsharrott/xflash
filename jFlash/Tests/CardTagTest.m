@@ -683,7 +683,7 @@ static uint64_t LWEPhysicalFootprint(void)
 /**
  * Logs how long and how much memory it takes to open the big sets, against the old
  * "one blank Card per member" path. Nothing here asserts on time or bytes.
- * Nouns also checks that a Nouns 02–13 session file keeps its browse card.
+ * Common Nouns also checks that a removed Nouns session keeps a card that is still in the set.
  */
 - (void)testLargeSetOpenLogsIdLoadAgainstFullCardLoad
 {
@@ -693,7 +693,6 @@ static uint64_t LWEPhysicalFootprint(void)
 
   // tag id, name, card count. The largest set in 2.0 was Common Words 02 at 9,949 cards.
   NSArray *sets = [NSArray arrayWithObjects:
-                   [NSArray arrayWithObjects:[NSNumber numberWithInteger:133], @"Nouns", [NSNumber numberWithInteger:122197], nil],
                    [NSArray arrayWithObjects:[NSNumber numberWithInteger:2346], @"Common Nouns Full Set", [NSNumber numberWithInteger:18142], nil],
                    [NSArray arrayWithObjects:[NSNumber numberWithInteger:2152], @"Common Words Full Set", [NSNumber numberWithInteger:22325], nil],
                    nil];
@@ -707,19 +706,19 @@ static uint64_t LWEPhysicalFootprint(void)
     XCTAssertEqual(tag.cardCount, expectedCount, @"%@ membership", name);
 
     NSInteger carriedCardId = 0;
-    if (tagId == 133)
+    if (tagId == 2346)
     {
       FMResultSet *idRs = [[LWEDatabase sharedLWEDatabase].dao executeQuery:
-                           @"SELECT card_id FROM system_card_tag_link WHERE tag_id = 133 ORDER BY card_id LIMIT 1 OFFSET 50"];
-      XCTAssertTrue([idRs next], @"Nouns has a card past the start of the list");
+                           @"SELECT card_id FROM system_card_tag_link WHERE tag_id = 2346 ORDER BY card_id LIMIT 1 OFFSET 50"];
+      XCTAssertTrue([idRs next], @"Common Nouns has a card past the start of the list");
       carriedCardId = [idRs intForColumn:@"card_id"];
       [idRs close];
 
       NSArray *empty = [NSArray array];
       NSArray *one = [NSArray arrayWithObject:[NSNumber numberWithInteger:carriedCardId]];
-      // Same keys as Tag's ids.plist. Tag 620 is Nouns 02, folded into 133.
+      // Same keys as Tag's ids.plist. Tag 133 is the removed full Nouns list.
       NSDictionary *frozen = [NSDictionary dictionaryWithObjectsAndKeys:
-                              [NSNumber numberWithInteger:620], @"tagId",
+                              [NSNumber numberWithInteger:133], @"tagId",
                               [NSNumber numberWithInteger:DEFAULT_USER_ID], @"userId",
                               [NSArray arrayWithObjects:one, empty, empty, empty, empty, empty, nil], @"levels",
                               nil];
@@ -747,9 +746,9 @@ static uint64_t LWEPhysicalFootprint(void)
     }
     XCTAssertEqual(levelTotal, expectedCount);
 
-    if (tagId == 133)
+    if (tagId == 2346)
     {
-      XCTAssertEqual(tag.currentIndex, (NSInteger)50, @"Browse position follows the card, not the old 9k-card index");
+      XCTAssertEqual(tag.currentIndex, (NSInteger)50, @"Browse position follows the card into Common Nouns");
       XCTAssertEqual([[tag.flattenedCardIdArray objectAtIndex:tag.currentIndex] integerValue], carriedCardId);
       XCTAssertEqual([settings integerForKey:@"current_index"], tag.currentIndex);
       NSString *path = [LWEFile createCachesPathWithFilename:@"ids.plist"];
@@ -818,8 +817,7 @@ static uint64_t LWEPhysicalFootprint(void)
 
 /**
  * Logs how long and how much memory the word list takes as ids, against one blank
- * Card per member. Nothing here asserts on time or bytes. Opening Nouns used to
- * allocate those blank cards before any row was shown.
+ * Card per member. Nothing here asserts on time or bytes.
  */
 - (void)testWordListLogsIdLoadAgainstBlankCards
 {
@@ -827,7 +825,6 @@ static uint64_t LWEPhysicalFootprint(void)
   [settings setInteger:DEFAULT_USER_ID forKey:APP_USER];
 
   NSArray *sets = [NSArray arrayWithObjects:
-                   [NSArray arrayWithObjects:[NSNumber numberWithInteger:133], @"Nouns", [NSNumber numberWithInteger:122197], nil],
                    [NSArray arrayWithObjects:[NSNumber numberWithInteger:2346], @"Common Nouns Full Set", [NSNumber numberWithInteger:18142], nil],
                    [NSArray arrayWithObjects:[NSNumber numberWithInteger:2152], @"Common Words Full Set", [NSNumber numberWithInteger:22325], nil],
                    nil];
