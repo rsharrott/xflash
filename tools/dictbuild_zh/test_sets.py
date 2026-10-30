@@ -68,6 +68,14 @@ class LinkTest(unittest.TestCase):
         dropped = [(old, new) for _tag, old, action, new in records if action == 'dropped']
         self.assertEqual(dropped, [(200, 2), (600, None)])
 
+    def test_same_simplified_headword_when_pinyin_and_traditional_both_changed(self):
+        # 週到 zhou1 dao5 is now 周到 zhou1 dao4: neither the pinyin nor the
+        # traditional form matches, but it is the only card for that simplified word.
+        card = _Card(9, '周到', '周到', 'zhou1 dao4')
+        found = study_sets.index_replacements(
+            {700: ('週到', '周到', 'zhou1 dao5')}, [card], [])
+        self.assertEqual(found[700], (9, 'simp'))
+
     def test_priority_ids_cover_the_2011_lists_and_not_textbooks(self):
         self.assertIn(152, study_sets.PRIORITY_TAG_IDS)   # HSK 1
         self.assertIn(170, study_sets.PRIORITY_TAG_IDS)   # TOCFL

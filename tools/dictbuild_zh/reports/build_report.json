@@ -33,11 +33,11 @@
     "ambiguous_same_chars": 54
   },
   "set_links_before": 39004,
-  "set_links_after": 38914,
-  "set_links_remapped": 160,
-  "set_links_dropped": 90,
-  "ptag": 9455,
-  "user_tag_counts_updated": 0,
+  "set_links_after": 38919,
+  "set_links_remapped": 165,
+  "set_links_dropped": 85,
+  "ptag": 9456,
+  "user_tag_counts_updated": 5,
   "user_card_tag_link_dropped": 0,
   "user_card_tag_link_remapped": 0,
   "sets": [
@@ -1285,17 +1285,17 @@
       "tag_id": 156,
       "name": "HSK Level 5",
       "before": 2492,
-      "after": 2491,
-      "remapped": 6,
-      "dropped": 1
+      "after": 2492,
+      "remapped": 7,
+      "dropped": 0
     },
     {
       "tag_id": 157,
       "name": "HSK Level 6",
       "before": 4966,
-      "after": 4965,
-      "remapped": 14,
-      "dropped": 1
+      "after": 4966,
+      "remapped": 15,
+      "dropped": 0
     },
     {
       "tag_id": 158,
@@ -1381,9 +1381,9 @@
       "tag_id": 168,
       "name": "Common Verbs - Stative",
       "before": 1378,
-      "after": 1377,
-      "remapped": 3,
-      "dropped": 1
+      "after": 1378,
+      "remapped": 4,
+      "dropped": 0
     },
     {
       "tag_id": 170,
@@ -1397,17 +1397,17 @@
       "tag_id": 171,
       "name": "TOCFL 2 Intermediate",
       "before": 4435,
-      "after": 4432,
-      "remapped": 14,
-      "dropped": 3
+      "after": 4433,
+      "remapped": 15,
+      "dropped": 2
     },
     {
       "tag_id": 172,
       "name": "TOCFL 3 Advanced",
       "before": 7194,
-      "after": 7186,
-      "remapped": 23,
-      "dropped": 8
+      "after": 7187,
+      "remapped": 24,
+      "dropped": 7
     }
   ],
   "dropped_links": [
@@ -2051,24 +2051,6 @@
       "reason": "no replacement"
     },
     {
-      "tag_id": 156,
-      "name": "HSK Level 5",
-      "card_id": 84250,
-      "traditional": "週到",
-      "simplified": "周到",
-      "pinyin": "zhou1 dao5",
-      "reason": "no replacement"
-    },
-    {
-      "tag_id": 157,
-      "name": "HSK Level 6",
-      "card_id": 84250,
-      "traditional": "週到",
-      "simplified": "周到",
-      "pinyin": "zhou1 dao5",
-      "reason": "no replacement"
-    },
-    {
       "tag_id": 163,
       "name": "Common Nouns",
       "card_id": 14893,
@@ -2114,15 +2096,6 @@
       "reason": "no replacement"
     },
     {
-      "tag_id": 168,
-      "name": "Common Verbs - Stative",
-      "card_id": 84250,
-      "traditional": "週到",
-      "simplified": "周到",
-      "pinyin": "zhou1 dao5",
-      "reason": "no replacement"
-    },
-    {
       "tag_id": 171,
       "name": "TOCFL 2 Intermediate",
       "card_id": 84186,
@@ -2141,15 +2114,6 @@
       "reason": "no replacement"
     },
     {
-      "tag_id": 171,
-      "name": "TOCFL 2 Intermediate",
-      "card_id": 84250,
-      "traditional": "週到",
-      "simplified": "周到",
-      "pinyin": "zhou1 dao5",
-      "reason": "no replacement"
-    },
-    {
       "tag_id": 172,
       "name": "TOCFL 3 Advanced",
       "card_id": 84186,
@@ -2165,15 +2129,6 @@
       "traditional": "算帳",
       "simplified": "算帐",
       "pinyin": "suan4 zhang4",
-      "reason": "no replacement"
-    },
-    {
-      "tag_id": 172,
-      "name": "TOCFL 3 Advanced",
-      "card_id": 84250,
-      "traditional": "週到",
-      "simplified": "周到",
-      "pinyin": "zhou1 dao5",
       "reason": "no replacement"
     },
     {

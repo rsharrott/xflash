@@ -143,6 +143,11 @@ def _replacement(trad, simp, py, by_key, by_chars, simp_py, trad_simp, trad_py, 
     trad_same = _unique(trad_py.get((trad, loose_pinyin(py)), []))
     if len(trad_same) == 1:
         return trad_same[0].card_id, 'trad+pinyin'
+    # Same simplified headword, pinyin and traditional both edited (週到
+    # zhou1 dao5 → 周到 zhou1 dao4). Only when that headword is one card.
+    only = _unique(simp_cards.get(simp, []))
+    if len(only) == 1:
+        return only[0].card_id, 'simp'
     return None, None
 
 
