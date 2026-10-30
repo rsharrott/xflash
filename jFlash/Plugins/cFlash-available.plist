@@ -8,7 +8,7 @@
 			<key>pluginType</key>
 			<string>database</string>
 			<key>details</key>
-			<string>Adds sub-second full dictionary search (12MB)</string>
+			<string>Adds sub-second full dictionary search (28MB)</string>
 			<key>fileLocation</key>
 			<integer>2</integer>
 			<key>comment</key>
@@ -23,7 +23,7 @@
 &lt;body style=&quot;background-color:transparent;&quot;&gt;
 
 &lt;img src=&quot;fast-search@2x.png&quot; border=&quot;0&quot; width=&quot;290&quot; class=&quot;title retina&quot;/&gt;
-&lt;div class=&quot;subtitle&quot;&gt;&lt;small&gt;Version 1.1, 12.1MB&lt;br/&gt;
+&lt;div class=&quot;subtitle&quot;&gt;&lt;small&gt;Version 2.0, 28MB&lt;br/&gt;
 WiFi: 2 min / 3G: 12+ mins (approx)&lt;/small&gt;&lt;/div&gt;
 &lt;div id=&quot;release-notes&quot;&gt;
 &lt;p&gt;
@@ -57,15 +57,15 @@ That platform isn&apos;t quite ready yet - but we are working on it - and this c
 			<key>pluginId</key>
 			<string>FTS_DB</string>
 			<key>name</key>
-			<string>Awesomely Fast Search v1.0</string>
+			<string>Awesomely Fast Search v2.0</string>
 			<key>filePath</key>
-			<string>cFlash-FTS-1.0/cFlash-FTS-1.0.db</string>
+			<string>cFlash-FTS-2.0/cFlash-FTS-2.0.db</string>
 			<key>targetURL</key>
-			<string>https://d3jxezdeu5e50q.cloudfront.net/cFlash-FTS-1.0.zip</string>
+			<string>https://d3jxezdeu5e50q.cloudfront.net/cFlash-FTS-2.0.zip</string>
 			<key>targetPath</key>
-			<string>cFlash-FTS-1.0.zip</string>
+			<string>cFlash-FTS-2.0.zip</string>
 			<key>version</key>
-			<string>1.0</string>
+			<string>2.0</string>
 		</dict>
 		<dict>
 			<key>pluginType</key>

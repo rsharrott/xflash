@@ -9,17 +9,36 @@
 		<key>details</key>
 		<string>Core Cards</string>
 		<key>filePath</key>
-		<string>cFlash-CARD-1.0.db</string>
+		<string>cFlash-CARD-2.0.db</string>
 		<key>pluginId</key>
 		<string>CARD_DB</string>
 		<key>name</key>
 		<string>Chinese Flash Cards</string>
 		<key>version</key>
-		<string>1.0</string>
+		<string>2.0</string>
 		<key>fileLocation</key>
 		<integer>0</integer>
 		<key>comment</key>
 		<string>fileLocation values: 0 = Bundle, 1 = Library, 2 = Documents</string>
+	</dict>
+	<key>FTS_DB</key>
+	<dict>
+		<key>pluginType</key>
+		<string>database</string>
+		<key>details</key>
+		<string>Adds sub-second full dictionary search</string>
+		<key>filePath</key>
+		<string>cFlash-FTS-2.0.db</string>
+		<key>pluginId</key>
+		<string>FTS_DB</string>
+		<key>name</key>
+		<string>Awesomely Fast Search v2.0</string>
+		<key>version</key>
+		<string>2.0</string>
+		<key>fileLocation</key>
+		<integer>0</integer>
+		<key>comment</key>
+		<string>Bundled with the app. fileLocation 0 = bundle.</string>
 	</dict>
 </dict>
 </plist>

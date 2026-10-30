@@ -118,7 +118,7 @@
    Examples:
    一个 (one …): yī gè ⇒ ‘yí gè’
    一半 (one half): yī bàn ⇒ ‘yí bàn’
-   一步 (one step): yī bù ⇒ ‘yí bù’
+   一下 (one time): yī xià ⇒ ‘yí xià’
    */
 
 //  ChineseCard *card = [self _cardForKeyword:@"一个"];
@@ -133,11 +133,13 @@
   XCTAssertEqualObjects(@"yī bàn", card.attributedReading.string, @"Regular reading should not change"); 
   XCTAssertEqualObjects(@"yí bàn", card.sandhiReading, @"Tone sandhi reading should change"); 
   
-  card = [self _cardForKeyword:@"一步"];
-  XCTAssertNotNil(card, @"Card could not be found: 一步");
-  XCTAssertEqualObjects(@"yi1 bu4", card.reading, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"yī bù", card.attributedReading.string, @"Regular reading should not change"); 
-  XCTAssertEqualObjects(@"yí bù", card.sandhiReading, @"Tone sandhi reading should change"); 
+  // CC-CEDICT 2026-10-30 no longer has 一步 as its own entry (it survives only
+  // inside compounds such as 进一步). 一下 is the same rule: 一 before a 4th tone.
+  card = [self _cardForKeyword:@"一下"];
+  XCTAssertNotNil(card, @"Card could not be found: 一下");
+  XCTAssertEqualObjects(@"yi1 xia4", card.reading, @"Regular reading should not change"); 
+  XCTAssertEqualObjects(@"yī xià", card.attributedReading.string, @"Regular reading should not change"); 
+  XCTAssertEqualObjects(@"yí xià", card.sandhiReading, @"Tone sandhi reading should change"); 
 }
 
 - (void) testYi1BecomesYi4WhenFollowedByNonTone4

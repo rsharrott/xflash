@@ -41,6 +41,28 @@ is used under the licences below.
 
 ## Chinese in a Flash (cFlash)
 
-`cFlash-CARD-1.0.db` and `plugins/cFlash-FTS-1.0.db` are derived from
-[CC-CEDICT](https://cc-cedict.org/) (MDBG), CC BY-SA, and are not covered by
-the MIT licence either.
+| file | derived from | licence |
+|---|---|---|
+| `cFlash-CARD-2.0.db` (cards, meanings, built-in set links) | [CC-CEDICT](https://cc-cedict.org/) (MDBG), release of 2026-10-30 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| `plugins/cFlash-FTS-2.0.db` (search index) | the same CC-CEDICT release | CC BY-SA 4.0 |
+
+* **CC-CEDICT** is published by [MDBG](https://www.mdbg.net/chinese/dictionary?page=cc-cedict).
+  The file header for this release states the
+  [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/)
+  licence. Project page: <https://cc-cedict.org/wiki/>.
+  Referenced work named in the file: CEDICT, copyright 1997, 1998 Paul Andrew Denisowski.
+* The dictionary was converted and modified (numbered pinyin with ü, HTML
+  meanings, stable card ids, a search index, re-mapped study sets) by
+  `tools/dictbuild_zh/`. As a derivative work it is shared under the same
+  licence, CC BY-SA 4.0. The pinned file is
+  `cedict_1_0_ts_utf-8_mdbg.txt.gz`, sha256
+  `216f40bc26d65cb074f89d243fe2ec379ac29ad6fccb93f57ee1c9414892902f`,
+  `#! date=2026-10-30T01:44:55Z`, `#! entries=125325`.
+* Built-in study sets (HSK 2.0, TOCFL, textbook lessons, Jun Da / bigram
+  frequency lists, parts of speech, Long Weekend Favorites) are the 2011
+  lists, re-linked to the new card ids. They are not part of CC-CEDICT.
+  Word frequency lists are courtesy of Jun Da and Patrick Hassel Zein.
+  Textbook names and lesson lists are copyright their respective owners.
+* HSK 3.0 lists and Tatoeba example sentences are not in this build.
+* The user database template (`cFlash.db`) contains study-set names and
+  set membership only. Its data version stays 1.0.

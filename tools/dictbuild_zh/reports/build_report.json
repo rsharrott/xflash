@@ -1,0 +1,1258 @@
+{
+  "version": "2.0",
+  "bytes_before": {
+    "user": 557056
+  },
+  "cedict_date": "2026-10-30T01:44:55Z",
+  "cedict_entries_header": 125325,
+  "cedict_lines": 125325,
+  "cards": 118349,
+  "not_a_card": 6976,
+  "erhua_cards": 258,
+  "ids": {
+    "exact": 0,
+    "pinyin_changed": 0,
+    "traditional_changed": 0,
+    "simplified_changed": 0,
+    "from_map": 118349,
+    "new": 0,
+    "legacy": 0,
+    "legacy_reused": 0,
+    "legacy_dropped": 0,
+    "ambiguous_same_chars": 0
+  },
+  "id_bootstrap": {
+    "exact": 80385,
+    "pinyin_changed": 6292,
+    "traditional_changed": 708,
+    "simplified_changed": 467,
+    "from_map": 0,
+    "new": 30497,
+    "legacy": 98252,
+    "legacy_reused": 87852,
+    "legacy_dropped": 10400,
+    "ambiguous_same_chars": 54
+  },
+  "set_links_before": 39004,
+  "set_links_after": 38757,
+  "set_links_dropped": 247,
+  "ptag": 9403,
+  "user_tag_counts_updated": 0,
+  "user_card_tag_link_dropped": 0,
+  "sets": [
+    {
+      "tag_id": 1,
+      "name": "Lesson 01",
+      "before": 37,
+      "after": 37,
+      "dropped": 0
+    },
+    {
+      "tag_id": 2,
+      "name": "Lesson 02",
+      "before": 36,
+      "after": 36,
+      "dropped": 0
+    },
+    {
+      "tag_id": 3,
+      "name": "Lesson 03",
+      "before": 38,
+      "after": 38,
+      "dropped": 0
+    },
+    {
+      "tag_id": 4,
+      "name": "Lesson 04",
+      "before": 32,
+      "after": 32,
+      "dropped": 0
+    },
+    {
+      "tag_id": 5,
+      "name": "Lesson 05",
+      "before": 41,
+      "after": 41,
+      "dropped": 0
+    },
+    {
+      "tag_id": 6,
+      "name": "Lesson 06",
+      "before": 50,
+      "after": 47,
+      "dropped": 3
+    },
+    {
+      "tag_id": 7,
+      "name": "Lesson 07",
+      "before": 65,
+      "after": 65,
+      "dropped": 0
+    },
+    {
+      "tag_id": 8,
+      "name": "Lesson 08",
+      "before": 59,
+      "after": 58,
+      "dropped": 1
+    },
+    {
+      "tag_id": 9,
+      "name": "Lesson 09",
+      "before": 48,
+      "after": 46,
+      "dropped": 2
+    },
+    {
+      "tag_id": 10,
+      "name": "Lesson 10",
+      "before": 44,
+      "after": 43,
+      "dropped": 1
+    },
+    {
+      "tag_id": 11,
+      "name": "Colloquial Chinese 01",
+      "before": 27,
+      "after": 27,
+      "dropped": 0
+    },
+    {
+      "tag_id": 12,
+      "name": "Colloquial Chinese 02",
+      "before": 29,
+      "after": 29,
+      "dropped": 0
+    },
+    {
+      "tag_id": 13,
+      "name": "Colloquial Chinese 03",
+      "before": 36,
+      "after": 36,
+      "dropped": 0
+    },
+    {
+      "tag_id": 14,
+      "name": "Colloquial Chinese 04",
+      "before": 53,
+      "after": 53,
+      "dropped": 0
+    },
+    {
+      "tag_id": 15,
+      "name": "Colloquial Chinese 05",
+      "before": 39,
+      "after": 39,
+      "dropped": 0
+    },
+    {
+      "tag_id": 16,
+      "name": "Colloquial Chinese 06",
+      "before": 45,
+      "after": 45,
+      "dropped": 0
+    },
+    {
+      "tag_id": 17,
+      "name": "Colloquial Chinese 07",
+      "before": 35,
+      "after": 35,
+      "dropped": 0
+    },
+    {
+      "tag_id": 18,
+      "name": "Colloquial Chinese 08",
+      "before": 61,
+      "after": 58,
+      "dropped": 3
+    },
+    {
+      "tag_id": 19,
+      "name": "Colloquial Chinese 09",
+      "before": 53,
+      "after": 53,
+      "dropped": 0
+    },
+    {
+      "tag_id": 20,
+      "name": "Colloquial Chinese 10",
+      "before": 55,
+      "after": 55,
+      "dropped": 0
+    },
+    {
+      "tag_id": 21,
+      "name": "Introduction to Date Time",
+      "before": 19,
+      "after": 19,
+      "dropped": 0
+    },
+    {
+      "tag_id": 22,
+      "name": "Introduction to Numbers",
+      "before": 9,
+      "after": 9,
+      "dropped": 0
+    },
+    {
+      "tag_id": 23,
+      "name": "Introduction to Radicals",
+      "before": 39,
+      "after": 39,
+      "dropped": 0
+    },
+    {
+      "tag_id": 24,
+      "name": "Integrated Chinese 01",
+      "before": 42,
+      "after": 42,
+      "dropped": 0
+    },
+    {
+      "tag_id": 25,
+      "name": "Integrated Chinese 02",
+      "before": 38,
+      "after": 38,
+      "dropped": 0
+    },
+    {
+      "tag_id": 26,
+      "name": "Integrated Chinese 03",
+      "before": 72,
+      "after": 71,
+      "dropped": 1
+    },
+    {
+      "tag_id": 27,
+      "name": "Integrated Chinese 04",
+      "before": 54,
+      "after": 54,
+      "dropped": 0
+    },
+    {
+      "tag_id": 28,
+      "name": "Integrated Chinese 05",
+      "before": 47,
+      "after": 47,
+      "dropped": 0
+    },
+    {
+      "tag_id": 29,
+      "name": "Integrated Chinese 06",
+      "before": 69,
+      "after": 69,
+      "dropped": 0
+    },
+    {
+      "tag_id": 30,
+      "name": "Integrated Chinese 07",
+      "before": 48,
+      "after": 48,
+      "dropped": 0
+    },
+    {
+      "tag_id": 31,
+      "name": "Integrated Chinese 08",
+      "before": 43,
+      "after": 42,
+      "dropped": 1
+    },
+    {
+      "tag_id": 32,
+      "name": "Integrated Chinese 09",
+      "before": 57,
+      "after": 57,
+      "dropped": 0
+    },
+    {
+      "tag_id": 33,
+      "name": "Integrated Chinese 10",
+      "before": 45,
+      "after": 44,
+      "dropped": 1
+    },
+    {
+      "tag_id": 34,
+      "name": "Integrated Chinese 11",
+      "before": 50,
+      "after": 50,
+      "dropped": 0
+    },
+    {
+      "tag_id": 35,
+      "name": "Integrated Chinese 12",
+      "before": 62,
+      "after": 62,
+      "dropped": 0
+    },
+    {
+      "tag_id": 36,
+      "name": "Integrated Chinese 13",
+      "before": 48,
+      "after": 47,
+      "dropped": 1
+    },
+    {
+      "tag_id": 37,
+      "name": "Integrated Chinese 14",
+      "before": 77,
+      "after": 76,
+      "dropped": 1
+    },
+    {
+      "tag_id": 38,
+      "name": "Integrated Chinese 15",
+      "before": 46,
+      "after": 46,
+      "dropped": 0
+    },
+    {
+      "tag_id": 39,
+      "name": "Integrated Chinese 16",
+      "before": 55,
+      "after": 55,
+      "dropped": 0
+    },
+    {
+      "tag_id": 40,
+      "name": "Integrated Chinese 17",
+      "before": 35,
+      "after": 35,
+      "dropped": 0
+    },
+    {
+      "tag_id": 41,
+      "name": "Integrated Chinese 18",
+      "before": 50,
+      "after": 50,
+      "dropped": 0
+    },
+    {
+      "tag_id": 42,
+      "name": "Integrated Chinese 19",
+      "before": 45,
+      "after": 45,
+      "dropped": 0
+    },
+    {
+      "tag_id": 43,
+      "name": "NPCR1 Lesson 01",
+      "before": 23,
+      "after": 23,
+      "dropped": 0
+    },
+    {
+      "tag_id": 44,
+      "name": "NPCR1 Lesson 02",
+      "before": 23,
+      "after": 23,
+      "dropped": 0
+    },
+    {
+      "tag_id": 45,
+      "name": "NPCR1 Lesson 03",
+      "before": 23,
+      "after": 23,
+      "dropped": 0
+    },
+    {
+      "tag_id": 46,
+      "name": "NPCR1 Lesson 04",
+      "before": 37,
+      "after": 37,
+      "dropped": 0
+    },
+    {
+      "tag_id": 47,
+      "name": "NPCR1 Lesson 05",
+      "before": 31,
+      "after": 31,
+      "dropped": 0
+    },
+    {
+      "tag_id": 48,
+      "name": "NPCR1 Lesson 06",
+      "before": 31,
+      "after": 31,
+      "dropped": 0
+    },
+    {
+      "tag_id": 49,
+      "name": "NPCR1 Lesson 07",
+      "before": 44,
+      "after": 43,
+      "dropped": 1
+    },
+    {
+      "tag_id": 50,
+      "name": "NPCR1 Lesson 08",
+      "before": 54,
+      "after": 54,
+      "dropped": 0
+    },
+    {
+      "tag_id": 51,
+      "name": "NPCR1 Lesson 09",
+      "before": 69,
+      "after": 69,
+      "dropped": 0
+    },
+    {
+      "tag_id": 52,
+      "name": "NPCR1 Lesson 10",
+      "before": 58,
+      "after": 57,
+      "dropped": 1
+    },
+    {
+      "tag_id": 53,
+      "name": "NPCR1 Lesson 11",
+      "before": 58,
+      "after": 56,
+      "dropped": 2
+    },
+    {
+      "tag_id": 54,
+      "name": "NPCR1 Lesson 12",
+      "before": 59,
+      "after": 59,
+      "dropped": 0
+    },
+    {
+      "tag_id": 55,
+      "name": "NPCR1 Lesson 13",
+      "before": 56,
+      "after": 56,
+      "dropped": 0
+    },
+    {
+      "tag_id": 56,
+      "name": "NPCR1 Lesson 14",
+      "before": 52,
+      "after": 52,
+      "dropped": 0
+    },
+    {
+      "tag_id": 57,
+      "name": "PCR1 Lesson 01-05",
+      "before": 31,
+      "after": 31,
+      "dropped": 0
+    },
+    {
+      "tag_id": 58,
+      "name": "PCR1 Lesson 06",
+      "before": 12,
+      "after": 12,
+      "dropped": 0
+    },
+    {
+      "tag_id": 59,
+      "name": "PCR1 Lesson 07",
+      "before": 13,
+      "after": 13,
+      "dropped": 0
+    },
+    {
+      "tag_id": 60,
+      "name": "PCR1 Lesson 08",
+      "before": 14,
+      "after": 13,
+      "dropped": 1
+    },
+    {
+      "tag_id": 61,
+      "name": "PCR1 Lesson 09",
+      "before": 15,
+      "after": 15,
+      "dropped": 0
+    },
+    {
+      "tag_id": 62,
+      "name": "PCR1 Lesson 10",
+      "before": 17,
+      "after": 17,
+      "dropped": 0
+    },
+    {
+      "tag_id": 63,
+      "name": "PCR1 Lesson 11",
+      "before": 15,
+      "after": 15,
+      "dropped": 0
+    },
+    {
+      "tag_id": 64,
+      "name": "PCR1 Lesson 12",
+      "before": 7,
+      "after": 6,
+      "dropped": 1
+    },
+    {
+      "tag_id": 65,
+      "name": "PCR1 Lesson 13",
+      "before": 22,
+      "after": 22,
+      "dropped": 0
+    },
+    {
+      "tag_id": 66,
+      "name": "PCR1 Lesson 14",
+      "before": 19,
+      "after": 19,
+      "dropped": 0
+    },
+    {
+      "tag_id": 67,
+      "name": "PCR1 Lesson 15",
+      "before": 24,
+      "after": 24,
+      "dropped": 0
+    },
+    {
+      "tag_id": 68,
+      "name": "PCR1 Lesson 16",
+      "before": 24,
+      "after": 24,
+      "dropped": 0
+    },
+    {
+      "tag_id": 69,
+      "name": "PCR1 Lesson 17",
+      "before": 26,
+      "after": 26,
+      "dropped": 0
+    },
+    {
+      "tag_id": 70,
+      "name": "PCR1 Lesson 18",
+      "before": 15,
+      "after": 15,
+      "dropped": 0
+    },
+    {
+      "tag_id": 71,
+      "name": "PCR1 Lesson 19",
+      "before": 28,
+      "after": 26,
+      "dropped": 2
+    },
+    {
+      "tag_id": 72,
+      "name": "PCR1 Lesson 20",
+      "before": 28,
+      "after": 28,
+      "dropped": 0
+    },
+    {
+      "tag_id": 73,
+      "name": "PCR1 Lesson 21",
+      "before": 28,
+      "after": 28,
+      "dropped": 0
+    },
+    {
+      "tag_id": 74,
+      "name": "PCR1 Lesson 22",
+      "before": 33,
+      "after": 33,
+      "dropped": 0
+    },
+    {
+      "tag_id": 75,
+      "name": "PCR1 Lesson 23",
+      "before": 29,
+      "after": 28,
+      "dropped": 1
+    },
+    {
+      "tag_id": 76,
+      "name": "PCR1 Lesson 24",
+      "before": 15,
+      "after": 14,
+      "dropped": 1
+    },
+    {
+      "tag_id": 77,
+      "name": "PCR1 Lesson 25",
+      "before": 27,
+      "after": 27,
+      "dropped": 0
+    },
+    {
+      "tag_id": 78,
+      "name": "PCR1 Lesson 26",
+      "before": 31,
+      "after": 31,
+      "dropped": 0
+    },
+    {
+      "tag_id": 79,
+      "name": "PCR1 Lesson 27",
+      "before": 29,
+      "after": 29,
+      "dropped": 0
+    },
+    {
+      "tag_id": 80,
+      "name": "PCR1 Lesson 28",
+      "before": 32,
+      "after": 32,
+      "dropped": 0
+    },
+    {
+      "tag_id": 81,
+      "name": "PCR1 Lesson 29",
+      "before": 29,
+      "after": 29,
+      "dropped": 0
+    },
+    {
+      "tag_id": 82,
+      "name": "PCR1 Lesson 30",
+      "before": 12,
+      "after": 12,
+      "dropped": 0
+    },
+    {
+      "tag_id": 83,
+      "name": "Asking For Directions",
+      "before": 42,
+      "after": 40,
+      "dropped": 2
+    },
+    {
+      "tag_id": 84,
+      "name": "At the Dry Cleaners",
+      "before": 15,
+      "after": 15,
+      "dropped": 0
+    },
+    {
+      "tag_id": 85,
+      "name": "At Home",
+      "before": 148,
+      "after": 148,
+      "dropped": 0
+    },
+    {
+      "tag_id": 86,
+      "name": "At the Airport",
+      "before": 62,
+      "after": 61,
+      "dropped": 1
+    },
+    {
+      "tag_id": 87,
+      "name": "At the Bank",
+      "before": 27,
+      "after": 27,
+      "dropped": 0
+    },
+    {
+      "tag_id": 88,
+      "name": "At the Clothing Store",
+      "before": 76,
+      "after": 76,
+      "dropped": 0
+    },
+    {
+      "tag_id": 89,
+      "name": "At the Hospital",
+      "before": 135,
+      "after": 135,
+      "dropped": 0
+    },
+    {
+      "tag_id": 90,
+      "name": "At the Hotel",
+      "before": 76,
+      "after": 74,
+      "dropped": 2
+    },
+    {
+      "tag_id": 91,
+      "name": "At the Post Office",
+      "before": 28,
+      "after": 28,
+      "dropped": 0
+    },
+    {
+      "tag_id": 92,
+      "name": "At the Restaurant",
+      "before": 147,
+      "after": 143,
+      "dropped": 4
+    },
+    {
+      "tag_id": 93,
+      "name": "At the Theater/Movies",
+      "before": 57,
+      "after": 55,
+      "dropped": 2
+    },
+    {
+      "tag_id": 94,
+      "name": "At the Train Station",
+      "before": 38,
+      "after": 38,
+      "dropped": 0
+    },
+    {
+      "tag_id": 95,
+      "name": "Business",
+      "before": 43,
+      "after": 43,
+      "dropped": 0
+    },
+    {
+      "tag_id": 96,
+      "name": "Computer And Internet",
+      "before": 111,
+      "after": 111,
+      "dropped": 0
+    },
+    {
+      "tag_id": 97,
+      "name": "Education",
+      "before": 58,
+      "after": 58,
+      "dropped": 0
+    },
+    {
+      "tag_id": 98,
+      "name": "Making A Phone Call",
+      "before": 31,
+      "after": 31,
+      "dropped": 0
+    },
+    {
+      "tag_id": 99,
+      "name": "On the Airplane",
+      "before": 48,
+      "after": 48,
+      "dropped": 0
+    },
+    {
+      "tag_id": 100,
+      "name": "Passport Control and Customs",
+      "before": 25,
+      "after": 23,
+      "dropped": 2
+    },
+    {
+      "tag_id": 101,
+      "name": "Public Transportation",
+      "before": 34,
+      "after": 34,
+      "dropped": 0
+    },
+    {
+      "tag_id": 102,
+      "name": "Shopping For Food",
+      "before": 36,
+      "after": 36,
+      "dropped": 0
+    },
+    {
+      "tag_id": 103,
+      "name": "Sports",
+      "before": 79,
+      "after": 79,
+      "dropped": 0
+    },
+    {
+      "tag_id": 104,
+      "name": "Weather",
+      "before": 27,
+      "after": 27,
+      "dropped": 0
+    },
+    {
+      "tag_id": 105,
+      "name": "Characters 01",
+      "before": 99,
+      "after": 99,
+      "dropped": 0
+    },
+    {
+      "tag_id": 106,
+      "name": "Characters 02",
+      "before": 99,
+      "after": 99,
+      "dropped": 0
+    },
+    {
+      "tag_id": 107,
+      "name": "Characters 03",
+      "before": 98,
+      "after": 98,
+      "dropped": 0
+    },
+    {
+      "tag_id": 108,
+      "name": "Characters 04",
+      "before": 99,
+      "after": 99,
+      "dropped": 0
+    },
+    {
+      "tag_id": 109,
+      "name": "Characters 05",
+      "before": 99,
+      "after": 99,
+      "dropped": 0
+    },
+    {
+      "tag_id": 110,
+      "name": "Characters 06",
+      "before": 97,
+      "after": 97,
+      "dropped": 0
+    },
+    {
+      "tag_id": 111,
+      "name": "Characters 07",
+      "before": 96,
+      "after": 96,
+      "dropped": 0
+    },
+    {
+      "tag_id": 112,
+      "name": "Fiction Bigrams 01",
+      "before": 96,
+      "after": 95,
+      "dropped": 1
+    },
+    {
+      "tag_id": 113,
+      "name": "Fiction Bigrams 10",
+      "before": 82,
+      "after": 79,
+      "dropped": 3
+    },
+    {
+      "tag_id": 114,
+      "name": "Fiction Bigrams 11",
+      "before": 88,
+      "after": 87,
+      "dropped": 1
+    },
+    {
+      "tag_id": 115,
+      "name": "Fiction Bigrams 12",
+      "before": 81,
+      "after": 80,
+      "dropped": 1
+    },
+    {
+      "tag_id": 116,
+      "name": "Fiction Bigrams 13",
+      "before": 83,
+      "after": 82,
+      "dropped": 1
+    },
+    {
+      "tag_id": 117,
+      "name": "Fiction Bigrams 14",
+      "before": 75,
+      "after": 73,
+      "dropped": 2
+    },
+    {
+      "tag_id": 118,
+      "name": "Fiction Bigrams 15",
+      "before": 76,
+      "after": 74,
+      "dropped": 2
+    },
+    {
+      "tag_id": 119,
+      "name": "Fiction Bigrams 16",
+      "before": 79,
+      "after": 78,
+      "dropped": 1
+    },
+    {
+      "tag_id": 120,
+      "name": "Fiction Bigrams 17",
+      "before": 77,
+      "after": 75,
+      "dropped": 2
+    },
+    {
+      "tag_id": 121,
+      "name": "Fiction Bigrams 18",
+      "before": 76,
+      "after": 73,
+      "dropped": 3
+    },
+    {
+      "tag_id": 122,
+      "name": "Fiction Bigrams 19",
+      "before": 74,
+      "after": 73,
+      "dropped": 1
+    },
+    {
+      "tag_id": 123,
+      "name": "Fiction Bigrams 02",
+      "before": 94,
+      "after": 91,
+      "dropped": 3
+    },
+    {
+      "tag_id": 124,
+      "name": "Fiction Bigrams 20",
+      "before": 15,
+      "after": 15,
+      "dropped": 0
+    },
+    {
+      "tag_id": 125,
+      "name": "Fiction Bigrams 03",
+      "before": 93,
+      "after": 91,
+      "dropped": 2
+    },
+    {
+      "tag_id": 126,
+      "name": "Fiction Bigrams 04",
+      "before": 86,
+      "after": 85,
+      "dropped": 1
+    },
+    {
+      "tag_id": 127,
+      "name": "Fiction Bigrams 05",
+      "before": 83,
+      "after": 81,
+      "dropped": 2
+    },
+    {
+      "tag_id": 128,
+      "name": "Fiction Bigrams 06",
+      "before": 83,
+      "after": 81,
+      "dropped": 2
+    },
+    {
+      "tag_id": 129,
+      "name": "Fiction Bigrams 07",
+      "before": 85,
+      "after": 85,
+      "dropped": 0
+    },
+    {
+      "tag_id": 130,
+      "name": "Fiction Bigrams 08",
+      "before": 89,
+      "after": 88,
+      "dropped": 1
+    },
+    {
+      "tag_id": 131,
+      "name": "Fiction Bigrams 09",
+      "before": 78,
+      "after": 78,
+      "dropped": 0
+    },
+    {
+      "tag_id": 132,
+      "name": "News Bigrams 01",
+      "before": 97,
+      "after": 96,
+      "dropped": 1
+    },
+    {
+      "tag_id": 133,
+      "name": "News Bigrams 10",
+      "before": 94,
+      "after": 88,
+      "dropped": 6
+    },
+    {
+      "tag_id": 134,
+      "name": "News Bigrams 11",
+      "before": 89,
+      "after": 84,
+      "dropped": 5
+    },
+    {
+      "tag_id": 135,
+      "name": "News Bigrams 12",
+      "before": 89,
+      "after": 87,
+      "dropped": 2
+    },
+    {
+      "tag_id": 136,
+      "name": "News Bigrams 13",
+      "before": 93,
+      "after": 92,
+      "dropped": 1
+    },
+    {
+      "tag_id": 137,
+      "name": "News Bigrams 14",
+      "before": 91,
+      "after": 84,
+      "dropped": 7
+    },
+    {
+      "tag_id": 138,
+      "name": "News Bigrams 15",
+      "before": 92,
+      "after": 92,
+      "dropped": 0
+    },
+    {
+      "tag_id": 139,
+      "name": "News Bigrams 16",
+      "before": 83,
+      "after": 79,
+      "dropped": 4
+    },
+    {
+      "tag_id": 140,
+      "name": "News Bigrams 17",
+      "before": 89,
+      "after": 84,
+      "dropped": 5
+    },
+    {
+      "tag_id": 141,
+      "name": "News Bigrams 18",
+      "before": 88,
+      "after": 84,
+      "dropped": 4
+    },
+    {
+      "tag_id": 142,
+      "name": "News Bigrams 19",
+      "before": 89,
+      "after": 82,
+      "dropped": 7
+    },
+    {
+      "tag_id": 143,
+      "name": "News Bigrams 02",
+      "before": 98,
+      "after": 98,
+      "dropped": 0
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "before": 84,
+      "after": 75,
+      "dropped": 9
+    },
+    {
+      "tag_id": 145,
+      "name": "News Bigrams 03",
+      "before": 96,
+      "after": 94,
+      "dropped": 2
+    },
+    {
+      "tag_id": 146,
+      "name": "News Bigrams 04",
+      "before": 93,
+      "after": 89,
+      "dropped": 4
+    },
+    {
+      "tag_id": 147,
+      "name": "News Bigrams 05",
+      "before": 95,
+      "after": 91,
+      "dropped": 4
+    },
+    {
+      "tag_id": 148,
+      "name": "News Bigrams 06",
+      "before": 92,
+      "after": 89,
+      "dropped": 3
+    },
+    {
+      "tag_id": 149,
+      "name": "News Bigrams 07",
+      "before": 96,
+      "after": 92,
+      "dropped": 4
+    },
+    {
+      "tag_id": 150,
+      "name": "News Bigrams 08",
+      "before": 91,
+      "after": 89,
+      "dropped": 2
+    },
+    {
+      "tag_id": 151,
+      "name": "News Bigrams 09",
+      "before": 93,
+      "after": 91,
+      "dropped": 2
+    },
+    {
+      "tag_id": 152,
+      "name": "HSK Level 1",
+      "before": 153,
+      "after": 153,
+      "dropped": 0
+    },
+    {
+      "tag_id": 153,
+      "name": "HSK Level 2",
+      "before": 301,
+      "after": 300,
+      "dropped": 1
+    },
+    {
+      "tag_id": 154,
+      "name": "HSK Level 3",
+      "before": 600,
+      "after": 598,
+      "dropped": 2
+    },
+    {
+      "tag_id": 155,
+      "name": "HSK Level 4",
+      "before": 1193,
+      "after": 1190,
+      "dropped": 3
+    },
+    {
+      "tag_id": 156,
+      "name": "HSK Level 5",
+      "before": 2492,
+      "after": 2485,
+      "dropped": 7
+    },
+    {
+      "tag_id": 157,
+      "name": "HSK Level 6",
+      "before": 4966,
+      "after": 4951,
+      "dropped": 15
+    },
+    {
+      "tag_id": 158,
+      "name": "Long Weekend Favorites",
+      "before": 12,
+      "after": 12,
+      "dropped": 0
+    },
+    {
+      "tag_id": 159,
+      "name": "Common Adverbs",
+      "before": 376,
+      "after": 373,
+      "dropped": 3
+    },
+    {
+      "tag_id": 160,
+      "name": "Conjunctions",
+      "before": 100,
+      "after": 100,
+      "dropped": 0
+    },
+    {
+      "tag_id": 161,
+      "name": "Determiners",
+      "before": 86,
+      "after": 86,
+      "dropped": 0
+    },
+    {
+      "tag_id": 162,
+      "name": "Measure Words / Counters",
+      "before": 148,
+      "after": 147,
+      "dropped": 1
+    },
+    {
+      "tag_id": 163,
+      "name": "Common Nouns",
+      "before": 2407,
+      "after": 2400,
+      "dropped": 7
+    },
+    {
+      "tag_id": 164,
+      "name": "Particles",
+      "before": 35,
+      "after": 34,
+      "dropped": 1
+    },
+    {
+      "tag_id": 165,
+      "name": "Postpositions",
+      "before": 33,
+      "after": 33,
+      "dropped": 0
+    },
+    {
+      "tag_id": 166,
+      "name": "Prepositions",
+      "before": 63,
+      "after": 63,
+      "dropped": 0
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
+      "before": 3069,
+      "after": 3056,
+      "dropped": 13
+    },
+    {
+      "tag_id": 168,
+      "name": "Common Verbs - Stative",
+      "before": 1378,
+      "after": 1374,
+      "dropped": 4
+    },
+    {
+      "tag_id": 170,
+      "name": "TOCFL 1 Beginner",
+      "before": 1382,
+      "after": 1377,
+      "dropped": 5
+    },
+    {
+      "tag_id": 171,
+      "name": "TOCFL 2 Intermediate",
+      "before": 4435,
+      "after": 4418,
+      "dropped": 17
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "before": 7194,
+      "after": 7165,
+      "dropped": 29
+    }
+  ],
+  "bytes_after": {
+    "card": 19070976,
+    "fts": 29732864,
+    "user": 557056
+  },
+  "sources": {
+    "cedict_date": "2026-10-30T01:44:55Z",
+    "cedict_entries": 125325,
+    "files": {
+      "cedict_1_0_ts_utf-8_mdbg.txt.gz": {
+        "url": "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz",
+        "bytes": 3982173,
+        "sha256": "216f40bc26d65cb074f89d243fe2ec379ac29ad6fccb93f57ee1c9414892902f",
+        "last_modified": "2026-10-30T09:16:04+00:00"
+      }
+    }
+  }
+}

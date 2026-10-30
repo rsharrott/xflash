@@ -1,0 +1,12 @@
+{
+  "cedict_date": "2026-10-30T01:44:55Z",
+  "cedict_entries": 125325,
+  "files": {
+    "cedict_1_0_ts_utf-8_mdbg.txt.gz": {
+      "url": "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz",
+      "bytes": 3982173,
+      "sha256": "216f40bc26d65cb074f89d243fe2ec379ac29ad6fccb93f57ee1c9414892902f",
+      "last_modified": "2026-10-30T09:16:04+00:00"
+    }
+  }
+}
