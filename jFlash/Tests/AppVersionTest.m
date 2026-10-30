@@ -28,7 +28,7 @@
   XCTAssertTrue([version length] > 0, @"CFBundleShortVersionString is not empty");
   XCTAssertFalse([version containsString:@"$("], @"MARKETING_VERSION was substituted: %@", version);
 #if defined(LWE_JFLASH)
-  XCTAssertEqualObjects(version, @"1.0", @"Japanese in a Flash launches as 1.0");
+  XCTAssertEqualObjects(version, @"1.1", @"Japanese in a Flash launches as 1.1");
 #endif
 }
 
