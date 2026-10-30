@@ -92,8 +92,31 @@ class AssignTest(unittest.TestCase):
         stats = ids.assign_ids(again, [], mapping)
         self.assertEqual(again[1].card_id, 3)
         self.assertEqual(again[0].card_id, 1000000)
-        self.assertEqual(stats['from_map'], 2)
+        self.assertEqual(stats['exact'], 2)
         self.assertEqual(stats['new'], 0)
+
+    def test_later_build_keeps_ids_when_pinyin_or_traditional_changes(self):
+        # A refresh edits the pinyin (including a capitalisation) and the
+        # traditional form. The committed map, not a new id, wins.
+        first = [Entry('愛', '爱', 'ai4'), Entry('裏', '里', 'li3'), Entry('先生', '先生', 'xian1 sheng5')]
+        _first, _stats, mapping = self.assign(
+            first, [(7, '愛', '爱', 'ai4'), (15, '裏', '里', 'li3'), (20, '先生', '先生', 'xian1 sheng5')])
+        edited = [Entry('愛', '爱', 'ai3'), Entry('裡', '里', 'li3'), Entry('先生', '先生', 'Xian1 sheng5')]
+        stats = ids.assign_ids(edited, [], mapping)
+        self.assertEqual([entry.card_id for entry in edited], [7, 15, 20])
+        self.assertEqual(stats['pinyin_changed'], 2)
+        self.assertEqual(stats['traditional_changed'], 1)
+        self.assertEqual(stats['new'], 0)
+        self.assertNotIn(('愛', '爱', 'ai4'), mapping)
+        self.assertEqual(mapping[('愛', '爱', 'ai3')], 7)
+        self.assertEqual(mapping[('裡', '里', 'li3')], 15)
+        # The old spelling of 先生 coming back beside the edited one is a
+        # second entry, so it does not take 20.
+        both = [Entry('先生', '先生', 'Xian1 sheng5'), Entry('先生', '先生', 'xian1 sheng5')]
+        ids.assign_ids(both, [], mapping)
+        self.assertEqual(both[0].card_id, 20)
+        self.assertGreaterEqual(both[1].card_id, ids.NEW_ID_START)
+        self.assertNotEqual(both[0].card_id, both[1].card_id)
 
     def test_map_round_trip_is_stable(self):
         entries = [Entry('愛', '爱', 'ai4'), Entry('微', '微', 'Wei1')]

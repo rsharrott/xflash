@@ -84,12 +84,27 @@ class SearchReadingTest(unittest.TestCase):
     def test_proper_noun_keeps_capitals_and_a_lowercase_squash(self):
         text = pinyin.fts_reading('Wei1 xin4')
         self.assertIn('Wei1 xin4', text)
-        self.assertIn('Wēi xìn', text)
+        # Tone marks are stored lowercase so FTS, which only folds ASCII, matches ōu.
+        self.assertIn('wēi xìn', text)
+        self.assertNotIn('Wēi', text)
         self.assertIn('weixin', text)
+
+    def test_capitalised_tone_marks_are_lowercased_for_search(self):
+        # 欧洲 is Ou1 zhou1. Searching the tone-mark form in lowercase must hit it.
+        text = pinyin.fts_reading('Ou1 zhou1')
+        self.assertIn('ōu zhōu', text)
+        self.assertNotIn('Ōu', text)
+        self.assertNotIn('Ō', text)
 
     def test_single_syllable_has_no_duplicate_squash(self):
         text = pinyin.fts_reading('gong1')
-        self.assertEqual(text, 'gong1 gōng gong')
+        self.assertEqual(text, 'gong1 %s gōng %s gong' % (pinyin.FTS_BREAK, pinyin.FTS_BREAK))
+
+    def test_break_token_keeps_phrase_search_inside_one_form(self):
+        text = pinyin.fts_reading('ma1 ma')
+        self.assertIn(' %s ' % pinyin.FTS_BREAK, text)
+        parts = text.split(' %s ' % pinyin.FTS_BREAK)
+        self.assertTrue(all('ma ma ma' not in part for part in parts))
 
     def test_erhua(self):
         text = pinyin.fts_reading('yi1 dian3 r5')

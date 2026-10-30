@@ -68,6 +68,28 @@ class BuiltDictionaryTest(unittest.TestCase):
             if simp == '微信':
                 self.assertGreaterEqual(card_id, 1000000)
 
+    def test_core_set_words_were_remapped_not_dropped(self):
+        # tag id, simplified headword (a longer see-target such as 广东省 counts).
+        expect = (
+            (153, '里'), (154, '关于'), (155, '与'), (156, '数据'), (157, '发布'),
+            (10, '为什么'), (60, '先生'), (6, '广东'),
+        )
+        for tag_id, simp in expect:
+            count = self.db.execute(
+                'SELECT COUNT(*) FROM system_card_tag_link l JOIN cards c ON c.card_id = l.card_id '
+                'WHERE l.tag_id = ? AND (c.headword_simp = ? OR c.headword_simp LIKE ?)',
+                (tag_id, simp, simp + '%')).fetchone()[0]
+            self.assertGreater(count, 0, '%s in set %s' % (simp, tag_id))
+
+    def test_lowercase_tone_marks_find_ouzhou(self):
+        rows = self.db.execute(
+            'SELECT card_id FROM fts.cards_search_content WHERE reading MATCH ?',
+            ('"ōu zhōu"',)).fetchall()
+        self.assertTrue(rows, 'ōu zhōu should find 欧洲')
+        leaked = self.db.execute(
+            "SELECT COUNT(*) FROM fts.cards_search_content WHERE reading LIKE '%Ō%'").fetchone()[0]
+        self.assertEqual(leaked, 0)
+
     def test_yidianr_is_searchable_and_links_back(self):
         row = self.db.execute(
             "SELECT meaning FROM cards_html WHERE card_id = "

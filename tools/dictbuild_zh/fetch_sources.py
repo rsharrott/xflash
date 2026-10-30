@@ -26,6 +26,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LOCK = os.path.join(HERE, 'sources.lock.json')
 SOURCE_NAME = 'cedict_1_0_ts_utf-8_mdbg.txt.gz'
 SOURCE_URL = 'https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz'
+# MDBG overwrites that URL in place. This copy is the locked release, so a
+# later build still runs after upstream moves on.
+VENDOR = os.path.join(HERE, 'vendor', SOURCE_NAME)
 
 
 def sha256(path):
@@ -53,6 +56,16 @@ def header_meta(path):
             elif not line.startswith('#'):
                 break
     return meta
+
+
+def ensure_source(sources_dir):
+    """Copy the vendored release into sources/ when the download is absent."""
+    dest = os.path.join(sources_dir, SOURCE_NAME)
+    if os.path.exists(dest) or not os.path.exists(VENDOR):
+        return dest
+    os.makedirs(sources_dir, exist_ok=True)
+    shutil.copyfile(VENDOR, dest)
+    return dest
 
 
 def verify(sources_dir, lock=None):
@@ -92,6 +105,7 @@ def main():
                         help="don't download; only verify the file already in --sources")
     args = parser.parse_args()
     os.makedirs(args.sources, exist_ok=True)
+    ensure_source(args.sources)
     old = load_lock() if os.path.exists(LOCK) else {'files': {}}
     if not args.update_lock and not old.get('files'):
         raise SystemExit('No sources.lock.json yet; run with --update-lock')

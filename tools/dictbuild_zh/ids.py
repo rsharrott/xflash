@@ -57,11 +57,15 @@ def write_map(path, mapping):
 
 def assign_ids(entries, legacy_rows, existing_map):
     """Set entry.card_id. entries are in CEDICT file order and already have
-    trad, simp, pinyin. legacy_rows is an iterable of (card_id, trad, simp,
-    pinyin) from the 2011 database, or empty when existing_map is in use.
+    trad, simp, pinyin.
 
-    Returns a stats dict. Mutates entries and, when assigning new ids,
-    existing_map (the caller writes it back).
+    The first build passes legacy_rows from the 2011 database and an empty
+    map. Later builds pass the committed map and no legacy rows. Both use
+    the same one-to-one fallbacks (pinyin edits, including case, then
+    traditional edits, then simplified edits), so a future CEDICT refresh
+    keeps the id of an edited entry instead of minting a new one.
+
+    Returns a stats dict. Mutates entries and writes the map back.
     """
     _reject_duplicate_keys(entries)
     stats = {
@@ -69,7 +73,6 @@ def assign_ids(entries, legacy_rows, existing_map):
         'pinyin_changed': 0,
         'traditional_changed': 0,
         'simplified_changed': 0,
-        'from_map': 0,
         'new': 0,
         'legacy': 0,
         'legacy_reused': 0,
@@ -77,12 +80,13 @@ def assign_ids(entries, legacy_rows, existing_map):
         'ambiguous_same_chars': 0,
     }
     if existing_map:
-        _assign_from_map(entries, existing_map, stats)
-        return stats
-
-    by_key = {}
-    for card_id, trad, simp, pinyin in legacy_rows:
-        by_key[(trad, simp, pinyin)] = card_id
+        # Copy first: the map is rebuilt at the end, and a pinyin edit must
+        # not leave the old spelling pointing at the same id.
+        by_key = dict(existing_map)
+    else:
+        by_key = {}
+        for card_id, trad, simp, pinyin in legacy_rows:
+            by_key[(trad, simp, pinyin)] = card_id
     stats['legacy'] = len(by_key)
     claimed = set()
 
@@ -105,6 +109,10 @@ def assign_ids(entries, legacy_rows, existing_map):
         entries, by_key, claimed, lambda e: (e.trad, e.pinyin), lambda t, s, p: (t, p))
 
     next_id = NEW_ID_START
+    if by_key:
+        highest = max(by_key.values())
+        if highest >= NEW_ID_START:
+            next_id = highest + 1
     for entry in entries:
         if entry.card_id is not None:
             continue
@@ -115,40 +123,22 @@ def assign_ids(entries, legacy_rows, existing_map):
         next_id += 1
         stats['new'] += 1
 
-    # Current keys, then leftover 2011 keys whose ids were not reused. A word
-    # that leaves CEDICT and comes back keeps its id. A pinyin change keeps
-    # the id on the new spelling and does not also reserve the old spelling.
+    # Current keys, then leftover keys whose ids were not reused. A word that
+    # leaves CEDICT and comes back keeps its id. A pinyin or character edit
+    # keeps the id on the new spelling only, so the old spelling cannot take
+    # the same id if it returns as a second entry.
+    fresh = {}
     for entry in entries:
-        existing_map[(entry.trad, entry.simp, entry.pinyin)] = entry.card_id
+        fresh[(entry.trad, entry.simp, entry.pinyin)] = entry.card_id
     for key, card_id in by_key.items():
-        if card_id not in claimed and key not in existing_map:
-            existing_map[key] = card_id
+        if card_id not in claimed and key not in fresh:
+            fresh[key] = card_id
+    existing_map.clear()
+    existing_map.update(fresh)
     stats['legacy_reused'] = stats['exact'] + stats['pinyin_changed'] + stats['traditional_changed'] + stats['simplified_changed']
     stats['legacy_dropped'] = stats['legacy'] - stats['legacy_reused']
     _reject_duplicate_ids(entries)
     return stats
-
-
-def _assign_from_map(entries, existing_map, stats):
-    used = set(existing_map.values())
-    next_id = NEW_ID_START
-    if used:
-        next_id = max(NEW_ID_START, max(used) + 1)
-    for entry in entries:
-        key = (entry.trad, entry.simp, entry.pinyin)
-        card_id = existing_map.get(key)
-        if card_id is not None:
-            entry.card_id = card_id
-            stats['from_map'] += 1
-            continue
-        while next_id in used:
-            next_id += 1
-        entry.card_id = next_id
-        existing_map[key] = next_id
-        used.add(next_id)
-        next_id += 1
-        stats['new'] += 1
-    _reject_duplicate_ids(entries)
 
 
 def _claim_unique(entries, by_key, claimed, new_key, old_key):

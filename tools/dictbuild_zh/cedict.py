@@ -274,6 +274,39 @@ def _parse_inline(target):
     return trad, simp, py
 
 
+def card_for_reference(target, cards):
+    """The card a 'see' / 'variant of' note points at, or None.
+
+    Matches the traditional headword first (裡 for 裡|里[li3]), then the
+    simplified one, and requires the pinyin when the note has one.
+    """
+    parsed = _parse_inline(target)
+    if parsed is None:
+        return None
+    trad, simp, py = parsed
+    pools = []
+    if trad:
+        pools.append([card for card in cards if card.trad == trad])
+    if simp and simp != trad:
+        pools.append([card for card in cards if card.simp == simp or card.trad == simp])
+    for pool in pools:
+        if py:
+            exact = [card for card in pool if card.pinyin == py]
+            if len(exact) == 1:
+                return exact[0]
+            loose = [card for card in pool if _loose_pinyin(card.pinyin) == _loose_pinyin(py)]
+            if len(loose) == 1:
+                return loose[0]
+            continue
+        if len(pool) == 1:
+            return pool[0]
+    return None
+
+
+def _loose_pinyin(reading):
+    return (reading or '').replace('ü', 'v').replace('Ü', 'v').lower()
+
+
 def _resolve(target, by_trad):
     parsed = _parse_inline(target)
     if parsed is None:

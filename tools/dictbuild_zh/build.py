@@ -118,6 +118,7 @@ def main():
     parser.add_argument('--legacy-card', default=LEGACY_CARD,
                         help='2011 CARD db, used only when data/id_map.tsv does not exist yet')
     args = parser.parse_args()
+    fetch_sources.ensure_source(args.sources)
     lock = fetch_sources.verify(args.sources)
     source = cedict.source_path(args.sources)
     card_path = os.path.join(args.sql_dir, CARD_NAME)
@@ -176,16 +177,25 @@ def main():
         log('wrote', study_sets.SETS_PATH)
 
     card_ids = {entry.card_id for entry in cards}
+    legacy_of = {}
+    for (trad, simp, py), old_id in existing.items():
+        if old_id not in card_ids and old_id not in legacy_of:
+            legacy_of[old_id] = (trad, simp, py)
+    detailed = study_sets.index_replacements(legacy_of, cards, entries)
+    replacement = {old_id: new_id for old_id, (new_id, _how) in detailed.items()}
     all_links = study_sets.load_links()
-    links = study_sets.kept_links(all_links, card_ids)
+    links, link_records = study_sets.resolve_links(all_links, card_ids, replacement)
     before = collections.Counter(tag_id for tag_id, _card in all_links)
     after = collections.Counter(tag_id for tag_id, _card in links)
+    remapped_n = collections.Counter(tag_id for tag_id, _old, action, _new in link_records if action == 'remapped')
+    dropped_n = collections.Counter(tag_id for tag_id, _old, action, _new in link_records if action == 'dropped')
     priority = {card_id for tag_id, card_id in links if tag_id in study_sets.PRIORITY_TAG_IDS}
     for entry in cards:
         entry.ptag = 1 if entry.card_id in priority else 0
     report['set_links_before'] = len(all_links)
     report['set_links_after'] = len(links)
-    report['set_links_dropped'] = len(all_links) - len(links)
+    report['set_links_remapped'] = sum(remapped_n.values())
+    report['set_links_dropped'] = sum(dropped_n.values())
     report['ptag'] = sum(entry.ptag for entry in cards)
 
     log('writing', card_path)
@@ -226,32 +236,55 @@ def main():
 
     names = {}
     favorites_dropped = 0
+    favorites_remapped = 0
     counts_changed = None
     if os.path.exists(user_path):
         user = sqlite3.connect(user_path)
         names = dict(user.execute('SELECT tag_id, tag_name FROM tags'))
-        before_fav = user.execute('SELECT COUNT(*) FROM card_tag_link').fetchone()[0]
-        user.execute('ATTACH DATABASE ? AS carddb', (card_path,))
-        user.execute('DELETE FROM main.card_tag_link WHERE card_id NOT IN (SELECT card_id FROM carddb.cards)')
-        after_fav = user.execute('SELECT COUNT(*) FROM card_tag_link').fetchone()[0]
-        favorites_dropped = before_fav - after_fav
+        fav_rows = [(tag_id, card_id) for tag_id, card_id in user.execute(
+            'SELECT tag_id, card_id FROM card_tag_link ORDER BY rowid')]
+        fav_kept, fav_records = study_sets.resolve_links(fav_rows, card_ids, replacement)
+        favorites_dropped = sum(1 for _t, _c, action, _n in fav_records if action == 'dropped')
+        favorites_remapped = sum(1 for _t, _c, action, _n in fav_records if action == 'remapped')
+        if fav_kept != fav_rows:
+            user.execute('DELETE FROM card_tag_link')
+            user.executemany('INSERT INTO card_tag_link (tag_id, card_id) VALUES (?,?)', fav_kept)
         counts_changed = study_sets.refresh_user_counts(user, links)
-        if counts_changed or favorites_dropped:
+        if counts_changed or favorites_dropped or favorites_remapped:
             user.commit()
         else:
             user.rollback()
         user.close()
     report['user_tag_counts_updated'] = counts_changed
     report['user_card_tag_link_dropped'] = favorites_dropped
+    report['user_card_tag_link_remapped'] = favorites_remapped
     report['sets'] = [
         {
             'tag_id': tag_id,
             'name': names.get(tag_id, ''),
             'before': before[tag_id],
             'after': after[tag_id],
-            'dropped': before[tag_id] - after[tag_id],
+            'remapped': remapped_n[tag_id],
+            'dropped': dropped_n[tag_id],
         }
         for tag_id in sorted(before)
+    ]
+    # Headword of the 2011 id, including ids that are still live (a duplicate
+    # drop names that card, and legacy_of only holds retired ids).
+    head_of = {}
+    for (trad, simp, py), old_id in existing.items():
+        head_of.setdefault(old_id, (trad, simp, py))
+    report['dropped_links'] = [
+        {
+            'tag_id': tag_id,
+            'name': names.get(tag_id, ''),
+            'card_id': old_id,
+            'traditional': (head_of.get(old_id) or ('', '', ''))[0],
+            'simplified': (head_of.get(old_id) or ('', '', ''))[1],
+            'pinyin': (head_of.get(old_id) or ('', '', ''))[2],
+            'reason': ('already in the set (card %s)' % new_id) if new_id is not None else 'no replacement',
+        }
+        for tag_id, old_id, action, new_id in link_records if action == 'dropped'
     ]
     report['bytes_after'] = {
         'card': os.path.getsize(card_path),

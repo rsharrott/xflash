@@ -124,20 +124,29 @@ def strip_tone_digit(syl):
     return syl
 
 
+# Token between the numbered, tone-mark, and toneless copies. FTS phrase
+# search treats adjacent tokens as a phrase, and the simple tokenizer drops
+# punctuation, so a real token is what stops "ma ma ma" matching 妈妈 by
+# walking from one copy into the next. It is not a pinyin syllable.
+FTS_BREAK = 'qzz'
+
+
 def fts_reading(reading):
     """Reading column of cards_search_content.
 
     Numbered pinyin, then tone marks, then toneless syllables, then the
     syllables run together. Search for wei2 xin4, wēi xìn, wei xin and
-    weixin all hit the same card. Single-syllable words skip the run-together
-    copy because it is the same token as the toneless syllable.
+    weixin all hit the same card. The tone-mark copy is lowercased, as in
+    the 2011 index: FTS only case-folds ASCII, so Ōu would miss a search
+    for ōu. Single-syllable words skip the run-together copy because it is
+    the same token as the toneless syllable.
     """
     if not reading:
         return ''
-    marked = diacritic(reading, spaces=True)
+    marked = diacritic(reading, spaces=True).lower()
     toneless = [strip_tone_digit(s) for s in reading.split(' ')]
     toneless = [s for s in toneless if s]
-    spaced = ' '.join(toneless)
+    spaced = ' '.join(toneless).lower()
     squashed = ''.join(toneless).lower()
     parts = [reading]
     for extra in (marked, spaced):
@@ -145,4 +154,4 @@ def fts_reading(reading):
             parts.append(extra)
     if ' ' in reading and squashed and squashed not in parts:
         parts.append(squashed)
-    return ' '.join(parts)
+    return (' ' + FTS_BREAK + ' ').join(parts)

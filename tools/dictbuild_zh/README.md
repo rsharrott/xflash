@@ -12,8 +12,9 @@ CC-CEDICT release. The tables are the ones the app reads.
 Version **2.0** is this dictionary generation, the same kind of step jFlash
 took from the 2010 EDICT build to JMdict. The app compares that version when
 it decides a bundled plugin is newer. The user template stays 1.0: its tables
-did not change, and the revived app has a new bundle id, so there are no old
-installs to migrate. The bundle id itself is not changed here.
+did not change. The new app will ship under a new bundle id, so there is no
+upgrade from old installs and this build does not migrate a user database.
+That bundle id is not chosen yet; it waits until the new domain is ready.
 
 Search ships in the app bundle (`cFlash-installed.plist`, file location 0).
 Remote plugin downloads are off, so a search index that existed only as a
@@ -29,7 +30,14 @@ python3 -m unittest -v     # unit tests; the built-database checks run when the 
 ```
 
 Python 3.9+ standard library only. Building twice from the same sources and
-the committed id map produces byte-identical database files.
+the committed id map produces the same SQL. The database files are
+byte-identical when the SQLite library version matches; bytes 96–99 of the
+file are that version, so a different SQLite changes only those bytes.
+
+`vendor/` holds the locked CC-CEDICT gzip. MDBG overwrites the download URL
+in place, so after the next release `fetch_sources.py` copies this file into
+`sources/` instead of accepting the new one. `fetch_sources.py --update-lock`
+is still how a later release is adopted.
 
 ### Source and the lock file
 
@@ -76,24 +84,29 @@ does not cover them.
 
 `data/id_map.tsv` is the source of truth, keyed on
 `(traditional, simplified, pinyin)`. The first build copied ids out of
-`cFlash-CARD-1.0.db`:
+`cFlash-CARD-1.0.db`, and every later build applies the same rules to the
+committed map, so a pinyin or character edit keeps its id:
 
 1. exact key
-2. same characters, pinyin changed, only when that pair is one old card and one new card
+2. same characters, pinyin changed (including capitals), only when that pair is one old card and one new card
 3. same simplified + pinyin, traditional changed, same one-to-one rule
 4. same traditional + pinyin, simplified changed, same one-to-one rule
 
-Anything else new gets an id at or above 1,000,000, in CEDICT file order.
-A key that leaves the dictionary stays in the map, so if it comes back it
-gets the same id. A later `build.py` only appends ids; it does not renumber.
+Anything else new gets an id at or above 1,000,000, in CEDICT file order,
+after the highest id already in the map. A key that leaves the dictionary
+stays in the map, so if it comes back it gets the same id. An edit keeps the
+id on the new spelling only.
 
 ## Study sets
 
 `data/system_sets.tsv` is the 2011 link table (`tag_id`, `card_id`) in study
-order. Rows whose card is gone from CEDICT are dropped at build time and
-counted in `reports/build_report.json`. `tags.count` in `cFlash.db` is
-rewritten from the links that remain. Long Weekend Favorites is editable, so
-its rows live in `card_tag_link`; a favorite whose card disappeared is removed.
+order. A missing card is remapped before it is dropped: variant / see target
+(广东 → 广东省), then the same simplified characters and pinyin, then the
+same traditional + simplified, then the same traditional + pinyin. A link is
+dropped only when nothing matches or the set already has that card.
+`reports/build_report.json` lists every remaining drop. `tags.count` in
+`cFlash.db` is rewritten from the links that remain. Long Weekend Favorites
+is editable, so its rows live in `card_tag_link` and are remapped the same way.
 
 HSK 2.0 stays. Removing it, and adding HSK 3.0, is a later change.
 
