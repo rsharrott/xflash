@@ -100,10 +100,13 @@ id on the new spelling only.
 ## Study sets
 
 `data/system_sets.tsv` is the 2011 link table (`tag_id`, `card_id`) in study
-order. A missing card is remapped before it is dropped: variant / see target
-(广东 → 广东省), then the same simplified characters and pinyin, then the
-same traditional + simplified, then the same traditional + pinyin. A link is
-dropped only when nothing matches or the set already has that card.
+order. A missing card is remapped before it is dropped. The same simplified
+characters and pinyin (case and ü ignored) win first, so HSK 6 兴隆 and 振兴
+stay the common words. A place-name redirect runs only when that short form
+is not a card (广东 → 广东省). Several `see` targets are ranked by token
+overlap with the 2011 English gloss (`data/legacy_en.tsv`); pinyin distance
+breaks a tie, and a different syllable with no shared gloss is dropped.
+`reports/remapped_links.tsv` is every remapped link with both definitions.
 `reports/build_report.json` lists every remaining drop. `tags.count` in
 `cFlash.db` is rewritten from the links that remain. Long Weekend Favorites
 is editable, so its rows live in `card_tag_link` and are remapped the same way.

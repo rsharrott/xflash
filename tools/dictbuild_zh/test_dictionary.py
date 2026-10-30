@@ -69,17 +69,53 @@ class BuiltDictionaryTest(unittest.TestCase):
                 self.assertGreaterEqual(card_id, 1000000)
 
     def test_core_set_words_were_remapped_not_dropped(self):
-        # tag id, simplified headword (a longer see-target such as 广东省 counts).
+        # Exact simplified headword. 广东省 is the see target of 广东; a
+        # prefix match would also accept 兴隆县 as 兴隆.
         expect = (
             (153, '里'), (154, '关于'), (155, '与'), (156, '数据'), (157, '发布'),
-            (10, '为什么'), (60, '先生'), (6, '广东'),
+            (10, '为什么'), (60, '先生'), (6, '广东省'),
         )
         for tag_id, simp in expect:
             count = self.db.execute(
                 'SELECT COUNT(*) FROM system_card_tag_link l JOIN cards c ON c.card_id = l.card_id '
-                'WHERE l.tag_id = ? AND (c.headword_simp = ? OR c.headword_simp LIKE ?)',
-                (tag_id, simp, simp + '%')).fetchone()[0]
+                'WHERE l.tag_id = ? AND c.headword_simp = ?',
+                (tag_id, simp)).fetchone()[0]
             self.assertGreater(count, 0, '%s in set %s' % (simp, tag_id))
+
+    def test_disputed_remaps_keep_the_plain_word_and_the_matching_gloss(self):
+        expect = (
+            (157, '兴隆', 'xing1 long2'),
+            (157, '振兴', 'zhen4 xing1'),
+            (164, '哩', 'li5'),
+            (167, '拜拜', 'bai2 bai2'),
+            (6, '广东省', 'Guang3 dong1 Sheng3'),
+        )
+        for tag_id, simp, reading in expect:
+            rows = self.db.execute(
+                'SELECT c.reading FROM system_card_tag_link l '
+                'JOIN cards c ON c.card_id = l.card_id '
+                'WHERE l.tag_id = ? AND c.headword_simp = ?',
+                (tag_id, simp)).fetchall()
+            self.assertEqual([row[0] for row in rows], [reading], '%s in set %s' % (simp, tag_id))
+        absent = (
+            (157, '兴隆县', None),
+            (157, '振兴区', None),
+            (164, '哩', 'li3'),
+            (167, '拜拜', 'bai4 bai5'),
+            (6, '广东', None),
+        )
+        for tag_id, simp, reading in absent:
+            sql = (
+                'SELECT COUNT(*) FROM system_card_tag_link l '
+                'JOIN cards c ON c.card_id = l.card_id '
+                'WHERE l.tag_id = ? AND c.headword_simp = ?'
+            )
+            args = [tag_id, simp]
+            if reading is not None:
+                sql += ' AND c.reading = ?'
+                args.append(reading)
+            count = self.db.execute(sql, args).fetchone()[0]
+            self.assertEqual(count, 0, '%s %s in set %s' % (simp, reading or '', tag_id))
 
     def test_lowercase_tone_marks_find_ouzhou(self):
         rows = self.db.execute(

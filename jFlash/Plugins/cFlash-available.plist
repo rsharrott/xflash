@@ -60,6 +60,9 @@ That platform isn&apos;t quite ready yet - but we are working on it - and this c
 			<string>Awesomely Fast Search v2.0</string>
 			<key>filePath</key>
 			<string>cFlash-FTS-2.0/cFlash-FTS-2.0.db</string>
+			<!-- Remote plugin downloads are off (LWE_PLUGIN_SERVER is empty).
+			     This CloudFront package is no longer hosted. The key stays so a
+			     future re-host has somewhere to put the URL. -->
 			<key>targetURL</key>
 			<string>https://d3jxezdeu5e50q.cloudfront.net/cFlash-FTS-2.0.zip</string>
 			<key>targetPath</key>

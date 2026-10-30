@@ -33,11 +33,11 @@
     "ambiguous_same_chars": 54
   },
   "set_links_before": 39004,
-  "set_links_after": 38919,
-  "set_links_remapped": 165,
-  "set_links_dropped": 85,
-  "ptag": 9456,
-  "user_tag_counts_updated": 5,
+  "set_links_after": 38916,
+  "set_links_remapped": 162,
+  "set_links_dropped": 88,
+  "ptag": 9454,
+  "user_tag_counts_updated": 0,
   "user_card_tag_link_dropped": 0,
   "user_card_tag_link_remapped": 0,
   "sets": [
@@ -1373,9 +1373,9 @@
       "tag_id": 167,
       "name": "Common Verbs - Active",
       "before": 3069,
-      "after": 3065,
-      "remapped": 9,
-      "dropped": 4
+      "after": 3064,
+      "remapped": 8,
+      "dropped": 5
     },
     {
       "tag_id": 168,
@@ -1397,17 +1397,17 @@
       "tag_id": 171,
       "name": "TOCFL 2 Intermediate",
       "before": 4435,
-      "after": 4433,
-      "remapped": 15,
-      "dropped": 2
+      "after": 4432,
+      "remapped": 14,
+      "dropped": 3
     },
     {
       "tag_id": 172,
       "name": "TOCFL 3 Advanced",
       "before": 7194,
-      "after": 7187,
-      "remapped": 24,
-      "dropped": 7
+      "after": 7186,
+      "remapped": 23,
+      "dropped": 8
     }
   ],
   "dropped_links": [
@@ -2071,6 +2071,15 @@
     {
       "tag_id": 167,
       "name": "Common Verbs - Active",
+      "card_id": 97858,
+      "traditional": "粘",
+      "simplified": "粘",
+      "pinyin": "nian2",
+      "reason": "already in the set (card 96718)"
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
       "card_id": 65095,
       "traditional": "算帳",
       "simplified": "算帐",
@@ -2107,6 +2116,15 @@
     {
       "tag_id": 171,
       "name": "TOCFL 2 Intermediate",
+      "card_id": 97858,
+      "traditional": "粘",
+      "simplified": "粘",
+      "pinyin": "nian2",
+      "reason": "already in the set (card 96718)"
+    },
+    {
+      "tag_id": 171,
+      "name": "TOCFL 2 Intermediate",
       "card_id": 65095,
       "traditional": "算帳",
       "simplified": "算帐",
@@ -2121,6 +2139,15 @@
       "simplified": "连络",
       "pinyin": "lian2 luo4",
       "reason": "already in the set (card 69861)"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 97858,
+      "traditional": "粘",
+      "simplified": "粘",
+      "pinyin": "nian2",
+      "reason": "already in the set (card 96718)"
     },
     {
       "tag_id": 172,
@@ -2177,6 +2204,7 @@
       "reason": "no replacement"
     }
   ],
+  "remapped_links_file": "tools/dictbuild_zh/reports/remapped_links.tsv",
   "bytes_after": {
     "card": 19079168,
     "fts": 32006144,

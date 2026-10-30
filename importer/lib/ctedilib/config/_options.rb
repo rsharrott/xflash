@@ -25,6 +25,8 @@ $options[:sqlite_name] = "cflash"
 $options[:sqlite_username] ="root"
 $options[:sqlite_password] = ""
 $options[:sqlite_file_path] = {}
+# Historical 2011 importer output names. The app ships the 2.0 databases
+# written by tools/dictbuild_zh; these paths are only for this old script.
 $options[:sqlite_file_path][:jflash_user]  = "./cFlash.db"
 $options[:sqlite_file_path][:jflash_cards] = "./cFlash-CARD-1.0.db"
 $options[:sqlite_file_path][:jflash_ex]    = "./cFlash-EX-1.0.db"

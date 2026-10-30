@@ -118,6 +118,60 @@ class AssignTest(unittest.TestCase):
         self.assertGreaterEqual(both[1].card_id, ids.NEW_ID_START)
         self.assertNotEqual(both[0].card_id, both[1].card_id)
 
+    def test_refresh_covers_exact_pinyin_traditional_simplified_and_a_second_edit(self):
+        first = [
+            Entry('你', '你', 'ni3'),
+            Entry('愛', '爱', 'ai4'),
+            Entry('裏', '里', 'li3'),
+            Entry('後', '後', 'hou4'),
+            Entry('先生', '先生', 'xian1 sheng5'),
+            Entry('行', '行', 'xing2'),
+            Entry('行', '行', 'hang2'),
+        ]
+        _entries, stats, mapping = self.assign(first, [
+            (1, '你', '你', 'ni3'),
+            (7, '愛', '爱', 'ai4'),
+            (15, '裏', '里', 'li3'),
+            (16, '後', '後', 'hou4'),
+            (20, '先生', '先生', 'xian1 sheng5'),
+            (9, '行', '行', 'xing2'),
+            (10, '行', '行', 'hang2'),
+        ])
+        self.assertEqual(stats['exact'], 7)
+        edited = [
+            Entry('你', '你', 'ni3'),
+            Entry('愛', '爱', 'ai3'),
+            Entry('裡', '里', 'li3'),
+            Entry('後', '后', 'hou4'),
+            Entry('先生', '先生', 'Xian1 sheng5'),
+            Entry('行', '行', 'xing2'),
+            Entry('行', '行', 'hang2'),
+            Entry('微', '微', 'Wei1'),
+        ]
+        stats = ids.assign_ids(edited, [], mapping)
+        self.assertEqual([entry.card_id for entry in edited[:7]], [1, 7, 15, 16, 20, 9, 10])
+        self.assertGreaterEqual(edited[7].card_id, ids.NEW_ID_START)
+        self.assertEqual(stats['exact'], 3)
+        self.assertEqual(stats['pinyin_changed'], 2)
+        self.assertEqual(stats['traditional_changed'], 1)
+        self.assertEqual(stats['simplified_changed'], 1)
+        self.assertEqual(stats['new'], 1)
+        # A second refresh moves 愛 again and still keeps 7.
+        again = [Entry('愛', '爱', 'ai1'), Entry('你', '你', 'ni3')]
+        ids.assign_ids(again, [], mapping)
+        self.assertEqual(again[0].card_id, 7)
+        self.assertEqual(again[1].card_id, 1)
+        # Two new readings against one old card are not guessed.
+        mapping[('中', '中', 'zhong3')] = 99
+        ambiguous = [Entry('中', '中', 'zhong1'), Entry('中', '中', 'zhong4')]
+        stats = ids.assign_ids(ambiguous, [], mapping)
+        self.assertEqual(stats['pinyin_changed'], 0)
+        self.assertEqual(stats['ambiguous_same_chars'], 2)
+        self.assertGreaterEqual(ambiguous[0].card_id, ids.NEW_ID_START)
+        self.assertGreaterEqual(ambiguous[1].card_id, ids.NEW_ID_START)
+        self.assertNotEqual(ambiguous[0].card_id, ambiguous[1].card_id)
+        self.assertNotEqual(ambiguous[0].card_id, edited[7].card_id)
+
     def test_map_round_trip_is_stable(self):
         entries = [Entry('愛', '爱', 'ai4'), Entry('微', '微', 'Wei1')]
         _entries, _stats, mapping = self.assign(entries, [(5, '愛', '爱', 'ai4')])

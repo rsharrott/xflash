@@ -76,6 +76,83 @@ class LinkTest(unittest.TestCase):
             {700: ('週到', '周到', 'zhou1 dao5')}, [card], [])
         self.assertEqual(found[700], (9, 'simp'))
 
+    def test_plain_word_beats_a_place_name_redirect(self):
+        # HSK 6's capitalised 兴隆 / 振兴 are the common words, not the
+        # county and the district. 广东 has no short-form card, so the
+        # province redirect still applies.
+        plain = _Card(1, '興隆', '兴隆', 'xing1 long2', english='prosperous')
+        county = _Card(2, '興隆縣', '兴隆县', 'Xing1 long2 Xian4', english='Xinglong county')
+        verb = _Card(3, '振興', '振兴', 'zhen4 xing1', english='to revitalize')
+        district = _Card(4, '振興區', '振兴区', 'Zhen4 xing1 Qu1', english='Zhenxing district')
+        province = _Card(5, '廣東省', '广东省', 'Guang3 dong1 Sheng3', english='Guangdong province')
+        redirects = [
+            _Card(0, '興隆', '兴隆', 'Xing1 long2', False, refs=['興隆縣|兴隆县[Xing1 long2 Xian4]']),
+            _Card(0, '振興', '振兴', 'Zhen4 xing1', False, refs=['振興區|振兴区[Zhen4 xing1 Qu1]']),
+            _Card(0, '廣東', '广东', 'Guang3 dong1', False, refs=['廣東省|广东省[Guang3 dong1 Sheng3]']),
+        ]
+        found = study_sets.index_replacements({
+            100: ('興隆', '兴隆', 'Xing1 long2', 'Xinglong county in Chengde, Hebei'),
+            101: ('振興', '振兴', 'Zhen4 xing1', 'Zhengxing district of Dandong'),
+            102: ('廣東', '广东', 'Guang3 dong1', 'Guangdong province'),
+        }, [plain, county, verb, district, province], redirects)
+        self.assertEqual(found[100], (1, 'simp+pinyin'))
+        self.assertEqual(found[101], (3, 'simp+pinyin'))
+        self.assertEqual(found[102][0], 5)
+        self.assertEqual(found[102][1], 'redirect')
+
+    def test_meaning_picks_the_particle_and_the_loanword(self):
+        mile = _Card(1, '哩', '哩', 'li3', english='mile')
+        particle = _Card(2, '哩', '哩', 'li5', english='(modal final particle similar to ne or la)')
+        bye = _Card(3, '拜拜', '拜拜', 'bai2 bai2', english='(loanword) bye-bye')
+        respects = _Card(4, '拜拜', '拜拜', 'bai4 bai5', english="to pay one's respects")
+        found = study_sets.index_replacements({
+            10: ('哩', '哩', 'li1', 'this'),
+            11: ('拜拜', '拜拜', 'bai4 bai4', 'bye-bye'),
+        }, [mile, particle, bye, respects], [])
+        self.assertEqual(found[10], (2, 'trad+simp'))
+        self.assertEqual(found[11], (3, 'trad+simp'))
+
+    def test_same_pinyin_variant_beats_a_different_syllable(self):
+        # 粘 nian2 "glutinous" moved to 黏. 粘 zhan1 "to glue" is a different word.
+        glue = _Card(1, '粘', '粘', 'zhan1', english='to glue; to paste')
+        sticky = _Card(2, '黏', '黏', 'nian2', english='sticky; glutinous')
+        redirects = [_Card(0, '粘', '粘', 'nian2', False, variant_target='黏|黏[nian2]')]
+        found = study_sets.index_replacements(
+            {9: ('粘', '粘', 'nian2', 'glutinous')}, [glue, sticky], redirects)
+        self.assertEqual(found[9][0], 2)
+
+    def test_see_target_follows_the_old_definition(self):
+        league = _Card(1, '興安盟', '兴安盟', 'Xing1 an1 Meng2', english='Hinggan league in Inner Mongolia')
+        district = _Card(2, '興安區', '兴安区', 'Xing1 an1 Qu1', english="Xing'an district of Hegang, Heilongjiang")
+        county = _Card(3, '興安縣', '兴安县', 'Xing1 an1 Xian4', english="Xing'an county in Guilin, Guangxi")
+        redirects = [_Card(0, '興安', '兴安', 'Xing1 an1', False, refs=[
+            '興安盟|兴安盟[Xing1 an1 Meng2]',
+            '興安區|兴安区[Xing1 an1 Qu1]',
+            '興安縣|兴安县[Xing1 an1 Xian4]',
+        ])]
+        found = study_sets.index_replacements(
+            {8: ('興安', '兴安', 'Xing1 an1', "Xing'an county in Guilin, Guangxi")},
+            [league, district, county], redirects)
+        self.assertEqual(found[8], (3, 'redirect'))
+
+    def test_pinyin_breaks_a_meaning_tie_toward_the_common_word(self):
+        # 從 cong1 "lax" is gone. "from" and the surname share no gloss with
+        # "lax"; cong2 is one tone away and Cong2 adds a capital.
+        common = _Card(1, '從', '从', 'cong2', english='from; through; via')
+        surname = _Card(2, '從', '从', 'Cong2', english='surname Cong')
+        found = study_sets.index_replacements(
+            {4: ('從', '从', 'cong1', 'lax')}, [common, surname], [])
+        self.assertEqual(found[4], (1, 'trad+simp'))
+
+    def test_distant_readings_with_no_shared_gloss_are_dropped(self):
+        shell = _Card(1, '甲', '甲', 'jia3', english='shell')
+        third = _Card(2, '甲', '甲', 'bing3', english='third')
+        rejected = {}
+        found = study_sets.index_replacements(
+            {5: ('甲', '甲', 'yi1', 'one')}, [shell, third], [], rejected)
+        self.assertNotIn(5, found)
+        self.assertEqual(rejected[5], 'no close meaning or pinyin match')
+
     def test_priority_ids_cover_the_2011_lists_and_not_textbooks(self):
         self.assertIn(152, study_sets.PRIORITY_TAG_IDS)   # HSK 1
         self.assertIn(170, study_sets.PRIORITY_TAG_IDS)   # TOCFL
@@ -101,7 +178,7 @@ class LinkTest(unittest.TestCase):
 
 
 class _Card:
-    def __init__(self, card_id, trad, simp, pinyin, include=True, variant_target=None, refs=None):
+    def __init__(self, card_id, trad, simp, pinyin, include=True, variant_target=None, refs=None, english=''):
         self.card_id = card_id
         self.trad = trad
         self.simp = simp
@@ -109,6 +186,7 @@ class _Card:
         self.include = include
         self.variant_target = variant_target
         self.refs = refs or []
+        self.glosses = [english] if english else []
 
 
 if __name__ == '__main__':

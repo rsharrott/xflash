@@ -10,6 +10,7 @@ Writes:
   tools/dictbuild_zh/data/id_map.tsv          (stable card ids)
   tools/dictbuild_zh/data/system_sets.tsv     (only if it does not exist yet)
   tools/dictbuild_zh/reports/build_report.json
+  tools/dictbuild_zh/reports/remapped_links.tsv
 
 and refreshes tags.count in jFlash/sql/cFlash.db. The user template's
 version stays 1.0: the table layout did not change, and the revived app
@@ -43,7 +44,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..'))
 VERSION = '2.0'
 MAP_PATH = os.path.join(HERE, 'data', 'id_map.tsv')
+LEGACY_EN_PATH = os.path.join(HERE, 'data', 'legacy_en.tsv')
 BOOTSTRAP_STATS = os.path.join(HERE, 'reports', 'id_bootstrap.json')
+REMAP_REPORT = os.path.join(HERE, 'reports', 'remapped_links.tsv')
 LEGACY_CARD = os.path.join(REPO, 'jFlash', 'sql', 'cFlash-CARD-1.0.db')
 CARD_NAME = 'cFlash-CARD-%s.db' % VERSION
 FTS_NAME = 'cFlash-FTS-%s.db' % VERSION
@@ -92,6 +95,24 @@ def finish_db(database):
     database.close()
 
 
+def load_legacy_english(path):
+    """2011 headword_en by card id. The id map keeps the headword and the
+    reading of a retired card, not its English gloss, and the meaning match
+    needs that gloss. Missing file means every score is zero and pinyin
+    breaks the ties."""
+    out = {}
+    if not path or not os.path.exists(path):
+        return out
+    with open(path, encoding='utf-8') as handle:
+        for line in handle:
+            line = line.rstrip('\n')
+            if not line or line.startswith('#') or line.startswith('card_id\t'):
+                continue
+            card_id, english = line.split('\t', 1)
+            out[int(card_id)] = english
+    return out
+
+
 def legacy_cards(path):
     database = sqlite3.connect(path)
     rows = [
@@ -101,6 +122,27 @@ def legacy_cards(path):
     ]
     database.close()
     return rows
+
+
+def _write_remap_report(path, rows):
+    """One row per remapped study-set link, old card then the card it now
+    points at, so a person can skim the whole list."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    header = (
+        'tag_id', 'set', 'old_id', 'old_traditional', 'old_simplified', 'old_pinyin',
+        'old_en', 'new_id', 'new_traditional', 'new_simplified', 'new_pinyin',
+        'new_en', 'how',
+    )
+    lines = ['\t'.join(header)]
+    for row in sorted(rows, key=lambda item: item[0]):
+        lines.append('\t'.join(_tsv(field) for field in row))
+    text = '\n'.join(lines) + '\n'
+    with open(path, 'w', encoding='utf-8') as handle:
+        handle.write(text)
+
+
+def _tsv(value):
+    return str(value).replace('\t', ' ').replace('\n', ' ').replace('\r', ' ')
 
 
 def legacy_links(path):
@@ -177,11 +219,13 @@ def main():
         log('wrote', study_sets.SETS_PATH)
 
     card_ids = {entry.card_id for entry in cards}
+    legacy_en = load_legacy_english(LEGACY_EN_PATH)
     legacy_of = {}
     for (trad, simp, py), old_id in existing.items():
         if old_id not in card_ids and old_id not in legacy_of:
-            legacy_of[old_id] = (trad, simp, py)
-    detailed = study_sets.index_replacements(legacy_of, cards, entries)
+            legacy_of[old_id] = (trad, simp, py, legacy_en.get(old_id, ''))
+    rejected = {}
+    detailed = study_sets.index_replacements(legacy_of, cards, entries, rejected)
     replacement = {old_id: new_id for old_id, (new_id, _how) in detailed.items()}
     all_links = study_sets.load_links()
     links, link_records = study_sets.resolve_links(all_links, card_ids, replacement)
@@ -282,10 +326,36 @@ def main():
             'traditional': (head_of.get(old_id) or ('', '', ''))[0],
             'simplified': (head_of.get(old_id) or ('', '', ''))[1],
             'pinyin': (head_of.get(old_id) or ('', '', ''))[2],
-            'reason': ('already in the set (card %s)' % new_id) if new_id is not None else 'no replacement',
+            'reason': (
+                ('already in the set (card %s)' % new_id) if new_id is not None
+                else rejected.get(old_id, 'no replacement')),
         }
         for tag_id, old_id, action, new_id in link_records if action == 'dropped'
     ]
+    by_card = {entry.card_id: entry for entry in cards}
+    remap_rows = []
+    for tag_id, old_id, action, new_id in link_records:
+        if action != 'remapped':
+            continue
+        old_head = head_of.get(old_id) or ('', '', '')
+        new_card = by_card.get(new_id)
+        remap_rows.append((
+            tag_id,
+            names.get(tag_id, ''),
+            old_id,
+            old_head[0],
+            old_head[1],
+            old_head[2],
+            legacy_en.get(old_id, ''),
+            new_id,
+            new_card.trad if new_card else '',
+            new_card.simp if new_card else '',
+            new_card.pinyin if new_card else '',
+            cedict.headword_en(new_card) if new_card else '',
+            detailed.get(old_id, (None, ''))[1],
+        ))
+    _write_remap_report(REMAP_REPORT, remap_rows)
+    report['remapped_links_file'] = os.path.relpath(REMAP_REPORT, REPO)
     report['bytes_after'] = {
         'card': os.path.getsize(card_path),
         'fts': os.path.getsize(fts_path),
