@@ -3336,6 +3336,7 @@
 					"$(inherited)",
 				);
 				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chineseinaflash.cflash;
 				PRODUCT_NAME = cFlash;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3359,6 +3360,7 @@
 					"$(inherited)",
 				);
 				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chineseinaflash.cflash;
 				PRODUCT_NAME = cFlash;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -3382,6 +3384,7 @@
 					"$(inherited)",
 				);
 				MARKETING_VERSION = 1.2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chineseinaflash.cflash;
 				PRODUCT_NAME = cFlash;
 				PROVISIONING_PROFILE = "";
 				TARGETED_DEVICE_FAMILY = 1;

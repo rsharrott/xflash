@@ -15,7 +15,7 @@
 		<string>chinese-flash-icon-ipad.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>
-	<string>com.longweekendmobile.cflash</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -28,7 +28,7 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.longweekendmobile.cflash</string>
+			<string>com.chineseinaflash.cflash</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>cflash</string>
