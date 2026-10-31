@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -76,6 +77,7 @@ fun DictionaryApp(viewModel: DictionaryViewModel = viewModel()) {
             onCard = viewModel::openCard,
             onAbout = viewModel::openAbout,
             onBack = viewModel::back,
+            onRetry = viewModel::retry,
         )
     }
 }
@@ -89,6 +91,7 @@ private fun DictionaryScaffold(
     onCard: (Long) -> Unit,
     onAbout: () -> Unit,
     onBack: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val title = when (state.screen) {
         Screen.Search -> stringResource(R.string.app_name)
@@ -114,7 +117,7 @@ private fun DictionaryScaffold(
                 onAbout = onAbout,
             )
             when (state.screen) {
-                Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard)
+                Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
                 Screen.About -> AboutBody(state.versions, versionName)
                 is Screen.Detail -> DetailBody(state)
             }
@@ -172,6 +175,7 @@ private fun SearchBody(
     onQueryChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onCard: (Long) -> Unit,
+    onRetry: () -> Unit,
 ) {
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         Spacer(Modifier.height(16.dp))
@@ -184,7 +188,10 @@ private fun SearchBody(
                 .semantics { contentDescription = searchDescription },
             placeholder = { Text(stringResource(R.string.search_hint)) },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search,
+                autoCorrectEnabled = false,
+            ),
             keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
             trailingIcon = if (state.query.isNotEmpty()) {
                 {
@@ -200,7 +207,12 @@ private fun SearchBody(
         Spacer(Modifier.height(12.dp))
         when (state.phase) {
             Phase.Preparing -> PreparingMessage()
-            Phase.Failed -> ErrorText(state.error ?: DictionaryError.PrepareFailed)
+            Phase.Failed -> {
+                ErrorText(state.error ?: DictionaryError.PrepareFailed)
+                TextButton(onClick = onRetry) {
+                    Text(stringResource(R.string.retry))
+                }
+            }
             Phase.Ready -> ReadyResults(state, onCard)
         }
     }
@@ -400,6 +412,7 @@ private fun AboutBody(versions: DataVersions?, versionName: String) {
             LicenceLink(R.string.link_cc_by, R.string.url_cc_by)
             Spacer(Modifier.height(12.dp))
             Paragraph(stringResource(R.string.licence_code))
+            Paragraph(stringResource(R.string.licence_apache))
             LicenceLink(R.string.link_privacy, R.string.url_privacy)
             Spacer(Modifier.height(20.dp))
             Text(
@@ -525,16 +538,19 @@ private fun paperFieldColors() = OutlinedTextFieldDefaults.colors(
 @Composable
 private fun appVersionName(): String {
     val context = LocalContext.current
-    val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        context.packageManager.getPackageInfo(
-            context.packageName,
-            PackageManager.PackageInfoFlags.of(0),
-        )
-    } else {
-        @Suppress("DEPRECATION")
-        context.packageManager.getPackageInfo(context.packageName, 0)
+    val packageName = context.packageName
+    return remember(packageName) {
+        val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getPackageInfo(
+                packageName,
+                PackageManager.PackageInfoFlags.of(0),
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(packageName, 0)
+        }
+        info.versionName.orEmpty()
     }
-    return info.versionName.orEmpty()
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFF6F1E7)
@@ -556,6 +572,7 @@ private fun SearchPreview() {
             onCard = {},
             onAbout = {},
             onBack = {},
+            onRetry = {},
         )
     }
 }
@@ -584,6 +601,7 @@ private fun CardPreview() {
             onCard = {},
             onAbout = {},
             onBack = {},
+            onRetry = {},
         )
     }
 }

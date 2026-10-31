@@ -4,17 +4,22 @@ name: Android
 # iOS checks in unit-tests.yml, and it does not change that file.
 on:
   pull_request:
-    paths:
+    paths: &android-paths
       - 'android-app/**'
       - 'jFlash/sql/jFlash.db'
       - 'jFlash/sql/jFlash-CARD-2.0.db'
       - 'jFlash/sql/plugins/jFlash-FTS-2.0.db'
       - 'jFlash/sql/plugins/jFlash-EX-2.0.db'
       - '.github/workflows/android.yml'
+  # Same paths on master so the Gradle cache can be written. Pull-request
+  # caches are read-only. This does not change the iOS workflow.
+  push:
+    branches:
+      - master
+    paths: *android-paths
 
 permissions:
   contents: read
-  actions: write
 
 concurrency:
   group: android-${{ github.workflow }}-${{ github.ref }}

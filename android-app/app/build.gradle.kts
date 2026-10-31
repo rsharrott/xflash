@@ -5,6 +5,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import java.io.File
+import java.security.MessageDigest
 import java.util.Locale
 
 plugins {
@@ -71,13 +72,40 @@ abstract class CopyDictionaryDatabasesTask : DefaultTask() {
         if (files.isEmpty()) {
             throw GradleException("No dictionary databases were configured")
         }
+        val digest = MessageDigest.getInstance("SHA-256")
+        val sizes = sortedMapOf<String, Long>()
         files.forEach { src ->
             if (!src.isFile) {
                 throw GradleException("Missing dictionary database: ${src.absolutePath}")
             }
-            src.copyTo(dest.resolve(src.name), overwrite = true)
-            logger.lifecycle("Dictionary asset ${src.name}: ${src.length()} bytes")
+            digest.update(src.name.toByteArray(Charsets.UTF_8))
+            digest.update(0)
+            var total = 0L
+            src.inputStream().use { input ->
+                dest.resolve(src.name).outputStream().use { output ->
+                    val buffer = ByteArray(1024 * 1024)
+                    while (true) {
+                        val read = input.read(buffer)
+                        if (read < 0) break
+                        output.write(buffer, 0, read)
+                        digest.update(buffer, 0, read)
+                        total += read
+                    }
+                }
+            }
+            sizes[src.name] = total
+            logger.lifecycle("Dictionary asset ${src.name}: $total bytes")
         }
+        val stamp = digest.digest().joinToString("") { "%02x".format(it) }
+        // Same text format as parseAssetManifest / DictionaryFiles.MANIFEST.
+        val manifest = buildString {
+            append("stamp ").append(stamp).append('\n')
+            sizes.forEach { (name, size) ->
+                append("size ").append(name).append(' ').append(size).append('\n')
+            }
+        }
+        dest.resolve("dictionary-manifest.txt").writeText(manifest)
+        logger.lifecycle("Dictionary manifest stamp $stamp")
     }
 }
 
@@ -111,7 +139,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 
@@ -134,6 +167,9 @@ android {
         // every test run and is not what `test` is for.
         unitTests.isIncludeAndroidResources = false
         unitTests.all { test ->
+            test.testLogging {
+                events("passed", "skipped", "failed")
+            }
             test.jvmArgs(
                 "--add-opens=java.base/java.lang=ALL-UNNAMED",
                 "--add-opens=java.base/java.util=ALL-UNNAMED",

@@ -31,6 +31,7 @@
     <string name="error_search">The search could not be completed.</string>
     <string name="error_card">This card could not be opened.</string>
     <string name="error_card_missing">This card is not in the dictionary.</string>
+    <string name="retry">Try again</string>
 
     <string name="about_intro">Japanese in a Flash! looks up Japanese words, readings, meanings, and example sentences.</string>
     <string name="about_scope">Practice, study sets, and reminders are not in this version yet.</string>
@@ -42,6 +43,7 @@
     <string name="licence_core1000">Core 1000 is not a separate word list. It is the cards whose JMdict entry carries the nf01 or nf02 frequency tag from the Mainichi Shimbun, under the same CC BY-SA 4.0 licence.</string>
     <string name="licence_tatoeba">Example sentences are from the Tatoeba Project (originally the Tanaka Corpus) and are used under the Creative Commons Attribution 2.0 France licence (CC BY 2.0 FR).</string>
     <string name="licence_code">The app source is MIT licensed. That licence does not cover the dictionary or the example sentences.</string>
+    <string name="licence_apache">AndroidX, Kotlin, and the other libraries this app is built with are under the Apache License 2.0.</string>
 
     <string name="link_cc_by_sa">CC BY-SA 4.0</string>
     <string name="url_cc_by_sa">https://creativecommons.org/licenses/by-sa/4.0/</string>

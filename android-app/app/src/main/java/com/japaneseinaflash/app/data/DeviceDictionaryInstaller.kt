@@ -8,7 +8,13 @@ internal object DeviceDictionaryInstaller {
     /** Uncompressed dictionary plus the largest file while it is still a partial copy. */
     const val REQUIRED_FREE_BYTES = 180L * 1024 * 1024
 
-    fun install(context: Context): InstalledDictionary {
+    fun install(context: Context): InstalledDictionary = installer(context).install()
+
+    fun open(context: Context): DictionaryRepository {
+        return installer(context).opening { installed -> DictionaryRepository.open(installed) }
+    }
+
+    private fun installer(context: Context): DictionaryInstaller {
         val dir = context.getDatabasePath(DictionaryFiles.USER_DB).parentFile
             ?: throw IOException("No database directory")
         if (!dir.isDirectory && !dir.mkdirs()) {
@@ -23,6 +29,6 @@ internal object DeviceDictionaryInstaller {
                     throw IOException("Not enough free space to copy the dictionary")
                 }
             },
-        ).install()
+        )
     }
 }

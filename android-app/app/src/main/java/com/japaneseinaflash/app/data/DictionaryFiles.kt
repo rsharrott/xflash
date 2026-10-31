@@ -9,11 +9,19 @@ package com.japaneseinaflash.app.data
  * none of those tables.
  */
 object DictionaryFiles {
+    /** Schema label stored in each database's `version` table. Not the copy stamp. */
     const val PLUGIN_VERSION = "2.0"
     const val USER_DB = "jFlash.db"
     const val CARD_DB = "jFlash-CARD-2.0.db"
     const val FTS_DB = "jFlash-FTS-2.0.db"
     const val EX_DB = "jFlash-EX-2.0.db"
+
+    /**
+     * Asset written by the Gradle copy task. Its `stamp` line is a SHA-256 of the
+     * database bytes, so a dictionary rebuild is copied again even when the
+     * schema version stays 2.0. The name is duplicated in `app/build.gradle.kts`.
+     */
+    const val MANIFEST = "dictionary-manifest.txt"
     const val STAMP = "dictionary-plugins.version"
 
     const val SCHEMA_CARD = "CARD_DB"

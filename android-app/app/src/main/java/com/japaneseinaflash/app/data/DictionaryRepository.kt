@@ -121,7 +121,7 @@ internal fun attachReadOnly(db: SQLiteDatabase, schema: String, file: File) {
 
 private fun isMatchSyntaxError(error: SQLException): Boolean {
     val message = error.message.orEmpty()
-    return message.contains("MATCH", ignoreCase = true) || message.contains("fts", ignoreCase = true)
+    return message.contains("malformed MATCH", ignoreCase = true)
 }
 
 private fun android.database.Cursor.string(column: String): String =

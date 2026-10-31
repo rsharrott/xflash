@@ -14,6 +14,13 @@ class SearchQueryTest {
     }
 
     @Test
+    fun fullWidthRomajiAndQuestionMarkAreNormalized() {
+        assertEquals("neko", SearchQuery.matchExpression("\uFF4E\uFF45\uFF4B\uFF4F"))
+        assertEquals("nek*", SearchQuery.matchExpression("\uFF4E\uFF45\uFF4B\uFF1F"))
+        assertEquals("neko", SearchQuery.prepare("\uFF4E\uFF45\uFF4B\uFF4F")!!.matchArgument)
+    }
+
+    @Test
     fun japanesePassesThroughUnchanged() {
         assertEquals("ねこ", SearchQuery.matchExpression("ねこ"))
         assertEquals("猫", SearchQuery.matchExpression("  猫  "))

@@ -50,6 +50,15 @@ class DictionarySourcesTest {
     }
 
     @Test
+    fun gradleCopyTaskWritesTheManifestTheInstallerReads() {
+        val root = findUp("dictionary-sources.properties").parentFile
+        val gradle = File(root, "app/build.gradle.kts").readText()
+        assertTrue(gradle.contains("\"${DictionaryFiles.MANIFEST}\""))
+        assertTrue(gradle.contains("append(\"stamp \")"))
+        assertTrue(gradle.contains("append(\"size \")"))
+    }
+
+    @Test
     fun databasesAreNotCopiedIntoTheAppTree() {
         val root = findUp("dictionary-sources.properties").parentFile
         val vendored = ArrayList<File>()
