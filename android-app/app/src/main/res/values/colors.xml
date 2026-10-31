@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="paper">#FFF6F1E7</color>
+    <color name="paper_raised">#FFFFFBF4</color>
+    <color name="ink">#FF1E1A16</color>
+    <color name="ink_muted">#FF5C5348</color>
+    <color name="seal">#FF6B2D3C</color>
+    <color name="seal_soft">#FFF3E1D4</color>
+    <color name="moss">#FF3D4F3A</color>
+    <color name="rule">#FFC9BBA8</color>
+    <color name="ic_launcher_background">#FFF6F1E7</color>
+</resources>

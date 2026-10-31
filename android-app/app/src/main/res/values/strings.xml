@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Japanese in a Flash!</string>
+
+    <string name="search_hint">Search Japanese, reading, romaji, or English</string>
+    <string name="search_prompt">Try a word, a reading, or an English meaning. ? is a wildcard.</string>
+    <string name="clear_search">Clear</string>
+    <string name="no_results">No matches</string>
+    <plurals name="search_truncated">
+        <item quantity="one">Showing the first %d match.</item>
+        <item quantity="other">Showing the first %d matches.</item>
+    </plurals>
+    <string name="cd_search_field">Search the dictionary</string>
+    <string name="cd_loading">Loading</string>
+    <string name="cd_result">%1$s, %2$s</string>
+
+    <string name="preparing_dictionary">Preparing the dictionary…</string>
+    <string name="preparing_dictionary_detail">The dictionary is copied onto this device the first time you open the app. This can take a minute.</string>
+
+    <string name="about">About</string>
+    <string name="about_title">About and licences</string>
+    <string name="back">Back</string>
+    <string name="card_loading_title">Card</string>
+
+    <string name="reading_and_romaji">%1$s · %2$s</string>
+    <string name="meaning_heading">Meaning</string>
+    <string name="examples_heading">Examples</string>
+    <string name="no_examples">No example sentences for this card.</string>
+
+    <string name="error_prepare">The dictionary could not be prepared. Free some space and open the app again.</string>
+    <string name="error_search">The search could not be completed.</string>
+    <string name="error_card">This card could not be opened.</string>
+    <string name="error_card_missing">This card is not in the dictionary.</string>
+
+    <string name="about_intro">Japanese in a Flash! looks up Japanese words, readings, meanings, and example sentences.</string>
+    <string name="about_scope">Practice, study sets, and reminders are not in this version yet.</string>
+    <string name="about_versions">Cards %1$s, search %2$s, examples %3$s.</string>
+    <string name="about_app_version">Version %1$s</string>
+
+    <string name="licence_heading">Dictionary data</string>
+    <string name="licence_jmdict">Dictionary entries come from JMdict (EDICT), the property of the Electronic Dictionary Research and Development Group (EDRDG). They are used, converted, and modified under the Creative Commons Attribution-ShareAlike 4.0 licence (CC BY-SA 4.0). The modified dictionary data is shared under the same licence.</string>
+    <string name="licence_core1000">Core 1000 is not a separate word list. It is the cards whose JMdict entry carries the nf01 or nf02 frequency tag from the Mainichi Shimbun, under the same CC BY-SA 4.0 licence.</string>
+    <string name="licence_tatoeba">Example sentences are from the Tatoeba Project (originally the Tanaka Corpus) and are used under the Creative Commons Attribution 2.0 France licence (CC BY 2.0 FR).</string>
+    <string name="licence_code">The app source is MIT licensed. That licence does not cover the dictionary or the example sentences.</string>
+
+    <string name="link_cc_by_sa">CC BY-SA 4.0</string>
+    <string name="url_cc_by_sa">https://creativecommons.org/licenses/by-sa/4.0/</string>
+    <string name="link_edrdg">EDRDG licence</string>
+    <string name="url_edrdg">https://www.edrdg.org/edrdg/licence.html</string>
+    <string name="link_jmdict">JMdict</string>
+    <string name="url_jmdict">https://www.edrdg.org/jmdict/j_jmdict.html</string>
+    <string name="link_source">Modified dictionary data</string>
+    <string name="url_source">https://github.com/rsharrott/xflash</string>
+    <string name="link_tatoeba">Tatoeba</string>
+    <string name="url_tatoeba">https://tatoeba.org</string>
+    <string name="link_cc_by">CC BY 2.0 FR</string>
+    <string name="url_cc_by">https://creativecommons.org/licenses/by/2.0/fr/</string>
+    <string name="link_privacy">Privacy policy</string>
+    <string name="url_privacy">https://japaneseinaflash.com/privacy</string>
+</resources>

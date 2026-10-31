@@ -3,6 +3,12 @@ xflash
 
 This is the source codebase for Japanese Flash and Chinese Flash (jFlash/cFlash), two language learning applications created by Long Weekend LLC (LWE) and its respective members. As LWE is no longer trading, the original authors have decided to open-source the codebase. The application supported iOS and Android.
 
+## Android
+
+`android/` is the original 2012 Eclipse/Ant app. It targets API 8 and is kept only as a reference for the old SQL and practice logic. It does not build with current Android tools.
+
+`android-app/` is the new Jetpack Compose app (search, with the 2.0 dictionary databases). See `android-app/README.md`.
+
 Licence
 =======
 The source code is MIT licensed (see `LICENSE`). The bundled dictionary and
