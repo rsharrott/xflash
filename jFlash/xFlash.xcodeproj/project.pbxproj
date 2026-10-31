@@ -51,9 +51,9 @@
 		4904663314727835004C44E2 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		4904663414727835004C44E2 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		4904663514727835004C44E2 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765070DF74369002DB57D /* CoreGraphics.framework */; };
-		4904663B14727835004C44E2 /* cFlash-CARD-1.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 49BD2AF1138E664100FAC045 /* cFlash-CARD-1.0.db */; };
+		4904663B14727835004C44E2 /* cFlash-CARD-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 49BD2AF1138E664100FAC045 /* cFlash-CARD-2.0.db */; };
 		4904663C14727835004C44E2 /* cFlash.db in Resources */ = {isa = PBXBuildFile; fileRef = 49BD2AF2138E664100FAC045 /* cFlash.db */; };
-		4904663F14727835004C44E2 /* cFlash-FTS-1.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4904661C147276E3004C44E2 /* cFlash-FTS-1.0.db */; };
+		4904663F14727835004C44E2 /* cFlash-FTS-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4904661C147276E3004C44E2 /* cFlash-FTS-2.0.db */; };
 		4908209911B794A500150499 /* PluginSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4908209811B794A500150499 /* PluginSettingsViewController.m */; };
 		490820A511B7959500150499 /* PluginSettingsView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 490820A411B7959500150499 /* PluginSettingsView.xib */; };
 		490B23411277BCE100CF3484 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 490B233C1277BCE100CF3484 /* FMDatabase.m */; };
@@ -353,7 +353,7 @@
 		496C670114728BC9009F04D4 /* ThemeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4999672911B3E45F00898A0C /* ThemeManager.m */; };
 		496C670214728BDC009F04D4 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24AEAE9E13D5E1EB008ADA45 /* Security.framework */; };
 		496C670314728BE2009F04D4 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 24AEAE9E13D5E1EB008ADA45 /* Security.framework */; };
-		496C6704147294D9009F04D4 /* cFlash-FTS-1.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4904661C147276E3004C44E2 /* cFlash-FTS-1.0.db */; };
+		496C6704147294D9009F04D4 /* cFlash-FTS-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 4904661C147276E3004C44E2 /* cFlash-FTS-2.0.db */; };
 		496C7AB01263270B004B6B90 /* plugin-resources in Resources */ = {isa = PBXBuildFile; fileRef = D322367A11D370B900B1AF15 /* plugin-resources */; };
 		496C7AB81263270B004B6B90 /* practice-btn-actions.png in Resources */ = {isa = PBXBuildFile; fileRef = 91D3CDE911D0C03F008565F8 /* practice-btn-actions.png */; };
 		496C7AB91263270B004B6B90 /* dropped-text-box.png in Resources */ = {isa = PBXBuildFile; fileRef = 917728E011C0CA9600A90071 /* dropped-text-box.png */; };
@@ -538,7 +538,7 @@
 		49BBA49C144D4BCE00E6A9AE /* help in Resources */ = {isa = PBXBuildFile; fileRef = 49BBA49B144D4BCE00E6A9AE /* help */; };
 		49BBA4C3144D5CA000E6A9AE /* LWEChineseSearchBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 49BBA4C2144D5CA000E6A9AE /* LWEChineseSearchBar.m */; };
 		49BBA4C5144D5D3D00E6A9AE /* LWEChineseSearchBarInput.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49BBA4C4144D5D3D00E6A9AE /* LWEChineseSearchBarInput.xib */; };
-		49BD2AF3138E664100FAC045 /* cFlash-CARD-1.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 49BD2AF1138E664100FAC045 /* cFlash-CARD-1.0.db */; };
+		49BD2AF3138E664100FAC045 /* cFlash-CARD-2.0.db in Resources */ = {isa = PBXBuildFile; fileRef = 49BD2AF1138E664100FAC045 /* cFlash-CARD-2.0.db */; };
 		49BD2AF4138E664100FAC045 /* cFlash.db in Resources */ = {isa = PBXBuildFile; fileRef = 49BD2AF2138E664100FAC045 /* cFlash.db */; };
 		49C0C97C1629151900F8966C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 49C0C97B1629151900F8966C /* Default-568h@2x.png */; };
 		49C0C97E16291B8400F8966C /* HelpWebViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 49C0C97D16291B8400F8966C /* HelpWebViewController.xib */; };
@@ -750,7 +750,7 @@
 		288765070DF74369002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		28A0AB4B0D9B1048005BE974 /* jFlash_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jFlash_Prefix.pch; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		4904661C147276E3004C44E2 /* cFlash-FTS-1.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "cFlash-FTS-1.0.db"; path = "sql/plugins/cFlash-FTS-1.0.db"; sourceTree = "<group>"; };
+		4904661C147276E3004C44E2 /* cFlash-FTS-2.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "cFlash-FTS-2.0.db"; path = "sql/plugins/cFlash-FTS-2.0.db"; sourceTree = "<group>"; };
 		4904664514727835004C44E2 /* cFlashTest.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = cFlashTest.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4908209711B794A500150499 /* PluginSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PluginSettingsViewController.h; path = AppSpecific/PluginSettingsViewController.h; sourceTree = "<group>"; };
 		4908209811B794A500150499 /* PluginSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = PluginSettingsViewController.m; path = AppSpecific/PluginSettingsViewController.m; sourceTree = "<group>"; };
@@ -964,7 +964,7 @@
 		49BBA4C1144D5CA000E6A9AE /* LWEChineseSearchBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LWEChineseSearchBar.h; path = AppSpecific/LWEChineseSearchBar.h; sourceTree = "<group>"; };
 		49BBA4C2144D5CA000E6A9AE /* LWEChineseSearchBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LWEChineseSearchBar.m; path = AppSpecific/LWEChineseSearchBar.m; sourceTree = "<group>"; };
 		49BBA4C4144D5D3D00E6A9AE /* LWEChineseSearchBarInput.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LWEChineseSearchBarInput.xib; path = AppSpecific/LWEChineseSearchBarInput.xib; sourceTree = "<group>"; };
-		49BD2AF1138E664100FAC045 /* cFlash-CARD-1.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "cFlash-CARD-1.0.db"; path = "sql/cFlash-CARD-1.0.db"; sourceTree = "<group>"; };
+		49BD2AF1138E664100FAC045 /* cFlash-CARD-2.0.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = "cFlash-CARD-2.0.db"; path = "sql/cFlash-CARD-2.0.db"; sourceTree = "<group>"; };
 		49BD2AF2138E664100FAC045 /* cFlash.db */ = {isa = PBXFileReference; lastKnownFileType = file; name = cFlash.db; path = sql/cFlash.db; sourceTree = "<group>"; };
 		49C0C97B1629151900F8966C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "Assets/Default-568h@2x.png"; sourceTree = "<group>"; };
 		49C0C97D16291B8400F8966C /* HelpWebViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = HelpWebViewController.xib; path = XIBs/HelpWebViewController.xib; sourceTree = "<group>"; };
@@ -1651,8 +1651,8 @@
 				498EBDB71489031A00BA6DE7 /* cFlash-available.plist */,
 				498EBDBF14890AAD00BA6DE7 /* cFlash-installed.plist */,
 				496C7A6E126325FD004B6B90 /* cFlash-Info.plist */,
-				49BD2AF1138E664100FAC045 /* cFlash-CARD-1.0.db */,
-				4904661C147276E3004C44E2 /* cFlash-FTS-1.0.db */,
+				49BD2AF1138E664100FAC045 /* cFlash-CARD-2.0.db */,
+				4904661C147276E3004C44E2 /* cFlash-FTS-2.0.db */,
 				49BD2AF2138E664100FAC045 /* cFlash.db */,
 			);
 			name = CFlash;
@@ -2413,9 +2413,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4904663B14727835004C44E2 /* cFlash-CARD-1.0.db in Resources */,
+				4904663B14727835004C44E2 /* cFlash-CARD-2.0.db in Resources */,
 				4904663C14727835004C44E2 /* cFlash.db in Resources */,
-				4904663F14727835004C44E2 /* cFlash-FTS-1.0.db in Resources */,
+				4904663F14727835004C44E2 /* cFlash-FTS-2.0.db in Resources */,
 				49377B221485259D00BD80C5 /* GroupDescriptionView.xib in Resources */,
 				497125271487300A00D4D150 /* MoodIcon.xib in Resources */,
 				498EBDBB1489031A00BA6DE7 /* cFlash-available.plist in Resources */,
@@ -2480,11 +2480,11 @@
 				4993AF931278024800872875 /* twitter-bird@2x.png in Resources */,
 				9179E4271384FFB000A7739B /* form-background.jpg in Resources */,
 				9179E44E1385021E00A7739B /* table-background.jpg in Resources */,
-				49BD2AF3138E664100FAC045 /* cFlash-CARD-1.0.db in Resources */,
+				49BD2AF3138E664100FAC045 /* cFlash-CARD-2.0.db in Resources */,
 				49BD2AF4138E664100FAC045 /* cFlash.db in Resources */,
 				49BBA49C144D4BCE00E6A9AE /* help in Resources */,
 				49BBA4C5144D5D3D00E6A9AE /* LWEChineseSearchBarInput.xib in Resources */,
-				496C6704147294D9009F04D4 /* cFlash-FTS-1.0.db in Resources */,
+				496C6704147294D9009F04D4 /* cFlash-FTS-2.0.db in Resources */,
 				493A478F146A829900F1E718 /* ActionBarViewController-Browse.xib in Resources */,
 				493A4793146A89BB00F1E718 /* SettingsView.xib in Resources */,
 				497607E3147A6570000A9FC5 /* chinese-flash-icon-ipad.png in Resources */,

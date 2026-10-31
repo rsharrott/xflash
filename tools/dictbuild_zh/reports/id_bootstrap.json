@@ -1,0 +1,12 @@
+{
+  "exact": 80385,
+  "pinyin_changed": 6292,
+  "traditional_changed": 708,
+  "simplified_changed": 467,
+  "from_map": 0,
+  "new": 30497,
+  "legacy": 98252,
+  "legacy_reused": 87852,
+  "legacy_dropped": 10400,
+  "ambiguous_same_chars": 54
+}

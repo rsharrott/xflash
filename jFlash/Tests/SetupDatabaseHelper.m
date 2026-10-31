@@ -19,8 +19,8 @@
   NSString * const CURRENT_FTS_TEST_DATABASE   = @"jFlash-FTS-2.0.db";
 #elif defined (LWE_CFLASH)
   NSString * const CURRENT_USER_TEST_DATABASE  = @"cFlash.db";
-  NSString * const CURRENT_CARD_TEST_DATABASE  = @"cFlash-CARD-1.0.db";
-  NSString * const CURRENT_FTS_TEST_DATABASE   = @"cFlash-FTS-1.0.db";
+  NSString * const CURRENT_CARD_TEST_DATABASE  = @"cFlash-CARD-2.0.db";
+  NSString * const CURRENT_FTS_TEST_DATABASE   = @"cFlash-FTS-2.0.db";
 #endif
 
 NSString * const kJFlashDatabaseErrorDomain         = @"kJFlashDatabaseErrorDomain";

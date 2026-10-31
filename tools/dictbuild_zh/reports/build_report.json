@@ -1,0 +1,2225 @@
+{
+  "version": "2.0",
+  "bytes_before": {
+    "user": 557056
+  },
+  "cedict_date": "2026-10-30T01:44:55Z",
+  "cedict_entries_header": 125325,
+  "cedict_lines": 125325,
+  "cards": 118349,
+  "not_a_card": 6976,
+  "erhua_cards": 258,
+  "ids": {
+    "exact": 118349,
+    "pinyin_changed": 0,
+    "traditional_changed": 0,
+    "simplified_changed": 0,
+    "new": 0,
+    "legacy": 128749,
+    "legacy_reused": 118349,
+    "legacy_dropped": 10400,
+    "ambiguous_same_chars": 0
+  },
+  "id_bootstrap": {
+    "exact": 80385,
+    "pinyin_changed": 6292,
+    "traditional_changed": 708,
+    "simplified_changed": 467,
+    "from_map": 0,
+    "new": 30497,
+    "legacy": 98252,
+    "legacy_reused": 87852,
+    "legacy_dropped": 10400,
+    "ambiguous_same_chars": 54
+  },
+  "set_links_before": 39004,
+  "set_links_after": 38916,
+  "set_links_remapped": 162,
+  "set_links_dropped": 88,
+  "ptag": 9454,
+  "user_tag_counts_updated": 0,
+  "user_card_tag_link_dropped": 0,
+  "user_card_tag_link_remapped": 0,
+  "sets": [
+    {
+      "tag_id": 1,
+      "name": "Lesson 01",
+      "before": 37,
+      "after": 37,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 2,
+      "name": "Lesson 02",
+      "before": 36,
+      "after": 36,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 3,
+      "name": "Lesson 03",
+      "before": 38,
+      "after": 38,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 4,
+      "name": "Lesson 04",
+      "before": 32,
+      "after": 32,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 5,
+      "name": "Lesson 05",
+      "before": 41,
+      "after": 41,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 6,
+      "name": "Lesson 06",
+      "before": 50,
+      "after": 50,
+      "remapped": 3,
+      "dropped": 0
+    },
+    {
+      "tag_id": 7,
+      "name": "Lesson 07",
+      "before": 65,
+      "after": 65,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 8,
+      "name": "Lesson 08",
+      "before": 59,
+      "after": 59,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 9,
+      "name": "Lesson 09",
+      "before": 48,
+      "after": 48,
+      "remapped": 2,
+      "dropped": 0
+    },
+    {
+      "tag_id": 10,
+      "name": "Lesson 10",
+      "before": 44,
+      "after": 44,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 11,
+      "name": "Colloquial Chinese 01",
+      "before": 27,
+      "after": 27,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 12,
+      "name": "Colloquial Chinese 02",
+      "before": 29,
+      "after": 29,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 13,
+      "name": "Colloquial Chinese 03",
+      "before": 36,
+      "after": 36,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 14,
+      "name": "Colloquial Chinese 04",
+      "before": 53,
+      "after": 53,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 15,
+      "name": "Colloquial Chinese 05",
+      "before": 39,
+      "after": 39,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 16,
+      "name": "Colloquial Chinese 06",
+      "before": 45,
+      "after": 45,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 17,
+      "name": "Colloquial Chinese 07",
+      "before": 35,
+      "after": 35,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 18,
+      "name": "Colloquial Chinese 08",
+      "before": 61,
+      "after": 59,
+      "remapped": 1,
+      "dropped": 2
+    },
+    {
+      "tag_id": 19,
+      "name": "Colloquial Chinese 09",
+      "before": 53,
+      "after": 53,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 20,
+      "name": "Colloquial Chinese 10",
+      "before": 55,
+      "after": 55,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 21,
+      "name": "Introduction to Date Time",
+      "before": 19,
+      "after": 19,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 22,
+      "name": "Introduction to Numbers",
+      "before": 9,
+      "after": 9,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 23,
+      "name": "Introduction to Radicals",
+      "before": 39,
+      "after": 39,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 24,
+      "name": "Integrated Chinese 01",
+      "before": 42,
+      "after": 42,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 25,
+      "name": "Integrated Chinese 02",
+      "before": 38,
+      "after": 38,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 26,
+      "name": "Integrated Chinese 03",
+      "before": 72,
+      "after": 72,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 27,
+      "name": "Integrated Chinese 04",
+      "before": 54,
+      "after": 54,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 28,
+      "name": "Integrated Chinese 05",
+      "before": 47,
+      "after": 47,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 29,
+      "name": "Integrated Chinese 06",
+      "before": 69,
+      "after": 69,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 30,
+      "name": "Integrated Chinese 07",
+      "before": 48,
+      "after": 48,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 31,
+      "name": "Integrated Chinese 08",
+      "before": 43,
+      "after": 42,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 32,
+      "name": "Integrated Chinese 09",
+      "before": 57,
+      "after": 57,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 33,
+      "name": "Integrated Chinese 10",
+      "before": 45,
+      "after": 45,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 34,
+      "name": "Integrated Chinese 11",
+      "before": 50,
+      "after": 50,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 35,
+      "name": "Integrated Chinese 12",
+      "before": 62,
+      "after": 62,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 36,
+      "name": "Integrated Chinese 13",
+      "before": 48,
+      "after": 47,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 37,
+      "name": "Integrated Chinese 14",
+      "before": 77,
+      "after": 76,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 38,
+      "name": "Integrated Chinese 15",
+      "before": 46,
+      "after": 46,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 39,
+      "name": "Integrated Chinese 16",
+      "before": 55,
+      "after": 55,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 40,
+      "name": "Integrated Chinese 17",
+      "before": 35,
+      "after": 35,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 41,
+      "name": "Integrated Chinese 18",
+      "before": 50,
+      "after": 50,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 42,
+      "name": "Integrated Chinese 19",
+      "before": 45,
+      "after": 45,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 43,
+      "name": "NPCR1 Lesson 01",
+      "before": 23,
+      "after": 23,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 44,
+      "name": "NPCR1 Lesson 02",
+      "before": 23,
+      "after": 23,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 45,
+      "name": "NPCR1 Lesson 03",
+      "before": 23,
+      "after": 23,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 46,
+      "name": "NPCR1 Lesson 04",
+      "before": 37,
+      "after": 37,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 47,
+      "name": "NPCR1 Lesson 05",
+      "before": 31,
+      "after": 31,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 48,
+      "name": "NPCR1 Lesson 06",
+      "before": 31,
+      "after": 31,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 49,
+      "name": "NPCR1 Lesson 07",
+      "before": 44,
+      "after": 43,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 50,
+      "name": "NPCR1 Lesson 08",
+      "before": 54,
+      "after": 54,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 51,
+      "name": "NPCR1 Lesson 09",
+      "before": 69,
+      "after": 69,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 52,
+      "name": "NPCR1 Lesson 10",
+      "before": 58,
+      "after": 57,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 53,
+      "name": "NPCR1 Lesson 11",
+      "before": 58,
+      "after": 58,
+      "remapped": 2,
+      "dropped": 0
+    },
+    {
+      "tag_id": 54,
+      "name": "NPCR1 Lesson 12",
+      "before": 59,
+      "after": 59,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 55,
+      "name": "NPCR1 Lesson 13",
+      "before": 56,
+      "after": 56,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 56,
+      "name": "NPCR1 Lesson 14",
+      "before": 52,
+      "after": 52,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 57,
+      "name": "PCR1 Lesson 01-05",
+      "before": 31,
+      "after": 31,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 58,
+      "name": "PCR1 Lesson 06",
+      "before": 12,
+      "after": 12,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 59,
+      "name": "PCR1 Lesson 07",
+      "before": 13,
+      "after": 13,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 60,
+      "name": "PCR1 Lesson 08",
+      "before": 14,
+      "after": 14,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 61,
+      "name": "PCR1 Lesson 09",
+      "before": 15,
+      "after": 15,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 62,
+      "name": "PCR1 Lesson 10",
+      "before": 17,
+      "after": 17,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 63,
+      "name": "PCR1 Lesson 11",
+      "before": 15,
+      "after": 15,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 64,
+      "name": "PCR1 Lesson 12",
+      "before": 7,
+      "after": 7,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 65,
+      "name": "PCR1 Lesson 13",
+      "before": 22,
+      "after": 22,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 66,
+      "name": "PCR1 Lesson 14",
+      "before": 19,
+      "after": 19,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 67,
+      "name": "PCR1 Lesson 15",
+      "before": 24,
+      "after": 24,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 68,
+      "name": "PCR1 Lesson 16",
+      "before": 24,
+      "after": 24,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 69,
+      "name": "PCR1 Lesson 17",
+      "before": 26,
+      "after": 26,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 70,
+      "name": "PCR1 Lesson 18",
+      "before": 15,
+      "after": 15,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 71,
+      "name": "PCR1 Lesson 19",
+      "before": 28,
+      "after": 27,
+      "remapped": 1,
+      "dropped": 1
+    },
+    {
+      "tag_id": 72,
+      "name": "PCR1 Lesson 20",
+      "before": 28,
+      "after": 28,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 73,
+      "name": "PCR1 Lesson 21",
+      "before": 28,
+      "after": 28,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 74,
+      "name": "PCR1 Lesson 22",
+      "before": 33,
+      "after": 33,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 75,
+      "name": "PCR1 Lesson 23",
+      "before": 29,
+      "after": 29,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 76,
+      "name": "PCR1 Lesson 24",
+      "before": 15,
+      "after": 14,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 77,
+      "name": "PCR1 Lesson 25",
+      "before": 27,
+      "after": 27,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 78,
+      "name": "PCR1 Lesson 26",
+      "before": 31,
+      "after": 31,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 79,
+      "name": "PCR1 Lesson 27",
+      "before": 29,
+      "after": 29,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 80,
+      "name": "PCR1 Lesson 28",
+      "before": 32,
+      "after": 32,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 81,
+      "name": "PCR1 Lesson 29",
+      "before": 29,
+      "after": 29,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 82,
+      "name": "PCR1 Lesson 30",
+      "before": 12,
+      "after": 12,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 83,
+      "name": "Asking For Directions",
+      "before": 42,
+      "after": 40,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 84,
+      "name": "At the Dry Cleaners",
+      "before": 15,
+      "after": 15,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 85,
+      "name": "At Home",
+      "before": 148,
+      "after": 148,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 86,
+      "name": "At the Airport",
+      "before": 62,
+      "after": 62,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 87,
+      "name": "At the Bank",
+      "before": 27,
+      "after": 27,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 88,
+      "name": "At the Clothing Store",
+      "before": 76,
+      "after": 76,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 89,
+      "name": "At the Hospital",
+      "before": 135,
+      "after": 135,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 90,
+      "name": "At the Hotel",
+      "before": 76,
+      "after": 76,
+      "remapped": 2,
+      "dropped": 0
+    },
+    {
+      "tag_id": 91,
+      "name": "At the Post Office",
+      "before": 28,
+      "after": 28,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 92,
+      "name": "At the Restaurant",
+      "before": 147,
+      "after": 146,
+      "remapped": 3,
+      "dropped": 1
+    },
+    {
+      "tag_id": 93,
+      "name": "At the Theater/Movies",
+      "before": 57,
+      "after": 55,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 94,
+      "name": "At the Train Station",
+      "before": 38,
+      "after": 38,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 95,
+      "name": "Business",
+      "before": 43,
+      "after": 43,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 96,
+      "name": "Computer And Internet",
+      "before": 111,
+      "after": 111,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 97,
+      "name": "Education",
+      "before": 58,
+      "after": 58,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 98,
+      "name": "Making A Phone Call",
+      "before": 31,
+      "after": 31,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 99,
+      "name": "On the Airplane",
+      "before": 48,
+      "after": 48,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 100,
+      "name": "Passport Control and Customs",
+      "before": 25,
+      "after": 24,
+      "remapped": 1,
+      "dropped": 1
+    },
+    {
+      "tag_id": 101,
+      "name": "Public Transportation",
+      "before": 34,
+      "after": 34,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 102,
+      "name": "Shopping For Food",
+      "before": 36,
+      "after": 36,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 103,
+      "name": "Sports",
+      "before": 79,
+      "after": 79,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 104,
+      "name": "Weather",
+      "before": 27,
+      "after": 27,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 105,
+      "name": "Characters 01",
+      "before": 99,
+      "after": 99,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 106,
+      "name": "Characters 02",
+      "before": 99,
+      "after": 99,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 107,
+      "name": "Characters 03",
+      "before": 98,
+      "after": 98,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 108,
+      "name": "Characters 04",
+      "before": 99,
+      "after": 99,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 109,
+      "name": "Characters 05",
+      "before": 99,
+      "after": 99,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 110,
+      "name": "Characters 06",
+      "before": 97,
+      "after": 97,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 111,
+      "name": "Characters 07",
+      "before": 96,
+      "after": 96,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 112,
+      "name": "Fiction Bigrams 01",
+      "before": 96,
+      "after": 95,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 113,
+      "name": "Fiction Bigrams 10",
+      "before": 82,
+      "after": 80,
+      "remapped": 1,
+      "dropped": 2
+    },
+    {
+      "tag_id": 114,
+      "name": "Fiction Bigrams 11",
+      "before": 88,
+      "after": 87,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 115,
+      "name": "Fiction Bigrams 12",
+      "before": 81,
+      "after": 81,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 116,
+      "name": "Fiction Bigrams 13",
+      "before": 83,
+      "after": 83,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 117,
+      "name": "Fiction Bigrams 14",
+      "before": 75,
+      "after": 73,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 118,
+      "name": "Fiction Bigrams 15",
+      "before": 76,
+      "after": 74,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 119,
+      "name": "Fiction Bigrams 16",
+      "before": 79,
+      "after": 79,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 120,
+      "name": "Fiction Bigrams 17",
+      "before": 77,
+      "after": 76,
+      "remapped": 1,
+      "dropped": 1
+    },
+    {
+      "tag_id": 121,
+      "name": "Fiction Bigrams 18",
+      "before": 76,
+      "after": 74,
+      "remapped": 1,
+      "dropped": 2
+    },
+    {
+      "tag_id": 122,
+      "name": "Fiction Bigrams 19",
+      "before": 74,
+      "after": 74,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 123,
+      "name": "Fiction Bigrams 02",
+      "before": 94,
+      "after": 91,
+      "remapped": 0,
+      "dropped": 3
+    },
+    {
+      "tag_id": 124,
+      "name": "Fiction Bigrams 20",
+      "before": 15,
+      "after": 15,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 125,
+      "name": "Fiction Bigrams 03",
+      "before": 93,
+      "after": 91,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 126,
+      "name": "Fiction Bigrams 04",
+      "before": 86,
+      "after": 85,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 127,
+      "name": "Fiction Bigrams 05",
+      "before": 83,
+      "after": 81,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 128,
+      "name": "Fiction Bigrams 06",
+      "before": 83,
+      "after": 81,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 129,
+      "name": "Fiction Bigrams 07",
+      "before": 85,
+      "after": 85,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 130,
+      "name": "Fiction Bigrams 08",
+      "before": 89,
+      "after": 89,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 131,
+      "name": "Fiction Bigrams 09",
+      "before": 78,
+      "after": 78,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 132,
+      "name": "News Bigrams 01",
+      "before": 97,
+      "after": 96,
+      "remapped": 0,
+      "dropped": 1
+    },
+    {
+      "tag_id": 133,
+      "name": "News Bigrams 10",
+      "before": 94,
+      "after": 92,
+      "remapped": 4,
+      "dropped": 2
+    },
+    {
+      "tag_id": 134,
+      "name": "News Bigrams 11",
+      "before": 89,
+      "after": 87,
+      "remapped": 3,
+      "dropped": 2
+    },
+    {
+      "tag_id": 135,
+      "name": "News Bigrams 12",
+      "before": 89,
+      "after": 89,
+      "remapped": 2,
+      "dropped": 0
+    },
+    {
+      "tag_id": 136,
+      "name": "News Bigrams 13",
+      "before": 93,
+      "after": 93,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 137,
+      "name": "News Bigrams 14",
+      "before": 91,
+      "after": 89,
+      "remapped": 5,
+      "dropped": 2
+    },
+    {
+      "tag_id": 138,
+      "name": "News Bigrams 15",
+      "before": 92,
+      "after": 92,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 139,
+      "name": "News Bigrams 16",
+      "before": 83,
+      "after": 83,
+      "remapped": 4,
+      "dropped": 0
+    },
+    {
+      "tag_id": 140,
+      "name": "News Bigrams 17",
+      "before": 89,
+      "after": 87,
+      "remapped": 3,
+      "dropped": 2
+    },
+    {
+      "tag_id": 141,
+      "name": "News Bigrams 18",
+      "before": 88,
+      "after": 86,
+      "remapped": 2,
+      "dropped": 2
+    },
+    {
+      "tag_id": 142,
+      "name": "News Bigrams 19",
+      "before": 89,
+      "after": 87,
+      "remapped": 5,
+      "dropped": 2
+    },
+    {
+      "tag_id": 143,
+      "name": "News Bigrams 02",
+      "before": 98,
+      "after": 98,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "before": 84,
+      "after": 78,
+      "remapped": 3,
+      "dropped": 6
+    },
+    {
+      "tag_id": 145,
+      "name": "News Bigrams 03",
+      "before": 96,
+      "after": 95,
+      "remapped": 1,
+      "dropped": 1
+    },
+    {
+      "tag_id": 146,
+      "name": "News Bigrams 04",
+      "before": 93,
+      "after": 89,
+      "remapped": 0,
+      "dropped": 4
+    },
+    {
+      "tag_id": 147,
+      "name": "News Bigrams 05",
+      "before": 95,
+      "after": 92,
+      "remapped": 1,
+      "dropped": 3
+    },
+    {
+      "tag_id": 148,
+      "name": "News Bigrams 06",
+      "before": 92,
+      "after": 89,
+      "remapped": 0,
+      "dropped": 3
+    },
+    {
+      "tag_id": 149,
+      "name": "News Bigrams 07",
+      "before": 96,
+      "after": 94,
+      "remapped": 2,
+      "dropped": 2
+    },
+    {
+      "tag_id": 150,
+      "name": "News Bigrams 08",
+      "before": 91,
+      "after": 90,
+      "remapped": 1,
+      "dropped": 1
+    },
+    {
+      "tag_id": 151,
+      "name": "News Bigrams 09",
+      "before": 93,
+      "after": 91,
+      "remapped": 0,
+      "dropped": 2
+    },
+    {
+      "tag_id": 152,
+      "name": "HSK Level 1",
+      "before": 153,
+      "after": 153,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 153,
+      "name": "HSK Level 2",
+      "before": 301,
+      "after": 301,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 154,
+      "name": "HSK Level 3",
+      "before": 600,
+      "after": 600,
+      "remapped": 2,
+      "dropped": 0
+    },
+    {
+      "tag_id": 155,
+      "name": "HSK Level 4",
+      "before": 1193,
+      "after": 1193,
+      "remapped": 3,
+      "dropped": 0
+    },
+    {
+      "tag_id": 156,
+      "name": "HSK Level 5",
+      "before": 2492,
+      "after": 2492,
+      "remapped": 7,
+      "dropped": 0
+    },
+    {
+      "tag_id": 157,
+      "name": "HSK Level 6",
+      "before": 4966,
+      "after": 4966,
+      "remapped": 15,
+      "dropped": 0
+    },
+    {
+      "tag_id": 158,
+      "name": "Long Weekend Favorites",
+      "before": 12,
+      "after": 12,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 159,
+      "name": "Common Adverbs",
+      "before": 376,
+      "after": 376,
+      "remapped": 3,
+      "dropped": 0
+    },
+    {
+      "tag_id": 160,
+      "name": "Conjunctions",
+      "before": 100,
+      "after": 100,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 161,
+      "name": "Determiners",
+      "before": 86,
+      "after": 86,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 162,
+      "name": "Measure Words / Counters",
+      "before": 148,
+      "after": 148,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 163,
+      "name": "Common Nouns",
+      "before": 2407,
+      "after": 2406,
+      "remapped": 7,
+      "dropped": 1
+    },
+    {
+      "tag_id": 164,
+      "name": "Particles",
+      "before": 35,
+      "after": 35,
+      "remapped": 1,
+      "dropped": 0
+    },
+    {
+      "tag_id": 165,
+      "name": "Postpositions",
+      "before": 33,
+      "after": 33,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 166,
+      "name": "Prepositions",
+      "before": 63,
+      "after": 63,
+      "remapped": 0,
+      "dropped": 0
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
+      "before": 3069,
+      "after": 3064,
+      "remapped": 8,
+      "dropped": 5
+    },
+    {
+      "tag_id": 168,
+      "name": "Common Verbs - Stative",
+      "before": 1378,
+      "after": 1378,
+      "remapped": 4,
+      "dropped": 0
+    },
+    {
+      "tag_id": 170,
+      "name": "TOCFL 1 Beginner",
+      "before": 1382,
+      "after": 1382,
+      "remapped": 5,
+      "dropped": 0
+    },
+    {
+      "tag_id": 171,
+      "name": "TOCFL 2 Intermediate",
+      "before": 4435,
+      "after": 4432,
+      "remapped": 14,
+      "dropped": 3
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "before": 7194,
+      "after": 7186,
+      "remapped": 23,
+      "dropped": 8
+    }
+  ],
+  "dropped_links": [
+    {
+      "tag_id": 18,
+      "name": "Colloquial Chinese 08",
+      "card_id": 48492,
+      "traditional": "氣像人員",
+      "simplified": "气像人员",
+      "pinyin": "qi4 xiang4 ren2 yuan2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 18,
+      "name": "Colloquial Chinese 08",
+      "card_id": 20165,
+      "traditional": "城里",
+      "simplified": "城里",
+      "pinyin": "cheng2 li3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 31,
+      "name": "Integrated Chinese 08",
+      "card_id": 60259,
+      "traditional": "的時候",
+      "simplified": "的时候",
+      "pinyin": "de5 shi2 hou4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 36,
+      "name": "Integrated Chinese 13",
+      "card_id": 88439,
+      "traditional": "開到",
+      "simplified": "开到",
+      "pinyin": "kai1 dao4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 37,
+      "name": "Integrated Chinese 14",
+      "card_id": 41235,
+      "traditional": "早知道",
+      "simplified": "早知道",
+      "pinyin": "zao3 zhi1 dao5",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 49,
+      "name": "NPCR1 Lesson 07",
+      "card_id": 97882,
+      "traditional": "耑",
+      "simplified": "耑",
+      "pinyin": "zhuan1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 52,
+      "name": "NPCR1 Lesson 10",
+      "card_id": 97544,
+      "traditional": "光槃",
+      "simplified": "光槃",
+      "pinyin": "guang1 pan2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 71,
+      "name": "PCR1 Lesson 19",
+      "card_id": 45276,
+      "traditional": "桔子水",
+      "simplified": "桔子水",
+      "pinyin": "ju2 zi5 shui3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 76,
+      "name": "PCR1 Lesson 24",
+      "card_id": 57143,
+      "traditional": "王書文",
+      "simplified": "王书文",
+      "pinyin": "Wang2 Shu1 wen2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 83,
+      "name": "Asking For Directions",
+      "card_id": 9047,
+      "traditional": "公共廁所",
+      "simplified": "公共厕所",
+      "pinyin": "gong1 gong4 ce4 suo3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 83,
+      "name": "Asking For Directions",
+      "card_id": 16012,
+      "traditional": "向左",
+      "simplified": "向左",
+      "pinyin": "xiang4 zuo3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 92,
+      "name": "At the Restaurant",
+      "card_id": 66200,
+      "traditional": "紅葡萄酒",
+      "simplified": "红葡萄酒",
+      "pinyin": "hong2 pu2 tao5 jiu3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 93,
+      "name": "At the Theater/Movies",
+      "card_id": 23485,
+      "traditional": "女演員",
+      "simplified": "女演员",
+      "pinyin": "nü3 yan3 yuan2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 93,
+      "name": "At the Theater/Movies",
+      "card_id": 21473,
+      "traditional": "多少錢",
+      "simplified": "多少钱",
+      "pinyin": "duo1 shao5 qian2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 100,
+      "name": "Passport Control and Customs",
+      "card_id": 51329,
+      "traditional": "海關官員",
+      "simplified": "海关官员",
+      "pinyin": "hai3 guan1 guan1 yuan2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 112,
+      "name": "Fiction Bigrams 01",
+      "card_id": 8828,
+      "traditional": "兩個或更多",
+      "simplified": "两个或更多",
+      "pinyin": "liang3 ge4 huo4 geng4 duo1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 113,
+      "name": "Fiction Bigrams 10",
+      "card_id": 42441,
+      "traditional": "更多",
+      "simplified": "更多",
+      "pinyin": "geng4 duo1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 113,
+      "name": "Fiction Bigrams 10",
+      "card_id": 48054,
+      "traditional": "母羊",
+      "simplified": "母羊",
+      "pinyin": "mu3 yang2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 114,
+      "name": "Fiction Bigrams 11",
+      "card_id": 33528,
+      "traditional": "愛麗思泉",
+      "simplified": "爱丽思泉",
+      "pinyin": "Ai4 li2 si1 quan2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 117,
+      "name": "Fiction Bigrams 14",
+      "card_id": 3650,
+      "traditional": "五年計劃",
+      "simplified": "五年计划",
+      "pinyin": "wu3 nian2 ji4 hua4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 117,
+      "name": "Fiction Bigrams 14",
+      "card_id": 29842,
+      "traditional": "幾位",
+      "simplified": "几位",
+      "pinyin": "ji3 wei4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 118,
+      "name": "Fiction Bigrams 15",
+      "card_id": 8870,
+      "traditional": "兩次",
+      "simplified": "两次",
+      "pinyin": "liang3 ci4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 118,
+      "name": "Fiction Bigrams 15",
+      "card_id": 21473,
+      "traditional": "多少錢",
+      "simplified": "多少钱",
+      "pinyin": "duo1 shao5 qian2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 120,
+      "name": "Fiction Bigrams 17",
+      "card_id": 8951,
+      "traditional": "八年",
+      "simplified": "八年",
+      "pinyin": "ba1 nian2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 121,
+      "name": "Fiction Bigrams 18",
+      "card_id": 64860,
+      "traditional": "第四",
+      "simplified": "第四",
+      "pinyin": "di4 si4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 121,
+      "name": "Fiction Bigrams 18",
+      "card_id": 29874,
+      "traditional": "幾百",
+      "simplified": "几百",
+      "pinyin": "ji3 bai3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 123,
+      "name": "Fiction Bigrams 02",
+      "card_id": 252,
+      "traditional": "一片",
+      "simplified": "一片",
+      "pinyin": "yi1 pian4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 123,
+      "name": "Fiction Bigrams 02",
+      "card_id": 1619,
+      "traditional": "不敢",
+      "simplified": "不敢",
+      "pinyin": "bu4 gan3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 123,
+      "name": "Fiction Bigrams 02",
+      "card_id": 83848,
+      "traditional": "這個月",
+      "simplified": "这个月",
+      "pinyin": "zhe4 ge4 yue4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 125,
+      "name": "Fiction Bigrams 03",
+      "card_id": 12946,
+      "traditional": "十年",
+      "simplified": "十年",
+      "pinyin": "shi2 nian2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 125,
+      "name": "Fiction Bigrams 03",
+      "card_id": 31295,
+      "traditional": "很多時",
+      "simplified": "很多时",
+      "pinyin": "hen3 duo1 shi2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 126,
+      "name": "Fiction Bigrams 04",
+      "card_id": 125,
+      "traditional": "一定要",
+      "simplified": "一定要",
+      "pinyin": "yi1 ding4 yao4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 127,
+      "name": "Fiction Bigrams 05",
+      "card_id": 1585,
+      "traditional": "不懂",
+      "simplified": "不懂",
+      "pinyin": "bu4 dong3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 127,
+      "name": "Fiction Bigrams 05",
+      "card_id": 20165,
+      "traditional": "城里",
+      "simplified": "城里",
+      "pinyin": "cheng2 li3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 128,
+      "name": "Fiction Bigrams 06",
+      "card_id": 64807,
+      "traditional": "第三",
+      "simplified": "第三",
+      "pinyin": "di4 san1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 128,
+      "name": "Fiction Bigrams 06",
+      "card_id": 29858,
+      "traditional": "幾十年",
+      "simplified": "几十年",
+      "pinyin": "ji3 shi2 nian2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 132,
+      "name": "News Bigrams 01",
+      "card_id": 230,
+      "traditional": "一步",
+      "simplified": "一步",
+      "pinyin": "yi1 bu4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 133,
+      "name": "News Bigrams 10",
+      "card_id": 40535,
+      "traditional": "新技術",
+      "simplified": "新技术",
+      "pinyin": "xin1 ji4 shu4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 133,
+      "name": "News Bigrams 10",
+      "card_id": 3650,
+      "traditional": "五年計劃",
+      "simplified": "五年计划",
+      "pinyin": "wu3 nian2 ji4 hua4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 134,
+      "name": "News Bigrams 11",
+      "card_id": 64851,
+      "traditional": "第十",
+      "simplified": "第十",
+      "pinyin": "di4 shi2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 134,
+      "name": "News Bigrams 11",
+      "card_id": 20563,
+      "traditional": "報道說",
+      "simplified": "报道说",
+      "pinyin": "bao4 dao4 shuo1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 137,
+      "name": "News Bigrams 14",
+      "card_id": 5816,
+      "traditional": "來看",
+      "simplified": "来看",
+      "pinyin": "lai2 kan4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 137,
+      "name": "News Bigrams 14",
+      "card_id": 42444,
+      "traditional": "更好",
+      "simplified": "更好",
+      "pinyin": "geng4 hao3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 140,
+      "name": "News Bigrams 17",
+      "card_id": 13707,
+      "traditional": "卡爾・馬克思",
+      "simplified": "卡尔・马克思",
+      "pinyin": "Ka3 er3 · Ma3 ke4 si1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 140,
+      "name": "News Bigrams 17",
+      "card_id": 29858,
+      "traditional": "幾十年",
+      "simplified": "几十年",
+      "pinyin": "ji3 shi2 nian2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 141,
+      "name": "News Bigrams 18",
+      "card_id": 32297,
+      "traditional": "快速發展",
+      "simplified": "快速发展",
+      "pinyin": "kuai4 su4 fa1 zhan3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 141,
+      "name": "News Bigrams 18",
+      "card_id": 81534,
+      "traditional": "越來越多",
+      "simplified": "越来越多",
+      "pinyin": "yue4 lai2 yue4 duo1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 142,
+      "name": "News Bigrams 19",
+      "card_id": 64820,
+      "traditional": "第九",
+      "simplified": "第九",
+      "pinyin": "di4 jiu3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 142,
+      "name": "News Bigrams 19",
+      "card_id": 6185,
+      "traditional": "保安局局長",
+      "simplified": "保安局局长",
+      "pinyin": "bao3 an1 ju2 ju2 zhang3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "card_id": 64845,
+      "traditional": "第六",
+      "simplified": "第六",
+      "pinyin": "di4 liu4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "card_id": 9341,
+      "traditional": "共同努力",
+      "simplified": "共同努力",
+      "pinyin": "gong4 tong2 nu3 li4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "card_id": 1619,
+      "traditional": "不敢",
+      "simplified": "不敢",
+      "pinyin": "bu4 gan3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "card_id": 29266,
+      "traditional": "帶著希望去旅行，比到達終點更美好",
+      "simplified": "带着希望去旅行，比到达终点更美好",
+      "pinyin": "dai4 zhe5 xi1 wang4 qu4 lü3 xing2 , bi3 dao4 da2 zhong1 dian3 geng4 mei3 hao3",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "card_id": 16669,
+      "traditional": "和平解決",
+      "simplified": "和平解决",
+      "pinyin": "he2 ping2 jie3 jue2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 144,
+      "name": "News Bigrams 20",
+      "card_id": 35928,
+      "traditional": "拉姆斯菲爾德",
+      "simplified": "拉姆斯菲尔德",
+      "pinyin": "La1 mu3 si1 fei1 er3 de2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 145,
+      "name": "News Bigrams 03",
+      "card_id": 83860,
+      "traditional": "這次危機",
+      "simplified": "这次危机",
+      "pinyin": "zhe4 ci4 wei1 ji1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 146,
+      "name": "News Bigrams 04",
+      "card_id": 42644,
+      "traditional": "最大",
+      "simplified": "最大",
+      "pinyin": "zui4 da4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 146,
+      "name": "News Bigrams 04",
+      "card_id": 74901,
+      "traditional": "薩達姆・侯賽因",
+      "simplified": "萨达姆・侯赛因",
+      "pinyin": "Sa4 da2 mu3 · Hou2 sai4 yin1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 146,
+      "name": "News Bigrams 04",
+      "card_id": 26928,
+      "traditional": "對臺",
+      "simplified": "对台",
+      "pinyin": "dui4 tai2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 146,
+      "name": "News Bigrams 04",
+      "card_id": 64807,
+      "traditional": "第三",
+      "simplified": "第三",
+      "pinyin": "di4 san1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 147,
+      "name": "News Bigrams 05",
+      "card_id": 56230,
+      "traditional": "特別是",
+      "simplified": "特别是",
+      "pinyin": "te4 bie2 shi4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 147,
+      "name": "News Bigrams 05",
+      "card_id": 83848,
+      "traditional": "這個月",
+      "simplified": "这个月",
+      "pinyin": "zhe4 ge4 yue4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 147,
+      "name": "News Bigrams 05",
+      "card_id": 31295,
+      "traditional": "很多時",
+      "simplified": "很多时",
+      "pinyin": "hen3 duo1 shi2",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 148,
+      "name": "News Bigrams 06",
+      "card_id": 40431,
+      "traditional": "新世紀",
+      "simplified": "新世纪",
+      "pinyin": "xin1 shi4 ji4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 148,
+      "name": "News Bigrams 06",
+      "card_id": 401,
+      "traditional": "一項",
+      "simplified": "一项",
+      "pinyin": "yi1 xiang4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 148,
+      "name": "News Bigrams 06",
+      "card_id": 42441,
+      "traditional": "更多",
+      "simplified": "更多",
+      "pinyin": "geng4 duo1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 149,
+      "name": "News Bigrams 07",
+      "card_id": 81534,
+      "traditional": "越來越多",
+      "simplified": "越来越多",
+      "pinyin": "yue4 lai2 yue4 duo1",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 149,
+      "name": "News Bigrams 07",
+      "card_id": 40619,
+      "traditional": "新社",
+      "simplified": "新社",
+      "pinyin": "Xin1 she4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 150,
+      "name": "News Bigrams 08",
+      "card_id": 64860,
+      "traditional": "第四",
+      "simplified": "第四",
+      "pinyin": "di4 si4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 151,
+      "name": "News Bigrams 09",
+      "card_id": 83869,
+      "traditional": "這項",
+      "simplified": "这项",
+      "pinyin": "zhe4 xiang4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 151,
+      "name": "News Bigrams 09",
+      "card_id": 33078,
+      "traditional": "情況下",
+      "simplified": "情况下",
+      "pinyin": "qing2 kuang4 xia4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 163,
+      "name": "Common Nouns",
+      "card_id": 14893,
+      "traditional": "古蹟",
+      "simplified": "古迹",
+      "pinyin": "gu3 ji4",
+      "reason": "already in the set (card 14893)"
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
+      "card_id": 84186,
+      "traditional": "連絡",
+      "simplified": "连络",
+      "pinyin": "lian2 luo4",
+      "reason": "already in the set (card 69861)"
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
+      "card_id": 97858,
+      "traditional": "粘",
+      "simplified": "粘",
+      "pinyin": "nian2",
+      "reason": "already in the set (card 96718)"
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
+      "card_id": 65095,
+      "traditional": "算帳",
+      "simplified": "算帐",
+      "pinyin": "suan4 zhang4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
+      "card_id": 97842,
+      "traditional": "稱",
+      "simplified": "称",
+      "pinyin": "cheng4",
+      "reason": "already in the set (card 63904)"
+    },
+    {
+      "tag_id": 167,
+      "name": "Common Verbs - Active",
+      "card_id": 82931,
+      "traditional": "轉帳",
+      "simplified": "转帐",
+      "pinyin": "zhuan3 zhang4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 171,
+      "name": "TOCFL 2 Intermediate",
+      "card_id": 84186,
+      "traditional": "連絡",
+      "simplified": "连络",
+      "pinyin": "lian2 luo4",
+      "reason": "already in the set (card 69861)"
+    },
+    {
+      "tag_id": 171,
+      "name": "TOCFL 2 Intermediate",
+      "card_id": 97858,
+      "traditional": "粘",
+      "simplified": "粘",
+      "pinyin": "nian2",
+      "reason": "already in the set (card 96718)"
+    },
+    {
+      "tag_id": 171,
+      "name": "TOCFL 2 Intermediate",
+      "card_id": 65095,
+      "traditional": "算帳",
+      "simplified": "算帐",
+      "pinyin": "suan4 zhang4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 84186,
+      "traditional": "連絡",
+      "simplified": "连络",
+      "pinyin": "lian2 luo4",
+      "reason": "already in the set (card 69861)"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 97858,
+      "traditional": "粘",
+      "simplified": "粘",
+      "pinyin": "nian2",
+      "reason": "already in the set (card 96718)"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 65095,
+      "traditional": "算帳",
+      "simplified": "算帐",
+      "pinyin": "suan4 zhang4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 97842,
+      "traditional": "稱",
+      "simplified": "称",
+      "pinyin": "cheng4",
+      "reason": "already in the set (card 63904)"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 14893,
+      "traditional": "古蹟",
+      "simplified": "古迹",
+      "pinyin": "gu3 ji4",
+      "reason": "already in the set (card 14893)"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 12835,
+      "traditional": "匹",
+      "simplified": "匹",
+      "pinyin": "pi3",
+      "reason": "already in the set (card 12835)"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 20021,
+      "traditional": "型狀",
+      "simplified": "型状",
+      "pinyin": "xing2 zhuang4",
+      "reason": "no replacement"
+    },
+    {
+      "tag_id": 172,
+      "name": "TOCFL 3 Advanced",
+      "card_id": 82931,
+      "traditional": "轉帳",
+      "simplified": "转帐",
+      "pinyin": "zhuan3 zhang4",
+      "reason": "no replacement"
+    }
+  ],
+  "remapped_links_file": "tools/dictbuild_zh/reports/remapped_links.tsv",
+  "bytes_after": {
+    "card": 19079168,
+    "fts": 32006144,
+    "user": 557056
+  },
+  "sources": {
+    "cedict_date": "2026-10-30T01:44:55Z",
+    "cedict_entries": 125325,
+    "files": {
+      "cedict_1_0_ts_utf-8_mdbg.txt.gz": {
+        "url": "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz",
+        "bytes": 3982173,
+        "sha256": "216f40bc26d65cb074f89d243fe2ec379ac29ad6fccb93f57ee1c9414892902f",
+        "last_modified": "2026-10-30T09:16:04+00:00"
+      }
+    }
+  }
+}
