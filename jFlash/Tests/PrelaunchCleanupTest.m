@@ -4,7 +4,7 @@
 //
 //  Pre-launch cleanup and reviewer follow-ups, checked in the host app (jFlashTest and cFlashTest are
 //  hosted, so [NSBundle mainBundle] is the app and app classes are reachable through the runtime):
-//  - jFlash's bundle ID and URL type name are com.japaneseinaflash.jflash, and the URL type still registers the jflash:// / cflash:// scheme
+//  - each app's bundle ID and URL type name are com.japaneseinaflash.jflash / com.chineseinaflash.cflash, and the URL type still registers the jflash:// / cflash:// scheme
 //  - Settings pop-up rows: readings reach the open menu's rows (as subtitles) and are cleared on reuse
 //  - the search-result star isn't colour-only (filled symbol + spoken value)
 //
@@ -30,6 +30,8 @@
   XCTAssertEqualObjects([type objectForKey:@"CFBundleURLName"], @"com.japaneseinaflash.jflash", @"URL type named after the bundle ID, not Long Weekend's");
   XCTAssertEqualObjects([type objectForKey:@"CFBundleURLSchemes"], @[@"jflash"], @"jflash:// still opens the app");
 #else
+  XCTAssertEqualObjects([[NSBundle mainBundle] bundleIdentifier], @"com.chineseinaflash.cflash", @"Bundle ID is on the chineseinaflash.com domain");
+  XCTAssertEqualObjects([type objectForKey:@"CFBundleURLName"], @"com.chineseinaflash.cflash", @"URL type named after the bundle ID, not Long Weekend's");
   XCTAssertEqualObjects([type objectForKey:@"CFBundleURLSchemes"], @[@"cflash"], @"cflash:// still opens the app");
 #endif
 }
