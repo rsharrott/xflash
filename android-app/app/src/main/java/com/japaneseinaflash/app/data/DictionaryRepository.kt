@@ -14,7 +14,7 @@ class DictionaryRepository internal constructor(
         val prepared = SearchQuery.prepare(raw, limit) ?: return emptyList()
         val ids = mutableListOf<Long>()
         try {
-            db.rawQuery(prepared.sql, arrayOf(prepared.matchArgument, prepared.limit.toString())).use { cursor ->
+            db.rawQuery(prepared.sql, prepared.arguments.toTypedArray()).use { cursor ->
                 while (cursor.moveToNext()) {
                     ids.add(cursor.getLong(0))
                 }

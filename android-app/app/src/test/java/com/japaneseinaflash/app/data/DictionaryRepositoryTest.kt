@@ -18,7 +18,7 @@ import java.nio.file.Files
 @Config(sdk = [28], manifest = Config.NONE)
 class DictionaryRepositoryTest {
     @Test
-    fun searchRanksByLengthThenCommonAndLoadsShownSentences() {
+    fun searchRanksTheExactHeadwordAndLoadsShownSentences() {
         val installed = fixture()
         DictionaryRepository.open(installed).use { repo ->
             assertEquals("1.1", repo.databaseVersion("main"))
@@ -46,6 +46,14 @@ class DictionaryRepositoryTest {
             assertEquals("猫", repo.loadCard(1)!!.headword)
             assertNull(repo.loadCard(404))
             assertTrue(repo.search("AND").isEmpty())
+            assertEquals(listOf(1L), repo.search("neko OR").map { it.id })
+            assertEquals(listOf(1L), repo.search("-neko").map { it.id })
+            assertEquals(listOf(1L), repo.search("neko NEAR/2").map { it.id })
+            assertTrue(repo.search("OR").isEmpty())
+            assertTrue(repo.search("NEAR").isEmpty())
+            assertTrue(repo.search("a".repeat(SearchQuery.MAX_EXPRESSION_CHARS + 1)).isEmpty())
+            assertEquals(listOf(40L, 41L), repo.search("targetword").map { it.id })
+            assertEquals(listOf(20L, 21L), repo.search("水").map { it.id })
         }
     }
 
@@ -87,6 +95,10 @@ class DictionaryRepositoryTest {
             insertCard(10, "zzza", "zzza", "zzza", "plain")
             insertCard(11, "zzzb", "zzzb", "zzzb", "plain")
             insertCard(12, "zzz", "zzz", "zzz", "<ol><li>alpha<dfn>noun</dfn></li></ol>")
+            insertCard(20, "水", "みず", "mizu", "water")
+            insertCard(21, "水位", "すいい", "suii", "water level")
+            insertCard(40, "targetword", "targetword", "targetword", "alpha")
+            insertCard(41, "ab", "ab", "ab", "alpha")
         }
         sqlite(File(dir, DictionaryFiles.FTS_DB)) {
             execSQL(
@@ -100,6 +112,10 @@ class DictionaryRepositoryTest {
             insertFts(10, "zzz aa", 0)
             insertFts(11, "zzz bb", 1)
             insertFts(12, "zzz", 0)
+            insertFts(20, "水 [ みず / mizu ] water", 1)
+            insertFts(21, "水位 [ すいい / suii ] water level", 1)
+            insertFts(40, "targetword [ targetword / targetword ] alpha beta gamma delta epsilon zeta eta", 0)
+            insertFts(41, "ab [ ab / ab ] targetword extra", 1)
         }
         sqlite(File(dir, DictionaryFiles.EX_DB)) {
             execSQL(

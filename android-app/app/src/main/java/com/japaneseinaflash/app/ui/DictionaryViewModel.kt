@@ -11,6 +11,8 @@ import com.japaneseinaflash.app.data.DataVersions
 import com.japaneseinaflash.app.data.DeviceDictionaryInstaller
 import com.japaneseinaflash.app.data.DictionaryFiles
 import com.japaneseinaflash.app.data.DictionaryRepository
+import com.japaneseinaflash.app.data.SearchPlan
+import com.japaneseinaflash.app.data.SearchQuery
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +50,10 @@ enum class DictionaryError {
     CardMissing,
 }
 
+enum class SearchNotice {
+    TooLong,
+}
+
 data class DictionaryUiState(
     val phase: Phase = Phase.Preparing,
     val query: String = "",
@@ -58,6 +64,7 @@ data class DictionaryUiState(
     val card: CardDetail? = null,
     val versions: DataVersions? = null,
     val error: DictionaryError? = null,
+    val notice: SearchNotice? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -208,6 +215,21 @@ class DictionaryViewModel(
     }
 
     private suspend fun runSearch(query: String) {
+        when (SearchQuery.plan(query)) {
+            SearchPlan.Blank -> {
+                if (query != queryText.value) return
+                _state.update { it.copy(searching = false, results = emptyList(), error = null, notice = null) }
+                return
+            }
+            SearchPlan.TooLong -> {
+                if (query != queryText.value) return
+                _state.update {
+                    it.copy(searching = false, results = emptyList(), error = null, notice = SearchNotice.TooLong)
+                }
+                return
+            }
+            is SearchPlan.Ready -> Unit
+        }
         val pending = repository
         val opened = try {
             pending.await()
@@ -217,23 +239,19 @@ class DictionaryViewModel(
             return
         }
         if (query != queryText.value) return
-        if (query.isBlank()) {
-            _state.update { it.copy(searching = false, results = emptyList(), error = null) }
-            return
-        }
         // Leave the previous list on screen until this search returns.
-        _state.update { it.copy(searching = true, error = null) }
+        _state.update { it.copy(searching = true, error = null, notice = null) }
         try {
             val results = withContext(Dispatchers.IO) { opened.search(query) }
             if (query != queryText.value) return
-            _state.update { it.copy(searching = false, results = results) }
+            _state.update { it.copy(searching = false, results = results, notice = null) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Log.e(TAG, "Search failed", e)
             if (query != queryText.value) return
             _state.update {
-                it.copy(searching = false, results = emptyList(), error = DictionaryError.SearchFailed)
+                it.copy(searching = false, results = emptyList(), error = DictionaryError.SearchFailed, notice = null)
             }
         }
     }

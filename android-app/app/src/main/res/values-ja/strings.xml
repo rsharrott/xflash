@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Product name stays in English, as it does in the iOS Japanese strings. -->
+    <string name="app_name">Japanese in a Flash!</string>
+
+    <string name="search_hint">日本語、読み、ローマ字、英語で検索</string>
+    <string name="search_prompt">単語、読み、英語の意味で探せます。? はワイルドカードです。</string>
+    <string name="clear_search">クリア</string>
+    <!-- Same empty state as iOS "No Results Found". -->
+    <string name="no_results">見つかりませんでした</string>
+    <string name="search_too_long">検索語が長すぎます</string>
+    <plurals name="search_truncated">
+        <item quantity="other">最初の %d 件を表示しています。</item>
+    </plurals>
+    <string name="cd_search_field">辞書を検索</string>
+    <string name="cd_loading">読み込み中</string>
+    <string name="cd_result">%1$s、%2$s</string>
+
+    <string name="preparing_dictionary">辞書を準備しています…</string>
+    <string name="preparing_dictionary_detail">最初にアプリを開いたとき、辞書をこの端末にコピーします。1分ほどかかることがあります。</string>
+
+    <string name="about">情報</string>
+    <string name="about_title">情報とライセンス</string>
+    <string name="back">戻る</string>
+    <string name="card_loading_title">カード</string>
+
+    <string name="reading_and_romaji">%1$s · %2$s</string>
+    <string name="meaning_heading">意味</string>
+    <!-- iOS "Examples". -->
+    <string name="examples_heading">例文</string>
+    <string name="no_examples">このカードの例文はありません。</string>
+
+    <string name="error_prepare">辞書を準備できませんでした。空き容量を確保して、アプリを開き直してください。</string>
+    <string name="error_search">検索を完了できませんでした。</string>
+    <string name="error_card">このカードを開けませんでした。</string>
+    <string name="error_card_missing">このカードは辞書にありません。</string>
+    <string name="retry">やり直す</string>
+
+    <string name="about_intro">Japanese in a Flash! は、日本語の単語、読み、意味、例文を調べます。</string>
+    <string name="about_scope">練習、学習セット、リマインダーは、このバージョンにはまだありません。</string>
+    <string name="about_versions">カード %1$s、検索 %2$s、例文 %3$s。</string>
+    <string name="about_app_version">バージョン %1$s</string>
+
+    <string name="licence_heading">辞書データ</string>
+    <string name="licence_jmdict">辞書の項目は、Electronic Dictionary Research and Development Group（EDRDG）が所有する JMdict（EDICT）に基づいています。クリエイティブ・コモンズ 表示-継承 4.0（CC BY-SA 4.0）ライセンスの下で使用・変換・改変しています。改変した辞書データも同じライセンスで公開しています。</string>
+    <string name="licence_core1000">Core 1000 は別の単語リストではありません。JMdict の nf01 と nf02 の優先度タグが付いたカードで、毎日新聞の語彙頻度リストに由来します。同じ CC BY-SA 4.0 ライセンスの下で使っています。</string>
+    <string name="licence_tatoeba">例文は Tatoeba プロジェクト（旧 Tanaka Corpus／田中コーパス）のもので、クリエイティブ・コモンズ 表示 2.0 フランス（CC BY 2.0 FR）ライセンスの下で使用しています。</string>
+    <string name="licence_code">アプリのソースコードは MIT ライセンスです。このライセンスは辞書と例文には適用されません。</string>
+    <string name="licence_apache">AndroidX、Kotlin、およびこのアプリが使うその他のライブラリは Apache License 2.0 の下にあります。</string>
+
+    <string name="link_cc_by_sa">CC BY-SA 4.0</string>
+    <string name="url_cc_by_sa">https://creativecommons.org/licenses/by-sa/4.0/</string>
+    <string name="link_edrdg">EDRDGライセンス</string>
+    <string name="url_edrdg">https://www.edrdg.org/edrdg/licence.html</string>
+    <string name="link_jmdict">JMdict</string>
+    <string name="url_jmdict">https://www.edrdg.org/jmdict/j_jmdict.html</string>
+    <string name="link_source">改変した辞書データ</string>
+    <string name="url_source">https://github.com/rsharrott/xflash</string>
+    <string name="link_tatoeba">Tatoeba</string>
+    <string name="url_tatoeba">https://tatoeba.org</string>
+    <string name="link_cc_by">CC BY 2.0 FR</string>
+    <string name="url_cc_by">https://creativecommons.org/licenses/by/2.0/fr/</string>
+    <!-- iOS "Privacy Policy". -->
+    <string name="link_privacy">プライバシーポリシー</string>
+    <string name="url_privacy">https://japaneseinaflash.com/privacy</string>
+</resources>

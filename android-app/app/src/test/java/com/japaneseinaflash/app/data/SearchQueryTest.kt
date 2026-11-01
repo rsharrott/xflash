@@ -15,33 +15,65 @@ class SearchQueryTest {
 
     @Test
     fun fullWidthRomajiAndQuestionMarkAreNormalized() {
-        assertEquals("neko", SearchQuery.matchExpression("\uFF4E\uFF45\uFF4B\uFF4F"))
-        assertEquals("nek*", SearchQuery.matchExpression("\uFF4E\uFF45\uFF4B\uFF1F"))
         assertEquals("neko", SearchQuery.prepare("\uFF4E\uFF45\uFF4B\uFF4F")!!.matchArgument)
+        assertEquals("nek*", SearchQuery.prepare("\uFF4E\uFF45\uFF4B\uFF1F")!!.matchArgument)
     }
 
     @Test
-    fun japanesePassesThroughUnchanged() {
-        assertEquals("ねこ", SearchQuery.matchExpression("ねこ"))
-        assertEquals("猫", SearchQuery.matchExpression("  猫  "))
+    fun japaneseIsAPrefixSoCompoundsMatchAndTheExactTermStays() {
+        val kana = SearchQuery.prepare("ねこ")!!
+        assertEquals("ねこ*", kana.matchArgument)
+        assertEquals("ねこ", kana.exactTerm)
+        val kanji = SearchQuery.prepare("  水  ")!!
+        assertEquals("水*", kanji.matchArgument)
+        assertEquals("水", kanji.exactTerm)
+        assertEquals("\"水\"", SearchQuery.prepare("\"水\"")!!.matchArgument)
     }
 
     @Test
-    fun quotesAndGroupingAreRemovedButTheKeywordStaysBound() {
-        val prepared = SearchQuery.prepare("ca\"t(x)")
-        assertEquals("catx", prepared!!.matchArgument)
+    fun quotesStayBoundAndCannotChangeTheSql() {
+        val prepared = SearchQuery.prepare("ca\"t(x)")!!
+        assertEquals("ca \"tx\"", prepared.matchArgument)
         assertEquals(DictionarySql.SEARCH, prepared.sql)
-        assertFalse(prepared.sql.contains("catx"))
+        assertFalse(prepared.matchArgument, prepared.sql.contains(prepared.matchArgument))
         assertTrue(prepared.sql.contains("cards_search_content MATCH ?"))
         assertTrue(prepared.sql.contains("LIMIT ?"))
+        assertEquals(prepared.sql.count { it == '?' }, prepared.arguments.size)
     }
 
     @Test
-    fun rankIsShortestContentThenCommonWordsThenCardId() {
+    fun operatorsAreQuotedOrDroppedSoTheMatchStaysWellFormed() {
+        assertEquals("\"OR\"", SearchQuery.prepare("OR")!!.matchArgument)
+        assertEquals("neko", SearchQuery.prepare("neko OR")!!.matchArgument)
+        assertEquals("neko", SearchQuery.prepare("-neko")!!.matchArgument)
+        assertEquals("\"NEAR\"", SearchQuery.prepare("NEAR")!!.matchArgument)
+        assertEquals("neko", SearchQuery.prepare("neko NEAR/2")!!.matchArgument)
+        assertEquals("\"hot water\"", SearchQuery.prepare("\"hot water\"")!!.matchArgument)
+        assertEquals("nek*", SearchQuery.prepare("nek?")!!.matchArgument)
+    }
+
+    @Test
+    fun rankIsExactThenCommonThenHeadwordLength() {
         val sql = DictionarySql.SEARCH
-        assertTrue(sql.contains("ORDER BY LENGTH(content) ASC, ptag DESC, card_id ASC"))
+        val order = sql.substringAfter("ORDER BY")
+        val ptag = order.indexOf("ptag DESC")
+        val head = order.indexOf("head_len ASC")
+        val card = order.indexOf("card_id ASC")
+        assertTrue(ptag in 0 until head)
+        assertTrue(head < card)
+        assertFalse(order.contains("LENGTH(content)"))
         assertFalse(sql.contains("headword MATCH"))
         assertFalse(sql.contains("reading MATCH"))
+        val prepared = SearchQuery.prepare("cat")!!
+        assertEquals("cat", prepared.exactTerm)
+        assertEquals(listOf("cat", "cat", "50"), prepared.arguments)
+    }
+
+    @Test
+    fun overlongQueriesAreReportedInsteadOfSearching() {
+        assertTrue(SearchQuery.plan("a".repeat(SearchQuery.MAX_EXPRESSION_CHARS)) is SearchPlan.Ready)
+        assertTrue(SearchQuery.plan("a".repeat(SearchQuery.MAX_EXPRESSION_CHARS + 1)) is SearchPlan.TooLong)
+        assertNull(SearchQuery.prepare("a".repeat(SearchQuery.MAX_EXPRESSION_CHARS + 1)))
     }
 
     @Test

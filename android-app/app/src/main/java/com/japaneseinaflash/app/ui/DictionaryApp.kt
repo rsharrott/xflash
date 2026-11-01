@@ -6,15 +6,18 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -39,6 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -63,6 +68,9 @@ import com.japaneseinaflash.app.data.DataVersions
 import com.japaneseinaflash.app.data.ExampleSentence
 import com.japaneseinaflash.app.data.SearchQuery
 import com.japaneseinaflash.app.data.Sense
+
+private val MaxContentWidth = 640.dp
+private const val MastheadTitleMaxLines = 4
 
 @Composable
 fun DictionaryApp(viewModel: DictionaryViewModel = viewModel()) {
@@ -103,23 +111,31 @@ private fun DictionaryScaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onBackground,
     ) { padding ->
-        Column(
+        Box(
             Modifier
                 .padding(padding)
                 .fillMaxSize()
                 .imePadding(),
+            contentAlignment = Alignment.TopCenter,
         ) {
-            Masthead(
-                title = title,
-                showBack = state.canGoBack,
-                showAbout = showAbout,
-                onBack = onBack,
-                onAbout = onAbout,
-            )
-            when (state.screen) {
-                Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
-                Screen.About -> AboutBody(state.versions, versionName)
-                is Screen.Detail -> DetailBody(state)
+            Column(
+                Modifier
+                    .widthIn(max = MaxContentWidth)
+                    .fillMaxHeight()
+                    .fillMaxWidth(),
+            ) {
+                Masthead(
+                    title = title,
+                    showBack = state.canGoBack,
+                    showAbout = showAbout,
+                    onBack = onBack,
+                    onAbout = onAbout,
+                )
+                when (state.screen) {
+                    Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
+                    Screen.About -> AboutBody(state.versions, versionName)
+                    is Screen.Detail -> DetailBody(state)
+                }
             }
         }
     }
@@ -153,7 +169,7 @@ private fun Masthead(
                 text = title,
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
-                maxLines = 1,
+                maxLines = MastheadTitleMaxLines,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .weight(1f)
@@ -180,6 +196,8 @@ private fun SearchBody(
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
         Spacer(Modifier.height(16.dp))
         val searchDescription = stringResource(R.string.cd_search_field)
+        val keyboard = LocalSoftwareKeyboardController.current
+        val focusManager = LocalFocusManager.current
         OutlinedTextField(
             value = state.query,
             onValueChange = onQueryChange,
@@ -192,7 +210,11 @@ private fun SearchBody(
                 imeAction = ImeAction.Search,
                 autoCorrectEnabled = false,
             ),
-            keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
+            keyboardActions = KeyboardActions(onSearch = {
+                keyboard?.hide()
+                focusManager.clearFocus()
+                onSubmit()
+            }),
             trailingIcon = if (state.query.isNotEmpty()) {
                 {
                     TextButton(onClick = { onQueryChange("") }) {
@@ -275,6 +297,7 @@ private fun ReadyResults(
     state.error?.let { ErrorText(it) }
     when {
         state.searching -> LoadingRow()
+        state.notice == SearchNotice.TooLong -> TooLongMessage()
         state.query.isBlank() -> Hint(stringResource(R.string.search_prompt))
         state.results.isEmpty() -> Hint(stringResource(R.string.no_results))
         else -> SearchResults(state.results, onCard)
@@ -496,6 +519,16 @@ private fun LoadingRow() {
             strokeWidth = 3.dp,
         )
     }
+}
+
+@Composable
+private fun TooLongMessage() {
+    Text(
+        text = stringResource(R.string.search_too_long),
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier.padding(top = 8.dp),
+    )
 }
 
 @Composable

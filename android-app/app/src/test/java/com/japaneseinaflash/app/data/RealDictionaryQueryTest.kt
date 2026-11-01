@@ -17,9 +17,10 @@ class RealDictionaryQueryTest {
         val card = sources.getValue(DictionaryFiles.CARD_DB).file.absolutePath
         val fts = sources.getValue(DictionaryFiles.FTS_DB).file.absolutePath
         val examples = sources.getValue(DictionaryFiles.EX_DB).file.absolutePath
-        val search = bind(DictionarySql.SEARCH, "ねこ", "5")
-        val cardSql = bind(DictionarySql.CARD, "1467640")
-        val sentenceSql = bind(DictionarySql.SENTENCES, "1467640")
+        val neko = SearchQuery.prepare("ねこ", limit = 1)!!
+        val search = bind(neko.sql, neko.arguments)
+        val cardSql = bind(DictionarySql.CARD, listOf("1467640"))
+        val sentenceSql = bind(DictionarySql.SENTENCES, listOf("1467640"))
         val script = """
             ATTACH DATABASE '$card' AS CARD_DB;
             ATTACH DATABASE '$fts' AS FTS_DB;
@@ -35,16 +36,89 @@ class RealDictionaryQueryTest {
         assertTrue("shown sentences were $shown", shown in 1..10)
     }
 
-    private fun bind(sql: String, vararg args: String): String {
+    @Test
+    fun reportedQueriesPutTheCommonWordFirst() {
+        assertEquals("水" to "みず", search("water").first())
+        val inu = search("inu", limit = 10)
+        assertEquals("犬" to "いぬ", inu.first())
+        assertBefore(inu, "犬", "寝ぬ")
+        assertBefore(inu, "犬", "淫雨")
+        val neko = search("neko")
+        assertEquals("猫" to "ねこ", neko.first())
+        assertBefore(neko, "猫", "ギコ猫")
+        val cat = search("cat")
+        assertEquals("猫" to "ねこ", cat.first())
+        assertBefore(cat, headword = "猫", laterReading = "ねこま")
+        val kanji = search("水")
+        assertEquals("水" to "みず", kanji.first())
+        assertTrue(kanji.drop(1).any { it.first.startsWith("水") && it.first.length > 1 })
+    }
+
+    @Test
+    fun operatorQueriesRunAndStillFindNeko() {
+        assertEquals("猫" to "ねこ", search("neko OR", limit = 3).first())
+        assertEquals("猫" to "ねこ", search("-neko", limit = 3).first())
+        assertEquals("猫" to "ねこ", search("neko NEAR/2", limit = 3).first())
+        assertTrue(search("OR", limit = 5).isNotEmpty())
+        assertTrue(search("NEAR", limit = 5).isNotEmpty())
+    }
+
+    private fun search(raw: String, limit: Int = 8): List<Pair<String, String>> {
+        val prepared = SearchQuery.prepare(raw, limit)!!
+        val ids = query(bind(prepared.sql, prepared.arguments)).lines().map { it.trim() }.filter { it.isNotEmpty() }
+        if (ids.isEmpty()) return emptyList()
+        val listed = ids.joinToString(",")
+        val rows = query(
+            "SELECT card_id || '|' || headword || '|' || reading FROM cards WHERE card_id IN ($listed);",
+        ).lines().map { it.trim() }.filter { it.isNotEmpty() }
+        val byId = rows.associate { line ->
+            val parts = line.split("|", limit = 3)
+            parts[0] to (parts[1] to parts[2])
+        }
+        return ids.map { byId.getValue(it) }
+    }
+
+    private fun assertBefore(
+        rows: List<Pair<String, String>>,
+        headword: String,
+        laterHeadword: String = headword,
+        laterReading: String? = null,
+    ) {
+        val first = rows.indexOfFirst { it.first == headword && (laterReading == null || it.second != laterReading) }
+        val later = if (laterReading == null) {
+            rows.indexOfFirst { it.first == laterHeadword }
+        } else {
+            rows.indexOfFirst { it.first == headword && it.second == laterReading }
+        }
+        assertTrue("$headword should come before $laterHeadword $laterReading in $rows", first >= 0 && later > first)
+    }
+
+    private fun query(sql: String): String {
+        val sources = listedSources().associateBy { it.assetName }
+        val user = sources.getValue(DictionaryFiles.USER_DB).file
+        val card = sources.getValue(DictionaryFiles.CARD_DB).file.absolutePath
+        val fts = sources.getValue(DictionaryFiles.FTS_DB).file.absolutePath
+        val script = """
+            ATTACH DATABASE '$card' AS CARD_DB;
+            ATTACH DATABASE '$fts' AS FTS_DB;
+            $sql
+        """.trimIndent()
+        return sqlite3(user, script)
+    }
+
+    private fun bind(sql: String, args: List<String>): String {
         var left = sql
         for (arg in args) {
-            require("'" !in arg && "?" !in arg)
-            val literal = if (arg.all { it.isDigit() }) arg else "'$arg'"
+            val literal = if (arg.isNotEmpty() && arg.all { it.isDigit() }) {
+                arg
+            } else {
+                "'" + arg.replace("'", "''") + "'"
+            }
             val index = left.indexOf('?')
-            require(index >= 0)
+            require(index >= 0) { "no placeholder for [$arg]" }
             left = left.replaceRange(index, index + 1, literal)
         }
-        require("?" !in left)
+        require("?" !in left) { left }
         return left
     }
 }
