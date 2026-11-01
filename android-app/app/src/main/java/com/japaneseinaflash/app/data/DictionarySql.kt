@@ -12,10 +12,12 @@ package com.japaneseinaflash.app.data
  * spec1, spec2, or gai1. That is the only frequency or priority column on
  * the dictionary databases.
  *
- * Rank is exact headword, reading, romaji, or gloss first, then `ptag`, then
- * the headword's length, then `card_id`. Whole-entry `LENGTH(content)` is not
- * used: a common word such as 水 has a long gloss list, so sorting by that
- * length first buried it under short compounds.
+ * Rank is exact headword, reading, romaji, or the first gloss, then an exact
+ * gloss in a later sense, then `ptag`, then the headword's length, then
+ * `card_id`. A later sense that happens to be the query (遣る for "eat") no
+ * longer ties the word whose first gloss is the query (食べる). Whole-entry
+ * `LENGTH(content)` is not used: a common word such as 水 has a long gloss
+ * list, so sorting by that length first buried it under short compounds.
  *
  * iOS Japanese search has the same burying. `CardPeer keywordIsHeadword` and
  * `keywordIsReading` are compiled out for JFlash (both return NO), so every
@@ -63,15 +65,28 @@ object DictionarySql {
         )
         ORDER BY
           CASE
-            WHEN term = '' THEN 1
+            WHEN term = '' THEN 2
             WHEN lower(headword) = lower(term)
               OR instr('; ' || lower(forms) || '; ', '; ' || lower(term) || '; ') > 0
               OR instr('; ' || lower(ifnull(reading, '')) || '; ', '; ' || lower(term) || '; ') > 0
               OR instr('; ' || lower(ifnull(romaji, '')) || '; ', '; ' || lower(term) || '; ') > 0
-              OR instr(' | ' || gloss || ' | ', ' | ' || lower(term) || ' | ') > 0
-              OR instr(' | ' || gloss || ' | ', ' | ' || lower(term) || ' (') > 0
+              OR (
+                CASE WHEN instr(gloss, ' | ') > 0
+                     THEN substr(gloss, 1, instr(gloss, ' | ') - 1)
+                     ELSE gloss END
+              ) = lower(term)
+              OR substr(
+                CASE WHEN instr(gloss, ' | ') > 0
+                     THEN substr(gloss, 1, instr(gloss, ' | ') - 1)
+                     ELSE gloss END,
+                1,
+                length(lower(term)) + 2
+              ) = lower(term) || ' ('
             THEN 0
-            ELSE 1
+            WHEN instr(' | ' || gloss || ' | ', ' | ' || lower(term) || ' | ') > 0
+              OR instr(' | ' || gloss || ' | ', ' | ' || lower(term) || ' (') > 0
+            THEN 1
+            ELSE 2
           END ASC,
           ptag DESC,
           head_len ASC,

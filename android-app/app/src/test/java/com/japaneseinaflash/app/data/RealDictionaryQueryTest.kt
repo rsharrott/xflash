@@ -55,6 +55,36 @@ class RealDictionaryQueryTest {
     }
 
     @Test
+    fun primaryGlossOutranksALaterSense() {
+        val eat = search("eat", limit = 40)
+        assertBefore(eat, "食べる", "遣る")
+        assertTrue("食べる was ${indexOf(eat, "食べる")} in $eat", indexOf(eat, "食べる") in 0..4)
+
+        val go = search("go", limit = 40)
+        assertBefore(go, "行く", "運ぶ")
+        assertTrue("行く was ${indexOf(go, "行く")} in $go", indexOf(go, "行く") in 0..11)
+
+        assertEquals("学校" to "がっこう", search("school").first())
+        val person = search("person", limit = 8)
+        val personIndex = person.indexOfFirst { it.first == "人" && it.second == "ひと" }
+        assertTrue("人（ひと） was $personIndex in $person", personIndex in 0..2)
+        assertTrue(person.take(personIndex).none { it.first == "彼" })
+
+        assertEquals("犬" to "いぬ", search("dog").first())
+        assertEquals("車" to "くるま", search("car").first())
+        assertEquals("雨" to "あめ", search("rain").first())
+    }
+
+    @Test
+    fun lowercaseAndAndProlongedKanaSearchTheRealIndex() {
+        assertEquals("白黒" to "しろくろ", search("black and white", limit = 3).first())
+        assertTrue(search("not available", limit = 5).isNotEmpty())
+        assertTrue(search("ラー", limit = 5).isNotEmpty())
+        val ramen = search("ラーメン", limit = 3)
+        assertTrue(ramen.any { it.first == "ラーメン" || it.first == "拉麺" })
+    }
+
+    @Test
     fun operatorQueriesRunAndStillFindNeko() {
         assertEquals("猫" to "ねこ", search("neko OR", limit = 3).first())
         assertEquals("猫" to "ねこ", search("-neko", limit = 3).first())
@@ -77,6 +107,9 @@ class RealDictionaryQueryTest {
         }
         return ids.map { byId.getValue(it) }
     }
+
+    private fun indexOf(rows: List<Pair<String, String>>, headword: String): Int =
+        rows.indexOfFirst { it.first == headword }
 
     private fun assertBefore(
         rows: List<Pair<String, String>>,

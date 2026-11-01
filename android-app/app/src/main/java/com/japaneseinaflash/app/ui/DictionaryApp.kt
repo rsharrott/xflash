@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
+
 package com.japaneseinaflash.app.ui
 
 import android.content.pm.PackageManager
@@ -41,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -124,13 +127,14 @@ private fun DictionaryScaffold(
                     .fillMaxHeight()
                     .fillMaxWidth(),
             ) {
-                Masthead(
-                    title = title,
-                    showBack = state.canGoBack,
-                    showAbout = showAbout,
-                    onBack = onBack,
-                    onAbout = onAbout,
-                )
+            Masthead(
+                title = title,
+                showBack = state.canGoBack,
+                showAbout = showAbout,
+                japaneseTitle = state.screen is Screen.Detail && state.card != null,
+                onBack = onBack,
+                onAbout = onAbout,
+            )
                 when (state.screen) {
                     Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
                     Screen.About -> AboutBody(state.versions, versionName)
@@ -146,6 +150,7 @@ private fun Masthead(
     title: String,
     showBack: Boolean,
     showAbout: Boolean,
+    japaneseTitle: Boolean,
     onBack: () -> Unit,
     onAbout: () -> Unit,
 ) {
@@ -167,7 +172,11 @@ private fun Masthead(
             }
             Text(
                 text = title,
-                style = MaterialTheme.typography.headlineMedium,
+                style = if (japaneseTitle) {
+                    MaterialTheme.typography.headlineMedium.withJapaneseGlyphs()
+                } else {
+                    MaterialTheme.typography.headlineMedium
+                },
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = MastheadTitleMaxLines,
                 overflow = TextOverflow.Ellipsis,
@@ -198,6 +207,14 @@ private fun SearchBody(
         val searchDescription = stringResource(R.string.cd_search_field)
         val keyboard = LocalSoftwareKeyboardController.current
         val focusManager = LocalFocusManager.current
+        val dismissKeyboard = {
+            // Drop focus before hiding. In landscape the IME otherwise restarts
+            // the input connection and asks to be shown again.
+            focusManager.clearFocus(force = true)
+            keyboard?.hide()
+            onSubmit()
+        }
+        InterceptPlatformTextInput(searchFieldImeInterceptor) {
         OutlinedTextField(
             value = state.query,
             onValueChange = onQueryChange,
@@ -210,11 +227,12 @@ private fun SearchBody(
                 imeAction = ImeAction.Search,
                 autoCorrectEnabled = false,
             ),
-            keyboardActions = KeyboardActions(onSearch = {
-                keyboard?.hide()
-                focusManager.clearFocus()
-                onSubmit()
-            }),
+            keyboardActions = KeyboardActions(
+                onSearch = { dismissKeyboard() },
+                onDone = { dismissKeyboard() },
+                onGo = { dismissKeyboard() },
+                onSend = { dismissKeyboard() },
+            ),
             trailingIcon = if (state.query.isNotEmpty()) {
                 {
                     TextButton(onClick = { onQueryChange("") }) {
@@ -226,6 +244,7 @@ private fun SearchBody(
             },
             colors = paperFieldColors(),
         )
+        }
         Spacer(Modifier.height(12.dp))
         when (state.phase) {
             Phase.Preparing -> PreparingMessage()
@@ -267,11 +286,14 @@ private fun SearchResults(
                     .semantics { contentDescription = description }
                     .padding(vertical = 12.dp),
             ) {
-                Text(card.headword, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    card.headword,
+                    style = MaterialTheme.typography.titleLarge.withJapaneseGlyphs(),
+                )
                 if (card.reading.isNotEmpty()) {
                     Text(
                         card.reading,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyLarge.withJapaneseGlyphs(),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -323,7 +345,10 @@ private fun CardBody(card: CardDetail) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
-        Text(card.headword, style = MaterialTheme.typography.headlineMedium)
+        Text(
+            card.headword,
+            style = MaterialTheme.typography.headlineMedium.withJapaneseGlyphs(),
+        )
         val readingLine = when {
             card.reading.isNotEmpty() && card.romaji.isNotEmpty() ->
                 stringResource(R.string.reading_and_romaji, card.reading, card.romaji)
@@ -334,7 +359,7 @@ private fun CardBody(card: CardDetail) {
         if (readingLine != null) {
             Text(
                 readingLine,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.withJapaneseGlyphs(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp),
             )
@@ -388,7 +413,10 @@ private fun SentenceBlock(sentence: ExampleSentence) {
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(Modifier.padding(12.dp)) {
-            Text(sentence.japanese, style = MaterialTheme.typography.bodyLarge)
+            Text(
+                sentence.japanese,
+                style = MaterialTheme.typography.bodyLarge.withJapaneseGlyphs(),
+            )
             if (sentence.english.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
                 Text(

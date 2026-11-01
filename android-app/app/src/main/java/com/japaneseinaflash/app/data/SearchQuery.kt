@@ -30,15 +30,20 @@ object SearchQuery {
     /**
      * Turns typed text into a MATCH expression SQLite will accept.
      *
-     * Tokens are quoted when they would otherwise be FTS operators (`OR`,
-     * `NEAR`, a leading `-`) or when they contain characters that break an
-     * unquoted query. `?` is the wildcard and becomes a trailing `*`. Quoted
-     * phrases stay phrases. A bare `AND`, `OR`, `NOT`, or `NEAR` next to a
-     * real word is dropped so it cannot AND the query down to nothing (those
-     * operator words are mostly absent from the index). A kanji or kana token
-     * is a prefix, so `水` matches `水*` as well as the exact word. The exact
-     * term is what ranking compares to the headword, reading, romaji, and gloss.
-     * NFKC folds full-width romaji and a full-width question mark (`ｎｅｋｏ`, `？`).
+     * Tokens are quoted when they would otherwise be FTS operators or when
+     * they contain characters that break an unquoted query. SQLite FTS treats
+     * only the uppercase words `AND`, `OR`, `NOT`, and `NEAR` as operators, so
+     * lowercase `and`, `or`, `not`, and `near` stay search terms (`not available`,
+     * `black and white`). An uppercase operator next to a real word is dropped
+     * so a dangling `OR` cannot reject the query. A leading `-` is the NOT
+     * operator and is removed. `?` is the wildcard: a trailing `?` becomes `*`,
+     * characters after a `?` stay in the word (`ne?ko` is `neko`), and a
+     * one-letter ASCII stem is not expanded (`s?` stays `s`) because `s*` scans
+     * the whole index. Quoted phrases stay phrases. A kanji or kana token,
+     * including the prolonged sound mark `ー`, is a prefix, so `水` matches
+     * `水*` and `ラー` matches `ラーメン`. The exact term is what ranking
+     * compares to the headword, reading, romaji, and gloss. NFKC folds
+     * full-width romaji and a full-width question mark (`ｎｅｋｏ`, `？`).
      */
     fun plan(raw: String, limit: Int = DEFAULT_LIMIT): SearchPlan {
         val normalized = Normalizer.normalize(raw, Normalizer.Form.NFKC).trim()
@@ -107,14 +112,17 @@ object SearchQuery {
             }
         }.trimStart('-')
         if (stripped.isEmpty()) return null
-        val wild = stripped.indexOfAny(charArrayOf('?', '*'))
-        val text = if (wild >= 0) stripped.substring(0, wild) else stripped
-        val kept = text.filter { it != '?' && it != '*' }
-        if (kept.isEmpty()) return null
+        val trailingWildcard = stripped.last() == '?' || stripped.last() == '*'
+        // `?` inside a word is not a mid-token wildcard this index can express.
+        // Keep the characters on both sides (`ne?ko` → neko) instead of dropping
+        // everything after the mark.
+        val text = stripped.filter { it != '?' && it != '*' }
+        if (text.isEmpty()) return null
+        val expand = trailingWildcard && (text.isJapaneseScript() || text.length >= MIN_ASCII_WILDCARD_STEM)
         return Piece(
-            text = kept,
+            text = text,
             phrase = false,
-            userWildcard = wild >= 0,
+            userWildcard = expand,
             forceQuote = false,
         )
     }
@@ -133,14 +141,13 @@ object SearchQuery {
 
     private fun Piece.toMatch(): String {
         val prefix = userWildcard || (!phrase && text.isJapaneseScript())
-        if (forceQuote || phrase || !text.isSafeBareToken()) {
-            if (prefix) {
-                val bare = text.safeBare()
-                return if (bare.isEmpty()) "" else "$bare*"
-            }
+        if (prefix && text.isSafeBareToken()) return "$text*"
+        // A quoted prefix (`"nek"*`) does not match this FTS index, so a word
+        // that cannot be written bare is kept as a literal phrase.
+        if (forceQuote || phrase || !text.isSafeBareToken() || prefix) {
             return "\"" + text.replace("\"", "") + "\""
         }
-        return if (prefix) "$text*" else text
+        return text
     }
 
     private fun String.isOperator(): Boolean = operator.matches(this)
@@ -156,18 +163,9 @@ object SearchQuery {
         while (index < length) {
             val cp = codePointAt(index)
             index += Character.charCount(cp)
-            if (!Character.isLetterOrDigit(cp)) return false
+            if (!cp.isSearchTokenChar()) return false
         }
         return true
-    }
-
-    private fun String.safeBare(): String = buildString(length) {
-        var index = 0
-        while (index < this@safeBare.length) {
-            val cp = this@safeBare.codePointAt(index)
-            index += Character.charCount(cp)
-            if (Character.isLetterOrDigit(cp)) appendCodePoint(cp)
-        }
     }
 
     private fun String.isJapaneseScript(): Boolean {
@@ -181,8 +179,15 @@ object SearchQuery {
         return true
     }
 
+    /**
+     * U+30FC `ー` is the prolonged sound mark. Its script is Common, not
+     * Katakana, so a word such as ラーメン would otherwise miss the kana prefix.
+     * U+30FB `・` and U+30A0 `゠` are the katakana middle dot and double hyphen
+     * and likewise sit inside kana words.
+     */
     private fun Int.isJapaneseLetter(): Boolean {
         if (this == '々'.code || this == '〆'.code || this == '〻'.code) return true
+        if (this == 'ー'.code || this == '・'.code || this == '゠'.code) return true
         return when (Character.UnicodeScript.of(this)) {
             Character.UnicodeScript.HAN,
             Character.UnicodeScript.HIRAGANA,
@@ -192,6 +197,12 @@ object SearchQuery {
         }
     }
 
-    private val operator = Regex("AND|OR|NOT|NEAR(?:/\\d+)?", RegexOption.IGNORE_CASE)
+    private fun Int.isSearchTokenChar(): Boolean =
+        Character.isLetterOrDigit(this) || this == 'ー'.code || this == '・'.code || this == '゠'.code
+
+    /** FTS operators are the uppercase words only. `and` is a normal token. */
+    private val operator = Regex("AND|OR|NOT|NEAR(?:/\\d+)?")
     private val whitespace = Regex("\\s+")
+
+    private const val MIN_ASCII_WILDCARD_STEM = 2
 }
