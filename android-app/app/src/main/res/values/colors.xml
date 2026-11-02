@@ -1,12 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="paper">#FFF6F1E7</color>
-    <color name="paper_raised">#FFFFFBF4</color>
-    <color name="ink">#FF1E1A16</color>
-    <color name="ink_muted">#FF5C5348</color>
-    <color name="seal">#FF6B2D3C</color>
-    <color name="seal_soft">#FFF3E1D4</color>
-    <color name="moss">#FF3D4F3A</color>
-    <color name="rule">#FFC9BBA8</color>
-    <color name="ic_launcher_background">#FFF6F1E7</color>
+    <!-- Token values. The previous paper / seal / moss set is retired. -->
+    <color name="paper">#FFFBF8F3</color>
+    <color name="paper_2">#FFE7E1D6</color>
+    <color name="paper_raised">#FFFFFDF9</color>
+    <color name="paper_button">#FFEDE6DA</color>
+    <color name="ink">#FF1D1A16</color>
+    <color name="ink_2">#FF3A352E</color>
+    <color name="muted">#FF6F665B</color>
+    <color name="line">#FFCFC6B8</color>
+    <color name="faded">#FF9A8F80</color>
+    <color name="fire">#FFC01B00</color>
+    <color name="fire_deep">#FF8E1400</color>
+    <color name="fire_dark">#FFD8381C</color>
+    <color name="water">#FF1356A7</color>
+    <color name="water_deep">#FF0E407D</color>
+    <color name="kimono_ai">#FF1F3558</color>
+    <color name="kimono_kaki">#FFEEA57A</color>
+    <color name="kutani_aubergine">#FF553366</color>
+    <color name="kutani_green">#FF1E4A3A</color>
+    <color name="dark_surface">#FF29241F</color>
+    <color name="dark_track">#FF4A433B</color>
+    <color name="dark_accent">#FFF2826E</color>
+    <color name="ic_launcher_background">#FFE7E1D6</color>
 </resources>

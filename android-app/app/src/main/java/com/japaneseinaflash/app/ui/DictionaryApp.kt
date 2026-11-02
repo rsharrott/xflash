@@ -2,9 +2,6 @@
 
 package com.japaneseinaflash.app.ui
 
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,14 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -29,25 +24,18 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.InterceptPlatformTextInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -62,8 +50,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.japaneseinaflash.app.R
 import com.japaneseinaflash.app.data.CardDetail
 import com.japaneseinaflash.app.data.CardSummary
@@ -76,84 +62,31 @@ private val MaxContentWidth = 640.dp
 private const val MastheadTitleMaxLines = 4
 
 @Composable
-fun DictionaryApp(viewModel: DictionaryViewModel = viewModel()) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    BackHandler(enabled = state.canGoBack) { viewModel.back() }
-    PaperTheme {
-        DictionaryScaffold(
-            state = state,
-            versionName = appVersionName(),
-            onQueryChange = viewModel::onQueryChange,
-            onSubmit = viewModel::submit,
-            onCard = viewModel::openCard,
-            onAbout = viewModel::openAbout,
-            onBack = viewModel::back,
-            onRetry = viewModel::retry,
-        )
-    }
-}
-
-@Composable
-private fun DictionaryScaffold(
+internal fun SearchPane(
     state: DictionaryUiState,
-    versionName: String,
     onQueryChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onCard: (Long) -> Unit,
-    onAbout: () -> Unit,
-    onBack: () -> Unit,
     onRetry: () -> Unit,
 ) {
-    val title = when (state.screen) {
-        Screen.Search -> stringResource(R.string.app_name)
-        Screen.About -> stringResource(R.string.about_title)
-        is Screen.Detail -> state.card?.headword ?: stringResource(R.string.card_loading_title)
-    }
-    val showAbout = state.screen is Screen.Search
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onBackground,
-    ) { padding ->
-        Box(
-            Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .imePadding(),
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            Column(
-                Modifier
-                    .widthIn(max = MaxContentWidth)
-                    .fillMaxHeight()
-                    .fillMaxWidth(),
-            ) {
-            Masthead(
-                title = title,
-                showBack = state.canGoBack,
-                showAbout = showAbout,
-                japaneseTitle = state.screen is Screen.Detail && state.card != null,
-                onBack = onBack,
-                onAbout = onAbout,
-            )
-                when (state.screen) {
-                    Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
-                    Screen.About -> AboutBody(state.versions, versionName)
-                    is Screen.Detail -> DetailBody(state)
-                }
-            }
-        }
+    Column(Modifier.fillMaxSize()) {
+        Masthead(title = stringResource(R.string.app_name))
+        SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
     }
 }
 
 @Composable
-private fun Masthead(
-    title: String,
-    showBack: Boolean,
-    showAbout: Boolean,
-    japaneseTitle: Boolean,
-    onBack: () -> Unit,
-    onAbout: () -> Unit,
-) {
+internal fun DetailPane(state: DictionaryUiState) {
+    DetailBody(state)
+}
+
+@Composable
+internal fun AboutPane(versions: DataVersions?, versionName: String) {
+    AboutBody(versions, versionName)
+}
+
+@Composable
+internal fun Masthead(title: String, japaneseTitle: Boolean = false) {
     Column {
         Row(
             modifier = Modifier
@@ -161,15 +94,6 @@ private fun Masthead(
                 .padding(start = 4.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (showBack) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_arrow_back),
-                        contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.onBackground,
-                    )
-                }
-            }
             Text(
                 text = title,
                 style = if (japaneseTitle) {
@@ -184,13 +108,8 @@ private fun Masthead(
                     .weight(1f)
                     .padding(horizontal = 12.dp, vertical = 8.dp),
             )
-            if (showAbout) {
-                TextButton(onClick = onAbout) {
-                    Text(stringResource(R.string.about))
-                }
-            }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 
@@ -306,7 +225,7 @@ private fun SearchResults(
                     )
                 }
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
     }
 }
@@ -596,29 +515,11 @@ private fun paperFieldColors() = OutlinedTextFieldDefaults.colors(
     unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
 )
 
-@Composable
-private fun appVersionName(): String {
-    val context = LocalContext.current
-    val packageName = context.packageName
-    return remember(packageName) {
-        val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.packageManager.getPackageInfo(
-                packageName,
-                PackageManager.PackageInfoFlags.of(0),
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            context.packageManager.getPackageInfo(packageName, 0)
-        }
-        info.versionName.orEmpty()
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFF6F1E7)
+@Preview(showBackground = true, backgroundColor = 0xFFE7E1D6)
 @Composable
 private fun SearchPreview() {
-    PaperTheme {
-        DictionaryScaffold(
+    com.japaneseinaflash.app.ui.theme.JifTheme(com.japaneseinaflash.app.study.StudyTheme.PAPER, dark = false) {
+        SearchPane(
             state = DictionaryUiState(
                 phase = Phase.Ready,
                 query = "neko",
@@ -627,41 +528,9 @@ private fun SearchPreview() {
                     CardSummary(2, "猫背", "ねこせ", "stoop"),
                 ),
             ),
-            versionName = "0.1.0",
             onQueryChange = {},
             onSubmit = {},
             onCard = {},
-            onAbout = {},
-            onBack = {},
-            onRetry = {},
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFF6F1E7)
-@Composable
-private fun CardPreview() {
-    PaperTheme {
-        DictionaryScaffold(
-            state = DictionaryUiState(
-                phase = Phase.Ready,
-                screen = Screen.Detail(1),
-                canGoBack = true,
-                card = CardDetail(
-                    id = 1,
-                    headword = "猫",
-                    reading = "ねこ",
-                    romaji = "neko",
-                    senses = listOf(Sense("cat", "noun")),
-                    sentences = listOf(ExampleSentence(1, "猫がのびをした。", "The cat stretched.")),
-                ),
-            ),
-            versionName = "0.1.0",
-            onQueryChange = {},
-            onSubmit = {},
-            onCard = {},
-            onAbout = {},
-            onBack = {},
             onRetry = {},
         )
     }

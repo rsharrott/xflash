@@ -165,8 +165,14 @@ android {
         // Unit tests build their own tiny databases. Packaging the real
         // dictionary into the unit-test assets would decompress ~116 MiB on
         // every test run and is not what `test` is for.
-        unitTests.isIncludeAndroidResources = false
+        // Compose UI tests resolve string resources through Robolectric, which
+        // needs the merged debug resources. The dictionary copy task is the
+        // same one assembleDebug runs; it stays incremental and the tests do
+        // not open those databases.
+        unitTests.isIncludeAndroidResources = true
         unitTests.all { test ->
+            // Compose tests resolve @Config(manifest) from the working directory.
+            test.workingDir = project.projectDir
             test.testLogging {
                 events("passed", "skipped", "failed")
             }
@@ -196,9 +202,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material.icons)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.adaptive.nav)
     implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
 }

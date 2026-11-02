@@ -107,6 +107,24 @@ class DictionaryRepository internal constructor(
         }
     }
 
+    internal fun <T> query(sql: String, args: Array<String>, read: (android.database.Cursor) -> T): List<T> =
+        synchronized(lock) { readRows(sql, args, read) }
+
+    internal fun exec(sql: String, vararg args: Any) = synchronized(lock) {
+        db.execSQL(sql, args)
+    }
+
+    internal fun <T> transaction(block: () -> T): T = synchronized(lock) {
+        db.beginTransaction()
+        try {
+            val value = block()
+            db.setTransactionSuccessful()
+            value
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     override fun close() = synchronized(lock) {
         db.close()
     }

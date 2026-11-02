@@ -37,7 +37,40 @@
     <string name="retry">やり直す</string>
 
     <string name="about_intro">Japanese in a Flash! は、日本語の単語、読み、意味、例文を調べます。</string>
-    <string name="about_scope">練習、学習セット、リマインダーは、このバージョンにはまだありません。</string>
+    <string name="about_scope">練習と学習セットは、このアプリに含まれています。</string>
+
+    <string name="nav_practice">練習</string>
+    <string name="nav_study_sets">学習セット</string>
+    <string name="nav_search">検索</string>
+    <string name="nav_settings">設定</string>
+
+    <string name="show_answer">答えを見る</string>
+    <string name="show_reading">読みを表示</string>
+    <string name="wrong">不正解</string>
+    <string name="right">正解</string>
+    <string name="cd_speak">読み上げ</string>
+    <string name="cd_palette">テーマ</string>
+
+    <string name="level_studying">学習中</string>
+    <string name="level_right_1">正解1回</string>
+    <string name="level_right_2">正解2回</string>
+    <string name="level_right_3">正解3回</string>
+    <string name="level_learned">覚えた</string>
+    <string name="pill_learned">%1$d / %2$d 覚えた</string>
+    <string name="pill_complete">全部覚えた ✓</string>
+    <string name="pill_complete_cd">このセットは全部覚えました</string>
+    <string name="pill_cd">%2$d枚中%1$d枚を覚えました</string>
+    <string name="study_progress">学習の進み具合</string>
+    <string name="empty_set_message">このセットに単語を追加するには「検索」を使ってください。</string>
+
+    <string name="theme">テーマ</string>
+    <string name="theme_applies">すぐに反映されます。カード、レベルバー、答えを見るボタンの色が変わります。</string>
+    <string name="theme_selected">選択中</string>
+    <string name="theme_paper">和紙</string>
+    <string name="theme_fire">紅</string>
+    <string name="theme_water">藍</string>
+    <string name="theme_kimono">着物</string>
+    <string name="theme_kutani">九谷</string>
     <string name="about_versions">カード %1$s、検索 %2$s、例文 %3$s。</string>
     <string name="about_app_version">バージョン %1$s</string>
 
