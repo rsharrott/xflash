@@ -34,8 +34,10 @@ object SearchQuery {
      * they contain characters that break an unquoted query. SQLite FTS treats
      * only the uppercase words `AND`, `OR`, `NOT`, and `NEAR` as operators, so
      * lowercase `and`, `or`, `not`, and `near` stay search terms (`not available`,
-     * `black and white`). An uppercase operator next to a real word is dropped
-     * so a dangling `OR` cannot reject the query. A leading `-` is the NOT
+     * `black and white`). An uppercase `OR` between words is kept (`neko OR inu`
+     * matches either word). A quoted `"OR"` stays a word inside that disjunction.
+     * `AND`, `NOT`, and `NEAR` are dropped, and a dangling `OR` is dropped, so
+     * none of them can reject the query. A leading `-` is the NOT
      * operator and is removed. `?` is the wildcard: a trailing `?` becomes `*`,
      * characters after a `?` stay in the word (`ne?ko` is `neko`), and a
      * one-letter ASCII stem is not expanded (`s?` stays `s`) because `s*` scans
@@ -49,12 +51,25 @@ object SearchQuery {
         val normalized = Normalizer.normalize(raw, Normalizer.Form.NFKC).trim()
         if (normalized.isEmpty()) return SearchPlan.Blank
         if (normalized.length > MAX_EXPRESSION_CHARS) return SearchPlan.TooLong
-        val pieces = pieces(normalized)
-        if (pieces.isEmpty()) return SearchPlan.Blank
-        val match = pieces.map { it.toMatch() }.filter { it.isNotEmpty() }.joinToString(" ")
+        val parsed = tokens(normalized)
+        if (parsed.isEmpty()) return SearchPlan.Blank
+        val words = parsed.filter { !it.isJoiner() }
+        val pieces = if (words.isNotEmpty()) {
+            words
+        } else {
+            parsed.map { piece ->
+                piece.copy(text = piece.text.literalOperator(), forceQuote = true, userWildcard = false)
+            }
+        }
+        val disjunction = linkedByOr(parsed)
+        val match = if (disjunction) {
+            words.joinToString(" OR ") { it.toMatch() }
+        } else {
+            pieces.map { it.toMatch() }.filter { it.isNotEmpty() }.joinToString(" ")
+        }
         if (match.isEmpty() || match.all { it == '*' || it.isWhitespace() }) return SearchPlan.Blank
-        val exact = pieces.joinToString(" ") { it.text }.trim()
-        if (exact.isEmpty()) return SearchPlan.Blank
+        val exact = if (disjunction) "" else pieces.joinToString(" ") { it.text }.trim()
+        if (exact.isEmpty() && !disjunction) return SearchPlan.Blank
         return SearchPlan.Ready(
             PreparedSearch(
                 sql = DictionarySql.SEARCH,
@@ -72,7 +87,33 @@ object SearchQuery {
         val forceQuote: Boolean,
     )
 
-    private fun pieces(normalized: String): List<Piece> {
+    /** A bare FTS operator. A quoted `"OR"` is a word, not a joiner. */
+    private fun Piece.isJoiner(): Boolean = !phrase && text.isOperator()
+
+    /**
+     * True when every word is joined to the next by uppercase `OR` and no other
+     * operator is present. A leading or trailing `OR` does not count, and a
+     * quoted `"OR"` counts as a word.
+     */
+    private fun linkedByOr(raw: List<Piece>): Boolean {
+        var words = 0
+        var seenWord = false
+        var orSinceWord = false
+        for (piece in raw) {
+            if (piece.isJoiner()) {
+                if (piece.text != "OR") return false
+                orSinceWord = true
+                continue
+            }
+            if (seenWord && !orSinceWord) return false
+            seenWord = true
+            orSinceWord = false
+            words++
+        }
+        return words >= 2
+    }
+
+    private fun tokens(normalized: String): List<Piece> {
         val raw = ArrayList<Piece>()
         var index = 0
         while (index < normalized.length) {
@@ -95,11 +136,7 @@ object SearchQuery {
             }
             parseBare(normalized.substring(start, index))?.let { raw += it }
         }
-        val words = raw.filter { !it.text.isOperator() }
-        if (words.isNotEmpty()) return words
-        return raw.map { piece ->
-            piece.copy(text = piece.text.literalOperator(), forceQuote = true, userWildcard = false)
-        }
+        return raw
     }
 
     private fun parseBare(token: String): Piece? {

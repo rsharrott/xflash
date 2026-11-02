@@ -39,29 +39,61 @@ class DictionaryRepository internal constructor(
     }
 
     private fun rankedIds(prepared: PreparedSearch): List<Long> {
-        if (!SearchRank.isPrefixQuery(prepared.matchArgument, prepared.exactTerm)) {
-            return readIds(prepared.sql, prepared.arguments.toTypedArray())
+        val match = prepared.matchArgument
+        val exact = prepared.exactTerm
+        if (SearchRank.isPrefixQuery(match, exact)) {
+            return readIds(DictionarySql.PREFIX, arrayOf(exact, match, prepared.limit.toString()))
         }
-        val fillers = readRows(DictionarySql.PREFIX_HITS, arrayOf(prepared.matchArgument, prepared.limit.toString())) { cursor ->
-            RankedCard(
-                id = cursor.getLong(0),
-                rank = 2,
-                ptag = cursor.getInt(1),
-                headLength = cursor.getInt(2),
-            )
+        if (SearchRank.isSingleToken(match, exact)) {
+            return tokenIds(exact, prepared.limit)
         }
-        val promoted = readRows(
-            DictionarySql.SCORED,
-            arrayOf(prepared.exactTerm, prepared.exactTerm, prepared.limit.toString()),
-        ) { cursor ->
-            RankedCard(
-                id = cursor.getLong(0),
-                rank = cursor.getInt(1),
-                ptag = cursor.getInt(2),
-                headLength = cursor.getInt(3),
-            )
+        return readIds(prepared.sql, prepared.arguments.toTypedArray())
+    }
+
+    /**
+     * Ranks a single token from one stored copy of each hit.
+     *
+     * A single SELECT rebuilds the gloss on every sort comparison. The stage
+     * table stores it once. It is TEMP, so it belongs to this connection, and
+     * [search] holds [lock]. The work is wrapped in a transaction: SQLite only
+     * has to write `temp`, and the read-only dictionary attachments stay
+     * read-only. Android's [SQLiteDatabase.beginTransaction] is exclusive and
+     * some builds then reject the lock, so that rejection falls back to the
+     * repository lock.
+     */
+    private fun tokenIds(term: String, limit: Int): List<Long> {
+        val transaction = startStageTransaction()
+        var primary: Throwable? = null
+        try {
+            db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+            db.execSQL(DictionarySql.TOKEN_STAGE, arrayOf<Any>(term, term))
+            val ids = readIds(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString()))
+            if (transaction) db.setTransactionSuccessful()
+            return ids
+        } catch (thrown: Throwable) {
+            primary = thrown
+            throw thrown
+        } finally {
+            if (transaction) {
+                try {
+                    db.endTransaction()
+                } catch (end: Exception) {
+                    if (primary != null) primary.addSuppressed(end) else throw end
+                }
+            }
+            try {
+                db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+            } catch (drop: Exception) {
+                if (primary != null) primary.addSuppressed(drop) else throw drop
+            }
         }
-        return SearchRank.merge(promoted, fillers, prepared.limit)
+    }
+
+    private fun startStageTransaction(): Boolean = try {
+        db.beginTransactionNonExclusive()
+        true
+    } catch (_: SQLException) {
+        false
     }
 
     private fun readIds(sql: String, args: Array<String>): List<Long> =
