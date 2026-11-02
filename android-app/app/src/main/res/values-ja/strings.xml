@@ -62,10 +62,12 @@
     <string name="pill_cd">%2$d枚中%1$d枚を覚えました</string>
     <string name="study_progress">学習の進み具合</string>
     <string name="empty_set_message">このセットに単語を追加するには「検索」を使ってください。</string>
+    <string name="study_set_learned">このセットは覚えました</string>
+    <string name="study_set_learned_message">おめでとうございます！このセットはすべて覚えました。ふだんは表示されないカードも出題します。</string>
+    <string name="ok">OK</string>
 
     <string name="theme">テーマ</string>
     <string name="theme_applies">すぐに反映されます。カード、レベルバー、答えを見るボタンの色が変わります。</string>
-    <string name="theme_selected">選択中</string>
     <string name="theme_paper">和紙</string>
     <string name="theme_fire">紅</string>
     <string name="theme_water">藍</string>
@@ -84,11 +86,13 @@
     <string name="no_words_title">セットに単語がありません</string>
     <string name="create_set">学習セットを作成</string>
     <string name="create_set_hint">セットに名前をつけてください</string>
-    <string name="ok">OK</string>
     <string name="cancel">キャンセル</string>
     <string name="cd_set_row">%1$s、%2$d</string>
     <plurals name="group_count">
         <item quantity="other">%d グループ</item>
+    </plurals>
+    <plurals name="word_count">
+        <item quantity="other">%d 語</item>
     </plurals>
     <plurals name="set_count">
         <item quantity="other">%d セット</item>
@@ -106,7 +110,6 @@
     <string name="help_sets">学習セット</string>
     <string name="help_practice">練習</string>
     <string name="help_search">検索</string>
-    <string name="help_corrections">誤りの報告</string>
     <string name="help_algorithm">学習アルゴリズム</string>
     <string name="help_tags">タグの一覧</string>
     <string name="settings_studying">学習</string>
@@ -128,7 +131,9 @@
     <string name="difficulty_medium">ふつう</string>
     <string name="difficulty_hard">むずかしい</string>
     <string name="difficulty_custom">カスタム</string>
-    <string name="difficulty_values">学習するカード %1$d 枚、新しいカードの頻度 %2$d</string>
+    <plurals name="difficulty_values">
+        <item quantity="other">学習するカード %1$d 枚、新しいカードの頻度 %2$d</item>
+    </plurals>
     <string name="pool_size">同時に学習するカードの枚数</string>
     <string name="pool_range">5〜50</string>
     <string name="new_card_frequency">新しいカードの出題頻度</string>
@@ -140,6 +145,7 @@
     <string name="dark_on">オン</string>
     <string name="dark_mode_paper">和紙のみ</string>
     <string name="dark_mode_unavailable">和紙のときに使えます。</string>
+    <string name="last_card_message">このセットには今学習中のカードしかありません。セットごと削除するには、先に別のセットに切り替えてください。</string>
     <string name="about_versions">カード %1$s、検索 %2$s、例文 %3$s。</string>
     <string name="about_app_version">バージョン %1$s</string>
 

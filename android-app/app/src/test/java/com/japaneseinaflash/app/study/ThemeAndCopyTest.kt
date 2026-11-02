@@ -50,14 +50,21 @@ class ThemeAndCopyTest {
     }
 
     @Test
-    fun colorsXmlUsesTheTokensAndDropsTheOldPalette() {
+    fun colorsXmlDropsTheOldPaletteAndTokensStayInCode() {
         val xml = source("src/main/res/values/colors.xml").readText()
         listOf("F6F1E7", "FFFBF4", "1E1A16", "5C5348", "6B2D3C", "F3E1D4", "3D4F3A", "C9BBA8").forEach {
             assertFalse(xml.contains(it, ignoreCase = true))
         }
-        listOf("FBF8F3", "E7E1D6", "1D1A16", "C01B00", "1356A7", "0E407D", "1F3558", "553366", "29241F", "F2826E", "D8381C").forEach {
-            assertTrue(xml.contains(it, ignoreCase = true))
+        assertTrue(xml.contains("E7E1D6", ignoreCase = true))
+        val tokens = source("src/main/java/com/japaneseinaflash/app/theme/TokenColors.kt").readText()
+        listOf("FBF8F3", "C01B00", "1356A7", "0E407D", "1F3558", "553366", "29241F", "F2826E", "D8381C").forEach {
+            assertTrue(tokens.contains(it, ignoreCase = true))
         }
+        assertEquals(TokenColors.FIRE, 0xFFC01B00.toInt())
+        assertEquals(TokenColors.WATER_DEEP, 0xFF0E407D.toInt())
+        assertEquals(TokenColors.KIMONO_AI, 0xFF1F3558.toInt())
+        assertEquals(TokenColors.KUTANI_AUBERGINE, 0xFF553366.toInt())
+        assertEquals(TokenColors.FIRE_DEEP, 0xFF8E1400.toInt())
     }
 
     @Test
@@ -74,15 +81,10 @@ class ThemeAndCopyTest {
         assertTrue(compareSetNames("Beginner 1 (≈N5) 02", "Beginner 1 (≈N5) 01") > 0)
         assertTrue(compareGroups(1, "Survival Japanese", 1, "Recommended") > 0)
         assertTrue(compareGroups(1, "Recommended", 0, "Common Words") < 0)
-        val mine = starredFirst(listOf(2L to "Long Weekend Favorites", 0L to "My Starred Words")) { it.first }
-        assertEquals(listOf(0L, 2L), mine.map { it.first })
         assertTrue(userOwnsMembership(0, editable = false))
         assertFalse(userOwnsMembership(95, editable = false))
-        assertTrue(233 > FLAT_SET_LIST_LIMIT)
-        assertTrue(opensAsSearch(0, 233))
-        assertTrue(opensAsSearch(0, 189))
-        assertFalse(opensAsSearch(4, 13))
-        assertFalse(opensAsSearch(0, 8))
+        assertTrue(opensAsSearch("Common Words"))
+        assertFalse(opensAsSearch("Nouns"))
     }
 
     private fun source(relative: String): File {

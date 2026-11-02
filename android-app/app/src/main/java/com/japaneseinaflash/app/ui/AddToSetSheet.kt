@@ -8,8 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -27,10 +25,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.japaneseinaflash.app.R
+import com.japaneseinaflash.app.study.displayName
 import com.japaneseinaflash.app.ui.withJapaneseGlyphs
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -43,6 +44,7 @@ fun AddToSetSheet(
     onCancelCreate: () -> Unit,
     onDone: () -> Unit,
 ) {
+    val japanese = LocalConfiguration.current.locales[0].language == "ja"
     ModalBottomSheet(onDismissRequest = onDone) {
         Column(
             Modifier
@@ -71,7 +73,7 @@ fun AddToSetSheet(
             state.sets.forEach { tag ->
                 val checked = tag.id in state.checked
                 ListItem(
-                    headlineContent = { Text(tag.name) },
+                    headlineContent = { Text(displayName(tag.name, tag.nameJa, japanese)) },
                     leadingContent = { Checkbox(checked = checked, onCheckedChange = null) },
                     modifier = Modifier
                         .toggleable(value = checked, role = Role.Checkbox) { onToggle(tag.id, !checked) }
@@ -80,7 +82,7 @@ fun AddToSetSheet(
             }
             ListItem(
                 headlineContent = { Text(stringResource(R.string.new_set)) },
-                leadingContent = { Icon(Icons.Filled.Add, contentDescription = null) },
+                leadingContent = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
                 modifier = Modifier
                     .clickable(role = Role.Button, onClick = onStartCreate)
                     .heightIn(min = 48.dp),
@@ -92,8 +94,8 @@ fun AddToSetSheet(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 4.dp),
                 )
-                state.builtIn.forEach { name ->
-                    ListItem(headlineContent = { Text(name) })
+                state.builtIn.forEach { tag ->
+                    ListItem(headlineContent = { Text(displayName(tag.name, tag.nameJa, japanese)) })
                 }
             }
             Button(
@@ -121,12 +123,19 @@ fun AddToSetSheet(
                 )
             },
             confirmButton = {
-                TextButton(onClick = { if (name.isNotBlank()) onCreate(name) }, enabled = name.isNotBlank()) {
+                TextButton(
+                    onClick = { if (name.isNotBlank()) onCreate(name) },
+                    enabled = name.isNotBlank(),
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) {
                     Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
-                TextButton(onClick = onCancelCreate) { Text(stringResource(R.string.cancel)) }
+                TextButton(
+                    onClick = onCancelCreate,
+                    modifier = Modifier.heightIn(min = 48.dp),
+                ) { Text(stringResource(R.string.cancel)) }
             },
         )
     }

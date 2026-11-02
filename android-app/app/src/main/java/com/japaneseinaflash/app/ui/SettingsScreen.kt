@@ -10,13 +10,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -29,10 +29,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.japaneseinaflash.app.R
@@ -60,21 +68,22 @@ fun SettingsScreen(
     onAbout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var dialog by remember { androidx.compose.runtime.mutableStateOf<ChoiceDialog?>(null) }
+    var dialogName by rememberSaveable { mutableStateOf<String?>(null) }
+    val dialog = dialogName?.let { name -> ChoiceDialog.entries.firstOrNull { it.name == name } }
     val paper = preferences.theme == StudyTheme.PAPER
     Column(modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         Masthead(stringResource(R.string.nav_settings))
         Section(stringResource(R.string.settings_studying))
         ChoiceRow(stringResource(R.string.study_language), languageLabel(preferences.language)) {
-            dialog = ChoiceDialog.Language
+            dialogName = ChoiceDialog.Language.name
         }
         ChoiceRow(
             stringResource(R.string.furigana),
             readingLabel(preferences.reading),
             supporting = stringResource(R.string.furigana_help),
-        ) { dialog = ChoiceDialog.Reading }
+        ) { dialogName = ChoiceDialog.Reading.name }
         ChoiceRow(stringResource(R.string.common_kana), kanaLabel(preferences.kanaHeadword)) {
-            dialog = ChoiceDialog.Kana
+            dialogName = ChoiceDialog.Kana.name
         }
         ChoiceRow(stringResource(R.string.difficulty), difficultyLabel(preferences)) { onDifficulty() }
         Section(stringResource(R.string.settings_appearance))
@@ -88,7 +97,7 @@ fun SettingsScreen(
                 stringResource(R.string.dark_mode_unavailable)
             },
             enabled = paper,
-        ) { if (paper) dialog = ChoiceDialog.Dark }
+        ) { if (paper) dialogName = ChoiceDialog.Dark.name }
         Section(stringResource(R.string.settings_about))
         ChoiceRow(stringResource(R.string.help), "") { onHelp() }
         ChoiceRow(stringResource(R.string.about), "") { onAbout() }
@@ -98,29 +107,29 @@ fun SettingsScreen(
             title = stringResource(R.string.study_language),
             options = StudyLanguage.entries.map { it to languageLabel(it) },
             selected = preferences.language,
-            onSelect = { onLanguage(it); dialog = null },
-            onDismiss = { dialog = null },
+            onSelect = { onLanguage(it); dialogName = null },
+            onDismiss = { dialogName = null },
         )
         ChoiceDialog.Reading -> RadioDialog(
             title = stringResource(R.string.furigana),
             options = ReadingMode.entries.map { it to readingLabel(it) },
             selected = preferences.reading,
-            onSelect = { onReading(it); dialog = null },
-            onDismiss = { dialog = null },
+            onSelect = { onReading(it); dialogName = null },
+            onDismiss = { dialogName = null },
         )
         ChoiceDialog.Kana -> RadioDialog(
             title = stringResource(R.string.common_kana),
             options = KanaHeadword.entries.map { it to kanaLabel(it) },
             selected = preferences.kanaHeadword,
-            onSelect = { onKana(it); dialog = null },
-            onDismiss = { dialog = null },
+            onSelect = { onKana(it); dialogName = null },
+            onDismiss = { dialogName = null },
         )
         ChoiceDialog.Dark -> RadioDialog(
             title = stringResource(R.string.dark_mode),
             options = DarkMode.entries.map { it to darkLabel(it) },
             selected = preferences.darkMode,
-            onSelect = { onDark(it); dialog = null },
-            onDismiss = { dialog = null },
+            onSelect = { onDark(it); dialogName = null },
+            onDismiss = { dialogName = null },
         )
         null -> Unit
     }
@@ -141,7 +150,7 @@ fun DifficultyScreen(
                 title = { Text(stringResource(R.string.difficulty)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.back))
                     }
                 },
             )
@@ -172,27 +181,41 @@ fun DifficultyScreen(
                     modifier = Modifier.padding(start = 20.dp, top = 16.dp),
                 )
                 Text("$pool", modifier = Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.titleMedium)
+                val poolLabel = stringResource(R.string.pool_size)
+                val poolState = pool.toString()
                 Slider(
                     value = pool.toFloat(),
                     onValueChange = { pool = it.toInt() },
                     onValueChangeFinished = { onCustom(pool, frequency) },
                     valueRange = AppPreferences.MIN_POOL.toFloat()..AppPreferences.MAX_POOL.toFloat(),
                     steps = AppPreferences.MAX_POOL - AppPreferences.MIN_POOL - 1,
-                    modifier = Modifier.padding(horizontal = 20.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .semantics {
+                            contentDescription = poolLabel
+                            stateDescription = poolState
+                        },
                 )
                 Text(stringResource(R.string.pool_range), modifier = Modifier.padding(horizontal = 20.dp))
+                val frequencyLabel = stringResource(R.string.new_card_frequency)
                 Text(
-                    stringResource(R.string.new_card_frequency),
+                    frequencyLabel,
                     modifier = Modifier.padding(start = 20.dp, top = 12.dp),
                 )
                 Text("$frequency", modifier = Modifier.padding(horizontal = 20.dp), style = MaterialTheme.typography.titleMedium)
+                val frequencyState = frequency.toString()
                 Slider(
                     value = frequency.toFloat(),
                     onValueChange = { frequency = it.toInt() },
                     onValueChangeFinished = { onCustom(pool, frequency) },
                     valueRange = 1f..4f,
                     steps = 2,
-                    modifier = Modifier.padding(horizontal = 20.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .semantics {
+                            contentDescription = frequencyLabel
+                            stateDescription = frequencyState
+                        },
                 )
                 Text(stringResource(R.string.frequency_range), modifier = Modifier.padding(horizontal = 20.dp))
             }
@@ -200,9 +223,14 @@ fun DifficultyScreen(
             ListItem(
                 headlineContent = { Text(stringResource(R.string.hide_learned)) },
                 trailingContent = {
-                    Switch(checked = preferences.hideLearned, onCheckedChange = onHide)
+                    Switch(checked = preferences.hideLearned, onCheckedChange = null)
                 },
-                modifier = Modifier.heightIn(min = 48.dp),
+                modifier = Modifier
+                    .toggleable(
+                        value = preferences.hideLearned,
+                        role = Role.Switch,
+                    ) { onHide(!preferences.hideLearned) }
+                    .heightIn(min = 48.dp),
             )
         }
     }
@@ -249,17 +277,30 @@ private fun ChoiceRow(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
+    val content = if (enabled) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    }
+    val support = if (enabled) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    }
     ListItem(
         headlineContent = { Text(headline) },
         supportingContent = {
             val line = listOfNotNull(value.ifBlank { null }, supporting).joinToString(" · ")
-            if (line.isNotBlank()) {
-                Text(line, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            if (line.isNotBlank()) Text(line)
         },
+        colors = ListItemDefaults.colors(
+            headlineColor = content,
+            supportingColor = support,
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)
+            .semantics { if (!enabled) disabled() }
             .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier),
     )
 }
@@ -319,5 +360,5 @@ private fun difficultyDetail(difficulty: Difficulty, preferences: AppPreferences
         Difficulty.HARD -> AppPreferences.HARD_POOL to AppPreferences.HARD_FREQUENCY
         Difficulty.CUSTOM -> preferences.customMax to preferences.customFrequency
     }
-    return stringResource(R.string.difficulty_values, pool, frequency)
+    return pluralStringResource(R.plurals.difficulty_values, pool, pool, frequency)
 }

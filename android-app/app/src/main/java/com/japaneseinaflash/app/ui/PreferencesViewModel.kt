@@ -16,6 +16,7 @@ import com.japaneseinaflash.app.study.StudyLanguage
 import com.japaneseinaflash.app.study.StudyTheme
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -63,7 +64,12 @@ class PreferencesViewModel(app: Application) : AndroidViewModel(app) {
             viewModelFactory {
                 initializer {
                     val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
-                    PracticeViewModel(app, session, store)
+                    PracticeViewModel(
+                        app,
+                        openRepository = { session.openRepository() },
+                        phase = session.state.map { it.phase },
+                        store = store,
+                    )
                 }
             }
     }

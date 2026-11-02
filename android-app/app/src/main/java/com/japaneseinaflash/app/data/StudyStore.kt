@@ -8,15 +8,6 @@ import com.japaneseinaflash.app.study.pickCardLevel
 import com.japaneseinaflash.app.study.probabilityOfUnseen
 import com.japaneseinaflash.app.study.seenCount
 import com.japaneseinaflash.app.study.selectableLevelCount
-import com.japaneseinaflash.app.study.starredFirst
-
-data class TagRecord(
-    val id: Long,
-    val name: String,
-    val nameJa: String,
-    val count: Int,
-    val editable: Boolean,
-)
 
 data class GroupRecord(
     val id: Long,
@@ -26,6 +17,21 @@ data class GroupRecord(
     val setCount: Int,
     val childGroups: Int,
 )
+
+data class TagRecord(
+    val id: Long,
+    val name: String,
+    val nameJa: String,
+    val count: Int,
+    val editable: Boolean,
+)
+
+data class PracticePick(
+    val card: PracticeCard,
+    val allLearned: Boolean,
+)
+
+enum class MembershipResult { Changed, LastCard }
 
 data class PracticeCard(
     val detail: CardDetail,
@@ -98,14 +104,22 @@ class StudyStore(private val repository: DictionaryRepository) {
         hideLearned: Boolean,
         random: Double,
         avoid: Long?,
-    ): PracticeCard? {
+    ): PracticePick? {
         val levels = levelCounts(tag, userId)
-        if (levels.sum() == 0) return null
+        val total = levels.sum()
+        if (total == 0) return null
+        val learned = levels.getOrElse(LEARNED_LEVEL) { 0 }
+        if (hideLearned && learned > 0 && total - learned == 0) {
+            val id = cardAtLevel(tag, userId, LEARNED_LEVEL, avoid) ?: return null
+            val card = practiceCard(id, userId) ?: return null
+            return PracticePick(card, allLearned = true)
+        }
         val numLevels = selectableLevelCount(levels, hideLearned)
         val seen = seenCount(levels, numLevels)
+        val totalForMath = if (hideLearned) total - learned else total
         val unseen = probabilityOfUnseen(
             cardsSeen = seen,
-            totalCards = levels.sum(),
+            totalCards = totalForMath,
             levelTimesCount = levelTimesCount(levels, numLevels),
             studyingCount = levels.getOrElse(1) { 0 },
             maxCards = maxCards,
@@ -114,7 +128,8 @@ class StudyStore(private val repository: DictionaryRepository) {
         val level = pickCardLevel(levels, numLevels, unseen, random)
         if (level < 0) return null
         val id = cardAtLevel(tag, userId, level, avoid) ?: return null
-        return practiceCard(id, userId)
+        val card = practiceCard(id, userId) ?: return null
+        return PracticePick(card, allLearned = false)
     }
 
     fun record(card: PracticeCard, userId: Long, right: Boolean) {
@@ -137,21 +152,12 @@ class StudyStore(private val repository: DictionaryRepository) {
         repository.query(StudySql.TAGS_IN_GROUP, arrayOf(groupId.toString()), ::readTag)
 
     fun mySets(): List<TagRecord> =
-        starredFirst(
-            repository.query(StudySql.USER_SETS, emptyArray(), ::readTag),
-        ) { it.id }
+        repository.query(StudySql.USER_SETS, emptyArray(), ::readTag)
 
-    fun searchTags(query: String, groupId: Long?): List<TagRecord> {
+    /** Set search covers every grouped set, the same as iOS TagPeer.retrieveTagListLike. */
+    fun searchTags(query: String): List<TagRecord> {
         val like = "%${query.replace("%", "").replace("_", "")}%"
-        return if (groupId == null) {
-            repository.query(StudySql.SEARCH_TAGS, arrayOf(like, like), ::readTag)
-        } else {
-            repository.query(
-                StudySql.SEARCH_TAGS_IN_GROUP,
-                arrayOf(groupId.toString(), like, like),
-                ::readTag,
-            )
-        }
+        return repository.query(StudySql.SEARCH_TAGS, arrayOf(like, like), ::readTag)
     }
 
     fun createSet(name: String): Long? {
@@ -187,16 +193,24 @@ class StudyStore(private val repository: DictionaryRepository) {
             )
         }
 
-    fun setMembership(tagId: Long, cardId: Long, member: Boolean) {
+    /**
+     * Removing the last card of the set currently being studied is refused,
+     * matching TagPeer.m. Any other set can drop its last card.
+     */
+    fun setMembership(tagId: Long, cardId: Long, member: Boolean, activeTagId: Long): MembershipResult {
         if (tagId != STARRED_TAG_ID) {
-            val tag = tag(tagId) ?: return
-            if (!tag.editable) return
+            val tag = tag(tagId) ?: return MembershipResult.Changed
+            if (!tag.editable) return MembershipResult.Changed
+        }
+        val already = repository.query(
+            StudySql.MEMBER_USER,
+            arrayOf(tagId.toString(), cardId.toString()),
+        ) { 1 }.isNotEmpty()
+        if (!member && already && tagId == activeTagId) {
+            val count = repository.query(StudySql.LINK_COUNT, arrayOf(tagId.toString())) { it.getInt(0) }.first()
+            if (count <= 1) return MembershipResult.LastCard
         }
         repository.transaction {
-            val already = repository.query(
-                StudySql.MEMBER_USER,
-                arrayOf(tagId.toString(), cardId.toString()),
-            ) { 1 }.isNotEmpty()
             if (member && !already) {
                 repository.exec(StudySql.INSERT_MEMBER, cardId, tagId)
                 repository.exec(StudySql.BUMP_TAG_COUNT, 1, 1, tagId)
@@ -205,11 +219,7 @@ class StudyStore(private val repository: DictionaryRepository) {
                 repository.exec(StudySql.BUMP_TAG_COUNT, -1, -1, tagId)
             }
         }
-    }
-
-    fun setActive(tagId: Long) {
-        // The preference store holds the active id. This only checks the tag exists.
-        check(tag(tagId) != null)
+        return MembershipResult.Changed
     }
 
     private fun readTag(cursor: android.database.Cursor) = TagRecord(
@@ -217,7 +227,7 @@ class StudyStore(private val repository: DictionaryRepository) {
         name = cursor.getString(1).orEmpty(),
         nameJa = cursor.getString(2).orEmpty(),
         count = cursor.getInt(3),
-        editable = cursor.getInt(4) != 0 || cursor.getLong(0) == STARRED_TAG_ID,
+        editable = cursor.getInt(4) != 0 || cursor.getLong(0) == 0L,
     )
 
     private fun readGroup(cursor: android.database.Cursor) = GroupRecord(
