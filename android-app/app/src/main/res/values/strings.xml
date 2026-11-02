@@ -60,10 +60,12 @@
     <string name="pill_cd">%1$d of %2$d learned</string>
     <string name="study_progress">Study progress</string>
     <string name="empty_set_message">To add words to this set, you can use Search.</string>
+    <string name="study_set_learned">Study set learned</string>
+    <string name="study_set_learned_message">Congratulations! You\'ve already learned this set. We will show cards that would usually be hidden.</string>
+    <string name="ok">OK</string>
 
     <string name="theme">Theme</string>
     <string name="theme_applies">Applies straight away. The card, the level bars and Show answer change colour.</string>
-    <string name="theme_selected">Selected</string>
     <string name="theme_paper">Paper</string>
     <string name="theme_fire">Fire</string>
     <string name="theme_water">Water</string>
@@ -82,12 +84,15 @@
     <string name="no_words_title">No words in set</string>
     <string name="create_set">Create study set</string>
     <string name="create_set_hint">Name your study set</string>
-    <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="cd_set_row">%1$s, %2$d</string>
     <plurals name="group_count">
         <item quantity="one">%d group</item>
         <item quantity="other">%d groups</item>
+    </plurals>
+    <plurals name="word_count">
+        <item quantity="one">%d word</item>
+        <item quantity="other">%d words</item>
     </plurals>
     <plurals name="set_count">
         <item quantity="one">%d set</item>

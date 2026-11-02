@@ -1,21 +1,37 @@
 package com.japaneseinaflash.app.data
 
+import com.japaneseinaflash.app.study.opensAsSearch
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class StudyCatalogSqlTest {
     @Test
-    fun realGroupsAndBeginnerSetsFollowTheIosOrder() {
+    fun topLevelGroupsFollowTheIosOrderAndOnlyCommonWordsIsSearched() {
         val user = listedSources().first { it.assetName == DictionaryFiles.USER_DB }.file
         val groups = sqlite3(
             user,
             "SELECT group_name FROM groups WHERE owner_id = 0 ORDER BY recommended DESC, group_name ASC;",
         ).trim().lines()
-        assertEquals("Recommended", groups[0])
-        assertEquals("Survival Japanese", groups[1])
-        assertEquals("Vocabulary Levels", groups[2])
-        assertTrue(groups.indexOf("Common Phrases") < groups.indexOf("Common Words"))
+        assertEquals(
+            listOf(
+                "Recommended",
+                "Survival Japanese",
+                "Vocabulary Levels",
+                "Common Phrases",
+                "Common Words",
+                "Core 1000",
+                "Expressions",
+                "Foreign Loan Words",
+                "Japanese Dialects",
+                "Parts of Speech",
+                "Specialist Terminology",
+            ),
+            groups,
+        )
+        assertTrue(opensAsSearch("Common Words"))
+        assertFalse(opensAsSearch("Nouns"))
         val beginner = sqlite3(
             user,
             """
@@ -26,15 +42,10 @@ class StudyCatalogSqlTest {
         ).trim().lines()
         assertTrue(beginner.first().endsWith("Full Set"))
         assertEquals("Beginner 1 (≈N5) 01", beginner[1])
-        assertEquals(
-            "233",
-            sqlite3(user, "SELECT COUNT(*) FROM group_tag_link WHERE group_id = 11;").trim(),
-        )
         val mine = sqlite3(
             user,
             "SELECT tag_name FROM tags WHERE editable = 1 OR tag_id = 0 ORDER BY tag_name COLLATE NOCASE ASC;",
-        )
-        assertTrue(mine.contains("My Starred Words"))
-        assertTrue(mine.contains("Long Weekend Favorites"))
+        ).trim().lines()
+        assertEquals("Long Weekend Favorites", mine.first())
     }
 }

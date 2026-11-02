@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Style
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,11 +27,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -78,21 +77,20 @@ fun JapaneseApp(
     val nav = rememberNavController()
     val current = nav.currentBackStackEntryAsState().value?.destination?.route
     val topLevel = current == null || current in setOf(Routes.Practice, Routes.Sets, Routes.Search, Routes.Settings)
-    var themesOpen by remember { mutableStateOf(false) }
-    val width = LocalConfiguration.current.screenWidthDp.dp
-    val suite = when {
-        !topLevel -> NavigationSuiteType.None
-        width >= 600.dp -> NavigationSuiteType.NavigationRail
-        else -> NavigationSuiteType.NavigationBar
+    var themesOpen by rememberSaveable { mutableStateOf(false) }
+    val suite = if (!topLevel) {
+        NavigationSuiteType.None
+    } else {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
     }
     JifTheme(theme = preferences.theme, dark = dark) {
         NavigationSuiteScaffold(
             layoutType = suite,
             navigationSuiteItems = {
-                suiteItem(nav, Routes.Practice, current, R.string.nav_practice, Icons.Filled.Style)
-                suiteItem(nav, Routes.Sets, current, R.string.nav_study_sets, Icons.Filled.Style)
-                suiteItem(nav, Routes.Search, current, R.string.nav_search, Icons.Filled.Search)
-                suiteItem(nav, Routes.Settings, current, R.string.nav_settings, Icons.Filled.Settings)
+                suiteItem(nav, Routes.Practice, current, R.string.nav_practice, R.drawable.ic_practice)
+                suiteItem(nav, Routes.Sets, current, R.string.nav_study_sets, R.drawable.ic_sets)
+                suiteItem(nav, Routes.Search, current, R.string.nav_search, R.drawable.ic_search)
+                suiteItem(nav, Routes.Settings, current, R.string.nav_settings, R.drawable.ic_settings)
             },
         ) {
             AppNavHost(
@@ -118,7 +116,7 @@ private fun androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteS
     route: String,
     current: String?,
     label: Int,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: Int,
 ) {
     item(
         selected = current == route || (route == Routes.Search && current?.startsWith("card/") == true),
@@ -129,7 +127,7 @@ private fun androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteS
                 restoreState = true
             }
         },
-        icon = { Icon(icon, contentDescription = null) },
+        icon = { Icon(painterResource(icon), contentDescription = null) },
         label = { Text(stringResource(label)) },
     )
 }
@@ -210,6 +208,7 @@ private fun SetsRoute(
         factory = StudySetsViewModel.factory(session, preferencesModel.store, groupId),
     )
     val state by model.state.collectAsStateWithLifecycle()
+    // Built-in names follow the device locale, as iOS LWEBuiltInCatalogUsesJapanese does.
     val japanese = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language == "ja"
     when (dictionary.phase) {
         Phase.Preparing -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -265,7 +264,7 @@ private fun PracticeRoute(
     val state by practice.state.collectAsStateWithLifecycle()
     val dictionary by session.state.collectAsStateWithLifecycle()
     val preferences by preferencesModel.preferences.collectAsStateWithLifecycle()
-    var progress by remember { mutableStateOf(false) }
+    var progress by rememberSaveable { mutableStateOf(false) }
     val speaker = rememberSpeaker()
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -277,8 +276,8 @@ private fun PracticeRoute(
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
                 ),
                 actions = {
-                    IconButton(onClick = onTheme, modifier = Modifier) {
-                        Icon(Icons.Filled.Palette, contentDescription = stringResource(R.string.cd_palette))
+                    IconButton(onClick = onTheme) {
+                        Icon(painterResource(R.drawable.ic_palette), contentDescription = stringResource(R.string.cd_palette))
                     }
                 },
             )
@@ -303,6 +302,18 @@ private fun PracticeRoute(
         if (progress) {
             ProgressSheet(state, onDismiss = { progress = false })
         }
+        if (state.allLearned) {
+            AlertDialog(
+                onDismissRequest = practice::dismissAllLearned,
+                title = { Text(stringResource(R.string.study_set_learned)) },
+                text = { Text(stringResource(R.string.study_set_learned_message)) },
+                confirmButton = {
+                    TextButton(onClick = practice::dismissAllLearned) {
+                        Text(stringResource(R.string.ok))
+                    }
+                },
+            )
+        }
     }
 }
 
@@ -319,6 +330,7 @@ private fun ProgressSheet(state: PracticeUiState, onDismiss: () -> Unit) {
             levels = state.levels,
             total = state.total,
             onClick = {},
+            asButton = false,
             modifier = Modifier.padding(16.dp),
         )
     }
@@ -344,7 +356,7 @@ private fun DetailRoute(session: DictionaryViewModel, cardId: Long?, onBack: () 
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -372,7 +384,7 @@ private fun AboutRoute(versions: com.japaneseinaflash.app.data.DataVersions?, on
                 title = { Text(stringResource(R.string.about_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                        Icon(painterResource(R.drawable.ic_arrow_back), contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),

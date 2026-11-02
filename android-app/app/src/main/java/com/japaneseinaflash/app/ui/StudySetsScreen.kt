@@ -11,11 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -30,7 +27,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -70,8 +69,8 @@ fun StudySetsScreen(
             onBack = onBack,
             action = {
                 if (!state.searchOnly && !searchOpen) {
-                    androidx.compose.material3.IconButton(onClick = { searchOpen = true }) {
-                        Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.search_sets))
+                    IconButton(onClick = { searchOpen = true }) {
+                        Icon(painterResource(R.drawable.ic_search), contentDescription = stringResource(R.string.search_sets))
                     }
                 }
             },
@@ -87,7 +86,7 @@ fun StudySetsScreen(
                     .semantics { contentDescription = searchDescription },
                 placeholder = { Text(stringResource(R.string.search_sets)) },
                 singleLine = true,
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                leadingIcon = { Icon(painterResource(R.drawable.ic_search), contentDescription = null) },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { onQuery(state.query) }),
             )
@@ -187,18 +186,22 @@ private fun Catalog(
                 SectionLabel(stringResource(R.string.studying_now))
                 val set = state.studying
                 val name = displayName(set.name, set.nameJa, japanese)
+                val words = pluralStringResource(R.plurals.word_count, set.count, set.count)
+                val description = stringResource(R.string.cd_set_row, name, set.count)
                 Surface(
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .fillMaxWidth()
-                        .clickable(onClick = onPractice),
+                        .heightIn(min = 48.dp)
+                        .clickable(role = Role.Button, onClick = onPractice)
+                        .semantics { contentDescription = description },
                     shape = MaterialTheme.shapes.large,
                     color = MaterialTheme.colorScheme.surface,
                 ) {
                     Column(Modifier.padding(16.dp)) {
                         Text(name, style = MaterialTheme.typography.titleMedium)
                         Text(
-                            set.count.toString(),
+                            words,
                             style = MaterialTheme.typography.bodyMedium,
                             color = LocalStudyColors.current.listSupporting,
                         )
@@ -214,7 +217,7 @@ private fun Catalog(
             item {
                 ListItem(
                     headlineContent = { Text(stringResource(R.string.new_set)) },
-                    leadingContent = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    leadingContent = { Icon(painterResource(R.drawable.ic_add), contentDescription = null) },
                     modifier = Modifier
                         .clickable(onClick = onCreate)
                         .heightIn(min = 48.dp),
@@ -253,10 +256,13 @@ private fun TagRow(tag: TagRecord, activeId: Long, japanese: Boolean, onTag: (Ta
     ListItem(
         headlineContent = { Text(name) },
         supportingContent = {
-            Text(tag.count.toString(), color = LocalStudyColors.current.listSupporting)
+            Text(
+                pluralStringResource(R.plurals.word_count, tag.count, tag.count),
+                color = LocalStudyColors.current.listSupporting,
+            )
         },
         trailingContent = if (tag.id == activeId) {
-            { Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.current_set)) }
+            { Icon(painterResource(R.drawable.ic_check), contentDescription = stringResource(R.string.current_set)) }
         } else {
             null
         },

@@ -62,10 +62,12 @@
     <string name="pill_cd">%2$d枚中%1$d枚を覚えました</string>
     <string name="study_progress">学習の進み具合</string>
     <string name="empty_set_message">このセットに単語を追加するには「検索」を使ってください。</string>
+    <string name="study_set_learned">このセットは覚えました</string>
+    <string name="study_set_learned_message">おめでとうございます！このセットはすべて覚えました。ふだんは表示されないカードも出題します。</string>
+    <string name="ok">OK</string>
 
     <string name="theme">テーマ</string>
     <string name="theme_applies">すぐに反映されます。カード、レベルバー、答えを見るボタンの色が変わります。</string>
-    <string name="theme_selected">選択中</string>
     <string name="theme_paper">和紙</string>
     <string name="theme_fire">紅</string>
     <string name="theme_water">藍</string>
@@ -84,11 +86,13 @@
     <string name="no_words_title">セットに単語がありません</string>
     <string name="create_set">学習セットを作成</string>
     <string name="create_set_hint">セットに名前をつけてください</string>
-    <string name="ok">OK</string>
     <string name="cancel">キャンセル</string>
     <string name="cd_set_row">%1$s、%2$d</string>
     <plurals name="group_count">
         <item quantity="other">%d グループ</item>
+    </plurals>
+    <plurals name="word_count">
+        <item quantity="other">%d 語</item>
     </plurals>
     <plurals name="set_count">
         <item quantity="other">%d セット</item>

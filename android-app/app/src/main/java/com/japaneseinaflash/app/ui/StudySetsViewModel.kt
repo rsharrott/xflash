@@ -13,9 +13,12 @@ import com.japaneseinaflash.app.data.StudyStore
 import com.japaneseinaflash.app.data.TagRecord
 import com.japaneseinaflash.app.study.opensAsSearch
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -48,14 +51,22 @@ class StudySetsViewModel(
 ) : AndroidViewModel(app) {
     private val _state = MutableStateFlow(SetsUiState())
     val state: StateFlow<SetsUiState> = _state.asStateFlow()
+    private val queries = MutableStateFlow("")
 
     init {
         reload()
+        viewModelScope.watchSetSearch(queries, find = { query ->
+            withContext(Dispatchers.IO) { StudyStore(session.openRepository()).searchTags(query) }
+        }) { rows, failed ->
+            _state.update {
+                it.copy(results = rows, searching = false, failed = failed)
+            }
+        }
     }
 
     fun onQuery(value: String) {
-        _state.update { it.copy(query = value) }
-        search(value)
+        _state.update { it.copy(query = value, failed = false) }
+        queries.value = value
     }
 
     fun askToStart(tag: TagRecord) {
@@ -94,26 +105,6 @@ class StudySetsViewModel(
         }
     }
 
-    private fun search(query: String) {
-        val trimmed = query.trim()
-        if (trimmed.isEmpty()) {
-            _state.update { it.copy(results = emptyList(), searching = false) }
-            return
-        }
-        viewModelScope.launch {
-            _state.update { it.copy(searching = true) }
-            try {
-                val study = StudyStore(session.openRepository())
-                val scope = if (_state.value.searchOnly) groupId else null
-                val rows = withContext(Dispatchers.IO) { study.searchTags(trimmed, scope) }
-                _state.update { it.copy(results = rows, searching = false) }
-            } catch (e: Exception) {
-                Log.e(TAG, "Set search failed", e)
-                _state.update { it.copy(searching = false, failed = true) }
-            }
-        }
-    }
-
     private fun reload() {
         viewModelScope.launch {
             _state.update { it.copy(loading = true, failed = false) }
@@ -136,7 +127,7 @@ class StudySetsViewModel(
                         )
                     } else {
                         val group = study.group(groupId)
-                        val searchOnly = group != null && opensAsSearch(group.childGroups, group.setCount)
+                        val searchOnly = group != null && opensAsSearch(group.name)
                         Loaded(
                             title = group?.name.orEmpty(),
                             titleJa = group?.nameJa.orEmpty(),
@@ -191,5 +182,27 @@ class StudySetsViewModel(
                     StudySetsViewModel(app, session, store, groupId)
                 }
             }
+    }
+}
+
+internal fun kotlinx.coroutines.CoroutineScope.watchSetSearch(
+    queries: kotlinx.coroutines.flow.Flow<String>,
+    debounceMs: Long = 200,
+    find: suspend (String) -> List<TagRecord>,
+    publish: (List<TagRecord>, Boolean) -> Unit,
+) = launch {
+    queries.debounce(debounceMs).collectLatest { raw ->
+        val trimmed = raw.trim()
+        if (trimmed.isEmpty()) {
+            publish(emptyList(), false)
+            return@collectLatest
+        }
+        try {
+            publish(find(trimmed), false)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            publish(emptyList(), true)
+        }
     }
 }

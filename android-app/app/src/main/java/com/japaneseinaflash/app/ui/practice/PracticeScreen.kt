@@ -20,12 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,8 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -58,6 +51,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.japaneseinaflash.app.R
+import com.japaneseinaflash.app.ui.PracticeKey
+import com.japaneseinaflash.app.ui.practiceKey
 import com.japaneseinaflash.app.study.AppPreferences
 import com.japaneseinaflash.app.study.PracticeFace
 import com.japaneseinaflash.app.study.cumulativeBarFractions
@@ -91,11 +86,20 @@ fun PracticeScreen(
         modifier
             .fillMaxSize()
             .onPreviewKeyEvent { event ->
-                if (!state.revealed && event.type == KeyEventType.KeyUp && event.key == Key.Spacebar) {
-                    onShowAnswer()
-                    true
-                } else {
-                    false
+                when (practiceKey(state.revealed, event.type, event.key)) {
+                    PracticeKey.ShowAnswer -> {
+                        onShowAnswer()
+                        true
+                    }
+                    PracticeKey.Right -> {
+                        onMark(true)
+                        true
+                    }
+                    PracticeKey.Wrong -> {
+                        onMark(false)
+                        true
+                    }
+                    null -> false
                 }
             },
     ) {
@@ -190,7 +194,7 @@ private fun AnswerActions(
                     contentColor = study.toggleLabel,
                 ),
             ) {
-                Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = stringResource(R.string.cd_speak))
+                Icon(painterResource(R.drawable.ic_volume), contentDescription = stringResource(R.string.cd_speak))
             }
         }
         Spacer(Modifier.height(12.dp))
@@ -200,7 +204,7 @@ private fun AnswerActions(
             shape = RoundedCornerShape(24.dp),
             colors = ButtonDefaults.buttonColors(containerColor = showAnswer, contentColor = study.onShowAnswer),
         ) {
-            Icon(Icons.Outlined.Visibility, contentDescription = null)
+            Icon(painterResource(R.drawable.ic_visibility), contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.show_answer), style = MaterialTheme.typography.titleMedium)
         }
@@ -212,7 +216,7 @@ private fun AnswerActions(
                 labelColor = study.wrongLabel,
                 outline = study.wrongOutline,
                 badge = study.wrongBadge,
-                badgeIcon = Icons.Filled.Close,
+                badgeIcon = R.drawable.ic_close,
                 badgeIconTint = study.onWrongBadge,
                 outlined = true,
                 onClick = { onMark(false) },
@@ -224,7 +228,7 @@ private fun AnswerActions(
                 labelColor = study.rightLabel,
                 outline = study.rightFill,
                 badge = study.rightBadge,
-                badgeIcon = Icons.Filled.Done,
+                badgeIcon = R.drawable.ic_check,
                 badgeIconTint = study.onRightBadge,
                 outlined = false,
                 onClick = { onMark(true) },
@@ -241,7 +245,7 @@ private fun MarkButton(
     labelColor: Color,
     outline: Color,
     badge: Color,
-    badgeIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    badgeIcon: Int,
     badgeIconTint: Color,
     outlined: Boolean,
     onClick: () -> Unit,
@@ -257,7 +261,7 @@ private fun MarkButton(
             contentAlignment = Alignment.Center,
         ) {
             Canvas(Modifier.matchParentSize()) { drawCircle(color = badge) }
-            Icon(badgeIcon, contentDescription = null, tint = badgeIconTint, modifier = Modifier.size(18.dp))
+            Icon(painterResource(badgeIcon), contentDescription = null, tint = badgeIconTint, modifier = Modifier.size(18.dp))
         }
         Spacer(Modifier.width(8.dp))
         Text(label, color = labelColor, style = MaterialTheme.typography.titleMedium)
@@ -283,7 +287,13 @@ private fun MarkButton(
 }
 
 @Composable
-fun LevelStrip(levels: IntArray, total: Int, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun LevelStrip(
+    levels: IntArray,
+    total: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    asButton: Boolean = true,
+) {
     val study = LocalStudyColors.current
     val names = listOf(
         stringResource(R.string.level_studying),
@@ -312,10 +322,10 @@ fun LevelStrip(levels: IntArray, total: Int, onClick: () -> Unit, modifier: Modi
             .fillMaxWidth()
             .heightIn(min = 48.dp)
             .semantics(mergeDescendants = true) {
-                role = Role.Button
+                if (asButton) role = Role.Button
                 contentDescription = "$summary. $pillDescription"
             }
-            .clickable(onClick = onClick),
+            .then(if (asButton) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -329,7 +339,7 @@ fun LevelStrip(levels: IntArray, total: Int, onClick: () -> Unit, modifier: Modi
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurface,
                             textAlign = TextAlign.Center,
-                            maxLines = 1,
+                            maxLines = 2,
                         )
                         Canvas(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 4.dp).height(4.dp)) {
                             levelBar(bars[index], study.bar, study.track)
@@ -355,7 +365,7 @@ fun LevelStrip(levels: IntArray, total: Int, onClick: () -> Unit, modifier: Modi
                 Text(pill, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.weight(1f))
                 Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    painterResource(R.drawable.ic_chevron_right),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
