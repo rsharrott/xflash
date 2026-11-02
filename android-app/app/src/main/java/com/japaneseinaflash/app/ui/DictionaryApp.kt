@@ -58,6 +58,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.LinkAnnotation
@@ -84,6 +86,13 @@ private val MaxContentWidth = 640.dp
 private const val MastheadTitleMaxLines = 4
 
 internal const val SearchResultsTag = "search-results"
+
+/** Colour of the results focus ring. Transparent until the list is focused. */
+internal val ResultsRing = SemanticsPropertyKey<androidx.compose.ui.graphics.Color>("ResultsRing")
+
+private var SemanticsPropertyReceiver.resultsRing: androidx.compose.ui.graphics.Color
+    get() = throw UnsupportedOperationException()
+    set(value) = set(ResultsRing, value)
 
 @Composable
 internal fun SearchPane(
@@ -229,15 +238,13 @@ private fun SearchBody(
         Spacer(Modifier.height(12.dp))
         val resultsInteraction = remember { MutableInteractionSource() }
         val resultsFocused by resultsInteraction.collectIsFocusedAsState()
+        val ring = if (resultsFocused) MaterialTheme.colorScheme.primary else Color.Transparent
         Box(
             Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .border(
-                    width = 2.dp,
-                    color = if (resultsFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
-                    shape = RoundedCornerShape(4.dp),
-                )
+                .border(width = 2.dp, color = ring, shape = RoundedCornerShape(4.dp))
+                .semantics { resultsRing = ring }
                 .testTag(SearchResultsTag)
                 .focusRequester(resultsFocus)
                 .focusable(interactionSource = resultsInteraction),

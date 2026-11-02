@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -60,7 +61,7 @@ class PracticeViewModel(
         viewModelScope.launch {
             combine(
                 phase,
-                store.preferences.map { it.cardKey() },
+                store.preferences.map { it.cardKey() }.distinctUntilChanged(),
             ) { ready, key -> ready to key }
                 .collectLatest { (ready, _) ->
                     if (ready == Phase.Ready) load(avoid = null)
