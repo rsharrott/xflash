@@ -53,8 +53,8 @@ fun StudySetsScreen(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     onPractice: () -> Unit,
-    onBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onBack: (() -> Unit)? = null,
 ) {
     var searchOpen by rememberSaveable { mutableStateOf(state.searchOnly) }
     Column(modifier.fillMaxSize()) {
@@ -91,12 +91,28 @@ fun StudySetsScreen(
                 keyboardActions = KeyboardActions(onSearch = { onQuery(state.query) }),
             )
         }
+        if (state.createFailed) {
+            Text(
+                stringResource(R.string.error_create_set),
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
         when {
             state.loading -> Text(
                 stringResource(R.string.cd_loading),
                 modifier = Modifier.padding(20.dp),
             )
-            state.failed -> Text(
+            state.loadFailed -> Text(
+                stringResource(R.string.error_load_sets),
+                modifier = Modifier.padding(20.dp),
+                color = MaterialTheme.colorScheme.error,
+            )
+            state.searching -> Text(
+                stringResource(R.string.cd_loading),
+                modifier = Modifier.padding(20.dp),
+            )
+            state.searchFailed -> Text(
                 stringResource(R.string.error_search),
                 modifier = Modifier.padding(20.dp),
                 color = MaterialTheme.colorScheme.error,

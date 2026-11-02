@@ -46,6 +46,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.japaneseinaflash.app.R
+import com.japaneseinaflash.app.study.StudyLanguage
 import com.japaneseinaflash.app.study.StudyTheme
 import com.japaneseinaflash.app.ui.practice.LevelStrip
 import com.japaneseinaflash.app.ui.practice.PracticeScreen
@@ -208,8 +209,8 @@ private fun SetsRoute(
         factory = StudySetsViewModel.factory(session, preferencesModel.store, groupId),
     )
     val state by model.state.collectAsStateWithLifecycle()
-    // Built-in names follow the device locale, as iOS LWEBuiltInCatalogUsesJapanese does.
-    val japanese = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language == "ja"
+    val preferences by preferencesModel.preferences.collectAsStateWithLifecycle()
+    val japanese = preferences.language == StudyLanguage.JAPANESE
     when (dictionary.phase) {
         Phase.Preparing -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(stringResource(R.string.preparing_dictionary))

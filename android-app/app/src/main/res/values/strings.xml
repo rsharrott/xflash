@@ -30,6 +30,8 @@
 
     <string name="error_prepare">The dictionary could not be prepared. Free some space and open the app again.</string>
     <string name="error_search">The search could not be completed.</string>
+    <string name="error_load_sets">The study sets could not be loaded.</string>
+    <string name="error_create_set">The set could not be created.</string>
     <string name="error_card">This card could not be opened.</string>
     <string name="error_card_missing">This card is not in the dictionary.</string>
     <string name="retry">Try again</string>

@@ -26,7 +26,9 @@ import kotlinx.coroutines.withContext
 
 data class SetsUiState(
     val loading: Boolean = true,
-    val failed: Boolean = false,
+    val loadFailed: Boolean = false,
+    val createFailed: Boolean = false,
+    val searchFailed: Boolean = false,
     val title: String = "",
     val titleJa: String = "",
     val studying: TagRecord? = null,
@@ -57,15 +59,17 @@ class StudySetsViewModel(
         reload()
         viewModelScope.watchSetSearch(queries, find = { query ->
             withContext(Dispatchers.IO) { StudyStore(session.openRepository()).searchTags(query) }
-        }) { rows, failed ->
+        }) { rows, searchFailed ->
             _state.update {
-                it.copy(results = rows, searching = false, failed = failed)
+                it.copy(results = rows, searching = false, searchFailed = searchFailed)
             }
         }
     }
 
     fun onQuery(value: String) {
-        _state.update { it.copy(query = value, failed = false) }
+        _state.update {
+            it.copy(query = value, searchFailed = false, searching = value.isNotBlank())
+        }
         queries.value = value
     }
 
@@ -96,18 +100,18 @@ class StudySetsViewModel(
             try {
                 val study = StudyStore(session.openRepository())
                 withContext(Dispatchers.IO) { study.createSet(name) }
-                _state.update { it.copy(creating = false) }
+                _state.update { it.copy(creating = false, createFailed = false) }
                 reload()
             } catch (e: Exception) {
                 Log.e(TAG, "Could not create a set", e)
-                _state.update { it.copy(creating = false, failed = true) }
+                _state.update { it.copy(creating = false, createFailed = true) }
             }
         }
     }
 
     private fun reload() {
         viewModelScope.launch {
-            _state.update { it.copy(loading = true, failed = false) }
+            _state.update { it.copy(loading = true, loadFailed = false) }
             try {
                 val prefs = store.preferences.first()
                 val study = StudyStore(session.openRepository())
@@ -151,12 +155,12 @@ class StudySetsViewModel(
                         tags = snapshot.tags,
                         searchOnly = snapshot.searchOnly,
                         activeId = snapshot.activeId,
-                        failed = false,
+                        loadFailed = false,
                     )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Could not load study sets", e)
-                _state.update { it.copy(loading = false, failed = true) }
+                _state.update { it.copy(loading = false, loadFailed = true) }
             }
         }
     }
