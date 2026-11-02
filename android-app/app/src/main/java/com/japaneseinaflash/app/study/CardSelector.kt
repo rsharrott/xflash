@@ -75,12 +75,6 @@ fun seenCount(levels: IntArray, numLevels: Int): Int {
     return sum
 }
 
-/**
- * 4 when Learned cards are hidden and something else is still in the set.
- * Otherwise 5, so a fully learned set still has a card to show.
- */
-fun selectableLevelCount(levels: IntArray, hideLearned: Boolean): Int {
-    if (!hideLearned) return LEARNED_LEVEL
-    val stillStudying = (0 until LEARNED_LEVEL).any { levels.getOrElse(it) { 0 } > 0 }
-    return if (stillStudying) LEARNED_LEVEL - 1 else LEARNED_LEVEL
-}
+/** 4 when Learned cards are hidden, otherwise 5. An all-learned set is handled by the caller. */
+fun selectableLevelCount(levels: IntArray, hideLearned: Boolean): Int =
+    if (hideLearned) LEARNED_LEVEL - 1 else LEARNED_LEVEL

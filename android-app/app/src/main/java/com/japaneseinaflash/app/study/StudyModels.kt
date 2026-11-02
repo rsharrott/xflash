@@ -139,21 +139,11 @@ fun usesDarkChrome(theme: StudyTheme, mode: DarkMode, systemDark: Boolean): Bool
     }
 }
 
-/** A group with this many sets is searched, not listed in one column. */
-const val FLAT_SET_LIST_LIMIT = 48
-
 const val STARRED_TAG_ID = 0L
 const val TOP_OWNER_ID = -1L
 
 fun displayName(name: String, nameJa: String?, japanese: Boolean): String =
     if (japanese && !nameJa.isNullOrBlank()) nameJa else name
-
-/** User sets: My Starred Words first, then the stored name order. */
-fun <T> starredFirst(items: List<T>, id: (T) -> Long): List<T> {
-    val starred = items.filter { id(it) == STARRED_TAG_ID }
-    val rest = items.filter { id(it) != STARRED_TAG_ID }
-    return starred + rest
-}
 
 /** Full Set before the numbered chunks. The comparison is the English name. */
 fun compareSetNames(a: String, b: String): Int {

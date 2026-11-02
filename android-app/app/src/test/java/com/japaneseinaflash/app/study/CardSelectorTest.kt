@@ -30,9 +30,9 @@ class CardSelectorTest {
     }
 
     @Test
-    fun learnedStaysHiddenUntilItIsAllThatIsLeft() {
+    fun hidingLearnedUsesFourLevels() {
         assertEquals(4, selectableLevelCount(intArrayOf(3, 1, 0, 0, 0, 9), hideLearned = true))
-        assertEquals(5, selectableLevelCount(intArrayOf(0, 0, 0, 0, 0, 9), hideLearned = true))
+        assertEquals(4, selectableLevelCount(intArrayOf(0, 0, 0, 0, 0, 9), hideLearned = true))
         assertEquals(5, selectableLevelCount(intArrayOf(3, 1, 0, 0, 0, 9), hideLearned = false))
         assertTrue(abs(levelTimesCount(intArrayOf(0, 2, 1, 0, 0, 0), 5) - 4) == 0)
     }
