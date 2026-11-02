@@ -8,7 +8,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,8 +39,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -48,6 +65,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
@@ -64,6 +83,8 @@ import com.japaneseinaflash.app.data.Sense
 private val MaxContentWidth = 640.dp
 private const val MastheadTitleMaxLines = 4
 
+internal const val SearchResultsTag = "search-results"
+
 @Composable
 internal fun SearchPane(
     state: DictionaryUiState,
@@ -74,7 +95,14 @@ internal fun SearchPane(
 ) {
     Column(Modifier.fillMaxSize()) {
         Masthead(title = stringResource(R.string.app_name))
-        SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
+        SearchBody(
+            state,
+            onQueryChange,
+            onSubmit,
+            onCard,
+            onRetry,
+            Modifier.weight(1f).fillMaxWidth(),
+        )
     }
 }
 
@@ -134,16 +162,20 @@ private fun SearchBody(
     onSubmit: () -> Unit,
     onCard: (Long) -> Unit,
     onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+    val resultsFocus = remember { FocusRequester() }
+    Column(modifier.padding(horizontal = 20.dp)) {
         Spacer(Modifier.height(16.dp))
         val searchDescription = stringResource(R.string.cd_search_field)
         val keyboard = LocalSoftwareKeyboardController.current
         val focusManager = LocalFocusManager.current
         val dismissKeyboard = {
-            // Drop focus before hiding. In landscape the IME otherwise restarts
-            // the input connection and asks to be shown again.
+            // Leave the text field, then park focus on the results. Clearing
+            // focus alone lands on About, and the next Enter would open it.
+            // The IME otherwise restarts the input connection and shows again.
             focusManager.clearFocus(force = true)
+            resultsFocus.requestFocus()
             keyboard?.hide()
             onSubmit()
         }
@@ -153,12 +185,28 @@ private fun SearchBody(
                 onValueChange = onQueryChange,
                 modifier = Modifier
                     .fillMaxWidth()
+                    // heightIn yields when the IME leaves less than 56dp.
+                    // requiredHeightIn keeps the text and Clear on screen.
+                    .requiredHeightIn(min = 56.dp)
+                    .onPreviewKeyEvent { event ->
+                        val enter = isSearchEnter(event.nativeKeyEvent.keyCode) ||
+                            event.key == Key.Enter ||
+                            event.key == Key.NumPadEnter
+                        if (!enter) return@onPreviewKeyEvent false
+                        // Key-up runs the search. Consuming the down event too
+                        // stops the IME from inserting a newline and restarting
+                        // the connection, which was showing the keyboard again.
+                        if (event.type == KeyEventType.KeyUp) dismissKeyboard()
+                        true
+                    }
                     .semantics { contentDescription = searchDescription },
                 placeholder = { Text(stringResource(R.string.search_hint)) },
                 singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.withJapaneseGlyphs(),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search,
                     autoCorrectEnabled = false,
+                    hintLocales = LocaleList(Locale("ja"), Locale("en")),
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = { dismissKeyboard() },
@@ -179,15 +227,31 @@ private fun SearchBody(
             )
         }
         Spacer(Modifier.height(12.dp))
-        when (state.phase) {
-            Phase.Preparing -> PreparingMessage()
-            Phase.Failed -> {
-                ErrorText(state.error ?: DictionaryError.PrepareFailed)
-                TextButton(onClick = onRetry) {
-                    Text(stringResource(R.string.retry))
+        val resultsInteraction = remember { MutableInteractionSource() }
+        val resultsFocused by resultsInteraction.collectIsFocusedAsState()
+        Box(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .border(
+                    width = 2.dp,
+                    color = if (resultsFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
+                    shape = RoundedCornerShape(4.dp),
+                )
+                .testTag(SearchResultsTag)
+                .focusRequester(resultsFocus)
+                .focusable(interactionSource = resultsInteraction),
+        ) {
+            when (state.phase) {
+                Phase.Preparing -> PreparingMessage()
+                Phase.Failed -> {
+                    ErrorText(state.error ?: DictionaryError.PrepareFailed)
+                    TextButton(onClick = onRetry) {
+                        Text(stringResource(R.string.retry))
+                    }
                 }
+                Phase.Ready -> ReadyResults(state, onCard)
             }
-            Phase.Ready -> ReadyResults(state, onCard)
         }
     }
 }

@@ -13,13 +13,18 @@ internal data class RankedCard(
 )
 
 /**
- * Prefix queries (`co*`, `こ*`) share their top rows with the exact token
- * (`co`, `こ`). The exact token is small, so it is scored in full. The other
- * prefix hits are non-exact and only need `ptag` and headword length.
+ * How a typed query is ranked once [SearchQuery] has made it safe.
+ *
+ * A prefix is ordered in SQL. A single token uses the same gloss rank as a
+ * phrase, read from a stored copy of the hits. Anything with more than one
+ * word uses the full query.
  */
 internal object SearchRank {
     fun isPrefixQuery(match: String, exactTerm: String): Boolean =
         exactTerm.isNotEmpty() && !exactTerm.any { it.isWhitespace() } && match == "$exactTerm*"
+
+    fun isSingleToken(match: String, exactTerm: String): Boolean =
+        exactTerm.isNotEmpty() && match == exactTerm && !exactTerm.any { it.isWhitespace() }
 
     fun merge(promoted: List<RankedCard>, fillers: List<RankedCard>, limit: Int): List<Long> {
         val byId = HashMap<Long, RankedCard>(fillers.size + promoted.size)

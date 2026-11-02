@@ -53,6 +53,22 @@ class SearchQueryTest {
     }
 
     @Test
+    fun uppercaseOrBetweenWordsMatchesEitherWord() {
+        val either = SearchQuery.prepare("neko OR inu")!!
+        assertEquals("neko OR inu", either.matchArgument)
+        assertEquals("", either.exactTerm)
+        assertEquals("ねこ* OR いぬ*", SearchQuery.prepare("ねこ OR いぬ")!!.matchArgument)
+        assertEquals("neko OR inu", SearchQuery.prepare("neko OR OR inu")!!.matchArgument)
+        assertEquals("neko OR inu", SearchQuery.prepare("OR neko OR inu")!!.matchArgument)
+        assertEquals("neko", SearchQuery.prepare("neko OR")!!.matchArgument)
+        assertEquals("neko inu", SearchQuery.prepare("neko AND inu")!!.matchArgument)
+        assertEquals("neko inu", SearchQuery.prepare("neko NOT inu")!!.matchArgument)
+        assertEquals("\"e-mail\" OR neko", SearchQuery.prepare("e-mail OR neko")!!.matchArgument)
+        assertEquals("neko OR \"OR\"", SearchQuery.prepare("neko OR \"OR\"")!!.matchArgument)
+        assertEquals("neko OR \"OR\" OR inu", SearchQuery.prepare("neko OR \"OR\" OR inu")!!.matchArgument)
+    }
+
+    @Test
     fun lowercaseOperatorWordsStaySearchTerms() {
         val phrase = SearchQuery.prepare("black and white")!!
         assertEquals("black and white", phrase.matchArgument)
