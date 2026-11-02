@@ -30,5 +30,16 @@ class SearchRankTest {
         assertFalse(SearchRank.isPrefixQuery("black and white", "black and white"))
         assertFalse(SearchRank.isPrefixQuery("neko", "neko"))
         assertFalse(SearchRank.isPrefixQuery("s", "s"))
+        assertFalse(SearchRank.isPrefixQuery("neko OR inu", ""))
     }
+
+    @Test
+    fun aSingleTokenUsesTheStagedRank() {
+        assertTrue(SearchRank.isSingleToken("and", "and"))
+        assertTrue(SearchRank.isSingleToken("s", "s"))
+        assertFalse(SearchRank.isSingleToken("and*", "and"))
+        assertFalse(SearchRank.isSingleToken("black and white", "black and white"))
+        assertFalse(SearchRank.isSingleToken("neko OR inu", ""))
+    }
+
 }
