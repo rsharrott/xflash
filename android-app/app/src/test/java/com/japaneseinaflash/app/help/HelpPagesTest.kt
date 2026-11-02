@@ -17,6 +17,11 @@ class HelpPagesTest {
             assertFalse(HelpPages.shown.contains(file))
             assertTrue(File(help, file).isFile)
         }
+        assertTrue(HelpPages.opensOutside("https"))
+        assertTrue(HelpPages.opensOutside("mailto"))
+        assertFalse(HelpPages.opensOutside("file"))
+        assertFalse(HelpPages.opensOutside("intent"))
+        assertFalse(HelpPages.opensOutside("http"))
         assertFalse(HelpPages.shown.any {
             it.contains("browse") || it.contains("share") || it.contains("integration") || it.contains("corrections")
         })

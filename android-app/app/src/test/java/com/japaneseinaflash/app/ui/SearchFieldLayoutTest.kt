@@ -68,6 +68,7 @@ class SearchFieldLayoutTest {
                     onQueryChange = {},
                     onSubmit = {},
                     onCard = {},
+                    onAdd = {},
                     onRetry = {},
                 )
             }

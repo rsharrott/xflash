@@ -3,6 +3,11 @@ package com.japaneseinaflash.app.ui
 import android.content.Context
 import android.provider.Settings
 import android.speech.tts.TextToSpeech
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -184,14 +189,14 @@ private fun AppNavHost(
     NavHost(
         navController = nav,
         startDestination = Routes.Practice,
-        enterTransition = { if (reduceMotion) androidx.compose.animation.EnterTransition.None else androidx.compose.animation.fadeIn() },
-        exitTransition = { if (reduceMotion) androidx.compose.animation.ExitTransition.None else androidx.compose.animation.fadeOut() },
-        popEnterTransition = { if (reduceMotion) androidx.compose.animation.EnterTransition.None else androidx.compose.animation.fadeIn() },
+        enterTransition = { if (reduceMotion) EnterTransition.None else fadeIn() },
+        exitTransition = { if (reduceMotion) ExitTransition.None else fadeOut() },
+        popEnterTransition = { if (reduceMotion) EnterTransition.None else fadeIn() },
         popExitTransition = {
             if (reduceMotion) {
-                androidx.compose.animation.ExitTransition.None
+                ExitTransition.None
             } else {
-                androidx.compose.animation.scaleOut(targetScale = 0.92f) + androidx.compose.animation.fadeOut()
+                scaleOut(targetScale = 0.92f) + fadeOut()
             }
         },
     ) {

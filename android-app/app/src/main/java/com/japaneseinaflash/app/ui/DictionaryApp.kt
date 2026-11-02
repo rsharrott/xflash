@@ -294,33 +294,33 @@ private fun SearchResults(
                 Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-            Column(
-                Modifier
-                    .weight(1f)
-                    .combinedClickable(onClick = { onCard(card.id) }, onLongClick = { onAdd(card) })
-                    .semantics { contentDescription = description }
-                    .padding(vertical = 12.dp),
-            ) {
-                Text(
-                    card.headword,
-                    style = MaterialTheme.typography.titleLarge.withJapaneseGlyphs(),
-                )
-                if (card.reading.isNotEmpty()) {
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .combinedClickable(onClick = { onCard(card.id) }, onLongClick = { onAdd(card) })
+                        .semantics { contentDescription = description }
+                        .padding(vertical = 12.dp),
+                ) {
                     Text(
-                        card.reading,
-                        style = MaterialTheme.typography.bodyLarge.withJapaneseGlyphs(),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        card.headword,
+                        style = MaterialTheme.typography.titleLarge.withJapaneseGlyphs(),
                     )
+                    if (card.reading.isNotEmpty()) {
+                        Text(
+                            card.reading,
+                            style = MaterialTheme.typography.bodyLarge.withJapaneseGlyphs(),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    if (card.meaning.isNotEmpty()) {
+                        Text(
+                            card.meaning,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                 }
-                if (card.meaning.isNotEmpty()) {
-                    Text(
-                        card.meaning,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
                 IconButton(onClick = { onAdd(card) }, modifier = Modifier.size(48.dp)) {
                     Icon(
                         painterResource(R.drawable.ic_playlist_add),

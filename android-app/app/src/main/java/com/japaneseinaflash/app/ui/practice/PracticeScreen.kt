@@ -28,6 +28,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -189,7 +190,7 @@ private fun AnswerActions(
             FilledTonalIconButton(
                 onClick = onSpeak,
                 modifier = Modifier.size(48.dp),
-                colors = androidx.compose.material3.IconButtonDefaults.filledTonalIconButtonColors(
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = study.toggleFill,
                     contentColor = study.toggleLabel,
                 ),

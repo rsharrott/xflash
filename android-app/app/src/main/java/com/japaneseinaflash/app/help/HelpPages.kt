@@ -24,6 +24,9 @@ object HelpPages {
         "integration@2x.html",
     )
 
+    fun opensOutside(scheme: String?): Boolean =
+        scheme.equals("https", ignoreCase = true) || scheme.equals("mailto", ignoreCase = true)
+
     fun assetPath(file: String, japanese: Boolean): String {
         val relative = if (japanese) "help/ja/$file" else "help/$file"
         return "https://$ASSET_HOST/assets/$relative"

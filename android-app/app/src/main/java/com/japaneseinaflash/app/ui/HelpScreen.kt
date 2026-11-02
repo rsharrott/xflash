@@ -112,8 +112,10 @@ fun HelpPage(
                         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                             val uri = request.url
                             if (uri.host == HelpPages.ASSET_HOST) return false
-                            val intent = Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            runCatching { view.context.startActivity(intent) }
+                            if (HelpPages.opensOutside(uri.scheme)) {
+                                val intent = Intent(Intent.ACTION_VIEW, uri).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                runCatching { view.context.startActivity(intent) }
+                            }
                             return true
                         }
                     }
