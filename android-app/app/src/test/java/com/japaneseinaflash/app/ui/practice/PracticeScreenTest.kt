@@ -8,8 +8,13 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
 import androidx.compose.ui.unit.dp
 import com.japaneseinaflash.app.data.CardDetail
 import com.japaneseinaflash.app.data.ExampleSentence
@@ -27,6 +32,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalTestApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28], qualifiers = "w412dp-h2000dp")
 class PracticeScreenTest {
@@ -57,6 +63,27 @@ class PracticeScreenTest {
         compose.onNodeWithText("Right").assertIsDisplayed().assertHeightIsAtLeast(48.dp)
         compose.onNodeWithText("1. tea").assertIsDisplayed()
         assertTrue(compose.onAllNodesWithText("Show answer").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    fun enterOnTheFocusedWrongButtonMarksWrong() {
+        val marks = mutableListOf<Boolean>()
+        compose.setContent {
+            JifTheme(StudyTheme.PAPER, dark = false) {
+                PracticeScreen(
+                    state = sample(revealed = true),
+                    preferences = AppPreferences(),
+                    onShowAnswer = {},
+                    onToggleReading = {},
+                    onSpeak = {},
+                    onMark = { marks.add(it) },
+                    onLevels = {},
+                )
+            }
+        }
+        compose.onNodeWithText("Wrong").requestFocus().performKeyInput { pressKey(Key.Enter) }
+        compose.waitForIdle()
+        assertEquals(listOf(false), marks)
     }
 
     private fun sample(revealed: Boolean) = PracticeUiState(

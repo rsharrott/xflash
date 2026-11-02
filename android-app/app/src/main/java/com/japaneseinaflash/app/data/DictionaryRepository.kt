@@ -81,11 +81,7 @@ class DictionaryRepository internal constructor(
                     if (primary != null) primary.addSuppressed(end) else throw end
                 }
             }
-            try {
-                db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
-            } catch (drop: Exception) {
-                if (primary != null) primary.addSuppressed(drop) else throw drop
-            }
+            dropSearchStage(db, primary)
         }
     }
 
@@ -191,6 +187,15 @@ internal fun openDictionary(installed: InstalledDictionary): SQLiteDatabase {
  * then attached by path, which is what the iOS app does. A quote or newline in
  * the path is refused; the path is one of our own files, never user input.
  */
+/** A failed cleanup must not replace the search error that caused it. */
+internal fun dropSearchStage(db: SQLiteDatabase, primary: Throwable?) {
+    try {
+        db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+    } catch (drop: Exception) {
+        if (primary != null) primary.addSuppressed(drop) else throw drop
+    }
+}
+
 internal fun attachReadOnly(db: SQLiteDatabase, schema: String, file: File) {
     require(schema in DictionaryFiles.SCHEMAS)
     val path = file.canonicalPath

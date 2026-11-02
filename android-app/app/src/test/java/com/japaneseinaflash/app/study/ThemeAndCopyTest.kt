@@ -1,6 +1,8 @@
 package com.japaneseinaflash.app.study
 
+import androidx.compose.ui.graphics.Color
 import com.japaneseinaflash.app.theme.TokenColors
+import com.japaneseinaflash.app.ui.theme.studyColors
 import com.japaneseinaflash.app.theme.contrastRatio
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -65,6 +67,10 @@ class ThemeAndCopyTest {
         assertEquals(TokenColors.KIMONO_AI, 0xFF1F3558.toInt())
         assertEquals(TokenColors.KUTANI_AUBERGINE, 0xFF553366.toInt())
         assertEquals(TokenColors.FIRE_DEEP, 0xFF8E1400.toInt())
+        val paper = studyColors(StudyTheme.PAPER, dark = false)
+        assertEquals(Color(TokenColors.FIRE), paper.bar)
+        assertEquals(Color(TokenColors.FIRE), paper.toggleLabel)
+        assertEquals(Color(TokenColors.WATER_DEEP), studyColors(StudyTheme.WATER, dark = false).bar)
     }
 
     @Test
