@@ -32,6 +32,8 @@
 
     <string name="error_prepare">辞書を準備できませんでした。空き容量を確保して、アプリを開き直してください。</string>
     <string name="error_search">検索を完了できませんでした。</string>
+    <string name="error_load_sets">学習セットを読み込めませんでした。</string>
+    <string name="error_create_set">セットを作れませんでした。</string>
     <string name="error_card">このカードを開けませんでした。</string>
     <string name="error_card_missing">このカードは辞書にありません。</string>
     <string name="retry">やり直す</string>

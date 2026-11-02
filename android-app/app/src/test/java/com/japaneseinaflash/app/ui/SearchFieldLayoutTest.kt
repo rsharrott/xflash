@@ -16,8 +16,10 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import com.japaneseinaflash.app.data.CardSummary
 import com.japaneseinaflash.app.study.StudyTheme
+import com.japaneseinaflash.app.theme.TokenColors
 import com.japaneseinaflash.app.ui.theme.JifTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -52,8 +54,34 @@ class SearchFieldLayoutTest {
         rule.onNodeWithText("neko").performKeyInput { pressKey(Key.Enter) }
         rule.waitForIdle()
         rule.onNodeWithTag(SearchResultsTag).assertIsFocused()
+        rule.onNodeWithTag(SearchResultsTag).performKeyInput { pressKey(Key.Enter) }
+        rule.waitForIdle()
         assertEquals(1, submits)
     }
+
+    @Test
+    fun focusedResultsDrawAPrimaryRing() {
+        rule.setContent {
+            JifTheme(StudyTheme.PAPER, dark = false) {
+                SearchPane(
+                    state = readyState(),
+                    onQueryChange = {},
+                    onSubmit = {},
+                    onCard = {},
+                    onRetry = {},
+                )
+            }
+        }
+        assertEquals(Color.Transparent, ringColor())
+        rule.onNodeWithText("neko").performClick()
+        rule.onNodeWithText("neko").performKeyInput { pressKey(Key.Enter) }
+        rule.waitForIdle()
+        rule.onNodeWithTag(SearchResultsTag).assertIsFocused()
+        assertEquals(Color(TokenColors.FIRE), ringColor())
+    }
+
+    private fun ringColor(): Color =
+        rule.onNodeWithTag(SearchResultsTag).fetchSemanticsNode().config[ResultsRing]
 
     @Test
     fun theSearchFieldKeepsItsMinimumHeightWhenTheWindowIsShort() {

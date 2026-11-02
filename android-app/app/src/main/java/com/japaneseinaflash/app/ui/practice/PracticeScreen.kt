@@ -38,7 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -85,7 +85,7 @@ fun PracticeScreen(
     Column(
         modifier
             .fillMaxSize()
-            .onPreviewKeyEvent { event ->
+            .onKeyEvent { event ->
                 when (practiceKey(state.revealed, event.type, event.key)) {
                     PracticeKey.ShowAnswer -> {
                         onShowAnswer()
