@@ -73,6 +73,8 @@ class RealDictionaryQueryTest {
         assertEquals("犬" to "いぬ", search("dog").first())
         assertEquals("車" to "くるま", search("car").first())
         assertEquals("雨" to "あめ", search("rain").first())
+        assertEquals("兄" to "あに", search("older brother", limit = 5).first())
+        assertTrue(search("school", limit = 15).any { it.first == "貴校" })
     }
 
     @Test
@@ -85,14 +87,29 @@ class RealDictionaryQueryTest {
     }
 
     @Test
-    fun prefixRankingAgreesWithTheFullQuery() {
+    fun prefixPrefersAFieldThatStartsWithTheStem() {
         assertEquals(37, countMatches("ラー*"))
-        for ((term, match) in listOf("co" to "co*", "こ" to "こ*")) {
-            assertEquals(
-                searchIds(DictionarySql.SEARCH, listOf(term, match, "50")),
-                prefixIds(term, match, 50),
-            )
+        assertEquals("回" to "かい", search("co?", limit = 8).first())
+        assertTrue(search("co?", limit = 4).none { it.first == "指揮官" })
+        assertEquals("水" to "みず", search("水", limit = 3).first())
+        assertEquals("猫" to "ねこ", search("ねこ", limit = 3).first())
+        val ramen = search("ラー", limit = 3)
+        assertTrue(ramen.first().first == "拉麺" || ramen.first().first == "ラーメン")
+    }
+
+    @Test
+    fun singleTokenRankingAgreesWithTheFullQuery() {
+        for (term in listOf("eat", "go", "school", "person", "dog", "car", "rain", "water", "s", "and")) {
+            assertEquals(term, searchIds(DictionarySql.SEARCH, listOf(term, term, "12")), tokenIds(term, 12))
         }
+    }
+
+    @Test
+    fun uppercaseOrReturnsBothWords() {
+        val either = search("neko OR inu", limit = 10)
+        assertTrue(either.any { it == ("猫" to "ねこ") })
+        assertTrue(either.any { it == ("犬" to "いぬ") })
+        assertEquals("猫" to "ねこ", search("neko OR", limit = 3).first())
     }
 
     @Test
@@ -106,7 +123,7 @@ class RealDictionaryQueryTest {
 
     private fun search(raw: String, limit: Int = 8): List<Pair<String, String>> {
         val prepared = SearchQuery.prepare(raw, limit)!!
-        val ids = query(bind(prepared.sql, prepared.arguments)).lines().map { it.trim() }.filter { it.isNotEmpty() }
+        val ids = ranked(prepared)
         if (ids.isEmpty()) return emptyList()
         val listed = ids.joinToString(",")
         val rows = query(
@@ -117,6 +134,48 @@ class RealDictionaryQueryTest {
             parts[0] to (parts[1] to parts[2])
         }
         return ids.map { byId.getValue(it) }
+    }
+
+    /** The same branch [com.japaneseinaflash.app.data.DictionaryRepository] uses. */
+    private fun ranked(prepared: PreparedSearch): List<String> {
+        val match = prepared.matchArgument
+        val exact = prepared.exactTerm
+        if (SearchRank.isPrefixQuery(match, exact)) {
+            val window = maxOf(prepared.limit, SearchRank.PREFIX_WINDOW)
+            val hits = searchIds(DictionarySql.PREFIX_WINDOW, listOf(match, window.toString())).map { line ->
+                val parts = line.split("|", limit = 7)
+                PrefixHit(
+                    id = parts[0].toLong(),
+                    ptag = parts[1].toInt(),
+                    headLength = parts[2].toInt(),
+                    headword = parts[3],
+                    reading = parts[4],
+                    romaji = parts[5],
+                    glossHead = parts[6],
+                )
+            }
+            return SearchRank.prefixIds(hits, exact, prepared.limit).map { it.toString() }
+        }
+        if (SearchRank.isSingleToken(match, exact)) return tokenIds(exact, prepared.limit)
+        return searchIds(prepared.sql, prepared.arguments)
+    }
+
+    private fun tokenIds(term: String, limit: Int): List<String> {
+        val script = """
+            ${DictionarySql.TOKEN_STAGE_DROP};
+            ${bind(DictionarySql.TOKEN_STAGE, listOf(term, term))};
+            ${bind(DictionarySql.TOKEN_RANKED, listOf(limit.toString()))};
+        """.trimIndent()
+        val promoted = query(script).lines().map { it.trim() }.filter { it.isNotEmpty() }.map { line ->
+            val parts = line.split("|")
+            RankedCard(parts[0].toLong(), parts[1].toInt(), parts[2].toInt(), parts[3].toInt())
+        }
+        if (promoted.size >= limit) return promoted.map { it.id.toString() }
+        val fillers = searchIds(DictionarySql.PREFIX_HITS, listOf(term, limit.toString())).map { line ->
+            val parts = line.split("|")
+            RankedCard(parts[0].toLong(), rank = 2, ptag = parts[1].toInt(), headLength = parts[2].toInt())
+        }
+        return SearchRank.merge(promoted, fillers, limit).map { it.toString() }
     }
 
     private fun indexOf(rows: List<Pair<String, String>>, headword: String): Int =
@@ -135,18 +194,6 @@ class RealDictionaryQueryTest {
             rows.indexOfFirst { it.first == headword && it.second == laterReading }
         }
         assertTrue("$headword should come before $laterHeadword $laterReading in $rows", first >= 0 && later > first)
-    }
-
-    private fun prefixIds(term: String, match: String, limit: Int): List<String> {
-        val promoted = searchIds(DictionarySql.SCORED, listOf(term, term, limit.toString())).map { line ->
-            val parts = line.split("|")
-            RankedCard(parts[0].toLong(), parts[1].toInt(), parts[2].toInt(), parts[3].toInt())
-        }
-        val fillers = searchIds(DictionarySql.PREFIX_HITS, listOf(match, limit.toString())).map { line ->
-            val parts = line.split("|")
-            RankedCard(parts[0].toLong(), rank = 2, ptag = parts[1].toInt(), headLength = parts[2].toInt())
-        }
-        return SearchRank.merge(promoted, fillers, limit).map { it.toString() }
     }
 
     private fun searchIds(sql: String, args: List<String>): List<String> =

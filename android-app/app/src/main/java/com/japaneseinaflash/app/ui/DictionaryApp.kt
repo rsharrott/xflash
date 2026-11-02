@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,6 +44,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -127,14 +133,14 @@ private fun DictionaryScaffold(
                     .fillMaxHeight()
                     .fillMaxWidth(),
             ) {
-            Masthead(
-                title = title,
-                showBack = state.canGoBack,
-                showAbout = showAbout,
-                japaneseTitle = state.screen is Screen.Detail && state.card != null,
-                onBack = onBack,
-                onAbout = onAbout,
-            )
+                Masthead(
+                    title = title,
+                    showBack = state.canGoBack,
+                    showAbout = showAbout,
+                    japaneseTitle = state.screen is Screen.Detail && state.card != null,
+                    onBack = onBack,
+                    onAbout = onAbout,
+                )
                 when (state.screen) {
                     Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
                     Screen.About -> AboutBody(state.versions, versionName)
@@ -220,9 +226,22 @@ private fun SearchBody(
                 onValueChange = onQueryChange,
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 56.dp)
+                    .onPreviewKeyEvent { event ->
+                        val enter = isSearchEnter(event.nativeKeyEvent.keyCode) ||
+                            event.key == Key.Enter ||
+                            event.key == Key.NumPadEnter
+                        if (!enter) return@onPreviewKeyEvent false
+                        // Key-up runs the search. Consuming the down event too
+                        // stops the IME from inserting a newline and restarting
+                        // the connection, which was showing the keyboard again.
+                        if (event.type == KeyEventType.KeyUp) dismissKeyboard()
+                        true
+                    }
                     .semantics { contentDescription = searchDescription },
                 placeholder = { Text(stringResource(R.string.search_hint)) },
                 singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge.withJapaneseGlyphs(),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search,
                     autoCorrectEnabled = false,
@@ -246,15 +265,17 @@ private fun SearchBody(
             )
         }
         Spacer(Modifier.height(12.dp))
-        when (state.phase) {
-            Phase.Preparing -> PreparingMessage()
-            Phase.Failed -> {
-                ErrorText(state.error ?: DictionaryError.PrepareFailed)
-                TextButton(onClick = onRetry) {
-                    Text(stringResource(R.string.retry))
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            when (state.phase) {
+                Phase.Preparing -> PreparingMessage()
+                Phase.Failed -> {
+                    ErrorText(state.error ?: DictionaryError.PrepareFailed)
+                    TextButton(onClick = onRetry) {
+                        Text(stringResource(R.string.retry))
+                    }
                 }
+                Phase.Ready -> ReadyResults(state, onCard)
             }
-            Phase.Ready -> ReadyResults(state, onCard)
         }
     }
 }

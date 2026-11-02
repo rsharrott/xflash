@@ -2,6 +2,7 @@
 
 package com.japaneseinaflash.app.ui
 
+import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -28,6 +29,39 @@ class SearchImeTest {
         )
         assertTrue(info.imeOptions and EditorInfo.IME_FLAG_NO_EXTRACT_UI != 0)
         assertTrue(info.imeOptions and EditorInfo.IME_FLAG_NO_FULLSCREEN != 0)
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0)
+        assertEquals(
+            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            info.inputType and EditorInfo.TYPE_MASK_VARIATION,
+        )
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT == 0)
+        assertEquals(EditorInfo.TYPE_CLASS_TEXT, info.inputType and EditorInfo.TYPE_MASK_CLASS)
+    }
+
+    @Test
+    fun suggestionsStayOffWhenComposeAskedForAutocorrect() {
+        val info = EditorInfo()
+        info.inputType = EditorInfo.TYPE_CLASS_TEXT or
+            EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES or
+            EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT or
+            EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE
+        info.applySearchImeFlags()
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0)
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT == 0)
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE == 0)
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES != 0)
+        assertEquals(
+            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            info.inputType and EditorInfo.TYPE_MASK_VARIATION,
+        )
+    }
+
+    @Test
+    fun enterRunsASearch() {
+        assertTrue(isSearchEnter(KeyEvent.KEYCODE_ENTER))
+        assertTrue(isSearchEnter(KeyEvent.KEYCODE_NUMPAD_ENTER))
+        assertTrue(!isSearchEnter(KeyEvent.KEYCODE_SEARCH))
+        assertTrue(!isSearchEnter(KeyEvent.KEYCODE_SPACE))
     }
 
     @Test
@@ -62,5 +96,10 @@ class SearchImeTest {
         assertTrue(info.imeOptions and EditorInfo.IME_FLAG_NO_EXTRACT_UI != 0)
         assertTrue(info.imeOptions and EditorInfo.IME_FLAG_NO_FULLSCREEN != 0)
         assertEquals(EditorInfo.IME_ACTION_SEARCH, info.imeOptions and EditorInfo.IME_MASK_ACTION)
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0)
+        assertEquals(
+            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+            info.inputType and EditorInfo.TYPE_MASK_VARIATION,
+        )
     }
 }

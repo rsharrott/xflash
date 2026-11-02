@@ -39,29 +39,58 @@ class DictionaryRepository internal constructor(
     }
 
     private fun rankedIds(prepared: PreparedSearch): List<Long> {
-        if (!SearchRank.isPrefixQuery(prepared.matchArgument, prepared.exactTerm)) {
-            return readIds(prepared.sql, prepared.arguments.toTypedArray())
+        val match = prepared.matchArgument
+        val exact = prepared.exactTerm
+        if (SearchRank.isPrefixQuery(match, exact)) {
+            val window = maxOf(prepared.limit, SearchRank.PREFIX_WINDOW).toString()
+            val hits = readRows(DictionarySql.PREFIX_WINDOW, arrayOf(match, window)) { cursor ->
+                PrefixHit(
+                    id = cursor.getLong(0),
+                    ptag = cursor.getInt(1),
+                    headLength = cursor.getInt(2),
+                    headword = cursor.stringAt(3),
+                    reading = cursor.stringAt(4),
+                    romaji = cursor.stringAt(5),
+                    glossHead = cursor.stringAt(6),
+                )
+            }
+            return SearchRank.prefixIds(hits, exact, prepared.limit)
         }
-        val fillers = readRows(DictionarySql.PREFIX_HITS, arrayOf(prepared.matchArgument, prepared.limit.toString())) { cursor ->
-            RankedCard(
-                id = cursor.getLong(0),
-                rank = 2,
-                ptag = cursor.getInt(1),
-                headLength = cursor.getInt(2),
-            )
+        if (SearchRank.isSingleToken(match, exact)) {
+            return tokenIds(exact, prepared.limit)
         }
-        val promoted = readRows(
-            DictionarySql.SCORED,
-            arrayOf(prepared.exactTerm, prepared.exactTerm, prepared.limit.toString()),
-        ) { cursor ->
-            RankedCard(
-                id = cursor.getLong(0),
-                rank = cursor.getInt(1),
-                ptag = cursor.getInt(2),
-                headLength = cursor.getInt(3),
-            )
+        return readIds(prepared.sql, prepared.arguments.toTypedArray())
+    }
+
+    /**
+     * Copies the token's hits once, ranks the exact glosses from that copy,
+     * and fills any remaining slots in common-word order.
+     */
+    private fun tokenIds(term: String, limit: Int): List<Long> {
+        db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+        try {
+            db.execSQL(DictionarySql.TOKEN_STAGE, arrayOf<Any>(term, term))
+            val promoted = readRows(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString())) { cursor ->
+                RankedCard(
+                    id = cursor.getLong(0),
+                    rank = cursor.getInt(1),
+                    ptag = cursor.getInt(2),
+                    headLength = cursor.getInt(3),
+                )
+            }
+            if (promoted.size >= limit) return promoted.map { it.id }
+            val fillers = readRows(DictionarySql.PREFIX_HITS, arrayOf(term, limit.toString())) { cursor ->
+                RankedCard(
+                    id = cursor.getLong(0),
+                    rank = 2,
+                    ptag = cursor.getInt(1),
+                    headLength = cursor.getInt(2),
+                )
+            }
+            return SearchRank.merge(promoted, fillers, limit)
+        } finally {
+            db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
         }
-        return SearchRank.merge(promoted, fillers, prepared.limit)
     }
 
     private fun readIds(sql: String, args: Array<String>): List<Long> =

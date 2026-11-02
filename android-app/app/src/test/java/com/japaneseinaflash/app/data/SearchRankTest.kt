@@ -30,5 +30,26 @@ class SearchRankTest {
         assertFalse(SearchRank.isPrefixQuery("black and white", "black and white"))
         assertFalse(SearchRank.isPrefixQuery("neko", "neko"))
         assertFalse(SearchRank.isPrefixQuery("s", "s"))
+        assertFalse(SearchRank.isPrefixQuery("neko OR inu", ""))
+    }
+
+    @Test
+    fun aSingleTokenUsesTheStagedRank() {
+        assertTrue(SearchRank.isSingleToken("and", "and"))
+        assertTrue(SearchRank.isSingleToken("s", "s"))
+        assertFalse(SearchRank.isSingleToken("and*", "and"))
+        assertFalse(SearchRank.isSingleToken("black and white", "black and white"))
+        assertFalse(SearchRank.isSingleToken("neko OR inu", ""))
+    }
+
+    @Test
+    fun aPrefixPrefersTheFieldThatStartsWithTheStem() {
+        val hits = listOf(
+            PrefixHit(1, 1, 1, "熟", "こなれる", "konareru", "ripe"),
+            PrefixHit(2, 0, 3, "指揮官", "しきかん", "shikikan", "commander"),
+            PrefixHit(3, 1, 1, "回", "かい", "kai", "counter for occurrences"),
+            PrefixHit(4, 1, 1, "咳", "せき", "seki", "cough"),
+        )
+        assertEquals(listOf(3L, 4L, 2L, 1L), SearchRank.prefixIds(hits, "co", limit = 4))
     }
 }
