@@ -19,6 +19,13 @@ package com.japaneseinaflash.app.data
  * `LENGTH(content)` is not used: a common word such as 水 has a long gloss
  * list, so sorting by that length first buried it under short compounds.
  *
+ * A prefix such as `co*` or `こ*` can hit tens of thousands of rows. The gloss
+ * text is built only for the exact token (`co`, `こ`), which is a small set.
+ * The other hits are ordered as non-exact matches (common word, then short
+ * headword) and merged in [SearchRank]. Doing the string work once per exact
+ * row, instead of again on every sort comparison, is what keeps that prefix
+ * close to the old length-only query.
+ *
  * iOS Japanese search has the same burying. `CardPeer keywordIsHeadword` and
  * `keywordIsReading` are compiled out for JFlash (both return NO), so every
  * Japanese query is
@@ -35,62 +42,101 @@ package com.japaneseinaflash.app.data
  */
 object DictionarySql {
     /**
-     * Placeholders, in order: exact term, MATCH expression, limit.
-     * The exact term is `''` when the query has nothing to compare
-     * (the rank then starts at "not exact").
+     * One row per hit, with `gloss` and `rank` each computed from stored
+     * columns rather than rebuilt inside `ORDER BY`.
+     *
+     * A leading parenthetical (`(one's) mother`) is skipped before the first
+     * gloss is read. `rank` is 0 for an exact headword, reading, romaji, or
+     * first gloss, 1 for an exact gloss in a later sense, and 2 otherwise.
+     * Placeholders: exact term (via `q`), MATCH expression.
      */
-    val SEARCH = """
-        WITH q(term) AS (SELECT ?)
-        SELECT card_id FROM (
-          SELECT
-            c.card_id AS card_id,
-            c.headword AS headword,
-            c.reading AS reading,
-            c.romaji AS romaji,
-            f.ptag AS ptag,
-            length(c.headword) AS head_len,
-            CASE WHEN instr(ifnull(f.content, ''), ' [ ') > 0
-                 THEN substr(f.content, 1, instr(f.content, ' [ ') - 1)
-                 ELSE ifnull(c.headword, '') END AS forms,
-            replace(replace(lower(
-              CASE WHEN instr(ifnull(f.content, ''), ' ] ') > 0
-                   THEN substr(f.content, instr(f.content, ' ] ') + 3)
-                   ELSE '' END
-            ), ' / ', ' | '), '; ', ' | ') AS gloss,
-            q.term AS term
-          FROM cards_search_content AS f
-          INNER JOIN cards c ON c.card_id = CAST(f.card_id AS INTEGER)
-          CROSS JOIN q
-          WHERE cards_search_content MATCH ?
-        )
-        ORDER BY
+    private val SCORED_ROWS = """
+        SELECT card_id, ptag, head_len,
           CASE
-            WHEN term = '' THEN 2
-            WHEN lower(headword) = lower(term)
-              OR instr('; ' || lower(forms) || '; ', '; ' || lower(term) || '; ') > 0
-              OR instr('; ' || lower(ifnull(reading, '')) || '; ', '; ' || lower(term) || '; ') > 0
-              OR instr('; ' || lower(ifnull(romaji, '')) || '; ', '; ' || lower(term) || '; ') > 0
-              OR (
-                CASE WHEN instr(gloss, ' | ') > 0
-                     THEN substr(gloss, 1, instr(gloss, ' | ') - 1)
-                     ELSE gloss END
-              ) = lower(term)
-              OR substr(
-                CASE WHEN instr(gloss, ' | ') > 0
-                     THEN substr(gloss, 1, instr(gloss, ' | ') - 1)
-                     ELSE gloss END,
-                1,
-                length(lower(term)) + 2
-              ) = lower(term) || ' ('
+            WHEN term_l = '' THEN 2
+            WHEN head_l = term_l
+              OR instr(forms_pad, '; ' || term_l || '; ') > 0
+              OR instr(reading_pad, '; ' || term_l || '; ') > 0
+              OR instr(romaji_pad, '; ' || term_l || '; ') > 0
+              OR first_l = term_l
+              OR substr(first_l, 1, length(term_l) + 2) = term_l || ' ('
             THEN 0
-            WHEN instr(' | ' || gloss || ' | ', ' | ' || lower(term) || ' | ') > 0
-              OR instr(' | ' || gloss || ' | ', ' | ' || lower(term) || ' (') > 0
+            WHEN instr(' | ' || gloss || ' | ', ' | ' || term_l || ' | ') > 0
+              OR instr(' | ' || gloss || ' | ', ' | ' || term_l || ' (') > 0
             THEN 1
             ELSE 2
-          END ASC,
-          ptag DESC,
-          head_len ASC,
-          card_id ASC
+          END AS rank
+        FROM (
+          SELECT card_id, ptag, head_len, term_l, head_l, forms_pad, reading_pad, romaji_pad, gloss,
+            CASE WHEN instr(body, ' | ') > 0
+                 THEN substr(body, 1, instr(body, ' | ') - 1)
+                 ELSE body END AS first_l
+          FROM (
+            SELECT card_id, ptag, head_len, term_l, head_l, forms_pad, reading_pad, romaji_pad, gloss,
+              CASE WHEN gloss LIKE '(%' AND instr(gloss, ') ') > 0
+                   THEN substr(gloss, instr(gloss, ') ') + 2)
+                   ELSE gloss END AS body
+            FROM (
+              SELECT
+                c.card_id AS card_id,
+                f.ptag AS ptag,
+                length(c.headword) AS head_len,
+                lower(q.raw) AS term_l,
+                lower(ifnull(c.headword, '')) AS head_l,
+                '; ' || lower(CASE WHEN instr(ifnull(f.content, ''), ' [ ') > 0
+                     THEN substr(f.content, 1, instr(f.content, ' [ ') - 1)
+                     ELSE ifnull(c.headword, '') END) || '; ' AS forms_pad,
+                '; ' || lower(ifnull(c.reading, '')) || '; ' AS reading_pad,
+                '; ' || lower(ifnull(c.romaji, '')) || '; ' AS romaji_pad,
+                replace(replace(lower(
+                  CASE WHEN instr(ifnull(f.content, ''), ' ] ') > 0
+                       THEN substr(f.content, instr(f.content, ' ] ') + 3)
+                       ELSE '' END
+                ), ' / ', ' | '), '; ', ' | ') AS gloss
+              FROM cards_search_content AS f
+              INNER JOIN cards c ON c.card_id = CAST(f.card_id AS INTEGER)
+              CROSS JOIN q
+              WHERE cards_search_content MATCH ?
+            )
+          )
+        )
+    """.trimIndent()
+
+    /**
+     * Ordered card ids. Placeholders: exact term, MATCH expression, limit.
+     */
+    val SEARCH = """
+        WITH q(raw) AS (SELECT ?)
+        SELECT card_id FROM (
+          $SCORED_ROWS
+        )
+        ORDER BY rank ASC, ptag DESC, head_len ASC, card_id ASC
+        LIMIT ?
+    """.trimIndent()
+
+    /**
+     * [SEARCH] plus the precomputed rank, for the exact token of a prefix.
+     * Placeholders: exact term, MATCH expression, limit.
+     */
+    val SCORED = """
+        WITH q(raw) AS (SELECT ?)
+        SELECT card_id, rank, ptag, head_len FROM (
+          $SCORED_ROWS
+        )
+        ORDER BY rank ASC, ptag DESC, head_len ASC, card_id ASC
+        LIMIT ?
+    """.trimIndent()
+
+    /**
+     * Prefix fillers with no gloss work. They are non-exact matches, so they
+     * sort by common word, then short headword. Placeholders: MATCH, limit.
+     */
+    val PREFIX_HITS = """
+        SELECT c.card_id, f.ptag, length(c.headword) AS head_len
+        FROM cards_search_content AS f
+        INNER JOIN cards c ON c.card_id = CAST(f.card_id AS INTEGER)
+        WHERE cards_search_content MATCH ?
+        ORDER BY f.ptag DESC, head_len ASC, c.card_id ASC
         LIMIT ?
     """.trimIndent()
 

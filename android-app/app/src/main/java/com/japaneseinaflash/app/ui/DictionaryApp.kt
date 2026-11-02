@@ -215,35 +215,35 @@ private fun SearchBody(
             onSubmit()
         }
         InterceptPlatformTextInput(searchFieldImeInterceptor) {
-        OutlinedTextField(
-            value = state.query,
-            onValueChange = onQueryChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .semantics { contentDescription = searchDescription },
-            placeholder = { Text(stringResource(R.string.search_hint)) },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search,
-                autoCorrectEnabled = false,
-            ),
-            keyboardActions = KeyboardActions(
-                onSearch = { dismissKeyboard() },
-                onDone = { dismissKeyboard() },
-                onGo = { dismissKeyboard() },
-                onSend = { dismissKeyboard() },
-            ),
-            trailingIcon = if (state.query.isNotEmpty()) {
-                {
-                    TextButton(onClick = { onQueryChange("") }) {
-                        Text(stringResource(R.string.clear_search))
+            OutlinedTextField(
+                value = state.query,
+                onValueChange = onQueryChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics { contentDescription = searchDescription },
+                placeholder = { Text(stringResource(R.string.search_hint)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search,
+                    autoCorrectEnabled = false,
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = { dismissKeyboard() },
+                    onDone = { dismissKeyboard() },
+                    onGo = { dismissKeyboard() },
+                    onSend = { dismissKeyboard() },
+                ),
+                trailingIcon = if (state.query.isNotEmpty()) {
+                    {
+                        TextButton(onClick = { onQueryChange("") }) {
+                            Text(stringResource(R.string.clear_search))
+                        }
                     }
-                }
-            } else {
-                null
-            },
-            colors = paperFieldColors(),
-        )
+                } else {
+                    null
+                },
+                colors = paperFieldColors(),
+            )
         }
         Spacer(Modifier.height(12.dp))
         when (state.phase) {

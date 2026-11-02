@@ -85,6 +85,17 @@ class RealDictionaryQueryTest {
     }
 
     @Test
+    fun prefixRankingAgreesWithTheFullQuery() {
+        assertEquals(37, countMatches("ラー*"))
+        for ((term, match) in listOf("co" to "co*", "こ" to "こ*")) {
+            assertEquals(
+                searchIds(DictionarySql.SEARCH, listOf(term, match, "50")),
+                prefixIds(term, match, 50),
+            )
+        }
+    }
+
+    @Test
     fun operatorQueriesRunAndStillFindNeko() {
         assertEquals("猫" to "ねこ", search("neko OR", limit = 3).first())
         assertEquals("猫" to "ねこ", search("-neko", limit = 3).first())
@@ -125,6 +136,24 @@ class RealDictionaryQueryTest {
         }
         assertTrue("$headword should come before $laterHeadword $laterReading in $rows", first >= 0 && later > first)
     }
+
+    private fun prefixIds(term: String, match: String, limit: Int): List<String> {
+        val promoted = searchIds(DictionarySql.SCORED, listOf(term, term, limit.toString())).map { line ->
+            val parts = line.split("|")
+            RankedCard(parts[0].toLong(), parts[1].toInt(), parts[2].toInt(), parts[3].toInt())
+        }
+        val fillers = searchIds(DictionarySql.PREFIX_HITS, listOf(match, limit.toString())).map { line ->
+            val parts = line.split("|")
+            RankedCard(parts[0].toLong(), rank = 2, ptag = parts[1].toInt(), headLength = parts[2].toInt())
+        }
+        return SearchRank.merge(promoted, fillers, limit).map { it.toString() }
+    }
+
+    private fun searchIds(sql: String, args: List<String>): List<String> =
+        query(bind(sql, args)).lines().map { it.trim() }.filter { it.isNotEmpty() }
+
+    private fun countMatches(match: String): Int =
+        query("SELECT count(*) FROM cards_search_content WHERE cards_search_content MATCH '$match';").trim().toInt()
 
     private fun query(sql: String): String {
         val sources = listedSources().associateBy { it.assetName }

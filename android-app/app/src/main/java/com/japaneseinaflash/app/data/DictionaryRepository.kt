@@ -12,13 +12,8 @@ class DictionaryRepository internal constructor(
 
     fun search(raw: String, limit: Int = SearchQuery.DEFAULT_LIMIT): List<CardSummary> = synchronized(lock) {
         val prepared = SearchQuery.prepare(raw, limit) ?: return emptyList()
-        val ids = mutableListOf<Long>()
-        try {
-            db.rawQuery(prepared.sql, prepared.arguments.toTypedArray()).use { cursor ->
-                while (cursor.moveToNext()) {
-                    ids.add(cursor.getLong(0))
-                }
-            }
+        val ids = try {
+            rankedIds(prepared)
         } catch (e: SQLException) {
             if (isMatchSyntaxError(e)) return emptyList()
             throw e
@@ -41,6 +36,43 @@ class DictionaryRepository internal constructor(
             }
         }
         ids.mapNotNull { byId[it] }
+    }
+
+    private fun rankedIds(prepared: PreparedSearch): List<Long> {
+        if (!SearchRank.isPrefixQuery(prepared.matchArgument, prepared.exactTerm)) {
+            return readIds(prepared.sql, prepared.arguments.toTypedArray())
+        }
+        val fillers = readRows(DictionarySql.PREFIX_HITS, arrayOf(prepared.matchArgument, prepared.limit.toString())) { cursor ->
+            RankedCard(
+                id = cursor.getLong(0),
+                rank = 2,
+                ptag = cursor.getInt(1),
+                headLength = cursor.getInt(2),
+            )
+        }
+        val promoted = readRows(
+            DictionarySql.SCORED,
+            arrayOf(prepared.exactTerm, prepared.exactTerm, prepared.limit.toString()),
+        ) { cursor ->
+            RankedCard(
+                id = cursor.getLong(0),
+                rank = cursor.getInt(1),
+                ptag = cursor.getInt(2),
+                headLength = cursor.getInt(3),
+            )
+        }
+        return SearchRank.merge(promoted, fillers, prepared.limit)
+    }
+
+    private fun readIds(sql: String, args: Array<String>): List<Long> =
+        readRows(sql, args) { it.getLong(0) }
+
+    private fun <T> readRows(sql: String, args: Array<String>, read: (android.database.Cursor) -> T): List<T> {
+        val rows = mutableListOf<T>()
+        db.rawQuery(sql, args).use { cursor ->
+            while (cursor.moveToNext()) rows.add(read(cursor))
+        }
+        return rows
     }
 
     fun loadCard(cardId: Long): CardDetail? = synchronized(lock) {

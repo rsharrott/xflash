@@ -85,16 +85,12 @@ class SearchQueryTest {
     @Test
     fun rankIsExactThenCommonThenHeadwordLength() {
         val sql = DictionarySql.SEARCH
-        val order = sql.substringAfter("ORDER BY")
-        val first = order.indexOf("THEN 0")
-        val later = order.indexOf("THEN 1")
-        val ptag = order.indexOf("ptag DESC")
-        val head = order.indexOf("head_len ASC")
-        val card = order.indexOf("card_id ASC")
-        assertTrue(first in 0 until later)
-        assertTrue(later < ptag)
-        assertTrue(ptag < head)
-        assertTrue(head < card)
+        assertTrue(sql.indexOf("THEN 0") < sql.indexOf("THEN 1"))
+        assertTrue(sql.contains("LIKE '(%'"))
+        val order = sql.substringAfterLast("ORDER BY").trim()
+        assertTrue(order.startsWith("rank ASC"))
+        assertTrue(order.indexOf("ptag DESC") < order.indexOf("head_len ASC"))
+        assertTrue(order.indexOf("head_len ASC") < order.indexOf("card_id ASC"))
         assertFalse(order.contains("LENGTH(content)"))
         assertFalse(sql.contains("headword MATCH"))
         assertFalse(sql.contains("reading MATCH"))
