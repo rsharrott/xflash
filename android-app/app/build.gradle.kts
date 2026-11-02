@@ -165,7 +165,10 @@ android {
         // Unit tests build their own tiny databases. Packaging the real
         // dictionary into the unit-test assets would decompress ~116 MiB on
         // every test run and is not what `test` is for.
-        unitTests.isIncludeAndroidResources = false
+        // Compose tests need the merged resources (strings, the test activity).
+        // Dictionary databases are generated assets, not res/, and unit tests
+        // build their own tiny databases rather than opening those assets.
+        unitTests.isIncludeAndroidResources = true
         unitTests.all { test ->
             test.testLogging {
                 events("passed", "skipped", "failed")
@@ -201,4 +204,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
+    testImplementation(composeBom)
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

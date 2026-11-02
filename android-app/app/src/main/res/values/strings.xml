@@ -6,6 +6,7 @@
     <string name="search_prompt">Try a word, a reading, or an English meaning. ? is a wildcard.</string>
     <string name="clear_search">Clear</string>
     <string name="no_results">No matches</string>
+    <string name="search_too_long">Search is too long</string>
     <plurals name="search_truncated">
         <item quantity="one">Showing the first %d match.</item>
         <item quantity="other">Showing the first %d matches.</item>

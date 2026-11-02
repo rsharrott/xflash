@@ -12,13 +12,8 @@ class DictionaryRepository internal constructor(
 
     fun search(raw: String, limit: Int = SearchQuery.DEFAULT_LIMIT): List<CardSummary> = synchronized(lock) {
         val prepared = SearchQuery.prepare(raw, limit) ?: return emptyList()
-        val ids = mutableListOf<Long>()
-        try {
-            db.rawQuery(prepared.sql, arrayOf(prepared.matchArgument, prepared.limit.toString())).use { cursor ->
-                while (cursor.moveToNext()) {
-                    ids.add(cursor.getLong(0))
-                }
-            }
+        val ids = try {
+            rankedIds(prepared)
         } catch (e: SQLException) {
             if (isMatchSyntaxError(e)) return emptyList()
             throw e
@@ -41,6 +36,61 @@ class DictionaryRepository internal constructor(
             }
         }
         ids.mapNotNull { byId[it] }
+    }
+
+    private fun rankedIds(prepared: PreparedSearch): List<Long> {
+        val match = prepared.matchArgument
+        val exact = prepared.exactTerm
+        if (SearchRank.isPrefixQuery(match, exact)) {
+            return readIds(DictionarySql.PREFIX, arrayOf(exact, match, prepared.limit.toString()))
+        }
+        if (SearchRank.isSingleToken(match, exact)) {
+            return tokenIds(exact, prepared.limit)
+        }
+        return readIds(prepared.sql, prepared.arguments.toTypedArray())
+    }
+
+    /**
+     * Ranks a single token from one stored copy of each hit.
+     *
+     * A single SELECT rebuilds the gloss on every sort comparison. The stage
+     * table stores it once. It is TEMP, so it belongs to this connection, and
+     * [search] holds [lock]. The work is wrapped in a transaction: SQLite only
+     * has to write `temp`, and the read-only dictionary attachments stay
+     * read-only. Android's [SQLiteDatabase.beginTransaction] is exclusive and
+     * some builds then reject the lock, so that rejection falls back to the
+     * repository lock.
+     */
+    private fun tokenIds(term: String, limit: Int): List<Long> {
+        val transaction = startStageTransaction()
+        try {
+            db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+            db.execSQL(DictionarySql.TOKEN_STAGE, arrayOf<Any>(term, term))
+            val ids = readIds(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString()))
+            if (transaction) db.setTransactionSuccessful()
+            return ids
+        } finally {
+            if (transaction) db.endTransaction()
+            db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+        }
+    }
+
+    private fun startStageTransaction(): Boolean = try {
+        db.beginTransactionNonExclusive()
+        true
+    } catch (_: SQLException) {
+        false
+    }
+
+    private fun readIds(sql: String, args: Array<String>): List<Long> =
+        readRows(sql, args) { it.getLong(0) }
+
+    private fun <T> readRows(sql: String, args: Array<String>, read: (android.database.Cursor) -> T): List<T> {
+        val rows = mutableListOf<T>()
+        db.rawQuery(sql, args).use { cursor ->
+            while (cursor.moveToNext()) rows.add(read(cursor))
+        }
+        return rows
     }
 
     fun loadCard(cardId: Long): CardDetail? = synchronized(lock) {

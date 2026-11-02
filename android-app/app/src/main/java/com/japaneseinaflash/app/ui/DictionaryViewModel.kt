@@ -11,6 +11,8 @@ import com.japaneseinaflash.app.data.DataVersions
 import com.japaneseinaflash.app.data.DeviceDictionaryInstaller
 import com.japaneseinaflash.app.data.DictionaryFiles
 import com.japaneseinaflash.app.data.DictionaryRepository
+import com.japaneseinaflash.app.data.SearchPlan
+import com.japaneseinaflash.app.data.SearchQuery
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +50,10 @@ enum class DictionaryError {
     CardMissing,
 }
 
+enum class SearchNotice {
+    TooLong,
+}
+
 data class DictionaryUiState(
     val phase: Phase = Phase.Preparing,
     val query: String = "",
@@ -58,6 +64,7 @@ data class DictionaryUiState(
     val card: CardDetail? = null,
     val versions: DataVersions? = null,
     val error: DictionaryError? = null,
+    val notice: SearchNotice? = null,
 )
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -73,6 +80,9 @@ class DictionaryViewModel(
 
     @Volatile
     private var cleared = false
+
+    /** Last query that finished without a search error. Failures stay re-runnable. */
+    private var lastSuccessfulQuery: String? = null
 
     private val _state = MutableStateFlow(DictionaryUiState())
     val state: StateFlow<DictionaryUiState> = _state.asStateFlow()
@@ -165,6 +175,9 @@ class DictionaryViewModel(
                 examples = opened.databaseVersion(DictionaryFiles.SCHEMA_EX).orEmpty(),
             )
             _state.update { it.copy(phase = Phase.Ready, versions = versions, error = null) }
+            if (queryText.value.isNotEmpty()) {
+                submitTicks.tryEmit(Unit)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -208,6 +221,25 @@ class DictionaryViewModel(
     }
 
     private suspend fun runSearch(query: String) {
+        if (query != queryText.value) return
+        if (!shouldRunSearch(query, lastSuccessfulQuery, _state.value.error)) return
+        when (SearchQuery.plan(query)) {
+            SearchPlan.Blank -> {
+                if (query != queryText.value) return
+                lastSuccessfulQuery = query
+                _state.update { it.copy(searching = false, results = emptyList(), error = null, notice = null) }
+                return
+            }
+            SearchPlan.TooLong -> {
+                if (query != queryText.value) return
+                lastSuccessfulQuery = query
+                _state.update {
+                    it.copy(searching = false, results = emptyList(), error = null, notice = SearchNotice.TooLong)
+                }
+                return
+            }
+            is SearchPlan.Ready -> Unit
+        }
         val pending = repository
         val opened = try {
             pending.await()
@@ -217,23 +249,20 @@ class DictionaryViewModel(
             return
         }
         if (query != queryText.value) return
-        if (query.isBlank()) {
-            _state.update { it.copy(searching = false, results = emptyList(), error = null) }
-            return
-        }
         // Leave the previous list on screen until this search returns.
-        _state.update { it.copy(searching = true, error = null) }
+        _state.update { it.copy(searching = true, error = null, notice = null) }
         try {
             val results = withContext(Dispatchers.IO) { opened.search(query) }
             if (query != queryText.value) return
-            _state.update { it.copy(searching = false, results = results) }
+            lastSuccessfulQuery = query
+            _state.update { it.copy(searching = false, results = results, notice = null) }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Log.e(TAG, "Search failed", e)
             if (query != queryText.value) return
             _state.update {
-                it.copy(searching = false, results = emptyList(), error = DictionaryError.SearchFailed)
+                it.copy(searching = false, results = emptyList(), error = DictionaryError.SearchFailed, notice = null)
             }
         }
     }
@@ -261,3 +290,11 @@ class DictionaryViewModel(
         }
     }
 }
+
+/**
+ * Skip only a repeat of a query that already succeeded. An error, including one
+ * left from before the dictionary finished opening, has to be allowed through
+ * so Enter and Retry can run it again.
+ */
+internal fun shouldRunSearch(query: String, lastSuccess: String?, error: DictionaryError?): Boolean =
+    error != null || query != lastSuccess
