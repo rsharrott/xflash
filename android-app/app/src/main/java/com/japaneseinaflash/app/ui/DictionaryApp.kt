@@ -63,6 +63,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.intl.LocaleList
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withLink
@@ -245,6 +247,7 @@ private fun SearchBody(
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Search,
                     autoCorrectEnabled = false,
+                    hintLocales = LocaleList(Locale("ja"), Locale("en")),
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = { dismissKeyboard() },

@@ -35,8 +35,9 @@ object SearchQuery {
      * only the uppercase words `AND`, `OR`, `NOT`, and `NEAR` as operators, so
      * lowercase `and`, `or`, `not`, and `near` stay search terms (`not available`,
      * `black and white`). An uppercase `OR` between words is kept (`neko OR inu`
-     * matches either word). `AND`, `NOT`, and `NEAR` are dropped, and a dangling
-     * `OR` is dropped, so none of them can reject the query. A leading `-` is the NOT
+     * matches either word). A quoted `"OR"` stays a word inside that disjunction.
+     * `AND`, `NOT`, and `NEAR` are dropped, and a dangling `OR` is dropped, so
+     * none of them can reject the query. A leading `-` is the NOT
      * operator and is removed. `?` is the wildcard: a trailing `?` becomes `*`,
      * characters after a `?` stay in the word (`ne?ko` is `neko`), and a
      * one-letter ASCII stem is not expanded (`s?` stays `s`) because `s*` scans
@@ -52,7 +53,7 @@ object SearchQuery {
         if (normalized.length > MAX_EXPRESSION_CHARS) return SearchPlan.TooLong
         val parsed = tokens(normalized)
         if (parsed.isEmpty()) return SearchPlan.Blank
-        val words = parsed.filter { !it.text.isOperator() }
+        val words = parsed.filter { !it.isJoiner() }
         val pieces = if (words.isNotEmpty()) {
             words
         } else {
@@ -86,16 +87,20 @@ object SearchQuery {
         val forceQuote: Boolean,
     )
 
+    /** A bare FTS operator. A quoted `"OR"` is a word, not a joiner. */
+    private fun Piece.isJoiner(): Boolean = !phrase && text.isOperator()
+
     /**
      * True when every word is joined to the next by uppercase `OR` and no other
-     * operator is present. A leading or trailing `OR` does not count.
+     * operator is present. A leading or trailing `OR` does not count, and a
+     * quoted `"OR"` counts as a word.
      */
     private fun linkedByOr(raw: List<Piece>): Boolean {
         var words = 0
         var seenWord = false
         var orSinceWord = false
         for (piece in raw) {
-            if (piece.text.isOperator()) {
+            if (piece.isJoiner()) {
                 if (piece.text != "OR") return false
                 orSinceWord = true
                 continue

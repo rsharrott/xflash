@@ -42,14 +42,4 @@ class SearchRankTest {
         assertFalse(SearchRank.isSingleToken("neko OR inu", ""))
     }
 
-    @Test
-    fun aPrefixPrefersTheFieldThatStartsWithTheStem() {
-        val hits = listOf(
-            PrefixHit(1, 1, 1, "熟", "こなれる", "konareru", "ripe"),
-            PrefixHit(2, 0, 3, "指揮官", "しきかん", "shikikan", "commander"),
-            PrefixHit(3, 1, 1, "回", "かい", "kai", "counter for occurrences"),
-            PrefixHit(4, 1, 1, "咳", "せき", "seki", "cough"),
-        )
-        assertEquals(listOf(3L, 4L, 2L, 1L), SearchRank.prefixIds(hits, "co", limit = 4))
-    }
 }

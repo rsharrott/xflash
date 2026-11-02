@@ -42,19 +42,7 @@ class DictionaryRepository internal constructor(
         val match = prepared.matchArgument
         val exact = prepared.exactTerm
         if (SearchRank.isPrefixQuery(match, exact)) {
-            val window = maxOf(prepared.limit, SearchRank.PREFIX_WINDOW).toString()
-            val hits = readRows(DictionarySql.PREFIX_WINDOW, arrayOf(match, window)) { cursor ->
-                PrefixHit(
-                    id = cursor.getLong(0),
-                    ptag = cursor.getInt(1),
-                    headLength = cursor.getInt(2),
-                    headword = cursor.stringAt(3),
-                    reading = cursor.stringAt(4),
-                    romaji = cursor.stringAt(5),
-                    glossHead = cursor.stringAt(6),
-                )
-            }
-            return SearchRank.prefixIds(hits, exact, prepared.limit)
+            return readIds(DictionarySql.PREFIX, arrayOf(exact, match, prepared.limit.toString()))
         }
         if (SearchRank.isSingleToken(match, exact)) {
             return tokenIds(exact, prepared.limit)
@@ -63,31 +51,19 @@ class DictionaryRepository internal constructor(
     }
 
     /**
-     * Copies the token's hits once, ranks the exact glosses from that copy,
-     * and fills any remaining slots in common-word order.
+     * Ranks a single token from one stored copy of each hit.
+     *
+     * A single SELECT rebuilds the gloss on every sort comparison. The stage
+     * table stores it once. [search] holds [lock] and this repository keeps
+     * one connection, so nothing else can see that table. A SQL transaction
+     * cannot wrap it: SQLite transactions cover every attached database, and
+     * the dictionary files are read-only.
      */
     private fun tokenIds(term: String, limit: Int): List<Long> {
         db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
         try {
             db.execSQL(DictionarySql.TOKEN_STAGE, arrayOf<Any>(term, term))
-            val promoted = readRows(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString())) { cursor ->
-                RankedCard(
-                    id = cursor.getLong(0),
-                    rank = cursor.getInt(1),
-                    ptag = cursor.getInt(2),
-                    headLength = cursor.getInt(3),
-                )
-            }
-            if (promoted.size >= limit) return promoted.map { it.id }
-            val fillers = readRows(DictionarySql.PREFIX_HITS, arrayOf(term, limit.toString())) { cursor ->
-                RankedCard(
-                    id = cursor.getLong(0),
-                    rank = 2,
-                    ptag = cursor.getInt(1),
-                    headLength = cursor.getInt(2),
-                )
-            }
-            return SearchRank.merge(promoted, fillers, limit)
+            return readIds(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString()))
         } finally {
             db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
         }

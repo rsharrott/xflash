@@ -30,10 +30,8 @@ class SearchImeTest {
         assertTrue(info.imeOptions and EditorInfo.IME_FLAG_NO_EXTRACT_UI != 0)
         assertTrue(info.imeOptions and EditorInfo.IME_FLAG_NO_FULLSCREEN != 0)
         assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0)
-        assertEquals(
-            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-            info.inputType and EditorInfo.TYPE_MASK_VARIATION,
-        )
+        assertEquals(0, info.inputType and EditorInfo.TYPE_MASK_VARIATION)
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD == 0)
         assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT == 0)
         assertEquals(EditorInfo.TYPE_CLASS_TEXT, info.inputType and EditorInfo.TYPE_MASK_CLASS)
     }
@@ -50,10 +48,8 @@ class SearchImeTest {
         assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT == 0)
         assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE == 0)
         assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES != 0)
-        assertEquals(
-            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-            info.inputType and EditorInfo.TYPE_MASK_VARIATION,
-        )
+        assertEquals(0, info.inputType and EditorInfo.TYPE_MASK_VARIATION)
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD == 0)
     }
 
     @Test
@@ -97,9 +93,6 @@ class SearchImeTest {
         assertTrue(info.imeOptions and EditorInfo.IME_FLAG_NO_FULLSCREEN != 0)
         assertEquals(EditorInfo.IME_ACTION_SEARCH, info.imeOptions and EditorInfo.IME_MASK_ACTION)
         assertTrue(info.inputType and EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS != 0)
-        assertEquals(
-            EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
-            info.inputType and EditorInfo.TYPE_MASK_VARIATION,
-        )
+        assertTrue(info.inputType and EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD == 0)
     }
 }

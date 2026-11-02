@@ -64,6 +64,8 @@ class SearchQueryTest {
         assertEquals("neko inu", SearchQuery.prepare("neko AND inu")!!.matchArgument)
         assertEquals("neko inu", SearchQuery.prepare("neko NOT inu")!!.matchArgument)
         assertEquals("\"e-mail\" OR neko", SearchQuery.prepare("e-mail OR neko")!!.matchArgument)
+        assertEquals("neko OR \"OR\"", SearchQuery.prepare("neko OR \"OR\"")!!.matchArgument)
+        assertEquals("neko OR \"OR\" OR inu", SearchQuery.prepare("neko OR \"OR\" OR inu")!!.matchArgument)
     }
 
     @Test

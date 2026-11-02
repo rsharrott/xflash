@@ -95,12 +95,18 @@ class RealDictionaryQueryTest {
         assertEquals("猫" to "ねこ", search("ねこ", limit = 3).first())
         val ramen = search("ラー", limit = 3)
         assertTrue(ramen.first().first == "拉麺" || ramen.first().first == "ラーメン")
+        assertEquals(139, countFieldStarts("and"))
+        val and = search("and?", limit = 50).map { it.first }
+        assertTrue(and.containsAll(listOf("云々", "並びに", "其れから")))
+        val one = search("one?", limit = 10)
+        val oneIndex = one.indexOfFirst { it.first == "一つ" }
+        assertTrue("一つ was ${oneIndex + 1} in $one", oneIndex in 2..4)
     }
 
     @Test
     fun singleTokenRankingAgreesWithTheFullQuery() {
-        for (term in listOf("eat", "go", "school", "person", "dog", "car", "rain", "water", "s", "and")) {
-            assertEquals(term, searchIds(DictionarySql.SEARCH, listOf(term, term, "12")), tokenIds(term, 12))
+        for (term in listOf("eat", "go", "school", "life", "for", "one", "and")) {
+            assertEquals(term, searchIds(DictionarySql.SEARCH, listOf(term, term, "20")), tokenIds(term, 20))
         }
     }
 
@@ -141,20 +147,7 @@ class RealDictionaryQueryTest {
         val match = prepared.matchArgument
         val exact = prepared.exactTerm
         if (SearchRank.isPrefixQuery(match, exact)) {
-            val window = maxOf(prepared.limit, SearchRank.PREFIX_WINDOW)
-            val hits = searchIds(DictionarySql.PREFIX_WINDOW, listOf(match, window.toString())).map { line ->
-                val parts = line.split("|", limit = 7)
-                PrefixHit(
-                    id = parts[0].toLong(),
-                    ptag = parts[1].toInt(),
-                    headLength = parts[2].toInt(),
-                    headword = parts[3],
-                    reading = parts[4],
-                    romaji = parts[5],
-                    glossHead = parts[6],
-                )
-            }
-            return SearchRank.prefixIds(hits, exact, prepared.limit).map { it.toString() }
+            return searchIds(DictionarySql.PREFIX, listOf(exact, match, prepared.limit.toString()))
         }
         if (SearchRank.isSingleToken(match, exact)) return tokenIds(exact, prepared.limit)
         return searchIds(prepared.sql, prepared.arguments)
@@ -166,16 +159,7 @@ class RealDictionaryQueryTest {
             ${bind(DictionarySql.TOKEN_STAGE, listOf(term, term))};
             ${bind(DictionarySql.TOKEN_RANKED, listOf(limit.toString()))};
         """.trimIndent()
-        val promoted = query(script).lines().map { it.trim() }.filter { it.isNotEmpty() }.map { line ->
-            val parts = line.split("|")
-            RankedCard(parts[0].toLong(), parts[1].toInt(), parts[2].toInt(), parts[3].toInt())
-        }
-        if (promoted.size >= limit) return promoted.map { it.id.toString() }
-        val fillers = searchIds(DictionarySql.PREFIX_HITS, listOf(term, limit.toString())).map { line ->
-            val parts = line.split("|")
-            RankedCard(parts[0].toLong(), rank = 2, ptag = parts[1].toInt(), headLength = parts[2].toInt())
-        }
-        return SearchRank.merge(promoted, fillers, limit).map { it.toString() }
+        return query(script).lines().map { it.trim() }.filter { it.isNotEmpty() }
     }
 
     private fun indexOf(rows: List<Pair<String, String>>, headword: String): Int =
@@ -201,6 +185,24 @@ class RealDictionaryQueryTest {
 
     private fun countMatches(match: String): Int =
         query("SELECT count(*) FROM cards_search_content WHERE cards_search_content MATCH '$match';").trim().toInt()
+
+    /** Rows whose headword, reading, romaji, or main gloss starts with [stem]. */
+    private fun countFieldStarts(stem: String): Int {
+        val like = "'%; $stem%'"
+        return query(
+            """
+            SELECT count(*) FROM cards_search_content f
+            INNER JOIN cards c ON c.card_id = CAST(f.card_id AS INTEGER)
+            WHERE cards_search_content MATCH '${stem}*'
+              AND (
+                '; ' || lower(ifnull(c.headword, '')) LIKE $like
+                OR '; ' || lower(ifnull(c.reading, '')) LIKE $like
+                OR '; ' || lower(ifnull(c.romaji, '')) LIKE $like
+                OR '; ' || lower(ifnull(c.headword_en, '')) LIKE $like
+              );
+            """.trimIndent(),
+        ).trim().toInt()
+    }
 
     private fun query(sql: String): String {
         val sources = listedSources().associateBy { it.assetName }

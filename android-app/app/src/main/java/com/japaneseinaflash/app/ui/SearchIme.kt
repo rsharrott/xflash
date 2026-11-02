@@ -13,10 +13,12 @@ import androidx.compose.ui.platform.PlatformTextInputMethodRequest
  * restarts the input connection, which shows the keyboard again. These flags
  * keep the field inline so the Search action reaches it.
  *
- * `autoCorrectEnabled = false` is not enough for Gboard: Enter still rewrites
- * `neko` to `Niko`. [EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS] plus the visible
- * password variation is what actually turns suggestions off, without switching
- * the field to an ASCII-only keyboard (that would block Japanese input).
+ * Suggestions are turned off with [EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS]
+ * and by clearing autocorrect. The visible-password variation is not set:
+ * Gboard and Google Japanese Input treat it as a password field and lock the
+ * keyboard to the alphabet, so a search for ねこ cannot be composed.
+ * The field's `hintLocales` are Japanese, then English, so the IME is not
+ * left guessing.
  */
 internal fun EditorInfo.applySearchImeFlags() {
     imeOptions = imeOptions or EditorInfo.IME_FLAG_NO_EXTRACT_UI or EditorInfo.IME_FLAG_NO_FULLSCREEN
@@ -24,7 +26,6 @@ internal fun EditorInfo.applySearchImeFlags() {
         EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT.inv() and
         EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE.inv()
     inputType = EditorInfo.TYPE_CLASS_TEXT or
-        EditorInfo.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD or
         EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
         keptFlags
 }

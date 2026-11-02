@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -97,7 +98,7 @@ class DictionaryViewModel(
             merge(
                 queryText.drop(1).debounce(300),
                 submitTicks.map { queryText.value },
-            ).collectLatest { query ->
+            ).distinctUntilChanged().collectLatest { query ->
                 runSearch(query)
             }
         }
