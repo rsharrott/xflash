@@ -12,11 +12,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,6 +43,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
@@ -101,8 +105,10 @@ fun DictionaryApp(viewModel: DictionaryViewModel = viewModel()) {
     }
 }
 
+internal const val SearchResultsTag = "search-results"
+
 @Composable
-private fun DictionaryScaffold(
+internal fun DictionaryScaffold(
     state: DictionaryUiState,
     versionName: String,
     onQueryChange: (String) -> Unit,
@@ -144,9 +150,20 @@ private fun DictionaryScaffold(
                     onAbout = onAbout,
                 )
                 when (state.screen) {
-                    Screen.Search -> SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
-                    Screen.About -> AboutBody(state.versions, versionName)
-                    is Screen.Detail -> DetailBody(state)
+                    Screen.Search -> SearchBody(
+                        state,
+                        onQueryChange,
+                        onSubmit,
+                        onCard,
+                        onRetry,
+                        Modifier.weight(1f).fillMaxWidth(),
+                    )
+                    Screen.About -> Box(Modifier.weight(1f).fillMaxWidth()) {
+                        AboutBody(state.versions, versionName)
+                    }
+                    is Screen.Detail -> Box(Modifier.weight(1f).fillMaxWidth()) {
+                        DetailBody(state)
+                    }
                 }
             }
         }
@@ -209,16 +226,20 @@ private fun SearchBody(
     onSubmit: () -> Unit,
     onCard: (Long) -> Unit,
     onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+    val resultsFocus = remember { FocusRequester() }
+    Column(modifier.padding(horizontal = 20.dp)) {
         Spacer(Modifier.height(16.dp))
         val searchDescription = stringResource(R.string.cd_search_field)
         val keyboard = LocalSoftwareKeyboardController.current
         val focusManager = LocalFocusManager.current
         val dismissKeyboard = {
-            // Drop focus before hiding. In landscape the IME otherwise restarts
-            // the input connection and asks to be shown again.
+            // Leave the text field, then park focus on the results. Clearing
+            // focus alone lands on About, and the next Enter would open it.
+            // The IME otherwise restarts the input connection and shows again.
             focusManager.clearFocus(force = true)
+            resultsFocus.requestFocus()
             keyboard?.hide()
             onSubmit()
         }
@@ -228,7 +249,9 @@ private fun SearchBody(
                 onValueChange = onQueryChange,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 56.dp)
+                    // heightIn yields when the IME leaves less than 56dp.
+                    // requiredHeightIn keeps the text and Clear on screen.
+                    .requiredHeightIn(min = 56.dp)
                     .onPreviewKeyEvent { event ->
                         val enter = isSearchEnter(event.nativeKeyEvent.keyCode) ||
                             event.key == Key.Enter ||
@@ -268,7 +291,14 @@ private fun SearchBody(
             )
         }
         Spacer(Modifier.height(12.dp))
-        Box(Modifier.weight(1f).fillMaxWidth()) {
+        Box(
+            Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .testTag(SearchResultsTag)
+                .focusRequester(resultsFocus)
+                .focusable(),
+        ) {
             when (state.phase) {
                 Phase.Preparing -> PreparingMessage()
                 Phase.Failed -> {

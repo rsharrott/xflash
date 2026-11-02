@@ -54,19 +54,32 @@ class DictionaryRepository internal constructor(
      * Ranks a single token from one stored copy of each hit.
      *
      * A single SELECT rebuilds the gloss on every sort comparison. The stage
-     * table stores it once. [search] holds [lock] and this repository keeps
-     * one connection, so nothing else can see that table. A SQL transaction
-     * cannot wrap it: SQLite transactions cover every attached database, and
-     * the dictionary files are read-only.
+     * table stores it once. It is TEMP, so it belongs to this connection, and
+     * [search] holds [lock]. The work is wrapped in a transaction: SQLite only
+     * has to write `temp`, and the read-only dictionary attachments stay
+     * read-only. Android's [SQLiteDatabase.beginTransaction] is exclusive and
+     * some builds then reject the lock, so that rejection falls back to the
+     * repository lock.
      */
     private fun tokenIds(term: String, limit: Int): List<Long> {
-        db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+        val transaction = startStageTransaction()
         try {
+            db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
             db.execSQL(DictionarySql.TOKEN_STAGE, arrayOf<Any>(term, term))
-            return readIds(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString()))
+            val ids = readIds(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString()))
+            if (transaction) db.setTransactionSuccessful()
+            return ids
         } finally {
+            if (transaction) db.endTransaction()
             db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
         }
+    }
+
+    private fun startStageTransaction(): Boolean = try {
+        db.beginTransactionNonExclusive()
+        true
+    } catch (_: SQLException) {
+        false
     }
 
     private fun readIds(sql: String, args: Array<String>): List<Long> =

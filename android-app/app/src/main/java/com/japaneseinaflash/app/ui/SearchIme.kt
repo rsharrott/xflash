@@ -28,6 +28,7 @@ internal fun EditorInfo.applySearchImeFlags() {
     inputType = EditorInfo.TYPE_CLASS_TEXT or
         EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
         keptFlags
+    hintLocales = android.os.LocaleList.forLanguageTags("ja,en")
 }
 
 /** Hardware Enter and the numeric-pad Enter, as opposed to the IME search key. */

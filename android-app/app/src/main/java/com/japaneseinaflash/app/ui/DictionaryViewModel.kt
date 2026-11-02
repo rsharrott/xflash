@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -82,6 +81,9 @@ class DictionaryViewModel(
     @Volatile
     private var cleared = false
 
+    /** Last query that finished without a search error. Failures stay re-runnable. */
+    private var lastSuccessfulQuery: String? = null
+
     private val _state = MutableStateFlow(DictionaryUiState())
     val state: StateFlow<DictionaryUiState> = _state.asStateFlow()
 
@@ -98,7 +100,7 @@ class DictionaryViewModel(
             merge(
                 queryText.drop(1).debounce(300),
                 submitTicks.map { queryText.value },
-            ).distinctUntilChanged().collectLatest { query ->
+            ).collectLatest { query ->
                 runSearch(query)
             }
         }
@@ -173,6 +175,9 @@ class DictionaryViewModel(
                 examples = opened.databaseVersion(DictionaryFiles.SCHEMA_EX).orEmpty(),
             )
             _state.update { it.copy(phase = Phase.Ready, versions = versions, error = null) }
+            if (queryText.value.isNotEmpty()) {
+                submitTicks.tryEmit(Unit)
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -216,14 +221,18 @@ class DictionaryViewModel(
     }
 
     private suspend fun runSearch(query: String) {
+        if (query != queryText.value) return
+        if (!shouldRunSearch(query, lastSuccessfulQuery, _state.value.error)) return
         when (SearchQuery.plan(query)) {
             SearchPlan.Blank -> {
                 if (query != queryText.value) return
+                lastSuccessfulQuery = query
                 _state.update { it.copy(searching = false, results = emptyList(), error = null, notice = null) }
                 return
             }
             SearchPlan.TooLong -> {
                 if (query != queryText.value) return
+                lastSuccessfulQuery = query
                 _state.update {
                     it.copy(searching = false, results = emptyList(), error = null, notice = SearchNotice.TooLong)
                 }
@@ -245,6 +254,7 @@ class DictionaryViewModel(
         try {
             val results = withContext(Dispatchers.IO) { opened.search(query) }
             if (query != queryText.value) return
+            lastSuccessfulQuery = query
             _state.update { it.copy(searching = false, results = results, notice = null) }
         } catch (e: CancellationException) {
             throw e
@@ -280,3 +290,11 @@ class DictionaryViewModel(
         }
     }
 }
+
+/**
+ * Skip only a repeat of a query that already succeeded. An error, including one
+ * left from before the dictionary finished opening, has to be allowed through
+ * so Enter and Retry can run it again.
+ */
+internal fun shouldRunSearch(query: String, lastSuccess: String?, error: DictionaryError?): Boolean =
+    error != null || query != lastSuccess

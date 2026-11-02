@@ -99,8 +99,7 @@ class RealDictionaryQueryTest {
         val and = search("and?", limit = 50).map { it.first }
         assertTrue(and.containsAll(listOf("云々", "並びに", "其れから")))
         val one = search("one?", limit = 10)
-        val oneIndex = one.indexOfFirst { it.first == "一つ" }
-        assertTrue("一つ was ${oneIndex + 1} in $one", oneIndex in 2..4)
+        assertEquals("一つ should be 4th in $one", 3, one.indexOfFirst { it.first == "一つ" })
     }
 
     @Test
