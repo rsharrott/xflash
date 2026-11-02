@@ -130,6 +130,9 @@ class StudyStore(private val repository: DictionaryRepository) {
     fun groups(ownerId: Long): List<GroupRecord> =
         repository.query(StudySql.GROUPS_BY_OWNER, arrayOf(ownerId.toString()), ::readGroup)
 
+    fun group(id: Long): GroupRecord? =
+        repository.query(StudySql.GROUP_BY_ID, arrayOf(id.toString()), ::readGroup).firstOrNull()
+
     fun tagsInGroup(groupId: Long): List<TagRecord> =
         repository.query(StudySql.TAGS_IN_GROUP, arrayOf(groupId.toString()), ::readTag)
 

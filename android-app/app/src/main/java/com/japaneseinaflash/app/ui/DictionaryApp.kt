@@ -23,7 +23,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -86,7 +90,12 @@ internal fun AboutPane(versions: DataVersions?, versionName: String) {
 }
 
 @Composable
-internal fun Masthead(title: String, japaneseTitle: Boolean = false) {
+internal fun Masthead(
+    title: String,
+    japaneseTitle: Boolean = false,
+    onBack: (() -> Unit)? = null,
+    action: (@Composable () -> Unit)? = null,
+) {
     Column {
         Row(
             modifier = Modifier
@@ -94,6 +103,11 @@ internal fun Masthead(title: String, japaneseTitle: Boolean = false) {
                 .padding(start = 4.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (onBack != null) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                }
+            }
             Text(
                 text = title,
                 style = if (japaneseTitle) {
@@ -108,6 +122,7 @@ internal fun Masthead(title: String, japaneseTitle: Boolean = false) {
                     .weight(1f)
                     .padding(horizontal = 12.dp, vertical = 8.dp),
             )
+            action?.invoke()
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }

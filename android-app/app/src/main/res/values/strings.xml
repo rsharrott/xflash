@@ -69,6 +69,30 @@
     <string name="theme_water">Water</string>
     <string name="theme_kimono">Kimono</string>
     <string name="theme_kutani">Kutani</string>
+
+    <string name="studying_now">Studying now</string>
+    <string name="my_sets">My sets</string>
+    <string name="built_in_sets">Built-in sets</string>
+    <string name="new_set">New set</string>
+    <string name="search_sets">Search sets by name</string>
+    <string name="search_sets_prompt">Search sets by name.</string>
+    <string name="cd_search_sets">Search study sets</string>
+    <string name="current_set">Current set</string>
+    <string name="start_set_message">Do you want to start this set?  Progress on your last set will be saved.</string>
+    <string name="no_words_title">No words in set</string>
+    <string name="create_set">Create study set</string>
+    <string name="create_set_hint">Name your study set</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="cd_set_row">%1$s, %2$d</string>
+    <plurals name="group_count">
+        <item quantity="one">%d group</item>
+        <item quantity="other">%d groups</item>
+    </plurals>
+    <plurals name="set_count">
+        <item quantity="one">%d set</item>
+        <item quantity="other">%d sets</item>
+    </plurals>
     <string name="about_versions">Cards %1$s, search %2$s, examples %3$s.</string>
     <string name="about_app_version">Version %1$s</string>
 

@@ -142,6 +142,10 @@ fun usesDarkChrome(theme: StudyTheme, mode: DarkMode, systemDark: Boolean): Bool
 /** A group with this many sets is searched, not listed in one column. */
 const val FLAT_SET_LIST_LIMIT = 48
 
+/** Common Words (233) and Nouns (189) take the search. Smaller groups stay as a list. */
+fun opensAsSearch(childGroups: Int, setCount: Int): Boolean =
+    childGroups == 0 && setCount > FLAT_SET_LIST_LIMIT
+
 const val STARRED_TAG_ID = 0L
 const val TOP_OWNER_ID = -1L
 

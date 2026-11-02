@@ -79,6 +79,10 @@ class ThemeAndCopyTest {
         assertTrue(userOwnsMembership(0, editable = false))
         assertFalse(userOwnsMembership(95, editable = false))
         assertTrue(233 > FLAT_SET_LIST_LIMIT)
+        assertTrue(opensAsSearch(0, 233))
+        assertTrue(opensAsSearch(0, 189))
+        assertFalse(opensAsSearch(4, 13))
+        assertFalse(opensAsSearch(0, 8))
     }
 
     private fun source(relative: String): File {

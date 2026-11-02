@@ -62,6 +62,14 @@ internal object StudySql {
         SELECT group_id FROM groups WHERE owner_id = -1 ORDER BY group_id LIMIT 1
     """
 
+    const val GROUP_BY_ID = """
+        SELECT g.group_id, g.group_name, IFNULL(g.group_name_ja, ''), g.recommended, g.tag_count,
+               (SELECT COUNT(*) FROM groups c WHERE c.owner_id = g.group_id) AS child_groups
+        FROM groups g
+        WHERE g.group_id = ?
+        LIMIT 1
+    """
+
     /** Full Set first, then the English name. Matches TagPeer.m. */
     const val TAGS_IN_GROUP = """
         SELECT t.tag_id, t.tag_name, IFNULL(t.tag_name_ja, ''), t.count, t.editable
