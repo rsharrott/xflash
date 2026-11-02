@@ -1,5 +1,6 @@
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -109,6 +110,22 @@ abstract class CopyDictionaryDatabasesTask : DefaultTask() {
     }
 }
 
+abstract class CopyHelpAssetsTask : DefaultTask() {
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val sourceDirectory: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun copy() {
+        val dest = outputDirectory.get().asFile.resolve("help")
+        dest.deleteRecursively()
+        sourceDirectory.get().asFile.copyRecursively(dest)
+    }
+}
+
 extensions.configure<ApplicationAndroidComponentsExtension>("androidComponents") {
     onVariants { variant ->
         val taskName = "copyDictionaryDatabases" +
@@ -119,6 +136,15 @@ extensions.configure<ApplicationAndroidComponentsExtension>("androidComponents")
         variant.sources.assets!!.addGeneratedSourceDirectory(
             copyTask,
             CopyDictionaryDatabasesTask::outputDirectory,
+        )
+        val helpTaskName = "copyHelpAssets" +
+            variant.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
+        val helpTask = tasks.register<CopyHelpAssetsTask>(helpTaskName) {
+            sourceDirectory.set(rootProject.file("../jFlash/Assets/JFlash/help"))
+        }
+        variant.sources.assets!!.addGeneratedSourceDirectory(
+            helpTask,
+            CopyHelpAssetsTask::outputDirectory,
         )
     }
 }

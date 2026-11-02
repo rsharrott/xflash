@@ -1,9 +1,10 @@
-@file:OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
+@file:OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 
 package com.japaneseinaflash.app.ui
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -71,17 +74,18 @@ internal fun SearchPane(
     onQueryChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onCard: (Long) -> Unit,
+    onAdd: (CardSummary) -> Unit,
     onRetry: () -> Unit,
 ) {
     Column(Modifier.fillMaxSize()) {
         Masthead(title = stringResource(R.string.app_name))
-        SearchBody(state, onQueryChange, onSubmit, onCard, onRetry)
+        SearchBody(state, onQueryChange, onSubmit, onCard, onAdd, onRetry)
     }
 }
 
 @Composable
-internal fun DetailPane(state: DictionaryUiState) {
-    DetailBody(state)
+internal fun DetailPane(state: DictionaryUiState, scroll: ScrollState = rememberScrollState()) {
+    DetailBody(state, scroll)
 }
 
 @Composable
@@ -134,6 +138,7 @@ private fun SearchBody(
     onQueryChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onCard: (Long) -> Unit,
+    onAdd: (CardSummary) -> Unit,
     onRetry: () -> Unit,
 ) {
     Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
@@ -188,7 +193,7 @@ private fun SearchBody(
                     Text(stringResource(R.string.retry))
                 }
             }
-            Phase.Ready -> ReadyResults(state, onCard)
+            Phase.Ready -> ReadyResults(state, onCard, onAdd)
         }
     }
 }
@@ -197,6 +202,7 @@ private fun SearchBody(
 private fun SearchResults(
     results: List<CardSummary>,
     onCard: (Long) -> Unit,
+    onAdd: (CardSummary) -> Unit,
 ) {
     if (results.size >= SearchQuery.DEFAULT_LIMIT) {
         Text(
@@ -213,10 +219,15 @@ private fun SearchResults(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(results, key = { it.id }) { card ->
             val description = stringResource(R.string.cd_result, card.headword, card.reading.ifEmpty { card.meaning })
+            val addLabel = stringResource(R.string.cd_add_to_set, card.headword)
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
             Column(
                 Modifier
-                    .fillMaxWidth()
-                    .clickable { onCard(card.id) }
+                    .weight(1f)
+                    .combinedClickable(onClick = { onCard(card.id) }, onLongClick = { onAdd(card) })
                     .semantics { contentDescription = description }
                     .padding(vertical = 12.dp),
             ) {
@@ -240,6 +251,13 @@ private fun SearchResults(
                     )
                 }
             }
+                IconButton(onClick = { onAdd(card) }, modifier = Modifier.size(48.dp)) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.PlaylistAdd,
+                        contentDescription = addLabel,
+                    )
+                }
+            }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
     }
@@ -249,6 +267,7 @@ private fun SearchResults(
 private fun ReadyResults(
     state: DictionaryUiState,
     onCard: (Long) -> Unit,
+    onAdd: (CardSummary) -> Unit,
 ) {
     state.error?.let { ErrorText(it) }
     when {
@@ -256,27 +275,27 @@ private fun ReadyResults(
         state.notice == SearchNotice.TooLong -> TooLongMessage()
         state.query.isBlank() -> Hint(stringResource(R.string.search_prompt))
         state.results.isEmpty() -> Hint(stringResource(R.string.no_results))
-        else -> SearchResults(state.results, onCard)
+        else -> SearchResults(state.results, onCard, onAdd)
     }
 }
 
 @Composable
-private fun DetailBody(state: DictionaryUiState) {
+private fun DetailBody(state: DictionaryUiState, scroll: ScrollState) {
     when {
         state.error != null && state.card == null -> {
             Column(Modifier.padding(20.dp)) { ErrorText(state.error) }
         }
         state.card == null -> LoadingRow()
-        else -> CardBody(state.card)
+        else -> CardBody(state.card, scroll)
     }
 }
 
 @Composable
-private fun CardBody(card: CardDetail) {
+private fun CardBody(card: CardDetail, scroll: ScrollState) {
     Column(
         Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scroll)
             .padding(horizontal = 20.dp, vertical = 16.dp),
     ) {
         Text(
@@ -546,6 +565,7 @@ private fun SearchPreview() {
             onQueryChange = {},
             onSubmit = {},
             onCard = {},
+            onAdd = {},
             onRetry = {},
         )
     }
