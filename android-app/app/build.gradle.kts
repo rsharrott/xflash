@@ -1,5 +1,6 @@
 import com.android.build.api.variant.ApplicationAndroidComponentsExtension
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -109,6 +110,116 @@ abstract class CopyDictionaryDatabasesTask : DefaultTask() {
     }
 }
 
+abstract class CopyHelpAssetsTask : DefaultTask() {
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val sourceDirectory: DirectoryProperty
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun copy() {
+        val source = sourceDirectory.get().asFile
+        val dest = outputDirectory.get().asFile.resolve("help")
+        dest.deleteRecursively()
+        val pages = listOf(
+            "welcome@2x.html",
+            "studysets@2x.html",
+            "practice@2x.html",
+            "search@2x.html",
+            "algorithm@2x.html",
+            "tags@2x.html",
+        )
+        val images = listOf(
+            "practice-progress-bar-en.png",
+            "practice-progress-bar-ja.png",
+            "practice-progress-popup-en.png",
+            "practice-progress-popup-ja.png",
+            "studysets-list-en.png",
+            "studysets-list-ja.png",
+            "algorithm-difficulty-en.png",
+            "algorithm-difficulty-ja.png",
+            "search-results-en.png",
+            "search-results-ja.png",
+        )
+        pages.forEach { name ->
+            writeAdapted(source.resolve(name), dest.resolve(name), name)
+            writeAdapted(source.resolve("ja").resolve(name), dest.resolve("ja").resolve(name), "ja/$name")
+        }
+        writeAdapted(source.resolve("help.css"), dest.resolve("help.css"), "help.css")
+        val img = dest.resolve("img")
+        img.mkdirs()
+        images.forEach { name ->
+            source.resolve("img").resolve(name).copyTo(img.resolve(name))
+        }
+    }
+
+    private fun writeAdapted(from: File, to: File, relative: String) {
+        check(from.isFile) { "Missing help source $from" }
+        to.parentFile.mkdirs()
+        to.writeText(adaptHelp(relative, from.readText()))
+    }
+
+    /** Android copies only. The iOS originals stay as they are. */
+    private fun adaptHelp(relative: String, text: String): String {
+        var out = text
+        when (relative) {
+            "practice@2x.html" -> {
+                out = dropParagraph(
+                    out,
+                    "<p>Already know a card? Tap <strong>Learned</strong> to mark it learned " +
+                        "(the same as the Learned progress column). With <strong>Hide Learned Cards</strong> " +
+                        "on in Difficulty settings, those cards stop coming up in practice.</p>",
+                )
+                out = dropParagraph(
+                    out,
+                    "<p>Tap <strong>Actions</strong> to add the card to a study set, share it, " +
+                        "or report a mistake with <strong>Fix Card</strong>.</p>",
+                )
+            }
+            "ja/practice@2x.html" -> {
+                out = dropParagraph(
+                    out,
+                    "<p>もう知っているカードは「<strong class=\"nw\">もう覚えた</strong>」をタップすると" +
+                        "「<strong class=\"nw\">覚えた</strong>」レベルに移ります。難易度設定の" +
+                        "「<strong class=\"nw\">覚えたカードを隠す</strong>」をオンにすると、練習に出なくなります。</p>",
+                )
+                out = dropParagraph(
+                    out,
+                    "<p><strong class=\"nw\">アクション</strong>をタップすると、カードを学習セットに追加したり、" +
+                        "シェアしたり、「<strong class=\"nw\">誤りを報告</strong>」で知らせたりできます。</p>",
+                )
+            }
+            "studysets@2x.html" -> {
+                val from = "To add new words to your new set, you can use <strong>Search</strong>, " +
+                    "or you can also add cards to a set from another set using the <strong>Actions</strong> button."
+                val to = "To add new words to your new set, you can use <strong>Search</strong>."
+                check(out.contains(from)) { "studysets Actions clause missing" }
+                out = out.replace(from, to)
+            }
+            "ja/studysets@2x.html" -> {
+                val from = "新しいセットに単語を追加するには、<strong class=\"nw\">検索</strong>を使うか、" +
+                    "ほかのセットのカードから<strong class=\"nw\">アクション</strong>ボタンで追加します。"
+                val to = "新しいセットに単語を追加するには、<strong class=\"nw\">検索</strong>を使います。"
+                check(out.contains(from)) { "studysets Actions clause missing" }
+                out = out.replace(from, to)
+            }
+            "help.css" -> {
+                check(out.contains("font: -apple-system-body;")) { "help.css font shorthand missing" }
+                out = out.replace("  font: -apple-system-body;\n", "")
+            }
+        }
+        return out
+    }
+
+    private fun dropParagraph(text: String, paragraph: String): String {
+        val indented = "  $paragraph\n"
+        check(text.contains(indented)) { "Help paragraph not found: $paragraph" }
+        return text.replace(indented, "")
+    }
+}
+
 extensions.configure<ApplicationAndroidComponentsExtension>("androidComponents") {
     onVariants { variant ->
         val taskName = "copyDictionaryDatabases" +
@@ -120,7 +231,20 @@ extensions.configure<ApplicationAndroidComponentsExtension>("androidComponents")
             copyTask,
             CopyDictionaryDatabasesTask::outputDirectory,
         )
+        val helpTaskName = "copyHelpAssets" +
+            variant.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.US) else it.toString() }
+        val helpTask = tasks.register<CopyHelpAssetsTask>(helpTaskName) {
+            sourceDirectory.set(rootProject.file("../jFlash/Assets/JFlash/help"))
+        }
+        variant.sources.assets!!.addGeneratedSourceDirectory(
+            helpTask,
+            CopyHelpAssetsTask::outputDirectory,
+        )
     }
+}
+
+tasks.matching { it.name == "testDebugUnitTest" || it.name == "testReleaseUnitTest" }.configureEach {
+    dependsOn("copyHelpAssetsDebug")
 }
 
 android {
@@ -205,6 +329,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.adaptive.nav)
+    implementation(libs.androidx.webkit)
     implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.androidx.compose.ui.tooling)
 

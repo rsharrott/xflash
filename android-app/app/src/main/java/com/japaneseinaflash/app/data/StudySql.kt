@@ -100,6 +100,26 @@ internal object StudySql {
 
     const val BUMP_GROUP = "UPDATE groups SET tag_count = tag_count + 1 WHERE group_id = ?"
 
+    const val MEMBER_USER = """
+        SELECT 1 FROM card_tag_link WHERE tag_id = ? AND card_id = ? LIMIT 1
+    """
+
+    const val LINK_COUNT = "SELECT COUNT(*) FROM card_tag_link WHERE tag_id = ?"
+
+    const val BUILTIN_WITH_CARD = """
+        SELECT t.tag_id, t.tag_name, IFNULL(t.tag_name_ja, '')
+        FROM CARD_DB.system_card_tag_link l
+        INNER JOIN tags t ON t.tag_id = l.tag_id
+        WHERE l.card_id = ? AND t.editable = 0
+        ORDER BY t.tag_name COLLATE NOCASE ASC
+    """
+
+    const val INSERT_MEMBER = "INSERT INTO card_tag_link (card_id, tag_id) VALUES (?, ?)"
+
+    const val DELETE_MEMBER = "DELETE FROM card_tag_link WHERE card_id = ? AND tag_id = ?"
+
+    const val BUMP_TAG_COUNT = "UPDATE tags SET count = CASE WHEN count + ? < 0 THEN 0 ELSE count + ? END WHERE tag_id = ?"
+
     private fun link(userOwned: Boolean): String =
         if (userOwned) "card_tag_link" else "CARD_DB.system_card_tag_link"
 

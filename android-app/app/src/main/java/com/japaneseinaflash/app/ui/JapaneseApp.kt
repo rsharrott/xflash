@@ -3,27 +3,40 @@ package com.japaneseinaflash.app.ui
 import android.content.Context
 import android.provider.Settings
 import android.speech.tts.TextToSpeech
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +44,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,12 +62,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.japaneseinaflash.app.R
 import com.japaneseinaflash.app.study.StudyLanguage
-import com.japaneseinaflash.app.study.StudyTheme
 import com.japaneseinaflash.app.ui.practice.LevelStrip
 import com.japaneseinaflash.app.ui.practice.PracticeScreen
 import com.japaneseinaflash.app.ui.theme.JifTheme
 import com.japaneseinaflash.app.ui.theme.ThemeSheet
-import com.japaneseinaflash.app.ui.theme.label
 import com.japaneseinaflash.app.ui.theme.rememberAppDark
 import java.util.Locale
 
@@ -64,14 +77,21 @@ private object Routes {
     const val Settings = "settings"
     const val About = "about"
     const val Group = "sets/group/{groupId}"
+    const val Difficulty = "settings/difficulty"
+    const val Help = "settings/help"
+    const val HelpPage = "settings/help/{index}"
     fun card(id: Long) = "card/$id"
     fun group(id: Long) = "sets/group/$id"
+    fun helpPage(index: Int) = "settings/help/$index"
 }
 
 @Composable
 fun JapaneseApp(
     session: DictionaryViewModel = viewModel(),
     preferencesModel: PreferencesViewModel = viewModel(),
+    actions: CardActionsViewModel = viewModel(
+        factory = CardActionsViewModel.factory(session, preferencesModel.store),
+    ),
 ) {
     val preferences by preferencesModel.preferences.collectAsStateWithLifecycle()
     val dark = rememberAppDark(preferences.theme, preferences.darkMode)
@@ -98,7 +118,31 @@ fun JapaneseApp(
                 nav = nav,
                 session = session,
                 preferencesModel = preferencesModel,
+                actions = actions,
                 onTheme = { themesOpen = true },
+            )
+        }
+        val sheet by actions.sheet.collectAsStateWithLifecycle()
+        sheet?.let { addState ->
+            AddToSetSheet(
+                state = addState,
+                onToggle = actions::toggle,
+                onCreate = actions::create,
+                onStartCreate = actions::startCreate,
+                onCancelCreate = actions::cancelCreate,
+                onDone = actions::dismiss,
+            )
+        }
+        val lastCard by actions.lastCard.collectAsStateWithLifecycle()
+        if (lastCard) {
+            AlertDialog(
+                onDismissRequest = actions::dismissLastCard,
+                text = { Text(stringResource(R.string.last_card_message)) },
+                confirmButton = {
+                    TextButton(onClick = actions::dismissLastCard) {
+                        Text(stringResource(R.string.ok))
+                    }
+                },
             )
         }
         if (themesOpen) {
@@ -112,7 +156,7 @@ fun JapaneseApp(
     }
 }
 
-private fun androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope.suiteItem(
+private fun NavigationSuiteScope.suiteItem(
     nav: NavHostController,
     route: String,
     current: String?,
@@ -138,25 +182,26 @@ private fun AppNavHost(
     nav: NavHostController,
     session: DictionaryViewModel,
     preferencesModel: PreferencesViewModel,
+    actions: CardActionsViewModel,
     onTheme: () -> Unit,
 ) {
     val reduceMotion = reducedMotion()
     NavHost(
         navController = nav,
         startDestination = Routes.Practice,
-        enterTransition = { if (reduceMotion) androidx.compose.animation.EnterTransition.None else androidx.compose.animation.fadeIn() },
-        exitTransition = { if (reduceMotion) androidx.compose.animation.ExitTransition.None else androidx.compose.animation.fadeOut() },
-        popEnterTransition = { if (reduceMotion) androidx.compose.animation.EnterTransition.None else androidx.compose.animation.fadeIn() },
+        enterTransition = { if (reduceMotion) EnterTransition.None else fadeIn() },
+        exitTransition = { if (reduceMotion) ExitTransition.None else fadeOut() },
+        popEnterTransition = { if (reduceMotion) EnterTransition.None else fadeIn() },
         popExitTransition = {
             if (reduceMotion) {
-                androidx.compose.animation.ExitTransition.None
+                ExitTransition.None
             } else {
-                androidx.compose.animation.scaleOut(targetScale = 0.92f) + androidx.compose.animation.fadeOut()
+                scaleOut(targetScale = 0.92f) + fadeOut()
             }
         },
     ) {
         composable(Routes.Practice) {
-            PracticeRoute(session, preferencesModel, onTheme)
+            PracticeRoute(session, preferencesModel, onTheme) { id -> actions.open(id) }
         }
         composable(Routes.Sets) {
             SetsRoute(groupId = null, nav = nav, session = session, preferencesModel = preferencesModel)
@@ -176,6 +221,7 @@ private fun AppNavHost(
                     onQueryChange = session::onQueryChange,
                     onSubmit = session::submit,
                     onCard = { id -> nav.navigate(Routes.card(id)) },
+                    onAdd = { actions.open(it.id) },
                     onRetry = session::retry,
                 )
             }
@@ -185,10 +231,57 @@ private fun AppNavHost(
             arguments = listOf(navArgument("cardId") { type = NavType.StringType }),
         ) { entry ->
             val id = entry.arguments?.getString("cardId")?.toLongOrNull()
-            DetailRoute(session, id, onBack = { nav.popBackStack() })
+            DetailRoute(session, actions, id, onBack = { nav.popBackStack() })
         }
         composable(Routes.Settings) {
-            SettingsHome(onAbout = { nav.navigate(Routes.About) }, onTheme = onTheme, theme = preferencesModel.preferences.collectAsStateWithLifecycle().value.theme)
+            val preferences by preferencesModel.preferences.collectAsStateWithLifecycle()
+            SettingsScreen(
+                preferences = preferences,
+                onTheme = onTheme,
+                onLanguage = preferencesModel::setLanguage,
+                onReading = preferencesModel::setReading,
+                onKana = preferencesModel::setKana,
+                onDark = preferencesModel::setDarkMode,
+                onDifficulty = { nav.navigate(Routes.Difficulty) },
+                onHelp = { nav.navigate(Routes.Help) },
+                onAbout = { nav.navigate(Routes.About) },
+            )
+        }
+        composable(Routes.Difficulty) {
+            val preferences by preferencesModel.preferences.collectAsStateWithLifecycle()
+            DifficultyScreen(
+                preferences = preferences,
+                onDifficulty = preferencesModel::setDifficulty,
+                onCustom = preferencesModel::setCustom,
+                onHide = preferencesModel::setHideLearned,
+                onBack = { nav.popBackStack() },
+            )
+        }
+        composable(Routes.Help) {
+            Column(Modifier.fillMaxSize()) {
+                Masthead(stringResource(R.string.help), onBack = { nav.popBackStack() })
+                HelpList(onOpen = { topic ->
+                    val index = HelpTopics.indexOf(topic)
+                    if (index >= 0) nav.navigate(Routes.helpPage(index))
+                })
+            }
+        }
+        composable(
+            route = Routes.HelpPage,
+            arguments = listOf(navArgument("index") { type = NavType.StringType }),
+        ) { entry ->
+            val index = entry.arguments?.getString("index")?.toIntOrNull() ?: 0
+            val topic = HelpTopics.getOrElse(index) { HelpTopics.first() }
+            val japanese = LocalConfiguration.current.locales[0].language == "ja"
+            val pagePreferences by preferencesModel.preferences.collectAsStateWithLifecycle()
+            val pageDark = rememberAppDark(pagePreferences.theme, pagePreferences.darkMode)
+            HelpPage(
+                topic,
+                japanese,
+                dark = pageDark,
+                fontScale = LocalDensity.current.fontScale,
+                onBack = { nav.popBackStack() },
+            )
         }
         composable(Routes.About) {
             val state by session.state.collectAsStateWithLifecycle()
@@ -258,6 +351,7 @@ private fun PracticeRoute(
     session: DictionaryViewModel,
     preferencesModel: PreferencesViewModel,
     onTheme: () -> Unit,
+    onAdd: (Long) -> Unit,
 ) {
     val practice: PracticeViewModel = viewModel(
         factory = PreferencesViewModel.practiceFactory(session, preferencesModel.store),
@@ -267,6 +361,7 @@ private fun PracticeRoute(
     val preferences by preferencesModel.preferences.collectAsStateWithLifecycle()
     var progress by rememberSaveable { mutableStateOf(false) }
     val speaker = rememberSpeaker()
+    var menu by remember { mutableStateOf(false) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -279,6 +374,19 @@ private fun PracticeRoute(
                 actions = {
                     IconButton(onClick = onTheme) {
                         Icon(painterResource(R.drawable.ic_palette), contentDescription = stringResource(R.string.cd_palette))
+                    }
+                    IconButton(onClick = { menu = true }) {
+                        Icon(painterResource(R.drawable.ic_more), contentDescription = stringResource(R.string.cd_more))
+                    }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.add_to_set)) },
+                            enabled = state.card != null,
+                            onClick = {
+                                menu = false
+                                state.card?.detail?.id?.let(onAdd)
+                            },
+                        )
                     }
                 },
             )
@@ -339,10 +447,20 @@ private fun ProgressSheet(state: PracticeUiState, onDismiss: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DetailRoute(session: DictionaryViewModel, cardId: Long?, onBack: () -> Unit) {
+private fun DetailRoute(
+    session: DictionaryViewModel,
+    actions: CardActionsViewModel,
+    cardId: Long?,
+    onBack: () -> Unit,
+) {
     val state by session.state.collectAsStateWithLifecycle()
-    androidx.compose.runtime.LaunchedEffect(cardId) {
-        if (cardId != null) session.loadCard(cardId)
+    val starred by actions.starred.collectAsStateWithLifecycle()
+    val scroll = rememberScrollState()
+    LaunchedEffect(cardId) {
+        if (cardId != null) {
+            session.loadCard(cardId)
+            actions.refreshStar(cardId)
+        }
     }
     val title = state.card?.headword ?: stringResource(R.string.card_loading_title)
     Scaffold(
@@ -364,12 +482,37 @@ private fun DetailRoute(session: DictionaryViewModel, cardId: Long?, onBack: () 
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
                 ),
+                actions = {
+                    if (cardId != null) {
+                        IconToggleButton(
+                            checked = starred[cardId] == true,
+                            onCheckedChange = { actions.setStar(cardId, it) },
+                        ) {
+                            Icon(
+                                painterResource(if (starred[cardId] == true) R.drawable.ic_star else R.drawable.ic_star_border),
+                                contentDescription = stringResource(
+                                    if (starred[cardId] == true) R.string.cd_starred else R.string.cd_not_starred,
+                                ),
+                            )
+                        }
+                    }
+                },
             )
+        },
+        floatingActionButton = {
+            if (cardId != null && state.card != null) {
+                ExtendedFloatingActionButton(
+                    expanded = !scroll.isScrollInProgress,
+                    onClick = { actions.open(cardId) },
+                    icon = { Icon(painterResource(R.drawable.ic_playlist_add), contentDescription = null) },
+                    text = { Text(stringResource(R.string.add_to_set)) },
+                )
+            }
         },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.TopCenter) {
             Box(Modifier.widthIn(max = 640.dp).fillMaxSize()) {
-                DetailPane(state)
+                DetailPane(state, scroll)
             }
         }
     }
@@ -401,30 +544,9 @@ private fun AboutRoute(versions: com.japaneseinaflash.app.data.DataVersions?, on
 }
 
 @Composable
-private fun SettingsHome(onAbout: () -> Unit, onTheme: () -> Unit, theme: StudyTheme) {
-    Centered {
-        Masthead(stringResource(R.string.nav_settings))
-        androidx.compose.material3.ListItem(
-            headlineContent = { Text(stringResource(R.string.theme)) },
-            supportingContent = { Text(stringResource(theme.label())) },
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .then(Modifier)
-                .let { it },
-        )
-        androidx.compose.material3.TextButton(onClick = onTheme, modifier = Modifier.padding(horizontal = 12.dp)) {
-            Text(stringResource(R.string.theme))
-        }
-        androidx.compose.material3.TextButton(onClick = onAbout, modifier = Modifier.padding(horizontal = 12.dp)) {
-            Text(stringResource(R.string.about))
-        }
-    }
-}
-
-@Composable
 private fun Centered(content: @Composable () -> Unit) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        Box(Modifier.widthIn(max = 640.dp).fillMaxSize()) { androidx.compose.foundation.layout.Column(Modifier.fillMaxSize()) { content() } }
+        Box(Modifier.widthIn(max = 640.dp).fillMaxSize()) { Column(Modifier.fillMaxSize()) { content() } }
     }
 }
 

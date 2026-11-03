@@ -1,6 +1,7 @@
 package com.japaneseinaflash.app.data
 
 import com.japaneseinaflash.app.study.LEARNED_LEVEL
+import com.japaneseinaflash.app.study.STARRED_TAG_ID
 import com.japaneseinaflash.app.study.levelTimesCount
 import com.japaneseinaflash.app.study.nextLevel
 import com.japaneseinaflash.app.study.pickCardLevel
@@ -29,6 +30,8 @@ data class PracticePick(
     val card: PracticeCard,
     val allLearned: Boolean,
 )
+
+enum class MembershipResult { Changed, LastCard }
 
 data class PracticeCard(
     val detail: CardDetail,
@@ -168,6 +171,55 @@ class StudyStore(private val repository: DictionaryRepository) {
             repository.exec(StudySql.BUMP_GROUP, owner)
             id
         }
+    }
+
+    fun userSetsForCard(cardId: Long): List<Pair<TagRecord, Boolean>> =
+        mySets().map { tag ->
+            val member = repository.query(
+                StudySql.MEMBER_USER,
+                arrayOf(tag.id.toString(), cardId.toString()),
+            ) { 1 }.isNotEmpty()
+            tag to member
+        }
+
+    fun builtInSetsWithCard(cardId: Long): List<TagRecord> =
+        repository.query(StudySql.BUILTIN_WITH_CARD, arrayOf(cardId.toString())) { cursor ->
+            TagRecord(
+                id = cursor.getLong(0),
+                name = cursor.getString(1).orEmpty(),
+                nameJa = cursor.getString(2).orEmpty(),
+                count = 0,
+                editable = false,
+            )
+        }
+
+    /**
+     * Removing the last card of the set currently being studied is refused,
+     * matching TagPeer.m. Any other set can drop its last card.
+     */
+    fun setMembership(tagId: Long, cardId: Long, member: Boolean, activeTagId: Long): MembershipResult {
+        if (tagId != STARRED_TAG_ID) {
+            val tag = tag(tagId) ?: return MembershipResult.Changed
+            if (!tag.editable) return MembershipResult.Changed
+        }
+        val already = repository.query(
+            StudySql.MEMBER_USER,
+            arrayOf(tagId.toString(), cardId.toString()),
+        ) { 1 }.isNotEmpty()
+        if (!member && already && tagId == activeTagId) {
+            val count = repository.query(StudySql.LINK_COUNT, arrayOf(tagId.toString())) { it.getInt(0) }.first()
+            if (count <= 1) return MembershipResult.LastCard
+        }
+        repository.transaction {
+            if (member && !already) {
+                repository.exec(StudySql.INSERT_MEMBER, cardId, tagId)
+                repository.exec(StudySql.BUMP_TAG_COUNT, 1, 1, tagId)
+            } else if (!member && already) {
+                repository.exec(StudySql.DELETE_MEMBER, cardId, tagId)
+                repository.exec(StudySql.BUMP_TAG_COUNT, -1, -1, tagId)
+            }
+        }
+        return MembershipResult.Changed
     }
 
     private fun readTag(cursor: android.database.Cursor) = TagRecord(

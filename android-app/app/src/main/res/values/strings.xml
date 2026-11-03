@@ -100,6 +100,56 @@
         <item quantity="one">%d set</item>
         <item quantity="other">%d sets</item>
     </plurals>
+
+    <string name="add_to_set">Add to set</string>
+    <string name="done">Done</string>
+    <string name="built_in_with_card">Built-in sets with this card</string>
+    <string name="cd_add_to_set">Add %1$s to a set</string>
+    <string name="cd_more">More</string>
+    <string name="cd_starred">Starred</string>
+    <string name="cd_not_starred">Not starred</string>
+    <string name="help">Help</string>
+    <string name="help_welcome">Welcome</string>
+    <string name="help_sets">Study sets</string>
+    <string name="help_practice">Practice</string>
+    <string name="help_search">Search</string>
+    <string name="help_algorithm">Learning algorithm</string>
+    <string name="help_tags">Tag glossary</string>
+    <string name="settings_studying">Studying</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_about">About</string>
+    <string name="study_language">Study language</string>
+    <string name="language_japanese">Japanese</string>
+    <string name="language_english">English</string>
+    <string name="furigana">Furigana / reading</string>
+    <string name="furigana_help">What to show under the word once you tap Show reading.</string>
+    <string name="reading_kana">Kana</string>
+    <string name="reading_romaji">Romaji</string>
+    <string name="reading_both">Kana and romaji</string>
+    <string name="common_kana">Common kana words</string>
+    <string name="prefer_kana">Prefer kana</string>
+    <string name="prefer_kanji">Prefer kanji</string>
+    <string name="difficulty">Difficulty</string>
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_medium">Medium</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="difficulty_custom">Custom</string>
+    <plurals name="difficulty_values">
+        <item quantity="one">%1$d card in the pool, frequency %2$d</item>
+        <item quantity="other">%1$d cards in the pool, frequency %2$d</item>
+    </plurals>
+    <string name="pool_size">Number of cards in study pool</string>
+    <string name="pool_range">5 to 50</string>
+    <string name="new_card_frequency">Frequency of new cards</string>
+    <string name="frequency_range">Less often to more often</string>
+    <string name="hide_learned">Hide learned cards</string>
+    <string name="dark_mode">Dark mode</string>
+    <string name="dark_follow">Follow system</string>
+    <string name="dark_off">Off</string>
+    <string name="dark_on">On</string>
+    <string name="dark_mode_paper">Paper only</string>
+    <string name="dark_mode_unavailable">Available for the Paper theme.</string>
+    <string name="last_card_message">This set only contains the card you are currently studying.  To delete a set entirely, please change to a different set first.</string>
     <string name="about_versions">Cards %1$s, search %2$s, examples %3$s.</string>
     <string name="about_app_version">Version %1$s</string>
 

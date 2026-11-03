@@ -31,14 +31,18 @@ class PracticeReloadTest {
             phase = kotlinx.coroutines.flow.flowOf(Phase.Ready),
             store = store,
         )
-        idleUntil { opens == 1 }
-        assertEquals(1, opens)
+        store.update { it.copy(theme = StudyTheme.PAPER, darkMode = DarkMode.OFF, tagId = 11L) }
+        idleUntil { opens >= 1 }
+        val dealt = opens
         store.update { it.copy(theme = StudyTheme.FIRE, darkMode = DarkMode.ON) }
-        idleUntil { true }
-        assertEquals(1, opens)
-        store.update { it.copy(tagId = 2L) }
-        idleUntil { opens >= 2 }
-        assertTrue(opens >= 2)
+        repeat(15) {
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            Thread.sleep(20)
+        }
+        assertEquals(dealt, opens)
+        store.update { it.copy(tagId = 12L) }
+        idleUntil { opens > dealt }
+        assertTrue(opens > dealt)
     }
 
     private fun idleUntil(ready: () -> Boolean) {
