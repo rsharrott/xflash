@@ -89,6 +89,8 @@ class ThemeAndCopyTest {
         assertTrue(compareGroups(1, "Recommended", 0, "Common Words") < 0)
         assertTrue(userOwnsMembership(0, editable = false))
         assertFalse(userOwnsMembership(95, editable = false))
+        assertTrue(opensAsSearch("Common Words"))
+        assertFalse(opensAsSearch("Nouns"))
     }
 
     private fun source(relative: String): File {

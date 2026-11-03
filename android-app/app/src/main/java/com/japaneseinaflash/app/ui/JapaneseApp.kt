@@ -46,6 +46,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.japaneseinaflash.app.R
+import com.japaneseinaflash.app.study.StudyLanguage
 import com.japaneseinaflash.app.study.StudyTheme
 import com.japaneseinaflash.app.ui.practice.LevelStrip
 import com.japaneseinaflash.app.ui.practice.PracticeScreen
@@ -62,7 +63,9 @@ private object Routes {
     const val Card = "card/{cardId}"
     const val Settings = "settings"
     const val About = "about"
+    const val Group = "sets/group/{groupId}"
     fun card(id: Long) = "card/$id"
+    fun group(id: Long) = "sets/group/$id"
 }
 
 @Composable
@@ -156,9 +159,14 @@ private fun AppNavHost(
             PracticeRoute(session, preferencesModel, onTheme)
         }
         composable(Routes.Sets) {
-            Centered {
-                Masthead(stringResource(R.string.nav_study_sets))
-            }
+            SetsRoute(groupId = null, nav = nav, session = session, preferencesModel = preferencesModel)
+        }
+        composable(
+            route = Routes.Group,
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType }),
+        ) { entry ->
+            val id = entry.arguments?.getString("groupId")?.toLongOrNull()
+            SetsRoute(groupId = id, nav = nav, session = session, preferencesModel = preferencesModel)
         }
         composable(Routes.Search) {
             val state by session.state.collectAsStateWithLifecycle()
@@ -186,6 +194,61 @@ private fun AppNavHost(
             val state by session.state.collectAsStateWithLifecycle()
             AboutRoute(state.versions, onBack = { nav.popBackStack() })
         }
+    }
+}
+
+@Composable
+private fun SetsRoute(
+    groupId: Long?,
+    nav: NavHostController,
+    session: DictionaryViewModel,
+    preferencesModel: PreferencesViewModel,
+) {
+    val dictionary by session.state.collectAsStateWithLifecycle()
+    val model: StudySetsViewModel = viewModel(
+        factory = StudySetsViewModel.factory(session, preferencesModel.store, groupId),
+    )
+    val state by model.state.collectAsStateWithLifecycle()
+    val preferences by preferencesModel.preferences.collectAsStateWithLifecycle()
+    val japanese = preferences.language == StudyLanguage.JAPANESE
+    when (dictionary.phase) {
+        Phase.Preparing -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.preparing_dictionary))
+        }
+        Phase.Failed -> Box(Modifier.padding(20.dp)) {
+            Text(stringResource(R.string.error_prepare), color = MaterialTheme.colorScheme.error)
+        }
+        Phase.Ready -> StudySetsScreen(
+            state = state,
+            japanese = japanese,
+            onQuery = model::onQuery,
+            onGroup = { nav.navigate(Routes.group(it)) },
+            onTag = model::askToStart,
+            onCreate = model::create,
+            onStartCreate = model::startCreate,
+            onConfirm = {
+                model.confirmStart {
+                    nav.navigate(Routes.Practice) {
+                        popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            },
+            onDismiss = model::dismissDialogs,
+            onPractice = {
+                nav.navigate(Routes.Practice) {
+                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            },
+            onBack = if (groupId != null) {
+                { nav.popBackStack() }
+            } else {
+                null
+            },
+        )
     }
 }
 

@@ -139,6 +139,9 @@ fun usesDarkChrome(theme: StudyTheme, mode: DarkMode, systemDark: Boolean): Bool
     }
 }
 
+/** Only Common Words is too long to list. Nouns and the other groups stay as lists. */
+fun opensAsSearch(englishName: String): Boolean = englishName == "Common Words"
+
 const val STARRED_TAG_ID = 0L
 const val TOP_OWNER_ID = -1L
 

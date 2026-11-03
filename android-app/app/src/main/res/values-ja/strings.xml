@@ -32,6 +32,8 @@
 
     <string name="error_prepare">辞書を準備できませんでした。空き容量を確保して、アプリを開き直してください。</string>
     <string name="error_search">検索を完了できませんでした。</string>
+    <string name="error_load_sets">学習セットを読み込めませんでした。</string>
+    <string name="error_create_set">セットを作れませんでした。</string>
     <string name="error_card">このカードを開けませんでした。</string>
     <string name="error_card_missing">このカードは辞書にありません。</string>
     <string name="retry">やり直す</string>
@@ -73,6 +75,30 @@
     <string name="theme_water">藍</string>
     <string name="theme_kimono">着物</string>
     <string name="theme_kutani">九谷</string>
+
+    <string name="studying_now">学習中のセット</string>
+    <string name="my_sets">マイセット</string>
+    <string name="built_in_sets">収録セット</string>
+    <string name="new_set">新しいセット</string>
+    <string name="search_sets">セット名で検索</string>
+    <string name="search_sets_prompt">セット名で検索してください。</string>
+    <string name="cd_search_sets">学習セットを検索</string>
+    <string name="current_set">現在のセット</string>
+    <string name="start_set_message">このセットの学習をはじめますか？今のセットの進み具合は保存されます。</string>
+    <string name="no_words_title">セットに単語がありません</string>
+    <string name="create_set">学習セットを作成</string>
+    <string name="create_set_hint">セットに名前をつけてください</string>
+    <string name="cancel">キャンセル</string>
+    <string name="cd_set_row">%1$s、%2$d</string>
+    <plurals name="group_count">
+        <item quantity="other">%d グループ</item>
+    </plurals>
+    <plurals name="word_count">
+        <item quantity="other">%d 語</item>
+    </plurals>
+    <plurals name="set_count">
+        <item quantity="other">%d セット</item>
+    </plurals>
     <string name="about_versions">カード %1$s、検索 %2$s、例文 %3$s。</string>
     <string name="about_app_version">バージョン %1$s</string>
 

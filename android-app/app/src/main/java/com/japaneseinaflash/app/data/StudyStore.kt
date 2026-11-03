@@ -8,6 +8,15 @@ import com.japaneseinaflash.app.study.probabilityOfUnseen
 import com.japaneseinaflash.app.study.seenCount
 import com.japaneseinaflash.app.study.selectableLevelCount
 
+data class GroupRecord(
+    val id: Long,
+    val name: String,
+    val nameJa: String,
+    val recommended: Int,
+    val setCount: Int,
+    val childGroups: Int,
+)
+
 data class TagRecord(
     val id: Long,
     val name: String,
@@ -127,12 +136,55 @@ class StudyStore(private val repository: DictionaryRepository) {
         repository.exec(StudySql.RECORD, card.detail.id, userId, rightCount, wrongCount, level)
     }
 
+    fun topGroupId(): Long? =
+        repository.query(StudySql.TOP_GROUP, emptyArray()) { it.getLong(0) }.firstOrNull()
+
+    fun groups(ownerId: Long): List<GroupRecord> =
+        repository.query(StudySql.GROUPS_BY_OWNER, arrayOf(ownerId.toString()), ::readGroup)
+
+    fun group(id: Long): GroupRecord? =
+        repository.query(StudySql.GROUP_BY_ID, arrayOf(id.toString()), ::readGroup).firstOrNull()
+
+    fun tagsInGroup(groupId: Long): List<TagRecord> =
+        repository.query(StudySql.TAGS_IN_GROUP, arrayOf(groupId.toString()), ::readTag)
+
+    fun mySets(): List<TagRecord> =
+        repository.query(StudySql.USER_SETS, emptyArray(), ::readTag)
+
+    /** Set search covers every grouped set, the same as iOS TagPeer.retrieveTagListLike. */
+    fun searchTags(query: String): List<TagRecord> {
+        val like = "%${query.replace("%", "").replace("_", "")}%"
+        return repository.query(StudySql.SEARCH_TAGS, arrayOf(like, like), ::readTag)
+    }
+
+    fun createSet(name: String): Long? {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return null
+        val owner = topGroupId() ?: return null
+        return repository.transaction {
+            repository.exec(StudySql.INSERT_TAG, trimmed)
+            val id = repository.query("SELECT last_insert_rowid()", emptyArray()) { it.getLong(0) }.first()
+            repository.exec(StudySql.LINK_TAG, id, owner)
+            repository.exec(StudySql.BUMP_GROUP, owner)
+            id
+        }
+    }
+
     private fun readTag(cursor: android.database.Cursor) = TagRecord(
         id = cursor.getLong(0),
         name = cursor.getString(1).orEmpty(),
         nameJa = cursor.getString(2).orEmpty(),
         count = cursor.getInt(3),
         editable = cursor.getInt(4) != 0 || cursor.getLong(0) == 0L,
+    )
+
+    private fun readGroup(cursor: android.database.Cursor) = GroupRecord(
+        id = cursor.getLong(0),
+        name = cursor.getString(1).orEmpty(),
+        nameJa = cursor.getString(2).orEmpty(),
+        recommended = cursor.getInt(3),
+        setCount = cursor.getInt(4),
+        childGroups = cursor.getInt(5),
     )
 
     companion object {

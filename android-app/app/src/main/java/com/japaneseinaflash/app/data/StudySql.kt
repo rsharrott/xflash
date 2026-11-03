@@ -2,6 +2,7 @@ package com.japaneseinaflash.app.data
 
 import com.japaneseinaflash.app.study.LEARNED_LEVEL
 import com.japaneseinaflash.app.study.LEVEL_COUNT
+import com.japaneseinaflash.app.study.STARRED_TAG_ID
 import com.japaneseinaflash.app.study.userOwnsMembership
 
 internal object StudySql {
@@ -47,6 +48,57 @@ internal object StudySql {
             (card_id, timestamp, created_on, user_id, right_count, wrong_count, card_level)
         VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?, ?)
     """
+
+    /** Child groups, recommended first, then the English name. Matches GroupPeer.m. */
+    const val GROUPS_BY_OWNER = """
+        SELECT g.group_id, g.group_name, IFNULL(g.group_name_ja, ''), g.recommended, g.tag_count,
+               (SELECT COUNT(*) FROM groups c WHERE c.owner_id = g.group_id) AS child_groups
+        FROM groups g
+        WHERE g.owner_id = ?
+        ORDER BY g.recommended DESC, g.group_name ASC
+    """
+
+    const val TOP_GROUP = """
+        SELECT group_id FROM groups WHERE owner_id = -1 ORDER BY group_id LIMIT 1
+    """
+
+    const val GROUP_BY_ID = """
+        SELECT g.group_id, g.group_name, IFNULL(g.group_name_ja, ''), g.recommended, g.tag_count,
+               (SELECT COUNT(*) FROM groups c WHERE c.owner_id = g.group_id) AS child_groups
+        FROM groups g
+        WHERE g.group_id = ?
+        LIMIT 1
+    """
+
+    /** Full Set first, then the English name. Matches TagPeer.m. */
+    const val TAGS_IN_GROUP = """
+        SELECT t.tag_id, t.tag_name, IFNULL(t.tag_name_ja, ''), t.count, t.editable
+        FROM tags t
+        INNER JOIN group_tag_link l ON l.tag_id = t.tag_id
+        WHERE l.group_id = ?
+        ORDER BY CASE WHEN t.tag_name LIKE '% Full Set' THEN 0 ELSE 1 END, t.tag_name ASC
+    """
+
+    const val SEARCH_TAGS = """
+        SELECT t.tag_id, t.tag_name, IFNULL(t.tag_name_ja, ''), t.count, t.editable
+        FROM tags t
+        WHERE (t.tag_name LIKE ? OR IFNULL(t.tag_name_ja, '') LIKE ?)
+          AND t.tag_id IN (SELECT tag_id FROM group_tag_link)
+        ORDER BY t.tag_name ASC
+    """
+
+    const val USER_SETS = """
+        SELECT t.tag_id, t.tag_name, IFNULL(t.tag_name_ja, ''), t.count, t.editable
+        FROM tags t
+        WHERE t.editable = 1 OR t.tag_id = $STARRED_TAG_ID
+        ORDER BY t.tag_name COLLATE NOCASE ASC
+    """
+
+    const val INSERT_TAG = "INSERT INTO tags (tag_name, description, editable, count) VALUES (?, '', 1, 0)"
+
+    const val LINK_TAG = "INSERT INTO group_tag_link (tag_id, group_id) VALUES (?, ?)"
+
+    const val BUMP_GROUP = "UPDATE groups SET tag_count = tag_count + 1 WHERE group_id = ?"
 
     private fun link(userOwned: Boolean): String =
         if (userOwned) "card_tag_link" else "CARD_DB.system_card_tag_link"
