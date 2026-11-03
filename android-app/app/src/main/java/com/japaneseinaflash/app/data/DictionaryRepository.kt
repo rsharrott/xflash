@@ -63,15 +63,25 @@ class DictionaryRepository internal constructor(
      */
     private fun tokenIds(term: String, limit: Int): List<Long> {
         val transaction = startStageTransaction()
+        var primary: Throwable? = null
         try {
             db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
             db.execSQL(DictionarySql.TOKEN_STAGE, arrayOf<Any>(term, term))
             val ids = readIds(DictionarySql.TOKEN_RANKED, arrayOf(limit.toString()))
             if (transaction) db.setTransactionSuccessful()
             return ids
+        } catch (thrown: Throwable) {
+            primary = thrown
+            throw thrown
         } finally {
-            if (transaction) db.endTransaction()
-            db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+            if (transaction) {
+                try {
+                    db.endTransaction()
+                } catch (end: Exception) {
+                    if (primary != null) primary.addSuppressed(end) else throw end
+                }
+            }
+            dropSearchStage(db, primary)
         }
     }
 
@@ -125,6 +135,24 @@ class DictionaryRepository internal constructor(
         }
     }
 
+    internal fun <T> query(sql: String, args: Array<String>, read: (android.database.Cursor) -> T): List<T> =
+        synchronized(lock) { readRows(sql, args, read) }
+
+    internal fun exec(sql: String, vararg args: Any) = synchronized(lock) {
+        db.execSQL(sql, args)
+    }
+
+    internal fun <T> transaction(block: () -> T): T = synchronized(lock) {
+        db.beginTransaction()
+        try {
+            val value = block()
+            db.setTransactionSuccessful()
+            value
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     override fun close() = synchronized(lock) {
         db.close()
     }
@@ -159,6 +187,15 @@ internal fun openDictionary(installed: InstalledDictionary): SQLiteDatabase {
  * then attached by path, which is what the iOS app does. A quote or newline in
  * the path is refused; the path is one of our own files, never user input.
  */
+/** A failed cleanup must not replace the search error that caused it. */
+internal fun dropSearchStage(db: SQLiteDatabase, primary: Throwable?) {
+    try {
+        db.execSQL(DictionarySql.TOKEN_STAGE_DROP)
+    } catch (drop: Exception) {
+        if (primary != null) primary.addSuppressed(drop) else throw drop
+    }
+}
+
 internal fun attachReadOnly(db: SQLiteDatabase, schema: String, file: File) {
     require(schema in DictionaryFiles.SCHEMAS)
     val path = file.canonicalPath

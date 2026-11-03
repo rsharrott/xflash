@@ -31,12 +31,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-sealed interface Screen {
-    data object Search : Screen
-    data class Detail(val cardId: Long) : Screen
-    data object About : Screen
-}
-
 enum class Phase {
     Preparing,
     Ready,
@@ -59,8 +53,6 @@ data class DictionaryUiState(
     val query: String = "",
     val results: List<CardSummary> = emptyList(),
     val searching: Boolean = false,
-    val screen: Screen = Screen.Search,
-    val canGoBack: Boolean = false,
     val card: CardDetail? = null,
     val versions: DataVersions? = null,
     val error: DictionaryError? = null,
@@ -68,14 +60,22 @@ data class DictionaryUiState(
 )
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-class DictionaryViewModel(
+class DictionaryViewModel internal constructor(
     app: Application,
     private val savedState: SavedStateHandle,
+    private val openInstalled: suspend (Application) -> DictionaryRepository,
+    private val runQuery: suspend (DictionaryRepository, String) -> List<CardSummary>,
 ) : AndroidViewModel(app) {
+
+    constructor(app: Application, savedState: SavedStateHandle) : this(
+        app,
+        savedState,
+        { application -> DeviceDictionaryInstaller.open(application) },
+        { repository, query -> withContext(Dispatchers.IO) { repository.search(query) } },
+    )
     private var repository = CompletableDeferred<DictionaryRepository>()
     private val queryText = MutableStateFlow(savedState.get<String>(KEY_QUERY).orEmpty())
     private val submitTicks = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    private val backStack = ArrayDeque<Screen>()
     private var cardRequest = 0
 
     @Volatile
@@ -88,13 +88,7 @@ class DictionaryViewModel(
     val state: StateFlow<DictionaryUiState> = _state.asStateFlow()
 
     init {
-        val restoredScreen = decodeScreen(savedState.get<String>(KEY_SCREEN))
-        savedState.get<ArrayList<String>>(KEY_STACK).orEmpty().mapNotNullTo(backStack) { decodeScreenOrNull(it) }
-        _state.value = DictionaryUiState(
-            query = queryText.value,
-            screen = restoredScreen,
-            canGoBack = backStack.isNotEmpty(),
-        )
+        _state.value = DictionaryUiState(query = queryText.value)
         viewModelScope.launch(Dispatchers.IO) { prepare() }
         viewModelScope.launch {
             merge(
@@ -107,10 +101,9 @@ class DictionaryViewModel(
         if (queryText.value.isNotEmpty()) {
             submitTicks.tryEmit(Unit)
         }
-        if (restoredScreen is Screen.Detail) {
-            viewModelScope.launch { loadCard(restoredScreen.cardId) }
-        }
     }
+
+    suspend fun openRepository(): DictionaryRepository = repository.await()
 
     fun onQueryChange(value: String) {
         queryText.value = value
@@ -132,22 +125,8 @@ class DictionaryViewModel(
         viewModelScope.launch(Dispatchers.IO) { prepare() }
     }
 
-    fun openCard(id: Long) {
-        push(Screen.Detail(id))
-        viewModelScope.launch { loadCard(id) }
-    }
-
-    fun openAbout() {
-        if (_state.value.screen is Screen.About) return
-        push(Screen.About)
-    }
-
-    fun back() {
-        val previous = backStack.removeLastOrNull() ?: return
-        _state.update {
-            it.copy(screen = previous, canGoBack = backStack.isNotEmpty(), error = null)
-        }
-        persistNavigation()
+    fun loadCard(id: Long) {
+        viewModelScope.launch { loadCardNow(id) }
     }
 
     override fun onCleared() {
@@ -161,7 +140,7 @@ class DictionaryViewModel(
     private suspend fun prepare() {
         val slot = repository
         try {
-            val opened = DeviceDictionaryInstaller.open(getApplication())
+            val opened = openInstalled(getApplication())
             if (cleared || !slot.complete(opened)) {
                 opened.close()
                 if (!slot.isCompleted) {
@@ -187,7 +166,7 @@ class DictionaryViewModel(
         }
     }
 
-    private suspend fun loadCard(id: Long) {
+    private suspend fun loadCardNow(id: Long) {
         val request = ++cardRequest
         _state.update { it.copy(card = null, error = null) }
         try {
@@ -207,17 +186,6 @@ class DictionaryViewModel(
             if (request != cardRequest) return
             _state.update { it.copy(card = null, error = DictionaryError.CardFailed) }
         }
-    }
-
-    private fun push(screen: Screen) {
-        backStack.addLast(_state.value.screen)
-        _state.update { it.copy(screen = screen, canGoBack = true) }
-        persistNavigation()
-    }
-
-    private fun persistNavigation() {
-        savedState[KEY_SCREEN] = encodeScreen(_state.value.screen)
-        savedState[KEY_STACK] = ArrayList(backStack.map { encodeScreen(it) })
     }
 
     private suspend fun runSearch(query: String) {
@@ -250,9 +218,13 @@ class DictionaryViewModel(
         }
         if (query != queryText.value) return
         // Leave the previous list on screen until this search returns.
+        // Forget the last success while this search is in flight. Otherwise
+        // backing up to that query (co? -> co) skips the search and the
+        // spinner stays up.
+        lastSuccessfulQuery = null
         _state.update { it.copy(searching = true, error = null, notice = null) }
         try {
-            val results = withContext(Dispatchers.IO) { opened.search(query) }
+            val results = runQuery(opened, query)
             if (query != queryText.value) return
             lastSuccessfulQuery = query
             _state.update { it.copy(searching = false, results = results, notice = null) }
@@ -270,24 +242,6 @@ class DictionaryViewModel(
     private companion object {
         const val TAG = "JapaneseInAFlash"
         const val KEY_QUERY = "query"
-        const val KEY_SCREEN = "screen"
-        const val KEY_STACK = "back_stack"
-
-        fun encodeScreen(screen: Screen): String = when (screen) {
-            Screen.Search -> "search"
-            Screen.About -> "about"
-            is Screen.Detail -> "detail:${screen.cardId}"
-        }
-
-        fun decodeScreen(raw: String?): Screen = decodeScreenOrNull(raw) ?: Screen.Search
-
-        fun decodeScreenOrNull(raw: String?): Screen? = when {
-            raw == null -> null
-            raw == "search" -> Screen.Search
-            raw == "about" -> Screen.About
-            raw.startsWith("detail:") -> raw.removePrefix("detail:").toLongOrNull()?.let { Screen.Detail(it) }
-            else -> null
-        }
     }
 }
 
